@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CheckCircle2, Loader2, Mail, MessageCircle, Send, Smartphone } from 'lucide-react';
+import { CheckCircle2, Loader2, Mail, MessageCircle, Send, Smartphone, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { type ComponentType } from 'react';
 import { useForm } from 'react-hook-form';
@@ -15,6 +15,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
+  useDisconnectNotifications,
   useNotificationSettings,
   useSendTestNotification,
   useUpdateNotificationSettings,
@@ -34,24 +35,43 @@ export default function SettingsPage() {
   const { data, isLoading } = useNotificationSettings();
   const updateSettings = useUpdateNotificationSettings();
   const sendTest = useSendTestNotification();
+  const disconnect = useDisconnectNotifications();
+  const isConnected = Boolean(data?.telegramConfigured);
 
   const form = useForm<NotificationSettingsInput>({
     resolver: zodResolver(notificationSettingsSchema),
     defaultValues: { telegramBotToken: '' },
   });
 
-  async function handleSubmit(values: NotificationSettingsInput) {
+  async function handleConnect(values: NotificationSettingsInput) {
     const token = values.telegramBotToken.trim();
-    if (!token && !data?.telegramConfigured) {
+    if (!token) {
       form.setError('telegramBotToken', { message: t('tokenRequired') });
       return;
     }
     try {
-      if (token) {
-        await updateSettings.mutateAsync({ telegramBotToken: token });
-      }
+      await updateSettings.mutateAsync({ telegramBotToken: token });
       await sendTest.mutateAsync();
       toast.success(t('testSent'));
+      form.reset({ telegramBotToken: '' });
+    } catch (error) {
+      toast.error(error instanceof ApiError ? error.message : t('genericError'));
+    }
+  }
+
+  async function handleSendDemo() {
+    try {
+      await sendTest.mutateAsync();
+      toast.success(t('testSent'));
+    } catch (error) {
+      toast.error(error instanceof ApiError ? error.message : t('genericError'));
+    }
+  }
+
+  async function handleRemove() {
+    try {
+      await disconnect.mutateAsync();
+      toast.success(t('removed'));
       form.reset({ telegramBotToken: '' });
     } catch (error) {
       toast.error(error instanceof ApiError ? error.message : t('genericError'));
@@ -71,7 +91,7 @@ export default function SettingsPage() {
           action={
             isLoading ? (
               <Skeleton className="h-5 w-20" />
-            ) : data?.telegramConfigured ? (
+            ) : isConnected ? (
               <Badge variant="secondary">
                 <CheckCircle2 className="size-3" />
                 {t('connected')}
@@ -87,64 +107,86 @@ export default function SettingsPage() {
               <Skeleton className="h-9 w-full" />
               <Skeleton className="h-9 w-40" />
             </div>
-          ) : (
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-4">
-                <FormField
-                  control={form.control}
-                  name="telegramBotToken"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('tokenLabel')}</FormLabel>
-                      <FormControl>
-                        <Input
-                          dir="ltr"
-                          autoComplete="off"
-                          placeholder={t('tokenPlaceholder')}
-                          {...field}
-                        />
-                      </FormControl>
-                      {data?.telegramConfigured && (
-                        <p className="text-xs text-muted-foreground">{t('replaceHint')}</p>
-                      )}
-                      <FormMessage />
-                    </FormItem>
+          ) : isConnected ? (
+            <div className="flex flex-col gap-4">
+              <p className="text-sm text-muted-foreground">
+                {data?.telegramChatId
+                  ? t('connectedChat', { chatId: data.telegramChatId })
+                  : t('connectedDescription')}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Button onClick={handleSendDemo} disabled={sendTest.isPending || disconnect.isPending}>
+                  {sendTest.isPending ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Send className="size-4" />
                   )}
-                />
-
-                {data?.telegramChatId && (
-                  <p className="text-xs text-muted-foreground">
-                    {t('connectedChat', { chatId: data.telegramChatId })}
-                  </p>
-                )}
-
-                <div>
-                  <Button type="submit" disabled={form.formState.isSubmitting}>
-                    {form.formState.isSubmitting ? (
-                      <Loader2 className="size-4 animate-spin" />
-                    ) : (
-                      <Send className="size-4" />
+                  {sendTest.isPending ? t('sending') : t('sendDemo')}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleRemove}
+                  disabled={sendTest.isPending || disconnect.isPending}
+                >
+                  {disconnect.isPending ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="size-4" />
+                  )}
+                  {t('remove')}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(handleConnect)} className="flex flex-col gap-4">
+                  <FormField
+                    control={form.control}
+                    name="telegramBotToken"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('tokenLabel')}</FormLabel>
+                        <FormControl>
+                          <Input
+                            dir="ltr"
+                            autoComplete="off"
+                            placeholder={t('tokenPlaceholder')}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
                     )}
-                    {form.formState.isSubmitting ? t('sending') : t('connectAndTest')}
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          )}
+                  />
+                  <div>
+                    <Button type="submit" disabled={form.formState.isSubmitting}>
+                      {form.formState.isSubmitting ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <Send className="size-4" />
+                      )}
+                      {form.formState.isSubmitting ? t('sending') : t('connectAndTest')}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
 
-          <div className="mt-6 border-t border-border pt-5">
-            <h3 className="mb-3 text-sm font-medium text-foreground">{t('stepsTitle')}</h3>
-            <ol className="space-y-3">
-              {setupSteps.map((step, index) => (
-                <li key={step} className="flex gap-3 text-sm text-muted-foreground">
-                  <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-foreground tabular-nums">
-                    {index + 1}
-                  </span>
-                  <span>{t(step)}</span>
-                </li>
-              ))}
-            </ol>
-          </div>
+              <div className="mt-6 border-t border-border pt-5">
+                <h3 className="mb-3 text-sm font-medium text-foreground">{t('stepsTitle')}</h3>
+                <ol className="space-y-3">
+                  {setupSteps.map((step, index) => (
+                    <li key={step} className="flex gap-3 text-sm text-muted-foreground">
+                      <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-foreground tabular-nums">
+                        {index + 1}
+                      </span>
+                      <span>{t(step)}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </>
+          )}
         </Section>
 
         <Section title={t('moreChannelsTitle')} description={t('moreChannelsDescription')}>
