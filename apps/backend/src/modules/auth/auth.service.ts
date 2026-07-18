@@ -3,11 +3,14 @@ import { JwtService } from '@nestjs/jwt';
 import bcrypt from 'bcryptjs';
 import { PrismaService } from '../../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
 import { JwtPayload } from './jwt-payload.interface';
 
 export interface LoginResult {
   accessToken: string;
 }
+
+const PASSWORD_HASH_ROUNDS = 10;
 
 @Injectable()
 export class AuthService {
@@ -27,7 +30,25 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password.');
     }
 
-    const payload: JwtPayload = { sub: user.id, tenantId: user.tenantId };
+    return this.issueToken(user.id, user.tenantId);
+  }
+
+  async register(registerDto: RegisterDto): Promise<LoginResult> {
+    const passwordHash = await bcrypt.hash(registerDto.password, PASSWORD_HASH_ROUNDS);
+
+    const user = await this.prisma.user.create({
+      data: {
+        email: registerDto.email,
+        passwordHash,
+        tenant: { create: { name: registerDto.businessName } },
+      },
+    });
+
+    return this.issueToken(user.id, user.tenantId);
+  }
+
+  private async issueToken(userId: string, tenantId: string): Promise<LoginResult> {
+    const payload: JwtPayload = { sub: userId, tenantId };
     return { accessToken: await this.jwtService.signAsync(payload) };
   }
 }

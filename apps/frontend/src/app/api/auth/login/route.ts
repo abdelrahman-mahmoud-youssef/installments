@@ -1,8 +1,6 @@
-import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import { config } from '@/lib/config';
-
-const SEVEN_DAYS_IN_SECONDS = 60 * 60 * 24 * 7;
+import { setAuthCookie } from '@/lib/set-auth-cookie';
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const body = await request.text();
@@ -20,14 +18,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
 
   const { accessToken } = data as { accessToken: string };
-  const cookieStore = await cookies();
-  cookieStore.set(config.authCookieName, accessToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    path: '/',
-    maxAge: SEVEN_DAYS_IN_SECONDS,
-  });
+  await setAuthCookie(accessToken);
 
   return NextResponse.json({ success: true });
 }

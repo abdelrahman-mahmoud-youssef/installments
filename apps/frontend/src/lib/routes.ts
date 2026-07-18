@@ -1,5 +1,6 @@
 export const routes = {
   login: '/login',
+  register: '/register',
   dashboard: '/dashboard',
   customers: '/customers',
   customer: (id: string) => `/customers/${id}`,
