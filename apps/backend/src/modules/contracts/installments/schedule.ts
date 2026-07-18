@@ -31,19 +31,25 @@ function distributeByFixedAmount(remaining: number, fixedAmount: number): number
   return amounts;
 }
 
-function calculateTotalAmount(input: ScheduleInput): number {
-  if (input.calculationMethod !== CalculationMethod.MARKUP_PERCENT) {
-    return input.productPrice;
+interface ContractTotals {
+  totalAmount: number;
+  remaining: number;
+}
+
+function computeTotals(input: ScheduleInput): ContractTotals {
+  if (input.calculationMethod === CalculationMethod.MARKUP_PERCENT) {
+    if (!input.markupPercent || input.markupPercent <= 0) {
+      throw new Error('markupPercent is required for the MARKUP_PERCENT calculation method.');
+    }
+    const financedBase = input.productPrice - input.downPayment;
+    const markedUpBalance = Math.round(Math.max(financedBase, 0) * (1 + input.markupPercent / 100));
+    return { totalAmount: input.downPayment + markedUpBalance, remaining: markedUpBalance };
   }
-  if (!input.markupPercent || input.markupPercent <= 0) {
-    throw new Error('markupPercent is required for the MARKUP_PERCENT calculation method.');
-  }
-  return Math.round(input.productPrice * (1 + input.markupPercent / 100));
+  return { totalAmount: input.productPrice, remaining: input.productPrice - input.downPayment };
 }
 
 export function calculateInstallmentSchedule(input: ScheduleInput): ScheduleResult {
-  const totalAmount = calculateTotalAmount(input);
-  const remaining = totalAmount - input.downPayment;
+  const { totalAmount, remaining } = computeTotals(input);
 
   if (remaining <= 0) {
     throw new Error('The remaining amount after the down payment must be greater than zero.');

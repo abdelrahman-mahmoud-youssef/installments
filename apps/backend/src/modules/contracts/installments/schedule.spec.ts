@@ -42,7 +42,7 @@ describe('calculateInstallmentSchedule', () => {
     expect(result.installmentAmounts).toEqual(Array(6).fill(1_500));
   });
 
-  it('applies markup to the product price before splitting evenly (Option 3)', () => {
+  it('applies markup to the financed amount, not the down payment (Option 3)', () => {
     const result = calculateInstallmentSchedule({
       calculationMethod: CalculationMethod.MARKUP_PERCENT,
       productPrice: 10_000,
@@ -51,9 +51,22 @@ describe('calculateInstallmentSchedule', () => {
       installmentCount: 10,
     });
 
-    expect(result.totalAmount).toBe(12_000);
-    expect(result.installmentAmounts).toEqual(Array(10).fill(1_000));
-    expect(sum(result.installmentAmounts)).toBe(10_000);
+    expect(result.totalAmount).toBe(11_600);
+    expect(result.installmentAmounts).toEqual(Array(10).fill(960));
+    expect(sum(result.installmentAmounts)).toBe(9_600);
+  });
+
+  it('marks up the whole price when there is no down payment', () => {
+    const result = calculateInstallmentSchedule({
+      calculationMethod: CalculationMethod.MARKUP_PERCENT,
+      productPrice: 10_000,
+      downPayment: 0,
+      markupPercent: 25,
+      installmentCount: 5,
+    });
+
+    expect(result.totalAmount).toBe(12_500);
+    expect(result.installmentAmounts).toEqual(Array(5).fill(2_500));
   });
 
   it('puts the rounding remainder on the final installment', () => {

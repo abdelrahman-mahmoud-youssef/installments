@@ -155,10 +155,17 @@ export default function NewContractPage() {
 
   const priceMinor = Math.round((Number(values.productPrice) || 0) * 100);
   const downMinor = Math.round((Number(values.downPayment) || 0) * 100);
-  const markup = calculationMethod === 'MARKUP_PERCENT' ? Number(values.markupPercent) || 0 : 0;
-  const totalMinor =
-    calculationMethod === 'MARKUP_PERCENT' ? Math.round(priceMinor * (1 + markup / 100)) : priceMinor;
-  const remainingMinor = totalMinor - downMinor;
+  let totalMinor: number;
+  let remainingMinor: number;
+  if (calculationMethod === 'MARKUP_PERCENT') {
+    const markup = Number(values.markupPercent) || 0;
+    const markedUpBalance = Math.round(Math.max(priceMinor - downMinor, 0) * (1 + markup / 100));
+    totalMinor = downMinor + markedUpBalance;
+    remainingMinor = markedUpBalance;
+  } else {
+    totalMinor = priceMinor;
+    remainingMinor = priceMinor - downMinor;
+  }
   const plan = buildInstallmentPreview(calculationMethod, remainingMinor, values);
 
   async function onSubmit(input: ContractInput) {
