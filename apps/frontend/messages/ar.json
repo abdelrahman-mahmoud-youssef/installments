@@ -23,6 +23,7 @@
     "customers": "العملاء",
     "contracts": "العقود",
     "reports": "التقارير",
+    "settings": "الإعدادات",
     "logout": "تسجيل الخروج",
     "account": "الحساب"
   },
@@ -277,5 +278,33 @@
     "remaining": "المتبقي",
     "paidInstallments": "الأقساط المدفوعة",
     "upcoming": "القادمة"
+  },
+  "settings": {
+    "title": "الإشعارات",
+    "subtitle": "اختر طريقة استلام نشاطك التجاري لتذكيرات الدفع.",
+    "telegramTitle": "بوت تيليجرام",
+    "telegramDescription": "اربط بوت تيليجرام الخاص بك لاستلام التذكيرات اليومية.",
+    "connected": "متصل",
+    "notConnected": "غير متصل",
+    "connectedChat": "يتم الإرسال إلى المحادثة {chatId}.",
+    "tokenLabel": "رمز البوت",
+    "tokenPlaceholder": "123456789:ABCdefGhIJKlmNoPQRstuVWxyz",
+    "tokenRequired": "رمز البوت مطلوب.",
+    "replaceHint": "يوجد رمز محفوظ. أدخل رمزًا جديدًا لاستبداله.",
+    "connectAndTest": "الربط وإرسال رسالة تجريبية",
+    "sending": "جارٍ الإرسال…",
+    "testSent": "تم إرسال الرسالة التجريبية — تحقق من تيليجرام.",
+    "genericError": "حدث خطأ ما.",
+    "stepsTitle": "طريقة الربط",
+    "step1": "في تيليجرام، افتح ‎@BotFather‎ وأرسل ‎/newbot‎ ثم اتبع التعليمات.",
+    "step2": "انسخ رمز البوت الذي يمنحك إياه BotFather والصقه في الأعلى.",
+    "step3": "افتح البوت الجديد واضغط «ابدأ» حتى يتمكن من مراسلتك.",
+    "step4": "اضغط «الربط وإرسال رسالة تجريبية» — سنعثر على محادثتك ونرسل رسالة تجريبية.",
+    "moreChannelsTitle": "قنوات أخرى",
+    "moreChannelsDescription": "تذكيرات البريد الإلكتروني وواتساب والرسائل النصية قادمة قريبًا.",
+    "comingSoon": "قريبًا",
+    "channelEmail": "البريد الإلكتروني",
+    "channelWhatsapp": "واتساب",
+    "channelSms": "الرسائل النصية"
   }
 }

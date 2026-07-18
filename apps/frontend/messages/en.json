@@ -23,6 +23,7 @@
     "customers": "Customers",
     "contracts": "Contracts",
     "reports": "Reports",
+    "settings": "Settings",
     "logout": "Log out",
     "account": "Account"
   },
@@ -277,5 +278,33 @@
     "remaining": "Remaining",
     "paidInstallments": "Paid installments",
     "upcoming": "Upcoming"
+  },
+  "settings": {
+    "title": "Notifications",
+    "subtitle": "Choose how your business receives payment reminders.",
+    "telegramTitle": "Telegram bot",
+    "telegramDescription": "Connect your own Telegram bot to receive daily reminders.",
+    "connected": "Connected",
+    "notConnected": "Not connected",
+    "connectedChat": "Sending to chat {chatId}.",
+    "tokenLabel": "Bot token",
+    "tokenPlaceholder": "123456789:ABCdefGhIJKlmNoPQRstuVWxyz",
+    "tokenRequired": "Bot token is required.",
+    "replaceHint": "A token is saved. Enter a new one to replace it.",
+    "connectAndTest": "Connect & send test",
+    "sending": "Sending…",
+    "testSent": "Test message sent — check your Telegram.",
+    "genericError": "Something went wrong.",
+    "stepsTitle": "How to connect",
+    "step1": "In Telegram, open @BotFather, send /newbot, and follow the prompts.",
+    "step2": "Copy the bot token BotFather gives you and paste it above.",
+    "step3": "Open your new bot and press Start so it can message you.",
+    "step4": "Click Connect & send test — we'll find your chat and send a test message.",
+    "moreChannelsTitle": "More channels",
+    "moreChannelsDescription": "Email, WhatsApp, and SMS reminders are on the way.",
+    "comingSoon": "Coming soon",
+    "channelEmail": "Email",
+    "channelWhatsapp": "WhatsApp",
+    "channelSms": "SMS"
   }
 }
