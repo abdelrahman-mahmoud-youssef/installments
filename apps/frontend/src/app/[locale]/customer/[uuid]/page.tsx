@@ -5,6 +5,7 @@ import { Logo } from '@/components/shared/logo';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { getPublicCustomer } from '@/lib/api/public';
 import { formatDate, formatMoney } from '@/lib/format';
+import { TelegramCard } from './telegram-card';
 
 export default async function PublicCustomerPage({
   params,
@@ -59,6 +60,8 @@ export default async function PublicCustomerPage({
             </div>
           )}
         </div>
+
+        {customer.telegram.available && <TelegramCard telegram={customer.telegram} publicId={uuid} />}
 
         {customer.contracts.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border bg-card p-10 text-center text-sm text-muted-foreground">
