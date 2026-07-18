@@ -1,28 +1,11 @@
 import { RecurrenceType } from '@prisma/client';
+import { addUtcDays, daysInUtcMonth, startOfUtcMonth, toUtcMidnight } from '../../../common/date/utc-date';
 
 export interface GenerateDueDatesInput {
   firstPaymentDate: Date;
   recurrenceType: RecurrenceType;
   installmentCount: number;
   intervalDays?: number;
-}
-
-function toUtcMidnight(date: Date): Date {
-  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
-}
-
-function addUtcDays(date: Date, days: number): Date {
-  const result = new Date(date);
-  result.setUTCDate(result.getUTCDate() + days);
-  return result;
-}
-
-function startOfUtcMonth(date: Date, monthsToAdd: number): Date {
-  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + monthsToAdd, 1));
-}
-
-function daysInUtcMonth(monthStart: Date): number {
-  return new Date(Date.UTC(monthStart.getUTCFullYear(), monthStart.getUTCMonth() + 1, 0)).getUTCDate();
 }
 
 function getMonthlyOccurrence(anchor: Date, monthsToAdd: number): Date {

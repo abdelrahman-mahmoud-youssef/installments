@@ -53,9 +53,6 @@
     "transform": {
       "^.+\\.ts$": "ts-jest"
     },
-    "moduleNameMapper": {
-      "^src/(.*)$": "<rootDir>/$1"
-    },
     "testEnvironment": "node"
   }
 }

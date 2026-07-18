@@ -1,0 +1,21 @@
+export function toUtcMidnight(date: Date): Date {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+}
+
+export function getUtcToday(): Date {
+  return toUtcMidnight(new Date());
+}
+
+export function addUtcDays(date: Date, days: number): Date {
+  const result = new Date(date);
+  result.setUTCDate(result.getUTCDate() + days);
+  return result;
+}
+
+export function startOfUtcMonth(date: Date, monthsToAdd = 0): Date {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + monthsToAdd, 1));
+}
+
+export function daysInUtcMonth(monthStart: Date): number {
+  return new Date(Date.UTC(monthStart.getUTCFullYear(), monthStart.getUTCMonth() + 1, 0)).getUTCDate();
+}
