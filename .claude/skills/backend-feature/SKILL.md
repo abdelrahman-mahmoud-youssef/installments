@@ -5,7 +5,7 @@ description: How to add or modify a NestJS feature module in this project (modul
 
 # Adding a backend feature
 
-Every feature lives in `backend/src/modules/<feature>/` with this shape:
+Every feature lives in `apps/backend/src/modules/<feature>/` with this shape:
 
 ```
 modules/<feature>/

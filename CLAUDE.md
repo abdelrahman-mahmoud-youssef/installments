@@ -4,15 +4,21 @@ Multi-tenant SaaS for managing installment contracts: customers, contracts, gene
 
 ## Layout
 
-- `backend/` — NestJS + Prisma + PostgreSQL + BullMQ (Redis)
-- `frontend/` — Next.js 15 App Router + Tailwind + shadcn/ui + TanStack Query + React Hook Form + Zod
+pnpm workspace monorepo:
+
+- `apps/backend/` — NestJS + Prisma + PostgreSQL + BullMQ (Redis)
+- `apps/frontend/` — Next.js 16 App Router + Tailwind + shadcn/ui (Base UI primitives) + TanStack Query + React Hook Form + Zod
 - `docker-compose.yml` — postgres + redis for local dev
+- `pnpm-workspace.yaml` / root `package.json` — workspace + cross-app scripts
 
 ## Commands
 
-- Infra: `docker compose up -d`
-- Backend: `cd backend` → `npm run start:dev` (port 3001), `npx prisma migrate dev`, `npm run seed`, `npm test`
-- Frontend: `cd frontend` → `npm run dev` (port 3000)
+- Install once: `pnpm install` (root — installs both apps, runs `prisma generate` via backend's `postinstall`)
+- Infra: `pnpm infra:up` (postgres + redis), `pnpm infra:down`
+- Both apps: `pnpm dev` from the root (parallel — backend on 3001, frontend on 3000)
+- Backend only: `pnpm --filter installment-backend dev`, `... exec prisma migrate dev`, `... seed`, `... test`
+- Frontend only: `pnpm --filter frontend dev`
+- Everything: `pnpm build`, `pnpm test`, `pnpm lint` (fan out to every app via `-r`)
 
 ## Core design decisions (do not silently change)
 
@@ -61,7 +67,7 @@ Mandatory for every line of code in this project.
 - Tailwind + CSS variables for design tokens (colors, spacing, radius, shadows, typography). Consistent spacing.
 - Forms: React Hook Form + Zod, shared schemas in `lib/schemas/`, reusable form components, error/loading/disabled states, proper accessibility.
 - Server state in TanStack Query, UI state in local React state. No unnecessary global state.
-- All HTTP through the API layer in `lib/api.ts` — never `fetch` directly in components. Auth, error handling, and request config centralized there.
+- All HTTP through the API layer in `lib/api/` — never `fetch` directly in components. Auth, error handling, and request config centralized there.
 - Every async operation shows loading, empty, error, and success states with user-friendly messages. Never swallow errors silently.
 - Performance: pagination, debounced search, dynamic imports where appropriate. Memoize only when beneficial; no premature optimization.
 
