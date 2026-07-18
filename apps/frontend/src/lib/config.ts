@@ -1,12 +1,10 @@
-function requireEnv(name: string): string {
-  const value = process.env[name];
-  if (!value) {
-    throw new Error(`Missing required environment variable: ${name}`);
-  }
-  return value;
-}
-
 export const config = {
-  backendUrl: requireEnv('BACKEND_URL'),
+  get backendUrl(): string {
+    const value = process.env.BACKEND_URL;
+    if (!value) {
+      throw new Error('Missing required environment variable: BACKEND_URL');
+    }
+    return value;
+  },
   authCookieName: 'installment_token',
 } as const;

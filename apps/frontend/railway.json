@@ -5,7 +5,7 @@
     "dockerfilePath": "apps/frontend/Dockerfile"
   },
   "deploy": {
-    "startCommand": "node_modules/.bin/next start -p ${PORT}",
+    "startCommand": "node_modules/.bin/next start",
     "healthcheckPath": "/login",
     "healthcheckTimeout": 120,
     "restartPolicyType": "ON_FAILURE",
