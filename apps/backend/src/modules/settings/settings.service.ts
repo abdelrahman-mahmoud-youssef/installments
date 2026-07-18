@@ -29,7 +29,7 @@ export class SettingsService {
   ): Promise<NotificationSettings> {
     const tenant = await this.prisma.tenant.update({
       where: { id: tenantId },
-      data: { telegramBotToken: dto.telegramBotToken, telegramChatId: null },
+      data: { telegramBotToken: dto.telegramBotToken, telegramChatId: null, telegramBotUsername: null },
     });
     return {
       telegramConfigured: Boolean(tenant.telegramBotToken),
@@ -40,7 +40,7 @@ export class SettingsService {
   async disconnect(tenantId: string): Promise<NotificationSettings> {
     const tenant = await this.prisma.tenant.update({
       where: { id: tenantId },
-      data: { telegramBotToken: null, telegramChatId: null },
+      data: { telegramBotToken: null, telegramChatId: null, telegramBotUsername: null },
     });
     return {
       telegramConfigured: Boolean(tenant.telegramBotToken),
@@ -59,7 +59,11 @@ export class SettingsService {
       throw new BadRequestException('Open your bot in Telegram and press Start, then try again.');
     }
 
-    await this.prisma.tenant.update({ where: { id: tenantId }, data: { telegramChatId: chatId } });
+    const botUsername = await this.telegram.getBotUsername(tenant.telegramBotToken);
+    await this.prisma.tenant.update({
+      where: { id: tenantId },
+      data: { telegramChatId: chatId, telegramBotUsername: botUsername },
+    });
     await this.telegram.sendMessage(
       tenant.telegramBotToken,
       chatId,

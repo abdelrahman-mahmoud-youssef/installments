@@ -10,5 +10,6 @@ export class RemindersProcessor extends WorkerHost {
 
   async process(_job: Job): Promise<void> {
     await this.remindersService.sendRemindersForAllTenants();
+    await this.remindersService.sendCustomerReminders();
   }
 }

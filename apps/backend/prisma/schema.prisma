@@ -41,6 +41,7 @@ model Tenant {
   id                 String             @id @default(cuid())
   name               String
   telegramBotToken   String?
+  telegramBotUsername String?
   telegramChatId     String?
   allocationStrategy AllocationStrategy @default(OLDEST_FIRST)
   createdAt          DateTime           @default(now())
@@ -72,6 +73,8 @@ model Customer {
   phone     String
   address   String?
   notes     String?
+  telegramChatId               String?
+  telegramNotificationsEnabled Boolean @default(true)
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   tenant    Tenant     @relation(fields: [tenantId], references: [id])

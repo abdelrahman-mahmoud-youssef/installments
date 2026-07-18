@@ -6,10 +6,12 @@ import { Queue } from 'bullmq';
 import { getUtcToday } from '../../common/date/utc-date';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TelegramService } from '../telegram/telegram.service';
+import { CustomerReminderItem, formatCustomerReminderMessage } from './customer-reminder-message';
 import { formatReminderMessage } from './reminder-message';
 
 const REMINDERS_QUEUE = 'reminders';
 const DAILY_REMINDER_JOB_NAME = 'send-daily-reminders';
+const OUTSTANDING_STATUSES = [InstallmentStatus.PENDING, InstallmentStatus.PARTIALLY_PAID];
 
 @Injectable()
 export class RemindersService implements OnModuleInit {
@@ -78,6 +80,75 @@ export class RemindersService implements OnModuleInit {
     );
   }
 
+  async sendCustomerReminders(): Promise<void> {
+    const today = getUtcToday();
+    const tenants = await this.prisma.tenant.findMany({
+      where: { telegramBotToken: { not: null }, telegramBotUsername: { not: null } },
+      select: { id: true, name: true, telegramBotToken: true },
+    });
+
+    for (const tenant of tenants) {
+      try {
+        await this.sendCustomerRemindersForTenant(tenant.id, tenant.name, tenant.telegramBotToken as string, today);
+      } catch (error) {
+        this.logger.error(
+          `Customer reminders failed for tenant ${tenant.id}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        );
+      }
+    }
+  }
+
+  private async sendCustomerRemindersForTenant(
+    tenantId: string,
+    businessName: string,
+    telegramBotToken: string,
+    today: Date,
+  ): Promise<void> {
+    const customers = await this.prisma.customer.findMany({
+      where: { tenantId, telegramChatId: { not: null }, telegramNotificationsEnabled: true },
+      select: {
+        telegramChatId: true,
+        contracts: {
+          select: {
+            productName: true,
+            installments: {
+              where: { status: { in: OUTSTANDING_STATUSES }, dueDate: { lte: today } },
+              select: { dueDate: true, amount: true, paidAmount: true },
+            },
+          },
+        },
+      },
+    });
+
+    for (const customer of customers) {
+      const dueToday: CustomerReminderItem[] = [];
+      const overdue: CustomerReminderItem[] = [];
+      for (const contract of customer.contracts) {
+        for (const installment of contract.installments) {
+          const item: CustomerReminderItem = {
+            productName: contract.productName,
+            remainingAmount: installment.amount - installment.paidAmount,
+            dueDate: installment.dueDate,
+          };
+          (installment.dueDate.getTime() === today.getTime() ? dueToday : overdue).push(item);
+        }
+      }
+
+      const message = formatCustomerReminderMessage({ businessName, dueToday, overdue });
+      if (!message) {
+        continue;
+      }
+
+      try {
+        await this.telegram.sendMessage(telegramBotToken, customer.telegramChatId as string, message);
+      } catch (error) {
+        this.logger.error(
+          `Customer reminder failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        );
+      }
+    }
+  }
+
   private async sendReminderForTenant(
     tenantId: string,
     businessName: string,
@@ -85,16 +156,15 @@ export class RemindersService implements OnModuleInit {
     telegramChatId: string,
   ): Promise<void> {
     const today = getUtcToday();
-    const outstandingStatuses = [InstallmentStatus.PENDING, InstallmentStatus.PARTIALLY_PAID];
 
     const [dueToday, overdue] = await Promise.all([
       this.prisma.installment.aggregate({
-        where: { tenantId, status: { in: outstandingStatuses }, dueDate: today },
+        where: { tenantId, status: { in: OUTSTANDING_STATUSES }, dueDate: today },
         _count: true,
         _sum: { amount: true, paidAmount: true },
       }),
       this.prisma.installment.aggregate({
-        where: { tenantId, status: { in: outstandingStatuses }, dueDate: { lt: today } },
+        where: { tenantId, status: { in: OUTSTANDING_STATUSES }, dueDate: { lt: today } },
         _count: true,
         _sum: { amount: true, paidAmount: true },
       }),
