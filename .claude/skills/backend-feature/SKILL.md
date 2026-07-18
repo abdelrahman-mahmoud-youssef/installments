@@ -25,5 +25,6 @@ modules/<feature>/
 5. **Errors are Nest HTTP exceptions** (`NotFoundException`, `BadRequestException`, ...) thrown from services. The global filter shapes the response — never try/catch to reshape errors locally, never swallow.
 6. **Endpoints are guarded by default** (global JWT guard). Only `@Public()` opts out — currently just login and the public customer page. List endpoints paginate via the shared pagination helpers.
 7. Register the module in `app.module.ts`. No comments anywhere. Shared enums/constants come from `@prisma/client` or `src/common/constants.ts` — never string literals inline.
+8. **Imports are relative, never `src/...`.** The backend runs on plain `tsc` + `node`/`tsx` (no bundler, no `tsconfig-paths`), so there is no `src/*` path alias — it type-checks but fails at runtime with `MODULE_NOT_FOUND`. Always import with `../../` relative paths.
 
 Mirror the existing `customers` module when in doubt — it is the reference implementation.
