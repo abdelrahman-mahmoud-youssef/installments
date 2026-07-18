@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -77,7 +78,9 @@ function UserMenu() {
         }
       />
       <DropdownMenuContent align="end" className="min-w-48">
-        <DropdownMenuLabel>{tCommon('appName')}</DropdownMenuLabel>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>{tCommon('appName')}</DropdownMenuLabel>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem variant="destructive" onClick={handleLogout}>
           <LogOut className="size-4" />
