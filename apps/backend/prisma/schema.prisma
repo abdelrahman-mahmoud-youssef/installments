@@ -40,6 +40,7 @@ enum AllocationStrategy {
 model Tenant {
   id                 String             @id @default(cuid())
   name               String
+  telegramBotToken   String?
   telegramChatId     String?
   allocationStrategy AllocationStrategy @default(OLDEST_FIRST)
   createdAt          DateTime           @default(now())

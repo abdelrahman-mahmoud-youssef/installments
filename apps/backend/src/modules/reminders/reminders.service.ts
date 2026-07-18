@@ -5,6 +5,7 @@ import { InstallmentStatus } from '@prisma/client';
 import { Queue } from 'bullmq';
 import { getUtcToday } from '../../common/date/utc-date';
 import { PrismaService } from '../../prisma/prisma.service';
+import { TelegramService } from '../telegram/telegram.service';
 import { formatReminderMessage } from './reminder-message';
 
 const REMINDERS_QUEUE = 'reminders';
@@ -18,6 +19,7 @@ export class RemindersService implements OnModuleInit {
     @InjectQueue(REMINDERS_QUEUE) private readonly remindersQueue: Queue,
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
+    private readonly telegram: TelegramService,
   ) {}
 
   onModuleInit(): void {
@@ -41,12 +43,17 @@ export class RemindersService implements OnModuleInit {
 
   async sendRemindersForAllTenants(): Promise<void> {
     const tenants = await this.prisma.tenant.findMany({
-      where: { telegramChatId: { not: null } },
+      where: { telegramBotToken: { not: null }, telegramChatId: { not: null } },
     });
 
     for (const tenant of tenants) {
       try {
-        await this.sendReminderForTenant(tenant.id, tenant.name, tenant.telegramChatId as string);
+        await this.sendReminderForTenant(
+          tenant.id,
+          tenant.name,
+          tenant.telegramBotToken as string,
+          tenant.telegramChatId as string,
+        );
       } catch (error) {
         this.logger.error(
           `Reminder failed for tenant ${tenant.id}: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -57,15 +64,24 @@ export class RemindersService implements OnModuleInit {
 
   async sendTestReminder(tenantId: string): Promise<void> {
     const tenant = await this.prisma.tenant.findUniqueOrThrow({ where: { id: tenantId } });
+    if (!tenant.telegramBotToken) {
+      throw new BadRequestException('This tenant has no Telegram bot configured.');
+    }
     if (!tenant.telegramChatId) {
       throw new BadRequestException('This tenant has no Telegram chat configured.');
     }
-    await this.sendReminderForTenant(tenant.id, tenant.name, tenant.telegramChatId);
+    await this.sendReminderForTenant(
+      tenant.id,
+      tenant.name,
+      tenant.telegramBotToken,
+      tenant.telegramChatId,
+    );
   }
 
   private async sendReminderForTenant(
     tenantId: string,
     businessName: string,
+    telegramBotToken: string,
     telegramChatId: string,
   ): Promise<void> {
     const today = getUtcToday();
@@ -93,30 +109,12 @@ export class RemindersService implements OnModuleInit {
     });
 
     try {
-      await this.sendTelegramMessage(telegramChatId, message);
+      await this.telegram.sendMessage(telegramBotToken, telegramChatId, message);
       await this.prisma.reminderLog.create({ data: { tenantId, success: true } });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       await this.prisma.reminderLog.create({ data: { tenantId, success: false, error: errorMessage } });
       throw error;
-    }
-  }
-
-  private async sendTelegramMessage(chatId: string, text: string): Promise<void> {
-    const botToken = this.config.get<string>('TELEGRAM_BOT_TOKEN');
-    if (!botToken) {
-      throw new Error('TELEGRAM_BOT_TOKEN is not configured.');
-    }
-
-    const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: chatId, text }),
-    });
-
-    if (!response.ok) {
-      const body = await response.text();
-      throw new Error(`Telegram API error ${response.status}: ${body}`);
     }
   }
 }
