@@ -1,7 +1,7 @@
 'use client';
 
 import { Plus, Search, Trash2 } from 'lucide-react';
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
@@ -13,12 +13,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Link } from '@/i18n/navigation';
 import { useCreateCustomer, useCustomers, useDeleteCustomer } from '@/hooks/use-customers';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { ApiError } from '@/lib/api/client';
 import { routes } from '@/lib/routes';
 
 export default function CustomersPage() {
+  const t = useTranslations('customers');
+  const tCommon = useTranslations('common');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const debouncedSearch = useDebouncedValue(search, 300);
@@ -30,13 +33,13 @@ export default function CustomersPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title="Customers"
+        title={t('title')}
         actions={
           <CustomerFormDialog
             trigger={
               <Button>
                 <Plus className="size-4" />
-                New customer
+                {t('newCustomer')}
               </Button>
             }
             onSubmit={(input) => createCustomer.mutateAsync(input)}
@@ -45,10 +48,10 @@ export default function CustomersPage() {
       />
 
       <div className="relative max-w-sm">
-        <Search className="absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
+        <Search className="absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground rtl:right-2.5 rtl:left-auto" />
         <Input
-          placeholder="Search by name or phone…"
-          className="pl-8"
+          placeholder={t('searchPlaceholder')}
+          className="pl-8 rtl:pr-8 rtl:pl-3"
           value={search}
           onChange={(event) => {
             setSearch(event.target.value);
@@ -64,20 +67,20 @@ export default function CustomersPage() {
           ))}
         </div>
       ) : isError || !data ? (
-        <EmptyState title="Couldn't load customers" description="Please try again in a moment." />
+        <EmptyState title={t('loadError')} description={tCommon('tryAgain')} />
       ) : data.data.length === 0 ? (
         <EmptyState
-          title={debouncedSearch ? 'No customers match your search' : 'No customers yet'}
-          description={debouncedSearch ? undefined : 'Create your first customer to get started.'}
+          title={debouncedSearch ? t('noResults') : t('noCustomersYet')}
+          description={debouncedSearch ? undefined : t('createFirst')}
         />
       ) : (
         <>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Address</TableHead>
+                <TableHead>{t('name')}</TableHead>
+                <TableHead>{t('phone')}</TableHead>
+                <TableHead>{t('address')}</TableHead>
                 <TableHead className="w-0" />
               </TableRow>
             </TableHeader>
@@ -98,18 +101,16 @@ export default function CustomersPage() {
                           <Trash2 className="size-4" />
                         </Button>
                       }
-                      title="Delete customer?"
-                      description={`This will permanently remove ${customer.name}. Customers with contracts cannot be deleted.`}
+                      title={t('deleteTitle')}
+                      description={t('deleteDescription', { name: customer.name })}
                       destructive
-                      confirmLabel="Delete"
+                      confirmLabel={t('delete')}
                       onConfirm={async () => {
                         try {
                           await deleteCustomer.mutateAsync(customer.id);
-                          toast.success('Customer deleted.');
+                          toast.success(t('deleted'));
                         } catch (error) {
-                          toast.error(
-                            error instanceof ApiError ? error.message : 'Could not delete customer.',
-                          );
+                          toast.error(error instanceof ApiError ? error.message : t('deleteError'));
                         }
                       }}
                     />

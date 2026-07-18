@@ -62,6 +62,7 @@ Mandatory for every line of code in this project.
 
 ## Frontend rules
 
+- **i18n: English + Arabic via next-intl.** All pages live under `app/[locale]/`; `en` has no URL prefix (`localePrefix: 'as-needed'`), `ar` is prefixed (`/ar/...`). `dir="rtl"`/`"ltr"` is set on `<html>` in `app/[locale]/layout.tsx` based on locale. Every UI string lives in `messages/en.json` / `messages/ar.json`, one key per string, no string ever hardcoded in a component. `Link`, `redirect`, `usePathname`, `useRouter` come from `@/i18n/navigation` (locale-aware), never from `next/link`/`next/navigation` — the exceptions are `useParams`, `useSearchParams`, and `notFound`, which aren't locale-specific and stay from `next/navigation`. Backend error messages are not translated (English only) — only the UI chrome is bilingual.
 - shadcn/ui components whenever appropriate. Components small, reusable, accessible, responsive, composable. UI / business logic / data fetching separated — no large business logic inside React components.
 - Mobile-first, responsive at mobile/tablet/laptop/desktop/wide. No fixed widths; flexible layouts; responsive typography; no layout shift while loading.
 - Tailwind + CSS variables for design tokens (colors, spacing, radius, shadows, typography). Consistent spacing.

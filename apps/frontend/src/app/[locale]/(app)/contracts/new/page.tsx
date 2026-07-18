@@ -1,7 +1,8 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { NumberInput } from '@/components/shared/number-input';
@@ -18,19 +19,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useRouter } from '@/i18n/navigation';
 import { useCreateContract } from '@/hooks/use-contracts';
 import { useCustomers } from '@/hooks/use-customers';
 import { ApiError } from '@/lib/api/client';
-import {
-  CALCULATION_METHODS,
-  CALCULATION_METHOD_LABELS,
-  RECURRENCE_TYPES,
-  RECURRENCE_TYPE_LABELS,
-} from '@/lib/enums';
+import { CALCULATION_METHODS, RECURRENCE_TYPES } from '@/lib/enums';
 import { routes } from '@/lib/routes';
 import { ContractInput, contractSchema } from '@/lib/schemas/contract';
 
 export default function NewContractPage() {
+  const t = useTranslations('contracts.new');
+  const tCalculationMethod = useTranslations('calculationMethod');
+  const tRecurrenceType = useTranslations('recurrenceType');
   const router = useRouter();
   const searchParams = useSearchParams();
   const preselectedCustomerId = searchParams.get('customerId') ?? '';
@@ -58,16 +58,16 @@ export default function NewContractPage() {
   async function onSubmit(values: ContractInput) {
     try {
       const contract = await createContract.mutateAsync(values);
-      toast.success('Contract created.');
+      toast.success(t('created'));
       router.push(routes.contract(contract.id));
     } catch (error) {
-      toast.error(error instanceof ApiError ? error.message : 'Could not create contract.');
+      toast.error(error instanceof ApiError ? error.message : t('createError'));
     }
   }
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title="New contract" description="Create an installment contract for a customer." />
+      <PageHeader title={t('title')} description={t('description')} />
 
       <Card>
         <CardContent className="pt-6">
@@ -78,11 +78,13 @@ export default function NewContractPage() {
                 name="customerId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Customer</FormLabel>
+                    <FormLabel>{t('customer')}</FormLabel>
                     <Select value={field.value} onValueChange={field.onChange}>
                       <FormControl>
                         <SelectTrigger className="w-full">
-                          <SelectValue placeholder={isLoadingCustomers ? 'Loading…' : 'Select a customer'} />
+                          <SelectValue
+                            placeholder={isLoadingCustomers ? t('loadingCustomers') : t('selectCustomer')}
+                          />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -104,7 +106,7 @@ export default function NewContractPage() {
                   name="productName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Product name</FormLabel>
+                      <FormLabel>{t('productName')}</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
@@ -117,7 +119,7 @@ export default function NewContractPage() {
                   name="productPrice"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Product price</FormLabel>
+                      <FormLabel>{t('productPrice')}</FormLabel>
                       <FormControl>
                         <NumberInput step="0.01" min="0" {...field} />
                       </FormControl>
@@ -130,7 +132,7 @@ export default function NewContractPage() {
                   name="downPayment"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Down payment</FormLabel>
+                      <FormLabel>{t('downPayment')}</FormLabel>
                       <FormControl>
                         <NumberInput step="0.01" min="0" {...field} />
                       </FormControl>
@@ -145,7 +147,7 @@ export default function NewContractPage() {
                 name="calculationMethod"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Installment calculation</FormLabel>
+                    <FormLabel>{t('calculationMethod')}</FormLabel>
                     <FormControl>
                       <RadioGroup value={field.value} onValueChange={field.onChange} className="grid-cols-1 sm:grid-cols-3">
                         {CALCULATION_METHODS.map((method) => (
@@ -154,7 +156,7 @@ export default function NewContractPage() {
                             className="flex items-center gap-2 rounded-md border p-3 text-sm has-[[data-checked]]:border-primary"
                           >
                             <RadioGroupItem value={method} />
-                            {CALCULATION_METHOD_LABELS[method]}
+                            {tCalculationMethod(method)}
                           </label>
                         ))}
                       </RadioGroup>
@@ -171,7 +173,7 @@ export default function NewContractPage() {
                     name="markupPercent"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Markup percentage</FormLabel>
+                        <FormLabel>{t('markupPercent')}</FormLabel>
                         <FormControl>
                           <NumberInput step="0.01" min="0" {...field} />
                         </FormControl>
@@ -186,7 +188,7 @@ export default function NewContractPage() {
                     name="installmentCount"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Number of installments</FormLabel>
+                        <FormLabel>{t('installmentCount')}</FormLabel>
                         <FormControl>
                           <NumberInput step="1" min="1" {...field} />
                         </FormControl>
@@ -201,7 +203,7 @@ export default function NewContractPage() {
                     name="fixedInstallmentAmount"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Fixed installment amount</FormLabel>
+                        <FormLabel>{t('fixedInstallmentAmount')}</FormLabel>
                         <FormControl>
                           <NumberInput step="0.01" min="0" {...field} />
                         </FormControl>
@@ -218,7 +220,7 @@ export default function NewContractPage() {
                   name="recurrenceType"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Recurrence</FormLabel>
+                      <FormLabel>{t('recurrence')}</FormLabel>
                       <Select value={field.value} onValueChange={field.onChange}>
                         <FormControl>
                           <SelectTrigger className="w-full">
@@ -228,7 +230,7 @@ export default function NewContractPage() {
                         <SelectContent>
                           {RECURRENCE_TYPES.map((type) => (
                             <SelectItem key={type} value={type}>
-                              {RECURRENCE_TYPE_LABELS[type]}
+                              {tRecurrenceType(type)}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -243,7 +245,7 @@ export default function NewContractPage() {
                     name="intervalDays"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Interval (days)</FormLabel>
+                        <FormLabel>{t('intervalDays')}</FormLabel>
                         <FormControl>
                           <NumberInput step="1" min="1" {...field} />
                         </FormControl>
@@ -260,7 +262,7 @@ export default function NewContractPage() {
                   name="startDate"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Start date</FormLabel>
+                      <FormLabel>{t('startDate')}</FormLabel>
                       <FormControl>
                         <Input type="date" {...field} />
                       </FormControl>
@@ -273,7 +275,7 @@ export default function NewContractPage() {
                   name="firstPaymentDate"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>First payment date</FormLabel>
+                      <FormLabel>{t('firstPaymentDate')}</FormLabel>
                       <FormControl>
                         <Input type="date" {...field} />
                       </FormControl>
@@ -284,7 +286,7 @@ export default function NewContractPage() {
               </div>
 
               <Button type="submit" disabled={form.formState.isSubmitting} className="self-start">
-                {form.formState.isSubmitting ? 'Creating…' : 'Create contract'}
+                {form.formState.isSubmitting ? t('submitting') : t('submit')}
               </Button>
             </form>
           </Form>

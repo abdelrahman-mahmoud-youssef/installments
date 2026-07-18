@@ -1,6 +1,6 @@
 # Installment SaaS
 
-Multi-tenant SaaS for managing installment contracts: customers, contracts with three installment-calculation methods, a recurrence engine, transaction-based payments, and daily Telegram reminders.
+Multi-tenant SaaS for managing installment contracts: customers, contracts with three installment-calculation methods, a recurrence engine, transaction-based payments, and daily Telegram reminders. The UI is bilingual (English / Arabic, with RTL support).
 
 pnpm workspace monorepo:
 

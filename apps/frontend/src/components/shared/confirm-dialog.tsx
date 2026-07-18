@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,7 +17,7 @@ export function ConfirmDialog({
   trigger,
   title,
   description,
-  confirmLabel = 'Confirm',
+  confirmLabel,
   destructive = false,
   onConfirm,
 }: {
@@ -27,6 +28,7 @@ export function ConfirmDialog({
   destructive?: boolean;
   onConfirm: () => Promise<void> | void;
 }) {
+  const t = useTranslations('common');
   const [open, setOpen] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
 
@@ -50,14 +52,14 @@ export function ConfirmDialog({
         </DialogHeader>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)} disabled={isConfirming}>
-            Cancel
+            {t('cancel')}
           </Button>
           <Button
             variant={destructive ? 'destructive' : 'default'}
             onClick={handleConfirm}
             disabled={isConfirming}
           >
-            {isConfirming ? 'Please wait…' : confirmLabel}
+            {isConfirming ? t('pleaseWait') : (confirmLabel ?? t('confirm'))}
           </Button>
         </DialogFooter>
       </DialogContent>

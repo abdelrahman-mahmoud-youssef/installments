@@ -1,7 +1,8 @@
 import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
+import { getLocale } from 'next-intl/server';
 import { AppShell } from '@/components/shared/app-shell';
 import { config } from '@/lib/config';
+import { redirect } from '@/i18n/navigation';
 import { routes } from '@/lib/routes';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -9,7 +10,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const token = cookieStore.get(config.authCookieName)?.value;
 
   if (!token) {
-    redirect(routes.login);
+    const locale = await getLocale();
+    redirect({ href: routes.login, locale });
   }
 
   return <AppShell>{children}</AppShell>;

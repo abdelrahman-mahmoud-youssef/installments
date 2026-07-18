@@ -1,22 +1,25 @@
 'use client';
 
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { EmptyState } from '@/components/shared/empty-state';
 import { Money } from '@/components/shared/money';
 import { PageHeader } from '@/components/shared/page-header';
 import { StatCard } from '@/components/shared/stat-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Link } from '@/i18n/navigation';
 import { useReports } from '@/hooks/use-reports';
 import { routes } from '@/lib/routes';
 
 export default function ReportsPage() {
+  const t = useTranslations('reports');
+  const tCommon = useTranslations('common');
   const { data, isLoading, isError } = useReports();
 
   if (isLoading) {
     return (
       <div className="flex flex-col gap-6">
-        <PageHeader title="Reports" />
+        <PageHeader title={t('title')} />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           {Array.from({ length: 3 }).map((_, index) => (
             <Skeleton key={index} className="h-24" />
@@ -30,38 +33,38 @@ export default function ReportsPage() {
   if (isError || !data) {
     return (
       <div className="flex flex-col gap-6">
-        <PageHeader title="Reports" />
-        <EmptyState title="Couldn't load reports" description="Please try again in a moment." />
+        <PageHeader title={t('title')} />
+        <EmptyState title={t('loadError')} description={tCommon('tryAgain')} />
       </div>
     );
   }
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title="Reports" />
+      <PageHeader title={t('title')} />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <StatCard label="Today's collections" value={<Money minorUnits={data.todayCollections} />} />
-        <StatCard label="This month's collections" value={<Money minorUnits={data.monthlyCollections} />} />
+        <StatCard label={t('todayCollections')} value={<Money minorUnits={data.todayCollections} />} />
+        <StatCard label={t('monthCollections')} value={<Money minorUnits={data.monthlyCollections} />} />
         <StatCard
-          label="Overdue balance"
+          label={t('overdueBalance')}
           value={<Money minorUnits={data.overdueBalance} />}
           tone={data.overdueBalance > 0 ? 'destructive' : undefined}
         />
       </div>
 
       <div className="rounded-lg border p-4">
-        <h2 className="mb-3 text-sm font-semibold">Overdue customers</h2>
+        <h2 className="mb-3 text-sm font-semibold">{t('overdueCustomers')}</h2>
         {data.overdueCustomers.length === 0 ? (
-          <p className="py-6 text-center text-sm text-muted-foreground">No overdue customers.</p>
+          <p className="py-6 text-center text-sm text-muted-foreground">{t('noOverdueCustomers')}</p>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Customer</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Overdue installments</TableHead>
-                <TableHead className="text-right">Overdue balance</TableHead>
+                <TableHead>{t('customer')}</TableHead>
+                <TableHead>{t('phone')}</TableHead>
+                <TableHead>{t('overdueInstallments')}</TableHead>
+                <TableHead className="text-end">{t('overdueBalance')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -74,7 +77,7 @@ export default function ReportsPage() {
                   </TableCell>
                   <TableCell className="text-muted-foreground">{customer.customerPhone}</TableCell>
                   <TableCell>{customer.overdueInstallmentCount}</TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-end">
                     <Money minorUnits={customer.overdueBalance} />
                   </TableCell>
                 </TableRow>

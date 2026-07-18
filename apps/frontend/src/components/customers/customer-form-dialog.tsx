@@ -1,6 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -30,6 +31,7 @@ export function CustomerFormDialog({
   customer?: Customer;
   onSubmit: (input: CustomerInput) => Promise<unknown>;
 }) {
+  const t = useTranslations('customers.form');
   const [open, setOpen] = useState(false);
 
   const form = useForm<CustomerInput>({
@@ -45,11 +47,11 @@ export function CustomerFormDialog({
   async function handleSubmit(values: CustomerInput) {
     try {
       await onSubmit(values);
-      toast.success(customer ? 'Customer updated.' : 'Customer created.');
+      toast.success(customer ? t('updated') : t('created'));
       setOpen(false);
       form.reset();
     } catch (error) {
-      toast.error(error instanceof ApiError ? error.message : 'Something went wrong.');
+      toast.error(error instanceof ApiError ? error.message : t('genericError'));
     }
   }
 
@@ -71,10 +73,8 @@ export function CustomerFormDialog({
       <DialogTrigger render={trigger} />
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{customer ? 'Edit customer' : 'New customer'}</DialogTitle>
-          <DialogDescription>
-            {customer ? 'Update this customer’s details.' : 'Add a new customer to this workspace.'}
-          </DialogDescription>
+          <DialogTitle>{customer ? t('editTitle') : t('newTitle')}</DialogTitle>
+          <DialogDescription>{customer ? t('editDescription') : t('newDescription')}</DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-4">
@@ -83,7 +83,7 @@ export function CustomerFormDialog({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>{t('name')}</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -96,7 +96,7 @@ export function CustomerFormDialog({
               name="phone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Phone number</FormLabel>
+                  <FormLabel>{t('phone')}</FormLabel>
                   <FormControl>
                     <Input type="tel" {...field} />
                   </FormControl>
@@ -109,7 +109,7 @@ export function CustomerFormDialog({
               name="address"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Address (optional)</FormLabel>
+                  <FormLabel>{t('address')}</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -122,7 +122,7 @@ export function CustomerFormDialog({
               name="notes"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Notes (optional)</FormLabel>
+                  <FormLabel>{t('notes')}</FormLabel>
                   <FormControl>
                     <Textarea rows={3} {...field} />
                   </FormControl>
@@ -132,7 +132,7 @@ export function CustomerFormDialog({
             />
             <DialogFooter>
               <Button type="submit" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? 'Saving…' : customer ? 'Save changes' : 'Create customer'}
+                {form.formState.isSubmitting ? t('saving') : customer ? t('saveChanges') : t('create')}
               </Button>
             </DialogFooter>
           </form>

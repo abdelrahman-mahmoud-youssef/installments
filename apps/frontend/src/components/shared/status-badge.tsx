@@ -1,3 +1,6 @@
+'use client';
+
+import { useTranslations } from 'next-intl';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
@@ -11,23 +14,15 @@ const STATUS_STYLES: Record<string, string> = {
   COMPLETED: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300',
 };
 
-const STATUS_LABELS: Record<string, string> = {
-  PENDING: 'Pending',
-  PARTIALLY_PAID: 'Partially paid',
-  PAID: 'Paid',
-  OVERDUE: 'Overdue',
-  CANCELLED: 'Cancelled',
-  ACTIVE: 'Active',
-  COMPLETED: 'Completed',
-};
-
 export function StatusBadge({ status, className }: { status: string; className?: string }) {
+  const t = useTranslations('status');
+
   return (
     <Badge
       variant="outline"
       className={cn('border-transparent font-medium', STATUS_STYLES[status], className)}
     >
-      {STATUS_LABELS[status] ?? status}
+      {t.has(status) ? t(status) : status}
     </Badge>
   );
 }

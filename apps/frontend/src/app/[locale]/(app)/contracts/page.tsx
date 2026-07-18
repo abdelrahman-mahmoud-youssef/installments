@@ -1,7 +1,7 @@
 'use client';
 
 import { Plus } from 'lucide-react';
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { EmptyState } from '@/components/shared/empty-state';
 import { Money } from '@/components/shared/money';
@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Link } from '@/i18n/navigation';
 import { useContracts } from '@/hooks/use-contracts';
 import { ContractStatus, CONTRACT_STATUSES } from '@/lib/enums';
 import { formatDate } from '@/lib/format';
@@ -26,6 +27,9 @@ import { routes } from '@/lib/routes';
 const STATUS_FILTER_ALL = 'ALL';
 
 export default function ContractsPage() {
+  const t = useTranslations('contracts');
+  const tCommon = useTranslations('common');
+  const tStatus = useTranslations('status');
   const [status, setStatus] = useState<string>(STATUS_FILTER_ALL);
   const [page, setPage] = useState(1);
 
@@ -38,11 +42,11 @@ export default function ContractsPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title="Contracts"
+        title={t('title')}
         actions={
           <Button render={<Link href={routes.newContract} />}>
             <Plus className="size-4" />
-            New contract
+            {t('newContract')}
           </Button>
         }
       />
@@ -58,10 +62,10 @@ export default function ContractsPage() {
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value={STATUS_FILTER_ALL}>All statuses</SelectItem>
+          <SelectItem value={STATUS_FILTER_ALL}>{t('allStatuses')}</SelectItem>
           {CONTRACT_STATUSES.map((value) => (
             <SelectItem key={value} value={value}>
-              {value.charAt(0) + value.slice(1).toLowerCase()}
+              {tStatus(value)}
             </SelectItem>
           ))}
         </SelectContent>
@@ -74,19 +78,19 @@ export default function ContractsPage() {
           ))}
         </div>
       ) : isError || !data ? (
-        <EmptyState title="Couldn't load contracts" description="Please try again in a moment." />
+        <EmptyState title={t('loadError')} description={tCommon('tryAgain')} />
       ) : data.data.length === 0 ? (
-        <EmptyState title="No contracts yet" description="Create a contract to get started." />
+        <EmptyState title={t('noContractsYet')} description={t('createPrompt')} />
       ) : (
         <>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Customer</TableHead>
-                <TableHead>Product</TableHead>
-                <TableHead>Total</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Created</TableHead>
+                <TableHead>{t('customer')}</TableHead>
+                <TableHead>{t('product')}</TableHead>
+                <TableHead>{t('total')}</TableHead>
+                <TableHead>{t('status')}</TableHead>
+                <TableHead>{t('created')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

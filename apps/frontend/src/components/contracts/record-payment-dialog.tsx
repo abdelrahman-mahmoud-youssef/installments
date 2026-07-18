@@ -1,6 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -33,6 +34,7 @@ export function RecordPaymentDialog({
   outstandingInstallments: Installment[];
   onSubmit: (input: PaymentInput) => Promise<unknown>;
 }) {
+  const t = useTranslations('payments.dialog');
   const [open, setOpen] = useState(false);
   const [isManual, setIsManual] = useState(false);
   const [manualAmounts, setManualAmounts] = useState<Record<string, string>>({});
@@ -53,13 +55,13 @@ export function RecordPaymentDialog({
 
     try {
       await onSubmit({ ...values, allocations });
-      toast.success('Payment recorded.');
+      toast.success(t('recorded'));
       setOpen(false);
       form.reset({ amount: 0, note: '' });
       setManualAmounts({});
       setIsManual(false);
     } catch (error) {
-      toast.error(error instanceof ApiError ? error.message : 'Could not record payment.');
+      toast.error(error instanceof ApiError ? error.message : t('recordError'));
     }
   }
 
@@ -68,11 +70,8 @@ export function RecordPaymentDialog({
       <DialogTrigger render={trigger} />
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Record payment</DialogTitle>
-          <DialogDescription>
-            By default, payments apply to the oldest unpaid installment first, with any excess rolling into
-            the next one.
-          </DialogDescription>
+          <DialogTitle>{t('title')}</DialogTitle>
+          <DialogDescription>{t('description')}</DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-4">
@@ -81,7 +80,7 @@ export function RecordPaymentDialog({
               name="amount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Amount</FormLabel>
+                  <FormLabel>{t('amount')}</FormLabel>
                   <FormControl>
                     <NumberInput step="0.01" min="0" {...field} />
                   </FormControl>
@@ -94,7 +93,7 @@ export function RecordPaymentDialog({
               name="note"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Note (optional)</FormLabel>
+                  <FormLabel>{t('note')}</FormLabel>
                   <FormControl>
                     <Textarea rows={2} {...field} />
                   </FormControl>
@@ -110,20 +109,20 @@ export function RecordPaymentDialog({
                 onChange={(event) => setIsManual(event.target.checked)}
                 className="size-4"
               />
-              Manually select which installments receive this payment
+              {t('manualToggle')}
             </label>
 
             {isManual && (
               <div className="flex flex-col gap-2 rounded-md border p-3">
                 {outstandingInstallments.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">No outstanding installments.</p>
+                  <p className="text-sm text-muted-foreground">{t('noOutstanding')}</p>
                 ) : (
                   outstandingInstallments.map((installment) => {
                     const remaining = installment.amount - installment.paidAmount;
                     return (
                       <div key={installment.id} className="flex items-center justify-between gap-3 text-sm">
                         <span>
-                          #{installment.sequence} — remaining <Money minorUnits={remaining} />
+                          #{installment.sequence} — <Money minorUnits={remaining} />
                         </span>
                         <Input
                           type="number"
@@ -143,14 +142,14 @@ export function RecordPaymentDialog({
                   })
                 )}
                 <p className="text-xs text-muted-foreground">
-                  Allocated: <Money minorUnits={toMinorUnits(manualTotal)} /> — must equal the payment amount.
+                  {t('allocated')} <Money minorUnits={toMinorUnits(manualTotal)} /> {t('allocatedHint')}
                 </p>
               </div>
             )}
 
             <DialogFooter>
               <Button type="submit" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? 'Recording…' : 'Record payment'}
+                {form.formState.isSubmitting ? t('submitting') : t('submit')}
               </Button>
             </DialogFooter>
           </form>
