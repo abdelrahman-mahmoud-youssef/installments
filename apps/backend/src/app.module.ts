@@ -6,6 +6,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { getRedisConnectionOptions } from './config/redis-connection';
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtAuthGuard } from './modules/auth/jwt-auth.guard';
+import { BroadcastsModule } from './modules/broadcasts/broadcasts.module';
 import { ContractsModule } from './modules/contracts/contracts.module';
 import { CustomersModule } from './modules/customers/customers.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
@@ -38,6 +39,7 @@ import { PrismaModule } from './prisma/prisma.module';
     PublicModule,
     RemindersModule,
     SettingsModule,
+    BroadcastsModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },

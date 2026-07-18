@@ -26,6 +26,11 @@ export class PublicController {
     return this.publicService.setTelegramEnabled(publicId, dto.enabled);
   }
 
+  @Patch(':publicId/telegram/broadcasts')
+  setTelegramBroadcasts(@Param('publicId') publicId: string, @Body() dto: SetTelegramEnabledDto) {
+    return this.publicService.setTelegramBroadcasts(publicId, dto.enabled);
+  }
+
   @Patch(':publicId/telegram/language')
   setTelegramLanguage(@Param('publicId') publicId: string, @Body() dto: SetTelegramLanguageDto) {
     return this.publicService.setTelegramLanguage(publicId, dto.language);

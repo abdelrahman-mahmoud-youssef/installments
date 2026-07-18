@@ -24,12 +24,14 @@ export interface PublicTelegramStatus {
   botUsername: string | null;
   connected: boolean;
   enabled: boolean;
+  broadcastsEnabled: boolean;
   language: NotificationLanguage;
 }
 
 export interface PublicTelegramState {
   connected: boolean;
   enabled: boolean;
+  broadcastsEnabled: boolean;
   language: NotificationLanguage;
 }
 
@@ -53,6 +55,7 @@ export class PublicService {
         name: true,
         telegramChatId: true,
         telegramNotificationsEnabled: true,
+        telegramBroadcastsEnabled: true,
         notificationLanguage: true,
         tenant: { select: { telegramBotToken: true, telegramBotUsername: true } },
         contracts: {
@@ -80,6 +83,7 @@ export class PublicService {
         botUsername: customer.tenant.telegramBotUsername,
         connected: Boolean(customer.telegramChatId),
         enabled: customer.telegramNotificationsEnabled,
+        broadcastsEnabled: customer.telegramBroadcastsEnabled,
         language: customer.notificationLanguage,
       },
     };
@@ -93,6 +97,7 @@ export class PublicService {
         name: true,
         telegramChatId: true,
         telegramNotificationsEnabled: true,
+        telegramBroadcastsEnabled: true,
         notificationLanguage: true,
         tenant: { select: { telegramBotToken: true } },
       },
@@ -123,7 +128,12 @@ export class PublicService {
         : `✅ ${customer.name} — you'll receive installment reminders here.`;
     await this.telegram.sendMessage(botToken, chatId, message);
 
-    return { connected: true, enabled: customer.telegramNotificationsEnabled, language: customer.notificationLanguage };
+    return {
+      connected: true,
+      enabled: customer.telegramNotificationsEnabled,
+      broadcastsEnabled: customer.telegramBroadcastsEnabled,
+      language: customer.notificationLanguage,
+    };
   }
 
   async setTelegramEnabled(publicId: string, enabled: boolean): Promise<PublicTelegramState> {
@@ -131,7 +141,12 @@ export class PublicService {
     const updated = await this.prisma.customer.update({
       where: { id: customer.id },
       data: { telegramNotificationsEnabled: enabled },
-      select: { telegramChatId: true, telegramNotificationsEnabled: true, notificationLanguage: true },
+      select: {
+        telegramChatId: true,
+        telegramNotificationsEnabled: true,
+        telegramBroadcastsEnabled: true,
+        notificationLanguage: true,
+      },
     });
     return this.stateOf(updated);
   }
@@ -141,7 +156,27 @@ export class PublicService {
     const updated = await this.prisma.customer.update({
       where: { id: customer.id },
       data: { notificationLanguage: language },
-      select: { telegramChatId: true, telegramNotificationsEnabled: true, notificationLanguage: true },
+      select: {
+        telegramChatId: true,
+        telegramNotificationsEnabled: true,
+        telegramBroadcastsEnabled: true,
+        notificationLanguage: true,
+      },
+    });
+    return this.stateOf(updated);
+  }
+
+  async setTelegramBroadcasts(publicId: string, enabled: boolean): Promise<PublicTelegramState> {
+    const customer = await this.ensureCustomer(publicId);
+    const updated = await this.prisma.customer.update({
+      where: { id: customer.id },
+      data: { telegramBroadcastsEnabled: enabled },
+      select: {
+        telegramChatId: true,
+        telegramNotificationsEnabled: true,
+        telegramBroadcastsEnabled: true,
+        notificationLanguage: true,
+      },
     });
     return this.stateOf(updated);
   }
@@ -151,19 +186,30 @@ export class PublicService {
     const updated = await this.prisma.customer.update({
       where: { id: customer.id },
       data: { telegramChatId: null },
-      select: { telegramNotificationsEnabled: true, notificationLanguage: true },
+      select: {
+        telegramNotificationsEnabled: true,
+        telegramBroadcastsEnabled: true,
+        notificationLanguage: true,
+      },
     });
-    return { connected: false, enabled: updated.telegramNotificationsEnabled, language: updated.notificationLanguage };
+    return {
+      connected: false,
+      enabled: updated.telegramNotificationsEnabled,
+      broadcastsEnabled: updated.telegramBroadcastsEnabled,
+      language: updated.notificationLanguage,
+    };
   }
 
   private stateOf(customer: {
     telegramChatId: string | null;
     telegramNotificationsEnabled: boolean;
+    telegramBroadcastsEnabled: boolean;
     notificationLanguage: NotificationLanguage;
   }): PublicTelegramState {
     return {
       connected: Boolean(customer.telegramChatId),
       enabled: customer.telegramNotificationsEnabled,
+      broadcastsEnabled: customer.telegramBroadcastsEnabled,
       language: customer.notificationLanguage,
     };
   }
