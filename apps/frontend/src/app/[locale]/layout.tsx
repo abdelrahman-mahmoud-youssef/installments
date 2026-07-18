@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { Toaster } from "@/components/ui/sonner";
 import { AppProviders } from "@/components/providers/app-providers";
 import { routing } from "@/i18n/routing";
+import { themeInitScript } from "@/lib/theme";
 import "../globals.css";
 
 const plexSans = IBM_Plex_Sans({
@@ -69,6 +70,7 @@ export default async function LocaleLayout({
       className={`${plexSans.variable} ${plexArabic.variable} ${plexMono.variable} h-full antialiased`}
     >
       <body className="min-h-full">
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <NextIntlClientProvider>
           <AppProviders direction={direction}>
             {children}

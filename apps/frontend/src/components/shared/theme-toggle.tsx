@@ -2,8 +2,8 @@
 
 import { Check, Monitor, Moon, Sun } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useTheme } from 'next-themes';
 import { useSyncExternalStore } from 'react';
+import { useTheme } from '@/lib/theme';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,

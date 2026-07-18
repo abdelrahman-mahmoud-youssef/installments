@@ -2,7 +2,7 @@
 
 import { DirectionProvider } from '@base-ui/react/direction-provider';
 import { MotionConfig } from 'framer-motion';
-import { ThemeProvider } from 'next-themes';
+import { ThemeProvider } from '@/lib/theme';
 import { QueryProvider } from './query-provider';
 
 export function AppProviders({
@@ -13,7 +13,7 @@ export function AppProviders({
   children: React.ReactNode;
 }) {
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+    <ThemeProvider>
       <DirectionProvider direction={direction}>
         <MotionConfig reducedMotion="user">
           <QueryProvider>{children}</QueryProvider>
