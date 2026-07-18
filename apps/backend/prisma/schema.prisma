@@ -37,12 +37,18 @@ enum AllocationStrategy {
   OLDEST_FIRST
 }
 
+enum NotificationLanguage {
+  AR
+  EN
+}
+
 model Tenant {
   id                 String             @id @default(cuid())
   name               String
   telegramBotToken   String?
   telegramBotUsername String?
   telegramChatId     String?
+  notificationLanguage NotificationLanguage @default(AR)
   allocationStrategy AllocationStrategy @default(OLDEST_FIRST)
   createdAt          DateTime           @default(now())
   users              User[]
@@ -75,6 +81,7 @@ model Customer {
   notes     String?
   telegramChatId               String?
   telegramNotificationsEnabled Boolean @default(true)
+  notificationLanguage         NotificationLanguage @default(AR)
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   tenant    Tenant     @relation(fields: [tenantId], references: [id])

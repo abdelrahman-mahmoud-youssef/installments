@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InstallmentStatus } from '@prisma/client';
+import { InstallmentStatus, NotificationLanguage } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TelegramService } from '../telegram/telegram.service';
 
@@ -24,11 +24,13 @@ export interface PublicTelegramStatus {
   botUsername: string | null;
   connected: boolean;
   enabled: boolean;
+  language: NotificationLanguage;
 }
 
 export interface PublicTelegramState {
   connected: boolean;
   enabled: boolean;
+  language: NotificationLanguage;
 }
 
 export interface PublicCustomerResponse {
@@ -51,6 +53,7 @@ export class PublicService {
         name: true,
         telegramChatId: true,
         telegramNotificationsEnabled: true,
+        notificationLanguage: true,
         tenant: { select: { telegramBotToken: true, telegramBotUsername: true } },
         contracts: {
           select: {
@@ -77,6 +80,7 @@ export class PublicService {
         botUsername: customer.tenant.telegramBotUsername,
         connected: Boolean(customer.telegramChatId),
         enabled: customer.telegramNotificationsEnabled,
+        language: customer.notificationLanguage,
       },
     };
   }
@@ -89,6 +93,7 @@ export class PublicService {
         name: true,
         telegramChatId: true,
         telegramNotificationsEnabled: true,
+        notificationLanguage: true,
         tenant: { select: { telegramBotToken: true } },
       },
     });
@@ -98,27 +103,27 @@ export class PublicService {
     }
 
     if (customer.telegramChatId) {
-      return { connected: true, enabled: customer.telegramNotificationsEnabled };
+      return this.stateOf(customer);
     }
 
     const botToken = customer.tenant.telegramBotToken;
     if (!botToken) {
-      return { connected: false, enabled: customer.telegramNotificationsEnabled };
+      return this.stateOf(customer);
     }
 
     const chatId = await this.telegram.findChatIdByStartPayload(botToken, publicId);
     if (!chatId) {
-      return { connected: false, enabled: customer.telegramNotificationsEnabled };
+      return this.stateOf(customer);
     }
 
     await this.prisma.customer.update({ where: { id: customer.id }, data: { telegramChatId: chatId } });
-    await this.telegram.sendMessage(
-      botToken,
-      chatId,
-      `✅ ${customer.name} — you'll receive installment reminders here.`,
-    );
+    const message =
+      customer.notificationLanguage === NotificationLanguage.AR
+        ? `✅ ${customer.name} — ستصلك تذكيرات الأقساط هنا.`
+        : `✅ ${customer.name} — you'll receive installment reminders here.`;
+    await this.telegram.sendMessage(botToken, chatId, message);
 
-    return { connected: true, enabled: customer.telegramNotificationsEnabled };
+    return { connected: true, enabled: customer.telegramNotificationsEnabled, language: customer.notificationLanguage };
   }
 
   async setTelegramEnabled(publicId: string, enabled: boolean): Promise<PublicTelegramState> {
@@ -126,9 +131,19 @@ export class PublicService {
     const updated = await this.prisma.customer.update({
       where: { id: customer.id },
       data: { telegramNotificationsEnabled: enabled },
-      select: { telegramChatId: true, telegramNotificationsEnabled: true },
+      select: { telegramChatId: true, telegramNotificationsEnabled: true, notificationLanguage: true },
     });
-    return { connected: Boolean(updated.telegramChatId), enabled: updated.telegramNotificationsEnabled };
+    return this.stateOf(updated);
+  }
+
+  async setTelegramLanguage(publicId: string, language: NotificationLanguage): Promise<PublicTelegramState> {
+    const customer = await this.ensureCustomer(publicId);
+    const updated = await this.prisma.customer.update({
+      where: { id: customer.id },
+      data: { notificationLanguage: language },
+      select: { telegramChatId: true, telegramNotificationsEnabled: true, notificationLanguage: true },
+    });
+    return this.stateOf(updated);
   }
 
   async disconnectTelegram(publicId: string): Promise<PublicTelegramState> {
@@ -136,9 +151,21 @@ export class PublicService {
     const updated = await this.prisma.customer.update({
       where: { id: customer.id },
       data: { telegramChatId: null },
-      select: { telegramNotificationsEnabled: true },
+      select: { telegramNotificationsEnabled: true, notificationLanguage: true },
     });
-    return { connected: false, enabled: updated.telegramNotificationsEnabled };
+    return { connected: false, enabled: updated.telegramNotificationsEnabled, language: updated.notificationLanguage };
+  }
+
+  private stateOf(customer: {
+    telegramChatId: string | null;
+    telegramNotificationsEnabled: boolean;
+    notificationLanguage: NotificationLanguage;
+  }): PublicTelegramState {
+    return {
+      connected: Boolean(customer.telegramChatId),
+      enabled: customer.telegramNotificationsEnabled,
+      language: customer.notificationLanguage,
+    };
   }
 
   private async ensureCustomer(publicId: string): Promise<{ id: string }> {

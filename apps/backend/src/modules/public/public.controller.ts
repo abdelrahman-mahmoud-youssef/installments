@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/commo
 import { Throttle } from '@nestjs/throttler';
 import { Public } from '../../common/decorators/public.decorator';
 import { SetTelegramEnabledDto } from './dto/set-telegram-enabled.dto';
+import { SetTelegramLanguageDto } from './dto/set-telegram-language.dto';
 import { PublicService } from './public.service';
 
 @Public()
@@ -23,6 +24,11 @@ export class PublicController {
   @Patch(':publicId/telegram')
   setTelegramEnabled(@Param('publicId') publicId: string, @Body() dto: SetTelegramEnabledDto) {
     return this.publicService.setTelegramEnabled(publicId, dto.enabled);
+  }
+
+  @Patch(':publicId/telegram/language')
+  setTelegramLanguage(@Param('publicId') publicId: string, @Body() dto: SetTelegramLanguageDto) {
+    return this.publicService.setTelegramLanguage(publicId, dto.language);
   }
 
   @Delete(':publicId/telegram')

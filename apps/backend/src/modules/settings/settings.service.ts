@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { NotificationLanguage, Tenant } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TelegramService } from '../telegram/telegram.service';
 import { UpdateNotificationSettingsDto } from './dto/update-notification-settings.dto';
@@ -6,6 +7,15 @@ import { UpdateNotificationSettingsDto } from './dto/update-notification-setting
 export interface NotificationSettings {
   telegramConfigured: boolean;
   telegramChatId: string | null;
+  notificationLanguage: NotificationLanguage;
+}
+
+function toSettings(tenant: Tenant): NotificationSettings {
+  return {
+    telegramConfigured: Boolean(tenant.telegramBotToken),
+    telegramChatId: tenant.telegramChatId,
+    notificationLanguage: tenant.notificationLanguage,
+  };
 }
 
 @Injectable()
@@ -17,10 +27,7 @@ export class SettingsService {
 
   async getNotifications(tenantId: string): Promise<NotificationSettings> {
     const tenant = await this.prisma.tenant.findUniqueOrThrow({ where: { id: tenantId } });
-    return {
-      telegramConfigured: Boolean(tenant.telegramBotToken),
-      telegramChatId: tenant.telegramChatId,
-    };
+    return toSettings(tenant);
   }
 
   async updateNotifications(
@@ -31,10 +38,15 @@ export class SettingsService {
       where: { id: tenantId },
       data: { telegramBotToken: dto.telegramBotToken, telegramChatId: null, telegramBotUsername: null },
     });
-    return {
-      telegramConfigured: Boolean(tenant.telegramBotToken),
-      telegramChatId: tenant.telegramChatId,
-    };
+    return toSettings(tenant);
+  }
+
+  async setLanguage(tenantId: string, language: NotificationLanguage): Promise<NotificationSettings> {
+    const tenant = await this.prisma.tenant.update({
+      where: { id: tenantId },
+      data: { notificationLanguage: language },
+    });
+    return toSettings(tenant);
   }
 
   async disconnect(tenantId: string): Promise<NotificationSettings> {
@@ -42,10 +54,7 @@ export class SettingsService {
       where: { id: tenantId },
       data: { telegramBotToken: null, telegramChatId: null, telegramBotUsername: null },
     });
-    return {
-      telegramConfigured: Boolean(tenant.telegramBotToken),
-      telegramChatId: tenant.telegramChatId,
-    };
+    return toSettings(tenant);
   }
 
   async sendTest(tenantId: string): Promise<void> {
@@ -64,10 +73,10 @@ export class SettingsService {
       where: { id: tenantId },
       data: { telegramChatId: chatId, telegramBotUsername: botUsername },
     });
-    await this.telegram.sendMessage(
-      tenant.telegramBotToken,
-      chatId,
-      `✅ ${tenant.name} — Telegram notifications are connected.`,
-    );
+    const message =
+      tenant.notificationLanguage === NotificationLanguage.AR
+        ? `✅ ${tenant.name} — تم ربط إشعارات تيليجرام بنجاح.`
+        : `✅ ${tenant.name} — Telegram notifications are connected.`;
+    await this.telegram.sendMessage(tenant.telegramBotToken, chatId, message);
   }
 }

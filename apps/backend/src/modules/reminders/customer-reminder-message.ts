@@ -1,3 +1,6 @@
+import { NotificationLanguage } from '@prisma/client';
+import { formatDate, formatMoney } from './notification-format';
+
 export interface CustomerReminderItem {
   productName: string;
   remainingAmount: number;
@@ -10,34 +13,40 @@ export interface CustomerReminderData {
   overdue: CustomerReminderItem[];
 }
 
-function formatMoney(minorUnits: number): string {
-  return `EGP ${new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(minorUnits / 100)}`;
+const MESSAGE_COPY = {
+  [NotificationLanguage.AR]: {
+    header: (businessName: string) => `تذكير من ${businessName}`,
+    dueToday: 'مستحق اليوم:',
+    overdue: 'متأخّر:',
+  },
+  [NotificationLanguage.EN]: {
+    header: (businessName: string) => `Reminder from ${businessName}`,
+    dueToday: 'Due today:',
+    overdue: 'Overdue:',
+  },
+};
+
+function formatItem(item: CustomerReminderItem, language: NotificationLanguage): string {
+  return `• ${item.productName} — ${formatMoney(item.remainingAmount, language)} (${formatDate(item.dueDate, language)})`;
 }
 
-function formatDate(date: Date): string {
-  return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
-}
-
-function formatItem(item: CustomerReminderItem): string {
-  return `• ${item.productName} — ${formatMoney(item.remainingAmount)} (${formatDate(item.dueDate)})`;
-}
-
-export function formatCustomerReminderMessage(data: CustomerReminderData): string | null {
+export function formatCustomerReminderMessage(
+  data: CustomerReminderData,
+  language: NotificationLanguage,
+): string | null {
   if (data.dueToday.length === 0 && data.overdue.length === 0) {
     return null;
   }
 
-  const lines = [`Reminder from ${data.businessName}`];
+  const copy = MESSAGE_COPY[language];
+  const lines = [copy.header(data.businessName)];
 
   if (data.dueToday.length > 0) {
-    lines.push('', 'Due today:', ...data.dueToday.map(formatItem));
+    lines.push('', copy.dueToday, ...data.dueToday.map((item) => formatItem(item, language)));
   }
 
   if (data.overdue.length > 0) {
-    lines.push('', 'Overdue:', ...data.overdue.map(formatItem));
+    lines.push('', copy.overdue, ...data.overdue.map((item) => formatItem(item, language)));
   }
 
   return lines.join('\n');

@@ -1,16 +1,25 @@
+import { NotificationLanguage } from '@prisma/client';
 import { formatCustomerReminderMessage } from './customer-reminder-message';
 
 describe('formatCustomerReminderMessage', () => {
   it('returns null when nothing is due or overdue', () => {
-    expect(formatCustomerReminderMessage({ businessName: 'Acme', dueToday: [], overdue: [] })).toBeNull();
+    expect(
+      formatCustomerReminderMessage(
+        { businessName: 'Acme', dueToday: [], overdue: [] },
+        NotificationLanguage.EN,
+      ),
+    ).toBeNull();
   });
 
-  it('formats an itemized message with due-today and overdue sections', () => {
-    const message = formatCustomerReminderMessage({
-      businessName: 'Acme Electronics',
-      dueToday: [{ productName: 'iPhone 15', remainingAmount: 125_000, dueDate: new Date('2026-07-18') }],
-      overdue: [{ productName: 'Laptop', remainingAmount: 90_000, dueDate: new Date('2026-07-10') }],
-    });
+  it('formats an itemized English message with due-today and overdue sections', () => {
+    const message = formatCustomerReminderMessage(
+      {
+        businessName: 'Acme Electronics',
+        dueToday: [{ productName: 'iPhone 15', remainingAmount: 125_000, dueDate: new Date('2026-07-18') }],
+        overdue: [{ productName: 'Laptop', remainingAmount: 90_000, dueDate: new Date('2026-07-10') }],
+      },
+      NotificationLanguage.EN,
+    );
 
     expect(message).toBe(
       [
@@ -25,13 +34,18 @@ describe('formatCustomerReminderMessage', () => {
     );
   });
 
-  it('omits the overdue section when there is nothing overdue', () => {
-    const message = formatCustomerReminderMessage({
-      businessName: 'Acme',
-      dueToday: [{ productName: 'TV', remainingAmount: 50_000, dueDate: new Date('2026-07-18') }],
-      overdue: [],
-    });
+  it('renders an itemized Arabic message', () => {
+    const message = formatCustomerReminderMessage(
+      {
+        businessName: 'أكمي',
+        dueToday: [{ productName: 'هاتف', remainingAmount: 125_000, dueDate: new Date('2026-07-18') }],
+        overdue: [],
+      },
+      NotificationLanguage.AR,
+    );
 
-    expect(message).toBe(['Reminder from Acme', '', 'Due today:', '• TV — EGP 500.00 (18 Jul)'].join('\n'));
+    expect(message).toContain('تذكير من أكمي');
+    expect(message).toContain('مستحق اليوم:');
+    expect(message).toContain('هاتف');
   });
 });

@@ -1,7 +1,7 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { BadRequestException, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { InstallmentStatus } from '@prisma/client';
+import { InstallmentStatus, NotificationLanguage } from '@prisma/client';
 import { Queue } from 'bullmq';
 import { getUtcToday } from '../../common/date/utc-date';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -55,6 +55,7 @@ export class RemindersService implements OnModuleInit {
           tenant.name,
           tenant.telegramBotToken as string,
           tenant.telegramChatId as string,
+          tenant.notificationLanguage,
         );
       } catch (error) {
         this.logger.error(
@@ -77,6 +78,7 @@ export class RemindersService implements OnModuleInit {
       tenant.name,
       tenant.telegramBotToken,
       tenant.telegramChatId,
+      tenant.notificationLanguage,
     );
   }
 
@@ -108,6 +110,7 @@ export class RemindersService implements OnModuleInit {
       where: { tenantId, telegramChatId: { not: null }, telegramNotificationsEnabled: true },
       select: {
         telegramChatId: true,
+        notificationLanguage: true,
         contracts: {
           select: {
             productName: true,
@@ -134,7 +137,10 @@ export class RemindersService implements OnModuleInit {
         }
       }
 
-      const message = formatCustomerReminderMessage({ businessName, dueToday, overdue });
+      const message = formatCustomerReminderMessage(
+        { businessName, dueToday, overdue },
+        customer.notificationLanguage,
+      );
       if (!message) {
         continue;
       }
@@ -154,6 +160,7 @@ export class RemindersService implements OnModuleInit {
     businessName: string,
     telegramBotToken: string,
     telegramChatId: string,
+    language: NotificationLanguage,
   ): Promise<void> {
     const today = getUtcToday();
 
@@ -170,13 +177,16 @@ export class RemindersService implements OnModuleInit {
       }),
     ]);
 
-    const message = formatReminderMessage({
-      businessName,
-      dueTodayCount: dueToday._count,
-      dueTodayTotal: (dueToday._sum.amount ?? 0) - (dueToday._sum.paidAmount ?? 0),
-      overdueCount: overdue._count,
-      overdueTotal: (overdue._sum.amount ?? 0) - (overdue._sum.paidAmount ?? 0),
-    });
+    const message = formatReminderMessage(
+      {
+        businessName,
+        dueTodayCount: dueToday._count,
+        dueTodayTotal: (dueToday._sum.amount ?? 0) - (dueToday._sum.paidAmount ?? 0),
+        overdueCount: overdue._count,
+        overdueTotal: (overdue._sum.amount ?? 0) - (overdue._sum.paidAmount ?? 0),
+      },
+      language,
+    );
 
     try {
       await this.telegram.sendMessage(telegramBotToken, telegramChatId, message);

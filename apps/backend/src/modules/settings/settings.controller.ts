@@ -1,5 +1,6 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Patch, Post } from '@nestjs/common';
 import { AuthenticatedUser, CurrentUser } from '../../common/decorators/current-user.decorator';
+import { SetNotificationLanguageDto } from './dto/set-notification-language.dto';
 import { UpdateNotificationSettingsDto } from './dto/update-notification-settings.dto';
 import { NotificationSettings, SettingsService } from './settings.service';
 
@@ -18,6 +19,14 @@ export class SettingsController {
     @Body() dto: UpdateNotificationSettingsDto,
   ): Promise<NotificationSettings> {
     return this.settingsService.updateNotifications(user.tenantId, dto);
+  }
+
+  @Patch('language')
+  setLanguage(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: SetNotificationLanguageDto,
+  ): Promise<NotificationSettings> {
+    return this.settingsService.setLanguage(user.tenantId, dto.language);
   }
 
   @Post('test')
