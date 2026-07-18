@@ -1,6 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -132,6 +133,7 @@ export function CustomerFormDialog({
             />
             <DialogFooter>
               <Button type="submit" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting && <Loader2 className="size-4 animate-spin" />}
                 {form.formState.isSubmitting ? t('saving') : customer ? t('saveChanges') : t('create')}
               </Button>
             </DialogFooter>

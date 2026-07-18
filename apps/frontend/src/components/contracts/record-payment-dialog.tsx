@@ -1,6 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -102,18 +103,18 @@ export function RecordPaymentDialog({
               )}
             />
 
-            <label className="flex items-center gap-2 text-sm">
+            <label className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-border bg-muted/40 p-3 text-sm">
               <input
                 type="checkbox"
                 checked={isManual}
                 onChange={(event) => setIsManual(event.target.checked)}
-                className="size-4"
+                className="size-4 accent-primary"
               />
               {t('manualToggle')}
             </label>
 
             {isManual && (
-              <div className="flex flex-col gap-2 rounded-md border p-3">
+              <div className="flex flex-col gap-2.5 rounded-lg border border-border p-3.5">
                 {outstandingInstallments.length === 0 ? (
                   <p className="text-sm text-muted-foreground">{t('noOutstanding')}</p>
                 ) : (
@@ -121,14 +122,14 @@ export function RecordPaymentDialog({
                     const remaining = installment.amount - installment.paidAmount;
                     return (
                       <div key={installment.id} className="flex items-center justify-between gap-3 text-sm">
-                        <span>
-                          #{installment.sequence} — <Money minorUnits={remaining} />
+                        <span className="text-muted-foreground">
+                          #{installment.sequence} · <Money minorUnits={remaining} />
                         </span>
                         <Input
                           type="number"
                           step="0.01"
                           min="0"
-                          className="w-28"
+                          className="h-8 w-28"
                           value={manualAmounts[installment.id] ?? ''}
                           onChange={(event) =>
                             setManualAmounts((previous) => ({
@@ -141,14 +142,19 @@ export function RecordPaymentDialog({
                     );
                   })
                 )}
-                <p className="text-xs text-muted-foreground">
-                  {t('allocated')} <Money minorUnits={toMinorUnits(manualTotal)} /> {t('allocatedHint')}
+                <p className="border-t border-border pt-2.5 text-xs text-muted-foreground">
+                  {t('allocated')}{' '}
+                  <span className="font-medium text-foreground">
+                    <Money minorUnits={toMinorUnits(manualTotal)} />
+                  </span>{' '}
+                  {t('allocatedHint')}
                 </p>
               </div>
             )}
 
             <DialogFooter>
               <Button type="submit" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting && <Loader2 className="size-4 animate-spin" />}
                 {form.formState.isSubmitting ? t('submitting') : t('submit')}
               </Button>
             </DialogFooter>

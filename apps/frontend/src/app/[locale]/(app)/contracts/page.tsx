@@ -1,12 +1,17 @@
 'use client';
 
-import { Plus } from 'lucide-react';
+import { FileText, Plus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
+import { DataTable, type Column } from '@/components/shared/data-table';
+import { DateText } from '@/components/shared/date-text';
 import { EmptyState } from '@/components/shared/empty-state';
 import { Money } from '@/components/shared/money';
+import { FadeIn } from '@/components/shared/motion';
 import { PageHeader } from '@/components/shared/page-header';
 import { PaginationControls } from '@/components/shared/pagination-controls';
+import { Section } from '@/components/shared/section';
+import { TableSkeleton } from '@/components/shared/skeletons';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,12 +21,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Link } from '@/i18n/navigation';
+import type { ContractListItem } from '@/lib/api/contracts';
 import { useContracts } from '@/hooks/use-contracts';
 import { ContractStatus, CONTRACT_STATUSES } from '@/lib/enums';
-import { formatDate } from '@/lib/format';
 import { routes } from '@/lib/routes';
 
 const STATUS_FILTER_ALL = 'ALL';
@@ -39,87 +42,112 @@ export default function ContractsPage() {
     limit: 20,
   });
 
+  const columns: Column<ContractListItem>[] = [
+    {
+      id: 'product',
+      header: t('product'),
+      role: 'primary',
+      cell: (contract) => (
+        <Link href={routes.contract(contract.id)} className="font-medium hover:underline">
+          {contract.productName}
+        </Link>
+      ),
+    },
+    {
+      id: 'customer',
+      header: t('customer'),
+      cell: (contract) => <span className="text-muted-foreground">{contract.customer.name}</span>,
+    },
+    {
+      id: 'total',
+      header: t('total'),
+      cell: (contract) => <Money minorUnits={contract.totalAmount} className="font-medium" />,
+    },
+    {
+      id: 'status',
+      header: t('status'),
+      role: 'trailing',
+      cell: (contract) => <StatusBadge status={contract.status} />,
+    },
+    {
+      id: 'created',
+      header: t('created'),
+      cell: (contract) => (
+        <span className="text-muted-foreground">
+          <DateText value={contract.createdAt} />
+        </span>
+      ),
+    },
+  ];
+
   return (
-    <div className="flex flex-col gap-6">
-      <PageHeader
-        title={t('title')}
-        actions={
-          <Button render={<Link href={routes.newContract} />}>
-            <Plus className="size-4" />
-            {t('newContract')}
-          </Button>
-        }
-      />
+    <div className="space-y-6">
+      <FadeIn>
+        <PageHeader
+          title={t('title')}
+          description={t('subtitle')}
+          actions={
+            <Button render={<Link href={routes.newContract} />}>
+              <Plus className="size-4" />
+              {t('newContract')}
+            </Button>
+          }
+        />
+      </FadeIn>
 
-      <Select
-        value={status}
-        onValueChange={(value) => {
-          setStatus(value ?? STATUS_FILTER_ALL);
-          setPage(1);
-        }}
-      >
-        <SelectTrigger className="w-48">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value={STATUS_FILTER_ALL}>{t('allStatuses')}</SelectItem>
-          {CONTRACT_STATUSES.map((value) => (
-            <SelectItem key={value} value={value}>
-              {tStatus(value)}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <FadeIn delay={0.05} className="space-y-4">
+        <Select
+          value={status}
+          onValueChange={(value) => {
+            setStatus(value ?? STATUS_FILTER_ALL);
+            setPage(1);
+          }}
+        >
+          <SelectTrigger className="w-48">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={STATUS_FILTER_ALL}>{t('allStatuses')}</SelectItem>
+            {CONTRACT_STATUSES.map((value) => (
+              <SelectItem key={value} value={value}>
+                {tStatus(value)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-      {isLoading ? (
-        <div className="flex flex-col gap-2">
-          {Array.from({ length: 5 }).map((_, index) => (
-            <Skeleton key={index} className="h-12" />
-          ))}
-        </div>
-      ) : isError || !data ? (
-        <EmptyState title={t('loadError')} description={tCommon('tryAgain')} />
-      ) : data.data.length === 0 ? (
-        <EmptyState title={t('noContractsYet')} description={t('createPrompt')} />
-      ) : (
-        <>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t('customer')}</TableHead>
-                <TableHead>{t('product')}</TableHead>
-                <TableHead>{t('total')}</TableHead>
-                <TableHead>{t('status')}</TableHead>
-                <TableHead>{t('created')}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.data.map((contract) => (
-                <TableRow key={contract.id}>
-                  <TableCell>
-                    <Link href={routes.customer(contract.customer.id)} className="hover:underline">
-                      {contract.customer.name}
-                    </Link>
-                  </TableCell>
-                  <TableCell>
-                    <Link href={routes.contract(contract.id)} className="font-medium hover:underline">
-                      {contract.productName}
-                    </Link>
-                  </TableCell>
-                  <TableCell>
-                    <Money minorUnits={contract.totalAmount} />
-                  </TableCell>
-                  <TableCell>
-                    <StatusBadge status={contract.status} />
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">{formatDate(contract.createdAt)}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          <PaginationControls page={data.page} totalPages={data.totalPages} onPageChange={setPage} />
-        </>
-      )}
+        {isLoading ? (
+          <TableSkeleton />
+        ) : isError || !data ? (
+          <Section>
+            <EmptyState icon={FileText} title={t('loadError')} description={tCommon('tryAgain')} />
+          </Section>
+        ) : data.data.length === 0 ? (
+          <Section>
+            <EmptyState
+              icon={FileText}
+              title={t('noContractsYet')}
+              description={t('createPrompt')}
+              action={
+                <Button size="sm" render={<Link href={routes.newContract} />}>
+                  <Plus className="size-4" />
+                  {t('newContract')}
+                </Button>
+              }
+            />
+          </Section>
+        ) : (
+          <div className="space-y-4">
+            <DataTable
+              columns={columns}
+              rows={data.data}
+              keyOf={(contract) => contract.id}
+              href={(contract) => routes.contract(contract.id)}
+            />
+            <PaginationControls page={data.page} totalPages={data.totalPages} onPageChange={setPage} />
+          </div>
+        )}
+      </FadeIn>
     </div>
   );
 }

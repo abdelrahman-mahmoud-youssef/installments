@@ -1,6 +1,7 @@
 {
   "common": {
     "appName": "Installments",
+    "appDescription": "Manage installment contracts, customers, and payments.",
     "loading": "Loading…",
     "cancel": "Cancel",
     "confirm": "Confirm",
@@ -11,12 +12,19 @@
     "somethingWentWrong": "Something went wrong.",
     "tryAgain": "Please try again in a moment."
   },
+  "theme": {
+    "toggle": "Toggle theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
   "nav": {
     "dashboard": "Dashboard",
     "customers": "Customers",
     "contracts": "Contracts",
     "reports": "Reports",
-    "logout": "Log out"
+    "logout": "Log out",
+    "account": "Account"
   },
   "status": {
     "PENDING": "Pending",
@@ -54,6 +62,7 @@
       "title": "Create your workspace",
       "description": "Start managing installment contracts for your business.",
       "businessName": "Business name",
+      "businessNamePlaceholder": "Acme Electronics",
       "email": "Email",
       "password": "Password",
       "submit": "Create workspace",
@@ -61,14 +70,29 @@
       "haveAccount": "Already have an account?",
       "signIn": "Sign in",
       "genericError": "Unable to create your account. Please try again."
+    },
+    "brand": {
+      "headline": "Get paid on schedule.",
+      "subhead": "Track every installment, customer, and payment in one calm, organized workspace.",
+      "point1": "Automated payment schedules",
+      "point2": "Real-time collection tracking",
+      "point3": "Isolated, secure workspaces",
+      "cardLabel": "Collection progress",
+      "cardCollected": "Collected",
+      "cardRemaining": "Remaining",
+      "footer": "Built for growing businesses."
     }
   },
   "dashboard": {
     "title": "Dashboard",
+    "subtitle": "Today's collections at a glance.",
+    "newContract": "New contract",
     "dueToday": "Due today",
     "overdue": "Overdue",
     "dueNext7Days": "Due within 7 days",
     "expectedToday": "Expected today",
+    "upcomingCollections": "Upcoming collections",
+    "upcomingCollectionsHint": "Amounts due over the next 7 days",
     "nothingDueToday": "Nothing due today.",
     "noOverdue": "No overdue installments.",
     "recentPayments": "Recent payments",
@@ -83,6 +107,7 @@
   },
   "customers": {
     "title": "Customers",
+    "subtitle": "Manage your customers and their contracts.",
     "newCustomer": "New customer",
     "searchPlaceholder": "Search by name or phone…",
     "loadError": "Couldn't load customers",
@@ -132,6 +157,7 @@
   },
   "contracts": {
     "title": "Contracts",
+    "subtitle": "Every installment plan in one place.",
     "newContract": "New contract",
     "allStatuses": "All statuses",
     "loadError": "Couldn't load contracts",
@@ -145,6 +171,18 @@
     "new": {
       "title": "New contract",
       "description": "Create an installment contract for a customer.",
+      "sectionProduct": "Customer & product",
+      "sectionPlan": "Installment plan",
+      "sectionSchedule": "Schedule",
+      "summary": "Summary",
+      "summaryHint": "Review before creating",
+      "contractTotal": "Contract total",
+      "financed": "Financed amount",
+      "hints": {
+        "FIXED_COUNT": "Split the balance into a set number of payments.",
+        "FIXED_AMOUNT": "Pay a fixed amount each period until settled.",
+        "MARKUP_PERCENT": "Add a markup, then split into installments."
+      },
       "customer": "Customer",
       "loadingCustomers": "Loading…",
       "selectCustomer": "Select a customer",
@@ -172,6 +210,8 @@
       "cancelDescription": "This cancels every remaining pending or partially paid installment. This cannot be undone.",
       "cancelled": "Contract cancelled.",
       "cancelError": "Could not cancel contract.",
+      "collected": "Collected",
+      "scheduleProgress": "Schedule progress",
       "totalAmount": "Total amount",
       "paid": "Paid",
       "remaining": "Remaining",
@@ -213,6 +253,7 @@
   },
   "reports": {
     "title": "Reports",
+    "subtitle": "Collections and outstanding balances.",
     "todayCollections": "Today's collections",
     "monthCollections": "This month's collections",
     "overdueBalance": "Overdue balance",

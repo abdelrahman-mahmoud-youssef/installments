@@ -1,28 +1,39 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
-const STATUS_STYLES: Record<string, string> = {
-  PENDING: 'bg-slate-100 text-slate-700 dark:bg-slate-500/20 dark:text-slate-300',
-  PARTIALLY_PAID: 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300',
-  PAID: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300',
-  OVERDUE: 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300',
-  CANCELLED: 'bg-zinc-100 text-zinc-500 dark:bg-zinc-500/20 dark:text-zinc-400',
-  ACTIVE: 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300',
-  COMPLETED: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300',
+const STATUS_TONE: Record<string, string> = {
+  PAID: 'bg-success-soft text-success',
+  COMPLETED: 'bg-success-soft text-success',
+  PARTIALLY_PAID: 'bg-warning-soft text-warning',
+  OVERDUE: 'bg-danger-soft text-danger',
+  ACTIVE: 'bg-info-soft text-info',
+  PENDING: 'bg-muted text-muted-foreground',
+  CANCELLED: 'bg-muted text-muted-foreground',
 };
 
-export function StatusBadge({ status, className }: { status: string; className?: string }) {
+export function StatusBadge({
+  status,
+  className,
+  dot = true,
+}: {
+  status: string;
+  className?: string;
+  dot?: boolean;
+}) {
   const t = useTranslations('status');
 
   return (
-    <Badge
-      variant="outline"
-      className={cn('border-transparent font-medium', STATUS_STYLES[status], className)}
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap',
+        STATUS_TONE[status] ?? 'bg-muted text-muted-foreground',
+        className,
+      )}
     >
+      {dot && <span className="size-1.5 shrink-0 rounded-full bg-current" />}
       {t.has(status) ? t(status) : status}
-    </Badge>
+    </span>
   );
 }

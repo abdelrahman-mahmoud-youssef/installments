@@ -1,5 +1,6 @@
 'use client';
 
+import { AlertTriangle, Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -45,8 +46,13 @@ export function ConfirmDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={trigger} />
-      <DialogContent>
+      <DialogContent showCloseButton={false}>
         <DialogHeader>
+          {destructive && (
+            <span className="grid size-11 place-items-center rounded-full bg-danger-soft text-danger">
+              <AlertTriangle className="size-5" />
+            </span>
+          )}
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
@@ -59,6 +65,7 @@ export function ConfirmDialog({
             onClick={handleConfirm}
             disabled={isConfirming}
           >
+            {isConfirming && <Loader2 className="size-4 animate-spin" />}
             {isConfirming ? t('pleaseWait') : (confirmLabel ?? t('confirm'))}
           </Button>
         </DialogFooter>

@@ -1,54 +1,118 @@
 'use client';
 
-import { Copy, Pencil, Plus } from 'lucide-react';
+import { Copy, MapPin, Pencil, Phone, Plus, StickyNote, UserRoundX } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { CustomerFormDialog } from '@/components/customers/customer-form-dialog';
+import { BackLink } from '@/components/shared/back-link';
+import { DataTable, type Column } from '@/components/shared/data-table';
+import { DateText } from '@/components/shared/date-text';
 import { EmptyState } from '@/components/shared/empty-state';
+import { InitialAvatar } from '@/components/shared/initial-avatar';
 import { Money } from '@/components/shared/money';
-import { PageHeader } from '@/components/shared/page-header';
+import { FadeIn } from '@/components/shared/motion';
+import { Section } from '@/components/shared/section';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Link } from '@/i18n/navigation';
+import type { CustomerContractSummary } from '@/lib/api/customers';
 import { useCustomer, useUpdateCustomer } from '@/hooks/use-customers';
-import { formatDate } from '@/lib/format';
 import { routes } from '@/lib/routes';
 
 export default function CustomerDetailPage() {
   const t = useTranslations('customers.detail');
+  const tNav = useTranslations('nav');
   const { id } = useParams<{ id: string }>();
   const { data: customer, isLoading, isError } = useCustomer(id);
   const updateCustomer = useUpdateCustomer(id);
 
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-6">
-        <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-40" />
-        <Skeleton className="h-64" />
+      <div className="space-y-6">
+        <Skeleton className="h-5 w-28" />
+        <Skeleton className="h-28 rounded-xl" />
+        <Skeleton className="h-64 rounded-xl" />
       </div>
     );
   }
 
   if (isError || !customer) {
-    return <EmptyState title={t('notFound')} />;
+    return (
+      <Section>
+        <EmptyState icon={UserRoundX} title={t('notFound')} />
+      </Section>
+    );
   }
 
   const publicUrl = `${window.location.origin}${routes.publicCustomer(customer.publicId)}`;
 
+  const columns: Column<CustomerContractSummary>[] = [
+    {
+      id: 'product',
+      header: t('product'),
+      role: 'primary',
+      cell: (contract) => (
+        <Link href={routes.contract(contract.id)} className="font-medium hover:underline">
+          {contract.productName}
+        </Link>
+      ),
+    },
+    {
+      id: 'total',
+      header: t('total'),
+      cell: (contract) => <Money minorUnits={contract.totalAmount} className="font-medium" />,
+    },
+    {
+      id: 'status',
+      header: t('status'),
+      role: 'trailing',
+      cell: (contract) => <StatusBadge status={contract.status} />,
+    },
+    {
+      id: 'created',
+      header: t('created'),
+      cell: (contract) => (
+        <span className="text-muted-foreground">
+          <DateText value={contract.createdAt} />
+        </span>
+      ),
+    },
+  ];
+
   return (
-    <div className="flex flex-col gap-6">
-      <PageHeader
-        title={customer.name}
-        description={customer.phone}
-        actions={
-          <>
+    <div className="space-y-6">
+      <FadeIn>
+        <BackLink href={routes.customers} label={tNav('customers')} />
+      </FadeIn>
+
+      <FadeIn delay={0.05}>
+        <div className="flex flex-col gap-5 rounded-xl border border-border bg-card p-5 shadow-xs sm:flex-row sm:items-center sm:justify-between sm:p-6">
+          <div className="flex items-center gap-4">
+            <InitialAvatar name={customer.name} className="size-14 text-lg" />
+            <div className="min-w-0 space-y-1.5">
+              <h1 className="font-heading text-xl font-semibold tracking-tight">{customer.name}</h1>
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                <span className="flex items-center gap-1.5">
+                  <Phone className="size-3.5" />
+                  <span dir="ltr" className="tabular-nums">
+                    {customer.phone}
+                  </span>
+                </span>
+                {customer.address && (
+                  <span className="flex items-center gap-1.5">
+                    <MapPin className="size-3.5" />
+                    {customer.address}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
             <Button
               variant="outline"
+              size="sm"
               onClick={() => {
                 navigator.clipboard.writeText(publicUrl);
                 toast.success(t('linkCopied'));
@@ -59,7 +123,7 @@ export default function CustomerDetailPage() {
             </Button>
             <CustomerFormDialog
               trigger={
-                <Button variant="outline">
+                <Button variant="outline" size="sm">
                   <Pencil className="size-4" />
                   {t('edit')}
                 </Button>
@@ -67,68 +131,51 @@ export default function CustomerDetailPage() {
               customer={customer}
               onSubmit={(input) => updateCustomer.mutateAsync(input)}
             />
-            <Button render={<Link href={`${routes.newContract}?customerId=${customer.id}`} />}>
+            <Button size="sm" render={<Link href={`${routes.newContract}?customerId=${customer.id}`} />}>
               <Plus className="size-4" />
               {t('newContract')}
             </Button>
-          </>
-        }
-      />
+          </div>
+        </div>
+      </FadeIn>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium text-muted-foreground">{t('address')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm">{customer.address || '—'}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium text-muted-foreground">{t('notes')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm">{customer.notes || '—'}</p>
-          </CardContent>
-        </Card>
-      </div>
+      {customer.notes && (
+        <FadeIn delay={0.08}>
+          <div className="flex gap-3 rounded-xl border border-border bg-card p-5 shadow-xs">
+            <StickyNote className="size-4 shrink-0 text-muted-foreground" />
+            <p className="text-sm whitespace-pre-line text-muted-foreground">{customer.notes}</p>
+          </div>
+        </FadeIn>
+      )}
 
-      <div className="rounded-lg border p-4">
-        <h2 className="mb-3 text-sm font-semibold">{t('contracts')}</h2>
+      <FadeIn delay={0.1} className="space-y-3">
+        <h2 className="font-heading text-sm font-semibold">{t('contracts')}</h2>
         {customer.contracts.length === 0 ? (
-          <EmptyState title={t('noContracts')} description={t('createContractPrompt')} />
+          <Section>
+            <EmptyState
+              icon={Plus}
+              title={t('noContracts')}
+              description={t('createContractPrompt')}
+              action={
+                <Button
+                  size="sm"
+                  render={<Link href={`${routes.newContract}?customerId=${customer.id}`} />}
+                >
+                  <Plus className="size-4" />
+                  {t('newContract')}
+                </Button>
+              }
+            />
+          </Section>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t('product')}</TableHead>
-                <TableHead>{t('total')}</TableHead>
-                <TableHead>{t('status')}</TableHead>
-                <TableHead>{t('created')}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {customer.contracts.map((contract) => (
-                <TableRow key={contract.id}>
-                  <TableCell>
-                    <Link href={routes.contract(contract.id)} className="font-medium hover:underline">
-                      {contract.productName}
-                    </Link>
-                  </TableCell>
-                  <TableCell>
-                    <Money minorUnits={contract.totalAmount} />
-                  </TableCell>
-                  <TableCell>
-                    <StatusBadge status={contract.status} />
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">{formatDate(contract.createdAt)}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <DataTable
+            columns={columns}
+            rows={customer.contracts}
+            keyOf={(contract) => contract.id}
+            href={(contract) => routes.contract(contract.id)}
+          />
         )}
-      </div>
+      </FadeIn>
     </div>
   );
 }

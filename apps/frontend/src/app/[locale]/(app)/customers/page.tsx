@@ -1,19 +1,23 @@
 'use client';
 
-import { Plus, Search, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Users, UserRoundX } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import { CustomerFormDialog } from '@/components/customers/customer-form-dialog';
+import { ConfirmDialog } from '@/components/shared/confirm-dialog';
+import { DataTable, type Column } from '@/components/shared/data-table';
 import { EmptyState } from '@/components/shared/empty-state';
+import { InitialAvatar } from '@/components/shared/initial-avatar';
+import { FadeIn } from '@/components/shared/motion';
 import { PageHeader } from '@/components/shared/page-header';
 import { PaginationControls } from '@/components/shared/pagination-controls';
+import { SearchInput } from '@/components/shared/search-input';
+import { Section } from '@/components/shared/section';
+import { TableSkeleton } from '@/components/shared/skeletons';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Link } from '@/i18n/navigation';
+import type { Customer } from '@/lib/api/customers';
 import { useCreateCustomer, useCustomers, useDeleteCustomer } from '@/hooks/use-customers';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { ApiError } from '@/lib/api/client';
@@ -30,98 +34,122 @@ export default function CustomersPage() {
   const createCustomer = useCreateCustomer();
   const deleteCustomer = useDeleteCustomer();
 
-  return (
-    <div className="flex flex-col gap-6">
-      <PageHeader
-        title={t('title')}
-        actions={
-          <CustomerFormDialog
+  const columns: Column<Customer>[] = [
+    {
+      id: 'name',
+      header: t('name'),
+      role: 'primary',
+      cell: (customer) => (
+        <Link href={routes.customer(customer.id)} className="group flex items-center gap-3">
+          <InitialAvatar name={customer.name} className="size-9 text-xs" />
+          <span className="truncate font-medium group-hover:underline">{customer.name}</span>
+        </Link>
+      ),
+    },
+    {
+      id: 'phone',
+      header: t('phone'),
+      cell: (customer) => (
+        <span dir="ltr" className="text-muted-foreground tabular-nums">
+          {customer.phone}
+        </span>
+      ),
+    },
+    {
+      id: 'address',
+      header: t('address'),
+      cell: (customer) => <span className="text-muted-foreground">{customer.address ?? '—'}</span>,
+    },
+    {
+      id: 'action',
+      header: '',
+      headerHidden: true,
+      role: 'action',
+      align: 'end',
+      className: 'w-0',
+      cell: (customer) => (
+        <div onClick={(event) => event.stopPropagation()}>
+          <ConfirmDialog
             trigger={
-              <Button>
-                <Plus className="size-4" />
-                {t('newCustomer')}
+              <Button variant="ghost" size="icon-sm" aria-label={t('delete')}>
+                <Trash2 className="size-4 text-muted-foreground" />
               </Button>
             }
-            onSubmit={(input) => createCustomer.mutateAsync(input)}
+            title={t('deleteTitle')}
+            description={t('deleteDescription', { name: customer.name })}
+            destructive
+            confirmLabel={t('delete')}
+            onConfirm={async () => {
+              try {
+                await deleteCustomer.mutateAsync(customer.id);
+                toast.success(t('deleted'));
+              } catch (error) {
+                toast.error(error instanceof ApiError ? error.message : t('deleteError'));
+              }
+            }}
           />
-        }
-      />
+        </div>
+      ),
+    },
+  ];
 
-      <div className="relative max-w-sm">
-        <Search className="absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground rtl:right-2.5 rtl:left-auto" />
-        <Input
-          placeholder={t('searchPlaceholder')}
-          className="pl-8 rtl:pr-8 rtl:pl-3"
+  return (
+    <div className="space-y-6">
+      <FadeIn>
+        <PageHeader
+          title={t('title')}
+          description={t('subtitle')}
+          actions={
+            <CustomerFormDialog
+              trigger={
+                <Button>
+                  <Plus className="size-4" />
+                  {t('newCustomer')}
+                </Button>
+              }
+              onSubmit={(input) => createCustomer.mutateAsync(input)}
+            />
+          }
+        />
+      </FadeIn>
+
+      <FadeIn delay={0.05} className="space-y-4">
+        <SearchInput
           value={search}
-          onChange={(event) => {
-            setSearch(event.target.value);
+          onChange={(value) => {
+            setSearch(value);
             setPage(1);
           }}
+          placeholder={t('searchPlaceholder')}
+          className="max-w-sm"
         />
-      </div>
 
-      {isLoading ? (
-        <div className="flex flex-col gap-2">
-          {Array.from({ length: 5 }).map((_, index) => (
-            <Skeleton key={index} className="h-12" />
-          ))}
-        </div>
-      ) : isError || !data ? (
-        <EmptyState title={t('loadError')} description={tCommon('tryAgain')} />
-      ) : data.data.length === 0 ? (
-        <EmptyState
-          title={debouncedSearch ? t('noResults') : t('noCustomersYet')}
-          description={debouncedSearch ? undefined : t('createFirst')}
-        />
-      ) : (
-        <>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t('name')}</TableHead>
-                <TableHead>{t('phone')}</TableHead>
-                <TableHead>{t('address')}</TableHead>
-                <TableHead className="w-0" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.data.map((customer) => (
-                <TableRow key={customer.id}>
-                  <TableCell>
-                    <Link href={routes.customer(customer.id)} className="font-medium hover:underline">
-                      {customer.name}
-                    </Link>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">{customer.phone}</TableCell>
-                  <TableCell className="text-muted-foreground">{customer.address ?? '—'}</TableCell>
-                  <TableCell>
-                    <ConfirmDialog
-                      trigger={
-                        <Button variant="ghost" size="icon-sm">
-                          <Trash2 className="size-4" />
-                        </Button>
-                      }
-                      title={t('deleteTitle')}
-                      description={t('deleteDescription', { name: customer.name })}
-                      destructive
-                      confirmLabel={t('delete')}
-                      onConfirm={async () => {
-                        try {
-                          await deleteCustomer.mutateAsync(customer.id);
-                          toast.success(t('deleted'));
-                        } catch (error) {
-                          toast.error(error instanceof ApiError ? error.message : t('deleteError'));
-                        }
-                      }}
-                    />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          <PaginationControls page={data.page} totalPages={data.totalPages} onPageChange={setPage} />
-        </>
-      )}
+        {isLoading ? (
+          <TableSkeleton />
+        ) : isError || !data ? (
+          <Section>
+            <EmptyState icon={Users} title={t('loadError')} description={tCommon('tryAgain')} />
+          </Section>
+        ) : data.data.length === 0 ? (
+          <Section>
+            <EmptyState
+              icon={debouncedSearch ? UserRoundX : Users}
+              title={debouncedSearch ? t('noResults') : t('noCustomersYet')}
+              description={debouncedSearch ? undefined : t('createFirst')}
+            />
+          </Section>
+        ) : (
+          <div className="space-y-4">
+            <DataTable
+              columns={columns}
+              rows={data.data}
+              keyOf={(customer) => customer.id}
+              href={(customer) => routes.customer(customer.id)}
+            />
+            <PaginationControls page={data.page} totalPages={data.totalPages} onPageChange={setPage} />
+          </div>
+        )}
+      </FadeIn>
     </div>
   );
 }

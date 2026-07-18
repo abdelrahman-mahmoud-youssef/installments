@@ -1,23 +1,33 @@
 'use client';
 
-import { LogOut, Menu } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { LogOut, Menu, User } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
+import { LanguageSwitcher } from '@/components/shared/language-switcher';
+import { Logo } from '@/components/shared/logo';
+import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Link, usePathname, useRouter } from '@/i18n/navigation';
 import { logout } from '@/lib/api/auth';
 import { navigationItems } from '@/lib/navigation';
 import { routes } from '@/lib/routes';
 import { cn } from '@/lib/utils';
-import { LanguageSwitcher } from './language-switcher';
 
 function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   const t = useTranslations('nav');
   const pathname = usePathname();
 
   return (
-    <nav className="flex flex-col gap-1">
+    <nav className="flex flex-col gap-0.5">
       {navigationItems.map((item) => {
         const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
         const Icon = item.icon;
@@ -26,14 +36,16 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
             key={item.href}
             href={item.href}
             onClick={onNavigate}
+            aria-current={isActive ? 'page' : undefined}
             className={cn(
-              'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+              'relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+              'before:absolute before:inset-y-1.5 before:start-0 before:w-1 before:rounded-full before:bg-primary before:transition-opacity',
               isActive
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                ? 'bg-primary/10 text-primary before:opacity-100'
+                : 'text-muted-foreground before:opacity-0 hover:bg-accent hover:text-foreground',
             )}
           >
-            <Icon className="size-4" />
+            <Icon className="size-[1.15rem]" strokeWidth={isActive ? 2.4 : 2} />
             {t(item.labelKey)}
           </Link>
         );
@@ -42,11 +54,10 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
-export function AppShell({ children }: { children: React.ReactNode }) {
+function UserMenu() {
   const t = useTranslations('nav');
   const tCommon = useTranslations('common');
   const router = useRouter();
-  const [mobileOpen, setMobileOpen] = useState(false);
 
   async function handleLogout() {
     await logout();
@@ -55,50 +66,80 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen flex-col md:flex-row">
-      <aside className="hidden w-64 shrink-0 flex-col gap-6 border-r bg-muted/20 p-4 md:flex">
-        <div className="flex items-center justify-between px-3">
-          <span className="text-lg font-semibold">{tCommon('appName')}</span>
-        </div>
-        <LanguageSwitcher />
-        <NavLinks />
-        <div className="mt-auto">
-          <Button variant="outline" className="w-full justify-start gap-2" onClick={handleLogout}>
-            <LogOut className="size-4" />
-            {t('logout')}
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <Button variant="ghost" size="icon-sm" aria-label={t('account')}>
+            <span className="grid size-7 place-items-center rounded-full bg-primary/12 text-primary">
+              <User className="size-4" />
+            </span>
           </Button>
+        }
+      />
+      <DropdownMenuContent align="end" className="min-w-48">
+        <DropdownMenuLabel>{tCommon('appName')}</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem variant="destructive" onClick={handleLogout}>
+          <LogOut className="size-4" />
+          {t('logout')}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+export function AppShell({ children }: { children: React.ReactNode }) {
+  const tCommon = useTranslations('common');
+  const locale = useLocale();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const sheetSide = locale === 'ar' ? 'right' : 'left';
+
+  return (
+    <div className="min-h-screen bg-background">
+      <aside className="fixed inset-y-0 start-0 z-40 hidden w-64 flex-col border-e border-sidebar-border bg-sidebar md:flex">
+        <div className="flex h-16 items-center px-5">
+          <Logo label={tCommon('appName')} />
+        </div>
+        <div className="flex-1 overflow-y-auto px-3 py-2">
+          <NavLinks />
         </div>
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-between border-b p-4 md:hidden">
-          <span className="text-lg font-semibold">{tCommon('appName')}</span>
-          <div className="flex items-center gap-2">
-            <LanguageSwitcher />
-            <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-              <SheetTrigger render={<Button variant="outline" size="icon" />}>
-                <Menu className="size-4" />
-              </SheetTrigger>
-              <SheetContent side="left" className="flex flex-col gap-6 p-4">
-                <span className="px-3 text-lg font-semibold">{tCommon('appName')}</span>
+      <div className="flex min-h-screen flex-col md:ps-64">
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur-md sm:px-6">
+          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+            <SheetTrigger
+              render={
+                <Button variant="ghost" size="icon-sm" className="md:hidden" aria-label="Menu">
+                  <Menu className="size-5" />
+                </Button>
+              }
+            />
+            <SheetContent side={sheetSide} className="w-72 p-0">
+              <SheetTitle className="sr-only">{tCommon('appName')}</SheetTitle>
+              <div className="flex h-16 items-center px-5">
+                <Logo label={tCommon('appName')} />
+              </div>
+              <div className="px-3 py-2">
                 <NavLinks onNavigate={() => setMobileOpen(false)} />
-                <div className="mt-auto">
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start gap-2"
-                    onClick={handleLogout}
-                  >
-                    <LogOut className="size-4" />
-                    {t('logout')}
-                  </Button>
-                </div>
-              </SheetContent>
-            </Sheet>
+              </div>
+            </SheetContent>
+          </Sheet>
+
+          <div className="md:hidden">
+            <Logo label={tCommon('appName')} />
+          </div>
+
+          <div className="ms-auto flex items-center gap-1">
+            <ThemeToggle />
+            <LanguageSwitcher />
+            <div className="mx-1 h-5 w-px bg-border" />
+            <UserMenu />
           </div>
         </header>
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">{children}</div>
+        <main className="flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+          <div className="mx-auto w-full max-w-6xl">{children}</div>
         </main>
       </div>
     </div>

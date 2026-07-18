@@ -1,6 +1,7 @@
 {
   "common": {
     "appName": "الأقساط",
+    "appDescription": "أدِر عقود التقسيط والعملاء والمدفوعات.",
     "loading": "جارٍ التحميل…",
     "cancel": "إلغاء",
     "confirm": "تأكيد",
@@ -11,12 +12,19 @@
     "somethingWentWrong": "حدث خطأ ما.",
     "tryAgain": "حاول مرة أخرى بعد قليل."
   },
+  "theme": {
+    "toggle": "تبديل السمة",
+    "light": "فاتح",
+    "dark": "داكن",
+    "system": "النظام"
+  },
   "nav": {
     "dashboard": "لوحة التحكم",
     "customers": "العملاء",
     "contracts": "العقود",
     "reports": "التقارير",
-    "logout": "تسجيل الخروج"
+    "logout": "تسجيل الخروج",
+    "account": "الحساب"
   },
   "status": {
     "PENDING": "معلّق",
@@ -54,6 +62,7 @@
       "title": "أنشئ مساحة عملك",
       "description": "ابدأ في إدارة عقود التقسيط لعملك.",
       "businessName": "اسم النشاط التجاري",
+      "businessNamePlaceholder": "مثال: متجر الإلكترونيات",
       "email": "البريد الإلكتروني",
       "password": "كلمة المرور",
       "submit": "إنشاء مساحة العمل",
@@ -61,14 +70,29 @@
       "haveAccount": "لديك حساب بالفعل؟",
       "signIn": "تسجيل الدخول",
       "genericError": "تعذر إنشاء حسابك. حاول مرة أخرى."
+    },
+    "brand": {
+      "headline": "احصل على مستحقاتك في موعدها.",
+      "subhead": "تابِع كل قسط وعميل ودفعة في مساحة عمل واحدة منظّمة وواضحة.",
+      "point1": "جداول سداد تلقائية",
+      "point2": "متابعة التحصيل لحظة بلحظة",
+      "point3": "مساحات عمل آمنة ومعزولة",
+      "cardLabel": "نسبة التحصيل",
+      "cardCollected": "المُحصّل",
+      "cardRemaining": "المتبقي",
+      "footer": "مصمَّم للأعمال المتنامية."
     }
   },
   "dashboard": {
     "title": "لوحة التحكم",
+    "subtitle": "نظرة سريعة على تحصيلات اليوم.",
+    "newContract": "عقد جديد",
     "dueToday": "مستحق اليوم",
     "overdue": "متأخر",
     "dueNext7Days": "مستحق خلال 7 أيام",
     "expectedToday": "المتوقع تحصيله اليوم",
+    "upcomingCollections": "التحصيلات القادمة",
+    "upcomingCollectionsHint": "المبالغ المستحقة خلال الأيام السبعة القادمة",
     "nothingDueToday": "لا توجد مستحقات اليوم.",
     "noOverdue": "لا توجد أقساط متأخرة.",
     "recentPayments": "أحدث الدفعات",
@@ -83,6 +107,7 @@
   },
   "customers": {
     "title": "العملاء",
+    "subtitle": "أدِر عملاءك وعقودهم.",
     "newCustomer": "عميل جديد",
     "searchPlaceholder": "ابحث بالاسم أو رقم الهاتف…",
     "loadError": "تعذر تحميل العملاء",
@@ -132,6 +157,7 @@
   },
   "contracts": {
     "title": "العقود",
+    "subtitle": "كل خطط التقسيط في مكان واحد.",
     "newContract": "عقد جديد",
     "allStatuses": "جميع الحالات",
     "loadError": "تعذر تحميل العقود",
@@ -145,6 +171,18 @@
     "new": {
       "title": "عقد جديد",
       "description": "أنشئ عقد تقسيط لعميل.",
+      "sectionProduct": "العميل والمنتج",
+      "sectionPlan": "خطة التقسيط",
+      "sectionSchedule": "الجدولة",
+      "summary": "الملخّص",
+      "summaryHint": "راجِع قبل الإنشاء",
+      "contractTotal": "إجمالي العقد",
+      "financed": "المبلغ المموَّل",
+      "hints": {
+        "FIXED_COUNT": "قسِّم الرصيد على عدد محدد من الدفعات.",
+        "FIXED_AMOUNT": "ادفع مبلغًا ثابتًا كل فترة حتى السداد.",
+        "MARKUP_PERCENT": "أضِف هامشًا ثم قسِّمه إلى أقساط."
+      },
       "customer": "العميل",
       "loadingCustomers": "جارٍ التحميل…",
       "selectCustomer": "اختر عميلًا",
@@ -172,6 +210,8 @@
       "cancelDescription": "سيؤدي هذا إلى إلغاء جميع الأقساط المتبقية المعلّقة أو المدفوعة جزئيًا. لا يمكن التراجع عن هذا الإجراء.",
       "cancelled": "تم إلغاء العقد.",
       "cancelError": "تعذر إلغاء العقد.",
+      "collected": "مُحصّل",
+      "scheduleProgress": "تقدّم الجدول",
       "totalAmount": "المبلغ الإجمالي",
       "paid": "المدفوع",
       "remaining": "المتبقي",
@@ -213,6 +253,7 @@
   },
   "reports": {
     "title": "التقارير",
+    "subtitle": "التحصيلات والأرصدة المستحقة.",
     "todayCollections": "تحصيلات اليوم",
     "monthCollections": "تحصيلات هذا الشهر",
     "overdueBalance": "الرصيد المتأخر",

@@ -1,13 +1,18 @@
 'use client';
 
+import { AlertTriangle, CalendarDays, TrendingUp, Wallet } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { DataTable, type Column } from '@/components/shared/data-table';
 import { EmptyState } from '@/components/shared/empty-state';
+import { InitialAvatar } from '@/components/shared/initial-avatar';
+import { MetricCard } from '@/components/shared/metric-card';
 import { Money } from '@/components/shared/money';
+import { FadeIn, Stagger, StaggerItem } from '@/components/shared/motion';
 import { PageHeader } from '@/components/shared/page-header';
-import { StatCard } from '@/components/shared/stat-card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Section } from '@/components/shared/section';
+import { MetricsSkeleton, TableSkeleton } from '@/components/shared/skeletons';
 import { Link } from '@/i18n/navigation';
+import type { OverdueCustomerSummary } from '@/lib/api/reports';
 import { useReports } from '@/hooks/use-reports';
 import { routes } from '@/lib/routes';
 
@@ -16,76 +21,113 @@ export default function ReportsPage() {
   const tCommon = useTranslations('common');
   const { data, isLoading, isError } = useReports();
 
+  const header = <PageHeader title={t('title')} description={t('subtitle')} />;
+
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-6">
-        <PageHeader title={t('title')} />
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          {Array.from({ length: 3 }).map((_, index) => (
-            <Skeleton key={index} className="h-24" />
-          ))}
-        </div>
-        <Skeleton className="h-64" />
+      <div className="space-y-6">
+        {header}
+        <MetricsSkeleton count={3} />
+        <TableSkeleton />
       </div>
     );
   }
 
   if (isError || !data) {
     return (
-      <div className="flex flex-col gap-6">
-        <PageHeader title={t('title')} />
-        <EmptyState title={t('loadError')} description={tCommon('tryAgain')} />
+      <div className="space-y-6">
+        {header}
+        <Section>
+          <EmptyState icon={AlertTriangle} title={t('loadError')} description={tCommon('tryAgain')} />
+        </Section>
       </div>
     );
   }
 
+  const columns: Column<OverdueCustomerSummary>[] = [
+    {
+      id: 'customer',
+      header: t('customer'),
+      role: 'primary',
+      cell: (customer) => (
+        <Link href={routes.customer(customer.customerId)} className="group flex items-center gap-3">
+          <InitialAvatar name={customer.customerName} className="size-9 text-xs" />
+          <span className="truncate font-medium group-hover:underline">{customer.customerName}</span>
+        </Link>
+      ),
+    },
+    {
+      id: 'phone',
+      header: t('phone'),
+      cell: (customer) => (
+        <span dir="ltr" className="text-muted-foreground tabular-nums">
+          {customer.customerPhone}
+        </span>
+      ),
+    },
+    {
+      id: 'count',
+      header: t('overdueInstallments'),
+      cell: (customer) => <span className="tabular-nums">{customer.overdueInstallmentCount}</span>,
+    },
+    {
+      id: 'balance',
+      header: t('overdueBalance'),
+      role: 'trailing',
+      align: 'end',
+      cell: (customer) => <Money minorUnits={customer.overdueBalance} className="font-semibold text-danger" />,
+    },
+  ];
+
   return (
-    <div className="flex flex-col gap-6">
-      <PageHeader title={t('title')} />
+    <div className="space-y-6">
+      <FadeIn>{header}</FadeIn>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <StatCard label={t('todayCollections')} value={<Money minorUnits={data.todayCollections} />} />
-        <StatCard label={t('monthCollections')} value={<Money minorUnits={data.monthlyCollections} />} />
-        <StatCard
-          label={t('overdueBalance')}
-          value={<Money minorUnits={data.overdueBalance} />}
-          tone={data.overdueBalance > 0 ? 'destructive' : undefined}
-        />
-      </div>
+      <Stagger className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <StaggerItem>
+          <MetricCard
+            label={t('todayCollections')}
+            value={<Money minorUnits={data.todayCollections} />}
+            icon={Wallet}
+            tone="success"
+            emphasis
+          />
+        </StaggerItem>
+        <StaggerItem>
+          <MetricCard
+            label={t('monthCollections')}
+            value={<Money minorUnits={data.monthlyCollections} />}
+            icon={TrendingUp}
+            tone="primary"
+            emphasis
+          />
+        </StaggerItem>
+        <StaggerItem>
+          <MetricCard
+            label={t('overdueBalance')}
+            value={<Money minorUnits={data.overdueBalance} />}
+            icon={CalendarDays}
+            tone={data.overdueBalance > 0 ? 'danger' : 'neutral'}
+            emphasis={data.overdueBalance > 0}
+          />
+        </StaggerItem>
+      </Stagger>
 
-      <div className="rounded-lg border p-4">
-        <h2 className="mb-3 text-sm font-semibold">{t('overdueCustomers')}</h2>
+      <FadeIn delay={0.05} className="space-y-3">
+        <h2 className="font-heading text-sm font-semibold">{t('overdueCustomers')}</h2>
         {data.overdueCustomers.length === 0 ? (
-          <p className="py-6 text-center text-sm text-muted-foreground">{t('noOverdueCustomers')}</p>
+          <Section>
+            <EmptyState icon={TrendingUp} title={t('noOverdueCustomers')} compact />
+          </Section>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t('customer')}</TableHead>
-                <TableHead>{t('phone')}</TableHead>
-                <TableHead>{t('overdueInstallments')}</TableHead>
-                <TableHead className="text-end">{t('overdueBalance')}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.overdueCustomers.map((customer) => (
-                <TableRow key={customer.customerId}>
-                  <TableCell>
-                    <Link href={routes.customer(customer.customerId)} className="font-medium hover:underline">
-                      {customer.customerName}
-                    </Link>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">{customer.customerPhone}</TableCell>
-                  <TableCell>{customer.overdueInstallmentCount}</TableCell>
-                  <TableCell className="text-end">
-                    <Money minorUnits={customer.overdueBalance} />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <DataTable
+            columns={columns}
+            rows={data.overdueCustomers}
+            keyOf={(customer) => customer.customerId}
+            href={(customer) => routes.customer(customer.customerId)}
+          />
         )}
-      </div>
+      </FadeIn>
     </div>
   );
 }

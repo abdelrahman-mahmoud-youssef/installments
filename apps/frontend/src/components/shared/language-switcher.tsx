@@ -1,13 +1,21 @@
 'use client';
 
+import { Check, Languages } from 'lucide-react';
 import { useLocale } from 'next-intl';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { usePathname, useRouter } from '@/i18n/navigation';
+import { cn } from '@/lib/utils';
 
-const LANGUAGE_LABELS: Record<string, string> = {
-  en: 'English',
-  ar: 'العربية',
-};
+const LANGUAGES = [
+  { value: 'ar', label: 'العربية', hint: 'AR' },
+  { value: 'en', label: 'English', hint: 'EN' },
+] as const;
 
 export function LanguageSwitcher() {
   const locale = useLocale();
@@ -15,24 +23,31 @@ export function LanguageSwitcher() {
   const pathname = usePathname();
 
   return (
-    <Select
-      value={locale}
-      onValueChange={(nextLocale) => {
-        if (nextLocale) {
-          router.replace(pathname, { locale: nextLocale });
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <Button variant="ghost" size="icon-sm" aria-label="Language">
+            <Languages className="size-4" />
+          </Button>
         }
-      }}
-    >
-      <SelectTrigger className="w-28" size="sm">
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
-        {Object.entries(LANGUAGE_LABELS).map(([value, label]) => (
-          <SelectItem key={value} value={value}>
-            {label}
-          </SelectItem>
+      />
+      <DropdownMenuContent align="end" className="min-w-40">
+        {LANGUAGES.map((language) => (
+          <DropdownMenuItem
+            key={language.value}
+            onClick={() => router.replace(pathname, { locale: language.value })}
+          >
+            <span className="w-6 text-xs font-semibold text-muted-foreground">{language.hint}</span>
+            <span>{language.label}</span>
+            <Check
+              className={cn(
+                'ms-auto size-4 text-primary',
+                locale === language.value ? 'opacity-100' : 'opacity-0',
+              )}
+            />
+          </DropdownMenuItem>
         ))}
-      </SelectContent>
-    </Select>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
