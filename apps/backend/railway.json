@@ -5,6 +5,7 @@
     "dockerfilePath": "apps/backend/Dockerfile"
   },
   "deploy": {
+    "preDeployCommand": "node_modules/.bin/prisma migrate deploy",
     "startCommand": "node dist/main.js",
     "healthcheckPath": "/health",
     "healthcheckTimeout": 120,
