@@ -1,0 +1,163 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RecurrenceType {
+  MONTHLY
+  EVERY_X_DAYS
+  WEEKLY
+  BIWEEKLY
+}
+
+enum ContractStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum InstallmentStatus {
+  PENDING
+  PARTIALLY_PAID
+  PAID
+  CANCELLED
+}
+
+enum CalculationMethod {
+  FIXED_COUNT
+  FIXED_AMOUNT
+  MARKUP_PERCENT
+}
+
+enum AllocationStrategy {
+  OLDEST_FIRST
+}
+
+model Tenant {
+  id                 String             @id @default(cuid())
+  name               String
+  telegramChatId     String?
+  allocationStrategy AllocationStrategy @default(OLDEST_FIRST)
+  createdAt          DateTime           @default(now())
+  users              User[]
+  customers          Customer[]
+  contracts          Contract[]
+  installments       Installment[]
+  payments           Payment[]
+  reminderLogs       ReminderLog[]
+}
+
+model User {
+  id           String   @id @default(cuid())
+  tenantId     String
+  email        String   @unique
+  passwordHash String
+  role         String   @default("ADMIN")
+  createdAt    DateTime @default(now())
+  tenant       Tenant   @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+}
+
+model Customer {
+  id        String     @id @default(cuid())
+  tenantId  String
+  publicId  String     @unique @default(uuid())
+  name      String
+  phone     String
+  address   String?
+  notes     String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  tenant    Tenant     @relation(fields: [tenantId], references: [id])
+  contracts Contract[]
+
+  @@index([tenantId, name])
+  @@index([tenantId, phone])
+}
+
+model Contract {
+  id                String            @id @default(cuid())
+  tenantId          String
+  customerId        String
+  productName       String
+  productPrice      Int
+  downPayment      Int
+  totalAmount       Int
+  calculationMethod CalculationMethod
+  markupPercent     Float?
+  installmentCount  Int
+  recurrenceType    RecurrenceType
+  intervalDays      Int?
+  startDate         DateTime          @db.Date
+  firstPaymentDate  DateTime          @db.Date
+  status            ContractStatus    @default(ACTIVE)
+  createdAt         DateTime          @default(now())
+  tenant            Tenant            @relation(fields: [tenantId], references: [id])
+  customer          Customer          @relation(fields: [customerId], references: [id])
+  installments      Installment[]
+  payments          Payment[]
+
+  @@index([tenantId, status])
+  @@index([tenantId, customerId])
+}
+
+model Installment {
+  id          String              @id @default(cuid())
+  tenantId    String
+  contractId  String
+  sequence    Int
+  dueDate     DateTime            @db.Date
+  amount      Int
+  paidAmount  Int                 @default(0)
+  status      InstallmentStatus   @default(PENDING)
+  tenant      Tenant              @relation(fields: [tenantId], references: [id])
+  contract    Contract            @relation(fields: [contractId], references: [id])
+  allocations PaymentAllocation[]
+
+  @@unique([contractId, sequence])
+  @@index([tenantId, dueDate, status])
+}
+
+model Payment {
+  id          String              @id @default(cuid())
+  tenantId    String
+  contractId  String
+  amount      Int
+  paidAt      DateTime            @default(now())
+  note        String?
+  createdAt   DateTime            @default(now())
+  tenant      Tenant              @relation(fields: [tenantId], references: [id])
+  contract    Contract            @relation(fields: [contractId], references: [id])
+  allocations PaymentAllocation[]
+
+  @@index([tenantId, paidAt])
+  @@index([tenantId, contractId])
+}
+
+model PaymentAllocation {
+  id            String      @id @default(cuid())
+  paymentId     String
+  installmentId String
+  amount        Int
+  payment       Payment     @relation(fields: [paymentId], references: [id])
+  installment   Installment @relation(fields: [installmentId], references: [id])
+
+  @@index([paymentId])
+  @@index([installmentId])
+}
+
+model ReminderLog {
+  id       String   @id @default(cuid())
+  tenantId String
+  sentAt   DateTime @default(now())
+  success  Boolean
+  error    String?
+  tenant   Tenant   @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, sentAt])
+}
