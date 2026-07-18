@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { CalendarClock, ListOrdered, Loader2, Percent } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { BackLink } from '@/components/shared/back-link';
@@ -91,6 +92,22 @@ function buildInstallmentPreview(
   return { count, regular: base, final };
 }
 
+function toIsoDate(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
+function todayIso(): string {
+  return toIsoDate(new Date());
+}
+
+function oneMonthLaterIso(): string {
+  const now = new Date();
+  const targetMonth = now.getMonth() + 1;
+  const daysInTargetMonth = new Date(now.getFullYear(), targetMonth + 1, 0).getDate();
+  const day = Math.min(now.getDate(), daysInTargetMonth);
+  return toIsoDate(new Date(now.getFullYear(), targetMonth, day));
+}
+
 export default function NewContractPage() {
   const t = useTranslations('contracts.new');
   const tCalculationMethod = useTranslations('calculationMethod');
@@ -117,6 +134,15 @@ export default function NewContractPage() {
       firstPaymentDate: '',
     },
   });
+
+  useEffect(() => {
+    if (!form.getValues('startDate')) {
+      form.setValue('startDate', todayIso());
+    }
+    if (!form.getValues('firstPaymentDate')) {
+      form.setValue('firstPaymentDate', oneMonthLaterIso());
+    }
+  }, [form]);
 
   const values = form.watch();
   const calculationMethod = values.calculationMethod;
