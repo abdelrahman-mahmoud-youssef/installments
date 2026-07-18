@@ -19,6 +19,7 @@ async function bootstrap(): Promise<void> {
 
   const port = Number(config.get<string>('PORT') ?? 3001);
   await app.listen(port, '0.0.0.0');
+  process.stderr.write(`Backend listening on port ${port}\n`);
 }
 
 void bootstrap();
