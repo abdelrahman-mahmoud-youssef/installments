@@ -55,6 +55,42 @@ function SummaryRow({
   );
 }
 
+interface InstallmentPreview {
+  count: number;
+  regular: number;
+  final: number;
+}
+
+function buildInstallmentPreview(
+  method: CalculationMethod,
+  remainingMinor: number,
+  values: ContractInput,
+): InstallmentPreview | null {
+  if (remainingMinor <= 0) {
+    return null;
+  }
+  if (method === 'FIXED_AMOUNT') {
+    const fixed = Math.round((Number(values.fixedInstallmentAmount) || 0) * 100);
+    if (fixed <= 0) {
+      return null;
+    }
+    const full = Math.floor(remainingMinor / fixed);
+    const last = remainingMinor - fixed * full;
+    const count = full + (last > 0 ? 1 : 0);
+    if (count <= 0) {
+      return null;
+    }
+    return { count, regular: fixed, final: last > 0 ? last : fixed };
+  }
+  const count = Math.floor(Number(values.installmentCount) || 0);
+  if (count <= 0) {
+    return null;
+  }
+  const base = Math.floor(remainingMinor / count);
+  const final = base + (remainingMinor - base * count);
+  return { count, regular: base, final };
+}
+
 export default function NewContractPage() {
   const t = useTranslations('contracts.new');
   const tCalculationMethod = useTranslations('calculationMethod');
@@ -86,11 +122,18 @@ export default function NewContractPage() {
   const calculationMethod = values.calculationMethod;
   const recurrenceType = values.recurrenceType;
 
-  const price = Number(values.productPrice) || 0;
+  const recurrenceItems = Object.fromEntries(
+    RECURRENCE_TYPES.map((type) => [type, tRecurrenceType(type)]),
+  );
+  const customerItems = Object.fromEntries((customers?.data ?? []).map((c) => [c.id, c.name]));
+
+  const priceMinor = Math.round((Number(values.productPrice) || 0) * 100);
+  const downMinor = Math.round((Number(values.downPayment) || 0) * 100);
   const markup = calculationMethod === 'MARKUP_PERCENT' ? Number(values.markupPercent) || 0 : 0;
-  const total = Math.round(price * (1 + markup / 100));
-  const down = Number(values.downPayment) || 0;
-  const financed = Math.max(total - down, 0);
+  const totalMinor =
+    calculationMethod === 'MARKUP_PERCENT' ? Math.round(priceMinor * (1 + markup / 100)) : priceMinor;
+  const remainingMinor = totalMinor - downMinor;
+  const plan = buildInstallmentPreview(calculationMethod, remainingMinor, values);
 
   async function onSubmit(input: ContractInput) {
     try {
@@ -119,7 +162,7 @@ export default function NewContractPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>{t('customer')}</FormLabel>
-                        <Select value={field.value} onValueChange={field.onChange}>
+                        <Select value={field.value} onValueChange={field.onChange} items={customerItems}>
                           <FormControl>
                             <SelectTrigger className="w-full">
                               <SelectValue
@@ -284,7 +327,7 @@ export default function NewContractPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>{t('recurrence')}</FormLabel>
-                        <Select value={field.value} onValueChange={field.onChange}>
+                        <Select value={field.value} onValueChange={field.onChange} items={recurrenceItems}>
                           <FormControl>
                             <SelectTrigger className="w-full">
                               <SelectValue />
@@ -351,11 +394,24 @@ export default function NewContractPage() {
               <div className="lg:sticky lg:top-20">
                 <Section title={t('summary')} description={t('summaryHint')}>
                   <dl className="divide-y divide-border">
-                    <SummaryRow label={t('contractTotal')}>{formatMoney(total * 100, locale)}</SummaryRow>
-                    <SummaryRow label={t('downPayment')}>{formatMoney(down * 100, locale)}</SummaryRow>
+                    <SummaryRow label={t('contractTotal')}>{formatMoney(totalMinor, locale)}</SummaryRow>
+                    <SummaryRow label={t('downPayment')}>{formatMoney(downMinor, locale)}</SummaryRow>
                     <SummaryRow label={t('financed')} emphasis>
-                      {formatMoney(financed * 100, locale)}
+                      {formatMoney(Math.max(remainingMinor, 0), locale)}
                     </SummaryRow>
+                    {plan && (
+                      <>
+                        <SummaryRow label={t('summaryInstallments')}>{plan.count}</SummaryRow>
+                        <SummaryRow label={t('summaryPerInstallment')}>
+                          {formatMoney(plan.regular, locale)}
+                        </SummaryRow>
+                        {plan.final !== plan.regular && (
+                          <SummaryRow label={t('summaryFinalInstallment')}>
+                            {formatMoney(plan.final, locale)}
+                          </SummaryRow>
+                        )}
+                      </>
+                    )}
                     <SummaryRow label={t('recurrence')}>{tRecurrenceType(recurrenceType)}</SummaryRow>
                   </dl>
                   <Button

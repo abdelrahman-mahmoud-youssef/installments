@@ -178,6 +178,9 @@
       "summaryHint": "Review before creating",
       "contractTotal": "Contract total",
       "financed": "Financed amount",
+      "summaryInstallments": "Installments",
+      "summaryPerInstallment": "Per installment",
+      "summaryFinalInstallment": "Final installment",
       "hints": {
         "FIXED_COUNT": "Split the balance into a set number of payments.",
         "FIXED_AMOUNT": "Pay a fixed amount each period until settled.",

@@ -102,6 +102,10 @@ export default function ContractsPage() {
             setStatus(value ?? STATUS_FILTER_ALL);
             setPage(1);
           }}
+          items={{
+            [STATUS_FILTER_ALL]: t('allStatuses'),
+            ...Object.fromEntries(CONTRACT_STATUSES.map((value) => [value, tStatus(value)])),
+          }}
         >
           <SelectTrigger className="w-48">
             <SelectValue />

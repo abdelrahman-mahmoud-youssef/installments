@@ -178,6 +178,9 @@
       "summaryHint": "راجِع قبل الإنشاء",
       "contractTotal": "إجمالي العقد",
       "financed": "المبلغ المموَّل",
+      "summaryInstallments": "عدد الأقساط",
+      "summaryPerInstallment": "قيمة القسط",
+      "summaryFinalInstallment": "القسط الأخير",
       "hints": {
         "FIXED_COUNT": "قسِّم الرصيد على عدد محدد من الدفعات.",
         "FIXED_AMOUNT": "ادفع مبلغًا ثابتًا كل فترة حتى السداد.",
