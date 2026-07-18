@@ -7,6 +7,10 @@ import { type ComponentType } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { FadeIn } from '@/components/shared/motion';
+import {
+  NotificationLanguage,
+  NotificationLanguageToggle,
+} from '@/components/shared/notification-language-toggle';
 import { PageHeader } from '@/components/shared/page-header';
 import { Section } from '@/components/shared/section';
 import { Badge } from '@/components/ui/badge';
@@ -18,6 +22,7 @@ import {
   useDisconnectNotifications,
   useNotificationSettings,
   useSendTestNotification,
+  useSetNotificationLanguage,
   useUpdateNotificationSettings,
 } from '@/hooks/use-settings';
 import { ApiError } from '@/lib/api/client';
@@ -36,6 +41,7 @@ export default function SettingsPage() {
   const updateSettings = useUpdateNotificationSettings();
   const sendTest = useSendTestNotification();
   const disconnect = useDisconnectNotifications();
+  const setLanguage = useSetNotificationLanguage();
   const isConnected = Boolean(data?.telegramConfigured);
 
   const form = useForm<NotificationSettingsInput>({
@@ -73,6 +79,15 @@ export default function SettingsPage() {
       await disconnect.mutateAsync();
       toast.success(t('removed'));
       form.reset({ telegramBotToken: '' });
+    } catch (error) {
+      toast.error(error instanceof ApiError ? error.message : t('genericError'));
+    }
+  }
+
+  async function handleLanguageChange(language: NotificationLanguage) {
+    try {
+      await setLanguage.mutateAsync(language);
+      toast.success(t('languageSaved'));
     } catch (error) {
       toast.error(error instanceof ApiError ? error.message : t('genericError'));
     }
@@ -186,6 +201,20 @@ export default function SettingsPage() {
                 </ol>
               </div>
             </>
+          )}
+
+          {!isLoading && data && (
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5">
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-foreground">{t('languageLabel')}</p>
+                <p className="text-xs text-muted-foreground">{t('languageHint')}</p>
+              </div>
+              <NotificationLanguageToggle
+                value={data.notificationLanguage}
+                onChange={handleLanguageChange}
+                disabled={setLanguage.isPending}
+              />
+            </div>
           )}
         </Section>
 

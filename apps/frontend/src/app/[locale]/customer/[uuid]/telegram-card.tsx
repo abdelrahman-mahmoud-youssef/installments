@@ -4,12 +4,17 @@ import { CheckCircle2, Loader2, Send } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import {
+  NotificationLanguage,
+  NotificationLanguageToggle,
+} from '@/components/shared/notification-language-toggle';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import {
   useDisconnectPublicTelegram,
   useSetPublicTelegramEnabled,
+  useSetPublicTelegramLanguage,
   useVerifyPublicTelegram,
 } from '@/hooks/use-public-telegram';
 import type { PublicTelegramStatus } from '@/lib/api/public';
@@ -27,10 +32,12 @@ export function TelegramCard({
   const t = useTranslations('publicCustomer');
   const [connected, setConnected] = useState(telegram.connected);
   const [enabled, setEnabled] = useState(telegram.enabled);
+  const [language, setLanguageState] = useState(telegram.language);
   const [waiting, setWaiting] = useState(false);
 
   const verify = useVerifyPublicTelegram(publicId);
   const setEnabledMutation = useSetPublicTelegramEnabled(publicId);
+  const setLanguageMutation = useSetPublicTelegramLanguage(publicId);
   const disconnect = useDisconnectPublicTelegram(publicId);
 
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -113,6 +120,18 @@ export function TelegramCard({
     }
   }
 
+  async function handleLanguageChange(next: NotificationLanguage) {
+    const previous = language;
+    setLanguageState(next);
+    try {
+      const result = await setLanguageMutation.mutateAsync(next);
+      setLanguageState(result.language);
+    } catch {
+      setLanguageState(previous);
+      toast.error(t('telegramError'));
+    }
+  }
+
   return (
     <div className="space-y-4 rounded-xl border border-border bg-card p-5 shadow-xs">
       <div className="flex items-center justify-between gap-3">
@@ -178,6 +197,15 @@ export function TelegramCard({
           )}
         </div>
       )}
+
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
+        <span className="text-sm font-medium">{t('telegramLanguageLabel')}</span>
+        <NotificationLanguageToggle
+          value={language}
+          onChange={handleLanguageChange}
+          disabled={setLanguageMutation.isPending}
+        />
+      </div>
     </div>
   );
 }

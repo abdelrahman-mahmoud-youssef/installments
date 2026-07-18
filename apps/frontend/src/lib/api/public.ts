@@ -1,3 +1,4 @@
+import type { NotificationLanguage } from '@/components/shared/notification-language-toggle';
 import { config } from '@/lib/config';
 
 export interface PublicUpcomingInstallment {
@@ -19,11 +20,13 @@ export interface PublicTelegramStatus {
   botUsername: string | null;
   connected: boolean;
   enabled: boolean;
+  language: NotificationLanguage;
 }
 
 export interface PublicTelegramState {
   connected: boolean;
   enabled: boolean;
+  language: NotificationLanguage;
 }
 
 export interface PublicCustomerResponse {
@@ -71,4 +74,14 @@ export function setPublicTelegramEnabled(
 
 export function disconnectPublicTelegram(publicId: string): Promise<PublicTelegramState> {
   return requestPublic(`customers/${publicId}/telegram`, { method: 'DELETE' });
+}
+
+export function setPublicTelegramLanguage(
+  publicId: string,
+  language: NotificationLanguage,
+): Promise<PublicTelegramState> {
+  return requestPublic(`customers/${publicId}/telegram/language`, {
+    method: 'PATCH',
+    body: JSON.stringify({ language }),
+  });
 }

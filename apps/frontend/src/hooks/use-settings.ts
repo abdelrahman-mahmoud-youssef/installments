@@ -1,9 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { NotificationLanguage } from '@/components/shared/notification-language-toggle';
 import {
   disconnectNotifications,
   getNotificationSettings,
   NotificationSettings,
   sendTestNotification,
+  setNotificationLanguage,
   updateNotificationSettings,
 } from '@/lib/api/settings';
 import { NotificationSettingsInput } from '@/lib/schemas/settings';
@@ -40,6 +42,14 @@ export function useDisconnectNotifications() {
   return useMutation({
     mutationFn: () => disconnectNotifications(),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: settingsKeys.notifications }),
+  });
+}
+
+export function useSetNotificationLanguage() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (language: NotificationLanguage) => setNotificationLanguage(language),
+    onSuccess: (data) => queryClient.setQueryData(settingsKeys.notifications, data),
   });
 }
 
