@@ -53,8 +53,10 @@ Add Railway's managed **PostgreSQL** and **Redis** plugins to the project.
   - `REDIS_URL` — reference the Redis plugin (`${{Redis.REDIS_URL}}`); the app also accepts `REDIS_HOST`/`REDIS_PORT`
   - `JWT_SECRET` — a strong random value
   - `JWT_EXPIRES_IN` — e.g. `7d`
-  - `FRONTEND_URL` — the frontend service's public URL (used as the CORS origin)
+  - `FRONTEND_URL` — optional; the frontend's public URL. If unset, CORS reflects the request origin. (Browser traffic is same-origin via the frontend proxy anyway.)
   - `TELEGRAM_BOT_TOKEN`, `REMINDER_HOUR` — optional (daily reminders)
+
+> The service only needs a reachable **`DATABASE_URL`** to boot and pass the `/health` check — `FRONTEND_URL` and Redis are optional (without Redis, the daily reminder job is skipped rather than crashing startup). If the health check still times out, check the deploy logs for a `prisma migrate deploy` / database-connection error.
   - `PORT` — injected by Railway automatically; the app binds `0.0.0.0:$PORT`.
 
 ### 3. Frontend service (`apps/frontend`)

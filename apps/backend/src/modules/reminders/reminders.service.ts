@@ -20,13 +20,23 @@ export class RemindersService implements OnModuleInit {
     private readonly config: ConfigService,
   ) {}
 
-  async onModuleInit(): Promise<void> {
+  onModuleInit(): void {
+    void this.registerDailyReminderJob();
+  }
+
+  private async registerDailyReminderJob(): Promise<void> {
     const hour = this.config.get<string>('REMINDER_HOUR', '8');
-    await this.remindersQueue.add(
-      DAILY_REMINDER_JOB_NAME,
-      {},
-      { repeat: { pattern: `0 ${hour} * * *` }, jobId: DAILY_REMINDER_JOB_NAME },
-    );
+    try {
+      await this.remindersQueue.add(
+        DAILY_REMINDER_JOB_NAME,
+        {},
+        { repeat: { pattern: `0 ${hour} * * *` }, jobId: DAILY_REMINDER_JOB_NAME },
+      );
+    } catch (error) {
+      this.logger.error(
+        `Could not register the daily reminder job: ${error instanceof Error ? error.message : 'unknown error'}`,
+      );
+    }
   }
 
   async sendRemindersForAllTenants(): Promise<void> {
