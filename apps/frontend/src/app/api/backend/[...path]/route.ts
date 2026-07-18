@@ -28,7 +28,8 @@ async function proxyToBackend(request: NextRequest, path: string[]): Promise<Nex
   });
 
   const responseBody = await backendResponse.text();
-  return new NextResponse(responseBody, {
+  const hasResponseBody = responseBody.length > 0 && backendResponse.status !== 204;
+  return new NextResponse(hasResponseBody ? responseBody : null, {
     status: backendResponse.status,
     headers: { 'Content-Type': backendResponse.headers.get('Content-Type') ?? 'application/json' },
   });
