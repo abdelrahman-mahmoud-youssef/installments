@@ -19,3 +19,7 @@ export function updateNotificationSettings(
 export function sendTestNotification(): Promise<void> {
   return apiClient.post('settings/notifications/test');
 }
+
+export function disconnectNotifications(): Promise<NotificationSettings> {
+  return apiClient.delete('settings/notifications');
+}

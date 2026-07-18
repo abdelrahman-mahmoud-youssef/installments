@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  disconnectNotifications,
   getNotificationSettings,
   NotificationSettings,
   sendTestNotification,
@@ -30,6 +31,14 @@ export function useSendTestNotification() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: () => sendTestNotification(),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: settingsKeys.notifications }),
+  });
+}
+
+export function useDisconnectNotifications() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => disconnectNotifications(),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: settingsKeys.notifications }),
   });
 }

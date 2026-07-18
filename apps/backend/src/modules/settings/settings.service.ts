@@ -37,6 +37,17 @@ export class SettingsService {
     };
   }
 
+  async disconnect(tenantId: string): Promise<NotificationSettings> {
+    const tenant = await this.prisma.tenant.update({
+      where: { id: tenantId },
+      data: { telegramBotToken: null, telegramChatId: null },
+    });
+    return {
+      telegramConfigured: Boolean(tenant.telegramBotToken),
+      telegramChatId: tenant.telegramChatId,
+    };
+  }
+
   async sendTest(tenantId: string): Promise<void> {
     const tenant = await this.prisma.tenant.findUniqueOrThrow({ where: { id: tenantId } });
     if (!tenant.telegramBotToken) {

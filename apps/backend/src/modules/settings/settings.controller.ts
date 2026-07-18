@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Patch, Post } from '@nestjs/common';
 import { AuthenticatedUser, CurrentUser } from '../../common/decorators/current-user.decorator';
 import { UpdateNotificationSettingsDto } from './dto/update-notification-settings.dto';
 import { NotificationSettings, SettingsService } from './settings.service';
@@ -24,5 +24,10 @@ export class SettingsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   sendTest(@CurrentUser() user: AuthenticatedUser): Promise<void> {
     return this.settingsService.sendTest(user.tenantId);
+  }
+
+  @Delete()
+  disconnect(@CurrentUser() user: AuthenticatedUser): Promise<NotificationSettings> {
+    return this.settingsService.disconnect(user.tenantId);
   }
 }
