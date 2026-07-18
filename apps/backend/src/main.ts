@@ -6,6 +6,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 
 async function bootstrap(): Promise<void> {
+  process.stderr.write('Bootstrap starting\n');
   const app = await NestFactory.create(AppModule);
   const config = app.get(ConfigService);
 
@@ -22,4 +23,7 @@ async function bootstrap(): Promise<void> {
   process.stderr.write(`Backend listening on port ${port}\n`);
 }
 
-void bootstrap();
+bootstrap().catch((error) => {
+  process.stderr.write(`Bootstrap failed: ${error instanceof Error ? error.stack : String(error)}\n`);
+  process.exit(1);
+});
