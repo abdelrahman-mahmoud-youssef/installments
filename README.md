@@ -33,23 +33,45 @@ pnpm lint
 
 Or target one app: `pnpm --filter installment-backend <script>` / `pnpm --filter frontend <script>`.
 
+> If `pnpm dev` prints `apps/backend dev: Failed`, a stale process is usually still holding port **3001** (or **3000** for the frontend). Stop leftover dev servers and retry — on Windows: `taskkill /F /IM node.exe`, on macOS/Linux: `lsof -ti:3001,3000 | xargs kill`.
+
 ## Deploying to Railway
 
-Each app is a separate Railway service built from its own `Dockerfile` (multi-stage, pnpm-workspace-aware — the build context is the repo root, since both apps share the root lockfile).
+Both apps deploy as **separate services from the same GitHub repo**, each built with its own multi-stage `Dockerfile`. The Dockerfiles are pnpm-workspace-aware and expect the **repo root as the build context** (both apps share the root `pnpm-lock.yaml`), so each service's config lives in `apps/<app>/railway.json` and points back to its Dockerfile by a repo-root-relative path.
 
-1. Provision managed **PostgreSQL** and **Redis** on Railway.
-2. Create a service for `apps/backend`: set **Root Directory** to `apps/backend` (Railway will use its `Dockerfile`/`railway.json` from there). Set env vars:
-   - `DATABASE_URL` — from the Postgres plugin
-   - `REDIS_URL` — from the Redis plugin (falls back to `REDIS_HOST`/`REDIS_PORT` if unset)
-   - `JWT_SECRET` — a strong random value
-   - `JWT_EXPIRES_IN` — e.g. `7d`
-   - `FRONTEND_URL` — the frontend service's public URL (CORS origin)
-   - `TELEGRAM_BOT_TOKEN`, `REMINDER_HOUR` — optional
-   - `PORT` is injected by Railway automatically; the app reads it directly.
-   - On deploy, the container runs `prisma migrate deploy` before starting.
-3. Create a service for `apps/frontend`: set **Root Directory** to `apps/frontend`. Set env vars:
-   - `BACKEND_URL` — the backend service's internal or public URL (read server-side only, in the `/api/auth/*` and `/api/backend/*` route handlers — never exposed to the browser)
-4. Both services expose `GET /health` (backend) and `GET /login` (frontend) for Railway's health checks.
+### 1. Provision data stores
+
+Add Railway's managed **PostgreSQL** and **Redis** plugins to the project.
+
+### 2. Backend service (`apps/backend`)
+
+- **New Service → GitHub repo** (this repo).
+- Settings → leave **Root Directory empty** (the Docker build context must be the repo root).
+- Settings → **Config-as-code / Railway Config File**: `apps/backend/railway.json` (or set the service variable `RAILWAY_CONFIG_FILE=apps/backend/railway.json`). This supplies the Dockerfile path, the `prisma migrate deploy && node dist/main.js` start command, and the `/health` health check.
+- **Variables**:
+  - `DATABASE_URL` — reference the Postgres plugin (`${{Postgres.DATABASE_URL}}`)
+  - `REDIS_URL` — reference the Redis plugin (`${{Redis.REDIS_URL}}`); the app also accepts `REDIS_HOST`/`REDIS_PORT`
+  - `JWT_SECRET` — a strong random value
+  - `JWT_EXPIRES_IN` — e.g. `7d`
+  - `FRONTEND_URL` — the frontend service's public URL (used as the CORS origin)
+  - `TELEGRAM_BOT_TOKEN`, `REMINDER_HOUR` — optional (daily reminders)
+  - `PORT` — injected by Railway automatically; the app binds `0.0.0.0:$PORT`.
+
+### 3. Frontend service (`apps/frontend`)
+
+- **New Service → GitHub repo** (same repo).
+- Settings → leave **Root Directory empty**.
+- Settings → **Railway Config File**: `apps/frontend/railway.json` (or `RAILWAY_CONFIG_FILE=apps/frontend/railway.json`).
+- **Variables**:
+  - `BACKEND_URL` — the backend service's URL, read **server-side only** by the `/api/auth/*` and `/api/backend/*` route handlers (never exposed to the browser). Prefer Railway private networking: `http://${{backend.RAILWAY_PRIVATE_DOMAIN}}:${{backend.PORT}}`.
+  - `PORT` — injected by Railway; the start command passes it to `next start`.
+
+### 4. Health checks
+
+- Backend: `GET /health` → `{ "status": "ok" }`.
+- Frontend: `GET /login` (renders the sign-in page for the default locale).
+
+> All browser → backend traffic is proxied through the frontend's own `/api/backend/*` route (same origin), so the backend never needs to be publicly reachable — expose it privately and keep only the frontend's domain public if you prefer.
 
 ## Architecture notes
 
