@@ -6,7 +6,6 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 
 async function bootstrap(): Promise<void> {
-  process.stderr.write('Bootstrap starting\n');
   const app = await NestFactory.create(AppModule);
   const config = app.get(ConfigService);
 
