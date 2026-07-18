@@ -8,6 +8,7 @@ export const routes = {
   newContract: '/contracts/new',
   contract: (id: string) => `/contracts/${id}`,
   reports: '/reports',
+  announcements: '/announcements',
   settings: '/settings',
   publicCustomer: (publicId: string) => `/customer/${publicId}`,
 } as const;

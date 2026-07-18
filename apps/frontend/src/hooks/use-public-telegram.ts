@@ -2,6 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import type { NotificationLanguage } from '@/components/shared/notification-language-toggle';
 import {
   disconnectPublicTelegram,
+  setPublicTelegramBroadcasts,
   setPublicTelegramEnabled,
   setPublicTelegramLanguage,
   verifyPublicTelegram,
@@ -13,6 +14,10 @@ export function useVerifyPublicTelegram(publicId: string) {
 
 export function useSetPublicTelegramEnabled(publicId: string) {
   return useMutation({ mutationFn: (enabled: boolean) => setPublicTelegramEnabled(publicId, enabled) });
+}
+
+export function useSetPublicTelegramBroadcasts(publicId: string) {
+  return useMutation({ mutationFn: (enabled: boolean) => setPublicTelegramBroadcasts(publicId, enabled) });
 }
 
 export function useSetPublicTelegramLanguage(publicId: string) {

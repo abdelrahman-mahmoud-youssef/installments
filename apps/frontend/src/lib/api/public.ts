@@ -20,12 +20,14 @@ export interface PublicTelegramStatus {
   botUsername: string | null;
   connected: boolean;
   enabled: boolean;
+  broadcastsEnabled: boolean;
   language: NotificationLanguage;
 }
 
 export interface PublicTelegramState {
   connected: boolean;
   enabled: boolean;
+  broadcastsEnabled: boolean;
   language: NotificationLanguage;
 }
 
@@ -83,5 +85,15 @@ export function setPublicTelegramLanguage(
   return requestPublic(`customers/${publicId}/telegram/language`, {
     method: 'PATCH',
     body: JSON.stringify({ language }),
+  });
+}
+
+export function setPublicTelegramBroadcasts(
+  publicId: string,
+  enabled: boolean,
+): Promise<PublicTelegramState> {
+  return requestPublic(`customers/${publicId}/telegram/broadcasts`, {
+    method: 'PATCH',
+    body: JSON.stringify({ enabled }),
   });
 }

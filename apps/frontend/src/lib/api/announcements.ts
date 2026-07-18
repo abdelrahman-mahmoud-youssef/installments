@@ -1,0 +1,52 @@
+import type { NotificationLanguage } from '@/components/shared/notification-language-toggle';
+import { apiClient } from './client';
+import { buildQuery, PaginatedResult } from './pagination';
+
+export type BroadcastAudience = 'ALL' | 'SELECTED';
+export type BroadcastStatus = 'QUEUED' | 'SENDING' | 'DONE';
+
+export interface BroadcastSubscriber {
+  id: string;
+  name: string;
+  telegramNotificationsEnabled: boolean;
+  telegramBroadcastsEnabled: boolean;
+}
+
+export interface Broadcast {
+  id: string;
+  body: string;
+  hasImage: boolean;
+  audience: BroadcastAudience;
+  recipientCount: number;
+  sentCount: number;
+  failedCount: number;
+  status: BroadcastStatus;
+  createdAt: string;
+}
+
+export interface CreateBroadcastInput {
+  body: string;
+  image?: string;
+  audience: BroadcastAudience;
+  customerIds?: string[];
+}
+
+export interface ListParams {
+  q?: string;
+  page?: number;
+  limit?: number;
+}
+
+export type { NotificationLanguage };
+
+export function listSubscribers(params: ListParams): Promise<PaginatedResult<BroadcastSubscriber>> {
+  return apiClient.get(`announcements/subscribers${buildQuery(params)}`);
+}
+
+export function listBroadcasts(params: ListParams): Promise<PaginatedResult<Broadcast>> {
+  return apiClient.get(`announcements${buildQuery(params)}`);
+}
+
+export function createBroadcast(input: CreateBroadcastInput): Promise<Broadcast> {
+  return apiClient.post('announcements', input);
+}

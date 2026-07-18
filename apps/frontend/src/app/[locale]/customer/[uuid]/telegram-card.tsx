@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import {
   useDisconnectPublicTelegram,
+  useSetPublicTelegramBroadcasts,
   useSetPublicTelegramEnabled,
   useSetPublicTelegramLanguage,
   useVerifyPublicTelegram,
@@ -32,11 +33,13 @@ export function TelegramCard({
   const t = useTranslations('publicCustomer');
   const [connected, setConnected] = useState(telegram.connected);
   const [enabled, setEnabled] = useState(telegram.enabled);
+  const [broadcastsEnabled, setBroadcastsEnabled] = useState(telegram.broadcastsEnabled);
   const [language, setLanguageState] = useState(telegram.language);
   const [waiting, setWaiting] = useState(false);
 
   const verify = useVerifyPublicTelegram(publicId);
   const setEnabledMutation = useSetPublicTelegramEnabled(publicId);
+  const setBroadcastsMutation = useSetPublicTelegramBroadcasts(publicId);
   const setLanguageMutation = useSetPublicTelegramLanguage(publicId);
   const disconnect = useDisconnectPublicTelegram(publicId);
 
@@ -120,6 +123,18 @@ export function TelegramCard({
     }
   }
 
+  async function handleBroadcastsToggle(next: boolean) {
+    setBroadcastsEnabled(next);
+    try {
+      const result = await setBroadcastsMutation.mutateAsync(next);
+      setBroadcastsEnabled(result.broadcastsEnabled);
+      toast.success(next ? t('telegramBroadcastsOnToast') : t('telegramBroadcastsOffToast'));
+    } catch {
+      setBroadcastsEnabled(!next);
+      toast.error(t('telegramError'));
+    }
+  }
+
   async function handleLanguageChange(next: NotificationLanguage) {
     const previous = language;
     setLanguageState(next);
@@ -156,6 +171,14 @@ export function TelegramCard({
               checked={enabled}
               onCheckedChange={handleToggle}
               disabled={setEnabledMutation.isPending}
+            />
+          </div>
+          <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/30 px-4 py-3">
+            <span className="text-sm font-medium">{t('telegramBroadcastsLabel')}</span>
+            <Switch
+              checked={broadcastsEnabled}
+              onCheckedChange={handleBroadcastsToggle}
+              disabled={setBroadcastsMutation.isPending}
             />
           </div>
           <Button
