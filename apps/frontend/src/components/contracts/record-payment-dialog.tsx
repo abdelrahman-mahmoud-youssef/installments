@@ -23,7 +23,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { ApiError } from '@/lib/api/client';
 import { Installment } from '@/lib/api/contracts';
-import { toMinorUnits } from '@/lib/format';
+import { toMinorUnits, toMajorUnits } from '@/lib/format';
+import { cn } from '@/lib/utils';
 import { PaymentInput, paymentSchema } from '@/lib/schemas/payment';
 
 export function RecordPaymentDialog({
@@ -45,6 +46,13 @@ export function RecordPaymentDialog({
     defaultValues: { amount: 0, note: '' },
   });
 
+  const nextRemaining = outstandingInstallments[0]
+    ? outstandingInstallments[0].amount - outstandingInstallments[0].paidAmount
+    : 0;
+  const totalOutstanding = outstandingInstallments.reduce(
+    (sum, item) => sum + (item.amount - item.paidAmount),
+    0,
+  );
   const manualTotal = Object.values(manualAmounts).reduce((total, value) => total + (Number(value) || 0), 0);
 
   async function handleSubmit(values: PaymentInput) {
@@ -69,90 +77,126 @@ export function RecordPaymentDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={trigger} />
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
+      <DialogContent className="flex max-h-[90dvh] flex-col gap-0 p-0 sm:max-w-md">
+        <DialogHeader className="border-b border-border p-5">
           <DialogTitle>{t('title')}</DialogTitle>
           <DialogDescription>{t('description')}</DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-4">
-            <FormField
-              control={form.control}
-              name="amount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('amount')}</FormLabel>
-                  <FormControl>
-                    <NumberInput step="0.01" min="0" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="note"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('note')}</FormLabel>
-                  <FormControl>
-                    <Textarea rows={2} {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <label className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-border bg-muted/40 p-3 text-sm">
-              <input
-                type="checkbox"
-                checked={isManual}
-                onChange={(event) => setIsManual(event.target.checked)}
-                className="size-4 accent-primary"
-              />
-              {t('manualToggle')}
-            </label>
-
-            {isManual && (
-              <div className="flex flex-col gap-2.5 rounded-lg border border-border p-3.5">
-                {outstandingInstallments.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">{t('noOutstanding')}</p>
-                ) : (
-                  outstandingInstallments.map((installment) => {
-                    const remaining = installment.amount - installment.paidAmount;
-                    return (
-                      <div key={installment.id} className="flex items-center justify-between gap-3 text-sm">
-                        <span className="text-muted-foreground">
-                          #{installment.sequence} · <Money minorUnits={remaining} />
-                        </span>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          className="h-8 w-28"
-                          value={manualAmounts[installment.id] ?? ''}
-                          onChange={(event) =>
-                            setManualAmounts((previous) => ({
-                              ...previous,
-                              [installment.id]: event.target.value,
-                            }))
-                          }
-                        />
-                      </div>
-                    );
-                  })
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="flex min-h-0 flex-1 flex-col">
+            <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-5">
+              <FormField
+                control={form.control}
+                name="amount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('amount')}</FormLabel>
+                    <FormControl>
+                      <NumberInput step="0.01" min="0" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
-                <p className="border-t border-border pt-2.5 text-xs text-muted-foreground">
-                  {t('allocated')}{' '}
-                  <span className="font-medium text-foreground">
-                    <Money minorUnits={toMinorUnits(manualTotal)} />
-                  </span>{' '}
-                  {t('allocatedHint')}
-                </p>
-              </div>
-            )}
+              />
 
-            <DialogFooter>
+              {outstandingInstallments.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => form.setValue('amount', toMajorUnits(nextRemaining), { shouldValidate: true })}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium transition-colors hover:bg-accent"
+                  >
+                    {t('quickNext')}
+                    <Money minorUnits={nextRemaining} className="text-muted-foreground" />
+                  </button>
+                  {outstandingInstallments.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        form.setValue('amount', toMajorUnits(totalOutstanding), { shouldValidate: true })
+                      }
+                      className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium transition-colors hover:bg-accent"
+                    >
+                      {t('quickFull')}
+                      <Money minorUnits={totalOutstanding} className="text-muted-foreground" />
+                    </button>
+                  )}
+                </div>
+              )}
+
+              <FormField
+                control={form.control}
+                name="note"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('note')}</FormLabel>
+                    <FormControl>
+                      <Textarea rows={2} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <label className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-border bg-muted/40 p-3 text-sm">
+                <input
+                  type="checkbox"
+                  checked={isManual}
+                  onChange={(event) => setIsManual(event.target.checked)}
+                  className="size-4 accent-primary"
+                />
+                {t('manualToggle')}
+              </label>
+
+              {isManual && (
+                <div className="space-y-2.5 rounded-lg border border-border p-3.5">
+                  {outstandingInstallments.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">{t('noOutstanding')}</p>
+                  ) : (
+                    <div className="max-h-44 space-y-2.5 overflow-y-auto">
+                      {outstandingInstallments.map((installment) => {
+                        const remaining = installment.amount - installment.paidAmount;
+                        return (
+                          <div key={installment.id} className="flex items-center justify-between gap-3 text-sm">
+                            <span className="text-muted-foreground">
+                              #{installment.sequence} · <Money minorUnits={remaining} />
+                            </span>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              className="h-8 w-28"
+                              value={manualAmounts[installment.id] ?? ''}
+                              onChange={(event) =>
+                                setManualAmounts((previous) => ({
+                                  ...previous,
+                                  [installment.id]: event.target.value,
+                                }))
+                              }
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                  <p className="flex items-center justify-between border-t border-border pt-2.5 text-xs text-muted-foreground">
+                    <span>{t('allocated')}</span>
+                    <span
+                      className={cn(
+                        'font-semibold',
+                        toMinorUnits(manualTotal) === toMinorUnits(Number(form.watch('amount')) || 0)
+                          ? 'text-success'
+                          : 'text-foreground',
+                      )}
+                    >
+                      <Money minorUnits={toMinorUnits(manualTotal)} />
+                    </span>
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <DialogFooter className="mx-0 mb-0 border-t border-border bg-transparent p-5">
               <Button type="submit" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting && <Loader2 className="size-4 animate-spin" />}
                 {form.formState.isSubmitting ? t('submitting') : t('submit')}
