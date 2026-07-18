@@ -1,13 +1,15 @@
 'use client';
 
 import { CalendarCheck2, ShieldCheck, TrendingUp, Wallet } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { LanguageSwitcher } from '@/components/shared/language-switcher';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
+import { formatMoney } from '@/lib/format';
 
 function BrandPanel() {
   const t = useTranslations('auth.brand');
   const tCommon = useTranslations('common');
+  const locale = useLocale();
 
   const points = [
     { icon: Wallet, text: t('point1') },
@@ -57,11 +59,11 @@ function BrandPanel() {
             <div className="mt-4 grid grid-cols-2 gap-3">
               <div className="rounded-lg bg-white/10 p-3">
                 <p className="text-xs text-white/60">{t('cardCollected')}</p>
-                <p className="mt-0.5 font-semibold tabular-nums">$12,480</p>
+                <p className="mt-0.5 font-semibold tabular-nums">{formatMoney(1248000, locale)}</p>
               </div>
               <div className="rounded-lg bg-white/10 p-3">
                 <p className="text-xs text-white/60">{t('cardRemaining')}</p>
-                <p className="mt-0.5 font-semibold tabular-nums">$3,520</p>
+                <p className="mt-0.5 font-semibold tabular-nums">{formatMoney(352000, locale)}</p>
               </div>
             </div>
           </div>

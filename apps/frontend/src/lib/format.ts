@@ -1,7 +1,7 @@
 export function formatMoney(minorUnits: number, locale = 'en'): string {
   return new Intl.NumberFormat(locale, {
     style: 'currency',
-    currency: 'USD',
+    currency: 'EGP',
     minimumFractionDigits: 2,
     numberingSystem: 'latn',
   }).format(minorUnits / 100);
@@ -10,7 +10,7 @@ export function formatMoney(minorUnits: number, locale = 'en'): string {
 export function formatCompactMoney(minorUnits: number, locale = 'en'): string {
   return new Intl.NumberFormat(locale, {
     style: 'currency',
-    currency: 'USD',
+    currency: 'EGP',
     notation: 'compact',
     maximumFractionDigits: 1,
     numberingSystem: 'latn',
