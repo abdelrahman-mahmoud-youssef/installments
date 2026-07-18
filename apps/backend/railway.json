@@ -5,7 +5,7 @@
     "dockerfilePath": "apps/backend/Dockerfile"
   },
   "deploy": {
-    "startCommand": "node_modules/.bin/prisma migrate deploy && echo '>>> migrate ok, launching node' && node dist/main.js",
+    "startCommand": "node dist/main.js",
     "healthcheckPath": "/health",
     "healthcheckTimeout": 120,
     "restartPolicyType": "ON_FAILURE",
