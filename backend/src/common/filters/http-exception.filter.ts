@@ -68,6 +68,13 @@ export class HttpExceptionFilter implements ExceptionFilter {
         error: 'Not Found',
       };
     }
+    if (exception.code === 'P2003') {
+      return {
+        statusCode: HttpStatus.CONFLICT,
+        message: 'This record cannot be deleted because other records depend on it.',
+        error: 'Conflict',
+      };
+    }
     this.logger.error(`Prisma error ${exception.code}: ${exception.message}`);
     return {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
