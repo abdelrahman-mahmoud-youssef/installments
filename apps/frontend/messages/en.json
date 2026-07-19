@@ -338,6 +338,8 @@
   "settings": {
     "title": "Settings",
     "subtitle": "Manage your branding and notifications.",
+    "tabBranding": "Branding",
+    "tabNotifications": "Notifications",
     "brandingTitle": "Branding",
     "brandingDescription": "Customize your logo and brand color across the dashboard and your customer portal.",
     "brandingSaved": "Branding updated.",

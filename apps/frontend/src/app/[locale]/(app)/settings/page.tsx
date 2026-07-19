@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   useDisconnectNotifications,
   useNotificationSettings,
@@ -100,143 +101,154 @@ export default function SettingsPage() {
         <PageHeader title={t('title')} description={t('subtitle')} />
       </FadeIn>
 
-      <FadeIn delay={0.05} className="mx-auto w-full max-w-2xl space-y-6">
-        <BrandingSection />
+      <FadeIn delay={0.05} className="mx-auto w-full max-w-2xl">
+        <Tabs defaultValue="branding">
+          <TabsList className="mb-6">
+            <TabsTrigger value="branding">{t('tabBranding')}</TabsTrigger>
+            <TabsTrigger value="notifications">{t('tabNotifications')}</TabsTrigger>
+          </TabsList>
 
-        <Section
-          title={t('telegramTitle')}
-          description={t('telegramDescription')}
-          action={
-            isLoading ? (
-              <Skeleton className="h-5 w-20" />
-            ) : isConnected ? (
-              <Badge variant="secondary">
-                <CheckCircle2 className="size-3" />
-                {t('connected')}
-              </Badge>
-            ) : (
-              <Badge variant="outline">{t('notConnected')}</Badge>
-            )
-          }
-        >
-          {isLoading ? (
-            <div className="space-y-3">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-9 w-full" />
-              <Skeleton className="h-9 w-40" />
-            </div>
-          ) : isConnected ? (
-            <div className="flex flex-col gap-4">
-              <p className="text-sm text-muted-foreground">
-                {data?.telegramChatId
-                  ? t('connectedChat', { chatId: data.telegramChatId })
-                  : t('connectedDescription')}
-              </p>
-              <div className="flex flex-wrap gap-2">
-                <Button onClick={handleSendDemo} disabled={sendTest.isPending || disconnect.isPending}>
-                  {sendTest.isPending ? (
-                    <Loader2 className="size-4 animate-spin" />
-                  ) : (
-                    <Send className="size-4" />
-                  )}
-                  {sendTest.isPending ? t('sending') : t('sendDemo')}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={handleRemove}
-                  disabled={sendTest.isPending || disconnect.isPending}
-                >
-                  {disconnect.isPending ? (
-                    <Loader2 className="size-4 animate-spin" />
-                  ) : (
-                    <Trash2 className="size-4" />
-                  )}
-                  {t('remove')}
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(handleConnect)} className="flex flex-col gap-4">
-                  <FormField
-                    control={form.control}
-                    name="telegramBotToken"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t('tokenLabel')}</FormLabel>
-                        <FormControl>
-                          <Input
-                            dir="ltr"
-                            autoComplete="off"
-                            placeholder={t('tokenPlaceholder')}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div>
-                    <Button type="submit" disabled={form.formState.isSubmitting}>
-                      {form.formState.isSubmitting ? (
+          <TabsContent value="branding">
+            <BrandingSection />
+          </TabsContent>
+
+          <TabsContent value="notifications" className="space-y-6">
+            <Section
+              title={t('telegramTitle')}
+              description={t('telegramDescription')}
+              action={
+                isLoading ? (
+                  <Skeleton className="h-5 w-20" />
+                ) : isConnected ? (
+                  <Badge variant="secondary">
+                    <CheckCircle2 className="size-3" />
+                    {t('connected')}
+                  </Badge>
+                ) : (
+                  <Badge variant="outline">{t('notConnected')}</Badge>
+                )
+              }
+            >
+              {isLoading ? (
+                <div className="space-y-3">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-9 w-full" />
+                  <Skeleton className="h-9 w-40" />
+                </div>
+              ) : isConnected ? (
+                <div className="flex flex-col gap-4">
+                  <p className="text-sm text-muted-foreground">
+                    {data?.telegramChatId
+                      ? t('connectedChat', { chatId: data.telegramChatId })
+                      : t('connectedDescription')}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <Button onClick={handleSendDemo} disabled={sendTest.isPending || disconnect.isPending}>
+                      {sendTest.isPending ? (
                         <Loader2 className="size-4 animate-spin" />
                       ) : (
                         <Send className="size-4" />
                       )}
-                      {form.formState.isSubmitting ? t('sending') : t('connectAndTest')}
+                      {sendTest.isPending ? t('sending') : t('sendDemo')}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={handleRemove}
+                      disabled={sendTest.isPending || disconnect.isPending}
+                    >
+                      {disconnect.isPending ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="size-4" />
+                      )}
+                      {t('remove')}
                     </Button>
                   </div>
-                </form>
-              </Form>
+                </div>
+              ) : (
+                <>
+                  <Form {...form}>
+                    <form onSubmit={form.handleSubmit(handleConnect)} className="flex flex-col gap-4">
+                      <FormField
+                        control={form.control}
+                        name="telegramBotToken"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t('tokenLabel')}</FormLabel>
+                            <FormControl>
+                              <Input
+                                dir="ltr"
+                                autoComplete="off"
+                                placeholder={t('tokenPlaceholder')}
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <div>
+                        <Button type="submit" disabled={form.formState.isSubmitting}>
+                          {form.formState.isSubmitting ? (
+                            <Loader2 className="size-4 animate-spin" />
+                          ) : (
+                            <Send className="size-4" />
+                          )}
+                          {form.formState.isSubmitting ? t('sending') : t('connectAndTest')}
+                        </Button>
+                      </div>
+                    </form>
+                  </Form>
 
-              <div className="mt-6 border-t border-border pt-5">
-                <h3 className="mb-3 text-sm font-medium text-foreground">{t('stepsTitle')}</h3>
-                <ol className="space-y-3">
-                  {setupSteps.map((step, index) => (
-                    <li key={step} className="flex gap-3 text-sm text-muted-foreground">
-                      <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-foreground tabular-nums">
-                        {index + 1}
-                      </span>
-                      <span>{t(step)}</span>
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            </>
-          )}
+                  <div className="mt-6 border-t border-border pt-5">
+                    <h3 className="mb-3 text-sm font-medium text-foreground">{t('stepsTitle')}</h3>
+                    <ol className="space-y-3">
+                      {setupSteps.map((step, index) => (
+                        <li key={step} className="flex gap-3 text-sm text-muted-foreground">
+                          <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-foreground tabular-nums">
+                            {index + 1}
+                          </span>
+                          <span>{t(step)}</span>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                </>
+              )}
 
-          {!isLoading && data && (
-            <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5">
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-foreground">{t('languageLabel')}</p>
-                <p className="text-xs text-muted-foreground">{t('languageHint')}</p>
-              </div>
-              <NotificationLanguageToggle
-                value={data.notificationLanguage}
-                onChange={handleLanguageChange}
-                disabled={setLanguage.isPending}
-              />
-            </div>
-          )}
-        </Section>
+              {!isLoading && data && (
+                <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground">{t('languageLabel')}</p>
+                    <p className="text-xs text-muted-foreground">{t('languageHint')}</p>
+                  </div>
+                  <NotificationLanguageToggle
+                    value={data.notificationLanguage}
+                    onChange={handleLanguageChange}
+                    disabled={setLanguage.isPending}
+                  />
+                </div>
+              )}
+            </Section>
 
-        <Section title={t('moreChannelsTitle')} description={t('moreChannelsDescription')}>
-          <ul className="space-y-2.5">
-            {comingSoonChannels.map(({ key, icon: Icon }) => (
-              <li
-                key={key}
-                className="flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/30 px-4 py-3"
-              >
-                <span className="flex items-center gap-3 text-sm font-medium text-muted-foreground">
-                  <Icon className="size-4" />
-                  {t(key)}
-                </span>
-                <Badge variant="outline">{t('comingSoon')}</Badge>
-              </li>
-            ))}
-          </ul>
-        </Section>
+            <Section title={t('moreChannelsTitle')} description={t('moreChannelsDescription')}>
+              <ul className="space-y-2.5">
+                {comingSoonChannels.map(({ key, icon: Icon }) => (
+                  <li
+                    key={key}
+                    className="flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/30 px-4 py-3"
+                  >
+                    <span className="flex items-center gap-3 text-sm font-medium text-muted-foreground">
+                      <Icon className="size-4" />
+                      {t(key)}
+                    </span>
+                    <Badge variant="outline">{t('comingSoon')}</Badge>
+                  </li>
+                ))}
+              </ul>
+            </Section>
+          </TabsContent>
+        </Tabs>
       </FadeIn>
     </div>
   );

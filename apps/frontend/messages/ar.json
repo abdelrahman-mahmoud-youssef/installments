@@ -338,6 +338,8 @@
   "settings": {
     "title": "الإعدادات",
     "subtitle": "تحكم في هوية نشاطك التجاري والإشعارات.",
+    "tabBranding": "الهوية البصرية",
+    "tabNotifications": "الإشعارات",
     "brandingTitle": "الهوية البصرية",
     "brandingDescription": "خصّص شعارك ولون علامتك التجارية عبر لوحة التحكم وصفحة عملائك.",
     "brandingSaved": "تم تحديث الهوية البصرية.",
