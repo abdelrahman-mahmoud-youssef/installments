@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CheckCircle2, Loader2, Mail, MessageCircle, Send, Smartphone, Trash2 } from 'lucide-react';
+import { Bell, CheckCircle2, Loader2, Mail, MessageCircle, Palette, Send, Smartphone, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { type ComponentType } from 'react';
 import { useForm } from 'react-hook-form';
@@ -103,9 +103,15 @@ export default function SettingsPage() {
 
       <FadeIn delay={0.05} className="mx-auto w-full max-w-2xl">
         <Tabs defaultValue="branding">
-          <TabsList className="mb-6">
-            <TabsTrigger value="branding">{t('tabBranding')}</TabsTrigger>
-            <TabsTrigger value="notifications">{t('tabNotifications')}</TabsTrigger>
+          <TabsList className="mb-6 w-full p-1">
+            <TabsTrigger value="branding" className="gap-2 text-sm">
+              <Palette className="size-4" />
+              {t('tabBranding')}
+            </TabsTrigger>
+            <TabsTrigger value="notifications" className="gap-2 text-sm">
+              <Bell className="size-4" />
+              {t('tabNotifications')}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="branding">
