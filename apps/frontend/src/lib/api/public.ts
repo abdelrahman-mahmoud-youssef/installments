@@ -9,6 +9,7 @@ export interface PublicUpcomingInstallment {
 export interface PublicContractSummary {
   productName: string;
   totalAmount: number;
+  downPayment: number;
   paidAmount: number;
   remainingAmount: number;
   paidInstallmentsCount: number;

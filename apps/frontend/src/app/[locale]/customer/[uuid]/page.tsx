@@ -110,6 +110,12 @@ export default async function PublicCustomerPage({
                   </div>
                 </div>
 
+                {contract.downPayment > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    {t('downPayment')}: <span className="font-medium">{formatMoney(contract.downPayment, locale)}</span>
+                  </p>
+                )}
+
                 {contract.upcomingInstallments.length > 0 && (
                   <div className="border-t border-border pt-4">
                     <p className="mb-2.5 text-xs font-medium text-muted-foreground">{t('upcoming')}</p>

@@ -13,6 +13,7 @@ export interface PublicUpcomingInstallment {
 export interface PublicContractSummary {
   productName: string;
   totalAmount: number;
+  downPayment: number;
   paidAmount: number;
   remainingAmount: number;
   paidInstallmentsCount: number;
@@ -62,6 +63,7 @@ export class PublicService {
           select: {
             productName: true,
             totalAmount: true,
+            downPayment: true,
             installments: {
               orderBy: { sequence: 'asc' },
               select: { dueDate: true, amount: true, paidAmount: true, status: true },
@@ -228,9 +230,14 @@ export class PublicService {
   private summarizeContract(contract: {
     productName: string;
     totalAmount: number;
+    downPayment: number;
     installments: { dueDate: Date; amount: number; paidAmount: number; status: InstallmentStatus }[];
   }): PublicContractSummary {
-    const paidAmount = contract.installments.reduce((total, installment) => total + installment.paidAmount, 0);
+    const installmentsPaidAmount = contract.installments.reduce(
+      (total, installment) => total + installment.paidAmount,
+      0,
+    );
+    const installmentsTotal = contract.installments.reduce((total, installment) => total + installment.amount, 0);
     const upcomingInstallments = contract.installments
       .filter(
         (installment) =>
@@ -246,8 +253,9 @@ export class PublicService {
     return {
       productName: contract.productName,
       totalAmount: contract.totalAmount,
-      paidAmount,
-      remainingAmount: contract.totalAmount - paidAmount,
+      downPayment: contract.downPayment,
+      paidAmount: contract.downPayment + installmentsPaidAmount,
+      remainingAmount: installmentsTotal - installmentsPaidAmount,
       paidInstallmentsCount: contract.installments.filter(
         (installment) => installment.status === InstallmentStatus.PAID,
       ).length,
