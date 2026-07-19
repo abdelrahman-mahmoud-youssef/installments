@@ -1,9 +1,9 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Calculator, Camera, Copy, Link2, Loader2, ThumbsUp } from 'lucide-react';
+import { Bold, Calculator, Camera, Copy, Link2, Loader2, ThumbsUp } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { NumberInput } from '@/components/shared/number-input';
@@ -65,6 +65,24 @@ export function ShopPageSection() {
       tiktokUrl: data?.tiktokUrl ?? '',
     },
   });
+
+  const aboutTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+  function handleBoldClick() {
+    const textarea = aboutTextareaRef.current;
+    if (!textarea) {
+      return;
+    }
+    const { selectionStart, selectionEnd, value } = textarea;
+    const selected = value.slice(selectionStart, selectionEnd) || t('aboutBoldPlaceholder');
+    const nextValue = `${value.slice(0, selectionStart)}**${selected}**${value.slice(selectionEnd)}`;
+    form.setValue('about', nextValue, { shouldDirty: true });
+    requestAnimationFrame(() => {
+      textarea.focus();
+      const cursor = selectionStart + selected.length + 4;
+      textarea.setSelectionRange(cursor, cursor);
+    });
+  }
 
   async function handleSave(values: ShopPageInput) {
     try {
@@ -176,10 +194,30 @@ export function ShopPageSection() {
                 name="about"
                 render={({ field }) => (
                   <FormItem className="max-w-sm">
-                    <FormLabel>{t('aboutLabel')}</FormLabel>
+                    <div className="mb-1.5 flex items-center justify-between">
+                      <FormLabel>{t('aboutLabel')}</FormLabel>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon-sm"
+                        onClick={handleBoldClick}
+                        aria-label={t('aboutBoldButton')}
+                      >
+                        <Bold className="size-3.5" />
+                      </Button>
+                    </div>
                     <FormControl>
-                      <Textarea rows={3} placeholder={t('aboutPlaceholder')} {...field} />
+                      <Textarea
+                        ref={aboutTextareaRef}
+                        rows={4}
+                        placeholder={t('aboutPlaceholder')}
+                        name={field.name}
+                        value={field.value}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                      />
                     </FormControl>
+                    <p className="text-xs text-muted-foreground">{t('aboutHint')}</p>
                     <FormMessage />
                   </FormItem>
                 )}

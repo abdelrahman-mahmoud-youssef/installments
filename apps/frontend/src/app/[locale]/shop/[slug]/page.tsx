@@ -1,6 +1,7 @@
 import { Camera, MessageCircle, Music2, ThumbsUp } from 'lucide-react';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
+import { FormattedText } from '@/components/shared/formatted-text';
 import { LanguageSwitcher } from '@/components/shared/language-switcher';
 import { BrandLogo } from '@/components/shared/logo';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
@@ -99,12 +100,14 @@ export default async function PublicShopPage({
         {showCalculator ? (
           <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
             <Tabs defaultValue="about">
-              <TabsList>
+              <TabsList className="w-full">
                 <TabsTrigger value="about">{t('aboutTab')}</TabsTrigger>
                 <TabsTrigger value="calculator">{t('calculatorTab')}</TabsTrigger>
               </TabsList>
               <TabsContent value="about">
-                <p className="text-sm whitespace-pre-line text-foreground">{shop.about || t('noAbout')}</p>
+                <p className="text-[0.95rem] leading-relaxed whitespace-pre-line text-foreground">
+                  {shop.about ? <FormattedText text={shop.about} /> : t('noAbout')}
+                </p>
               </TabsContent>
               <TabsContent value="calculator">
                 <InstallmentCalculator plans={shop.calculatorPlans} locale={locale} />
@@ -113,7 +116,9 @@ export default async function PublicShopPage({
           </div>
         ) : (
           <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
-            <p className="text-sm whitespace-pre-line text-foreground">{shop.about || t('noAbout')}</p>
+            <p className="text-[0.95rem] leading-relaxed whitespace-pre-line text-foreground">
+              {shop.about ? <FormattedText text={shop.about} /> : t('noAbout')}
+            </p>
           </div>
         )}
       </main>

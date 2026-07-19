@@ -136,7 +136,7 @@ export default async function PublicCustomerPage({
                 {(contract.payments.length > 0 || contract.upcomingInstallments.length > 0) && (
                   <div className="border-t border-border pt-4">
                     <Tabs defaultValue="payments">
-                      <TabsList>
+                      <TabsList className="w-full">
                         <TabsTrigger value="payments">{t('tabPayments')}</TabsTrigger>
                         <TabsTrigger value="upcoming">{t('upcoming')}</TabsTrigger>
                       </TabsList>
