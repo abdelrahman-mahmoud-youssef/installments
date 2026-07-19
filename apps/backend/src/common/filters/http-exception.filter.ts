@@ -1,30 +1,30 @@
-import {
-  ArgumentsHost,
-  Catch,
-  ExceptionFilter,
-  HttpException,
-  HttpStatus,
-  Logger,
-} from '@nestjs/common';
+import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { Response } from 'express';
+import { Request, Response } from 'express';
+import { Logger } from 'nestjs-pino';
 
 interface ErrorResponseBody {
   statusCode: number;
   message: string | string[];
   error: string;
+  requestId?: string;
 }
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
-  private readonly logger = new Logger(HttpExceptionFilter.name);
+  constructor(private readonly logger: Logger) {}
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const response = host.switchToHttp().getResponse<Response>();
+    const request = host.switchToHttp().getRequest<Request>();
     const body = this.toResponseBody(exception);
+    body.requestId = request.id !== undefined ? String(request.id) : undefined;
 
     if (body.statusCode >= HttpStatus.INTERNAL_SERVER_ERROR) {
-      this.logger.error(exception instanceof Error ? exception.stack : String(exception));
+      this.logger.error(
+        `Unhandled exception: ${body.error}`,
+        exception instanceof Error ? exception.stack : String(exception),
+      );
     }
 
     response.status(body.statusCode).json(body);
