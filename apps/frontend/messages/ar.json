@@ -299,7 +299,8 @@
     "telegramBroadcastsOnToast": "اتفعّلت الإعلانات.",
     "telegramBroadcastsOffToast": "اتوقفت الإعلانات.",
     "telegramDisconnectedToast": "اتلغى ربط تيليجرام.",
-    "telegramError": "حصل خطأ."
+    "telegramError": "حصل خطأ.",
+    "whatsappLabel": "كلمنا على واتساب"
   },
   "announcements": {
     "title": "الإعلانات",
@@ -352,6 +353,9 @@
     "colorHint": "بيُستخدم في لوحة التحكم وصفحة عملائك.",
     "displayNameLabel": "الاسم الظاهر",
     "displayNamePlaceholder": "بيظهر لعملائك",
+    "phoneLabel": "رقم الواتساب",
+    "phonePlaceholder": "+20 100 123 4567",
+    "phoneHint": "بيظهر كزرار واتساب في صفحة عملائك. اكتب كود الدولة.",
     "saveBranding": "حفظ",
     "publicPricingLabel": "إظهار السعر للعملاء",
     "publicPricingHint": "لو مقفول، العميل مش هيشوف الدفعة المقدمة ولا السعر الإجمالي في صفحته — هيشوف بس اللي دفعه واللي باقي عليه.",

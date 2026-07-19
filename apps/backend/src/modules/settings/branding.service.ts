@@ -28,6 +28,7 @@ export class BrandingService {
         displayName: dto.displayName,
         brandColor: dto.brandColor,
         showPublicPricing: dto.showPublicPricing,
+        phone: dto.phone,
       },
     });
     return toTenantBranding(tenant);

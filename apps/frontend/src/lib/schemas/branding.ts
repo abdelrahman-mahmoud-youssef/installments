@@ -15,6 +15,7 @@ export type BrandColorPreset = (typeof BRAND_COLOR_PRESETS)[number];
 
 export const brandingSchema = z.object({
   displayName: z.string().max(120),
+  phone: z.string().max(30),
 });
 
 export type BrandingInput = z.infer<typeof brandingSchema>;

@@ -1,3 +1,4 @@
+import { MessageCircle } from 'lucide-react';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { LanguageSwitcher } from '@/components/shared/language-switcher';
@@ -28,6 +29,7 @@ export default async function PublicCustomerPage({
   const totalRemaining = customer.contracts.reduce((sum, contract) => sum + contract.remainingAmount, 0);
   const totalPaid = customer.contracts.reduce((sum, contract) => sum + contract.paidAmount, 0);
   const logoUrl = resolveAssetUrl(customer.branding.logoUrl);
+  const whatsappPhone = customer.branding.phone?.replace(/\D/g, '') || null;
 
   return (
     <div className="min-h-screen bg-muted/25">
@@ -146,6 +148,18 @@ export default async function PublicCustomerPage({
       </main>
 
       <footer className="pb-10 text-center text-xs text-muted-foreground">{customer.branding.displayName}</footer>
+
+      {whatsappPhone && (
+        <a
+          href={`https://wa.me/${whatsappPhone}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={t('whatsappLabel')}
+          className="fixed bottom-5 end-5 z-50 grid size-14 place-items-center rounded-full bg-[#25D366] text-white shadow-lg transition-transform hover:scale-105"
+        >
+          <MessageCircle className="size-7" fill="currentColor" />
+        </a>
+      )}
     </div>
   );
 }

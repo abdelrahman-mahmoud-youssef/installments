@@ -31,12 +31,15 @@ export function BrandingSection() {
 
   const form = useForm<BrandingInput>({
     resolver: zodResolver(brandingSchema),
-    values: { displayName: data?.displayName ?? '' },
+    values: { displayName: data?.displayName ?? '', phone: data?.phone ?? '' },
   });
 
-  async function handleSaveDisplayName(values: BrandingInput) {
+  async function handleSaveDetails(values: BrandingInput) {
     try {
-      await updateBranding.mutateAsync({ displayName: values.displayName.trim() });
+      await updateBranding.mutateAsync({
+        displayName: values.displayName.trim(),
+        phone: values.phone.trim(),
+      });
       toast.success(t('brandingSaved'));
     } catch (error) {
       toast.error(error instanceof ApiError ? error.message : t('genericError'));
@@ -205,7 +208,7 @@ export function BrandingSection() {
           <Skeleton className="h-16 w-full max-w-sm" />
         ) : (
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSaveDisplayName)} className="flex flex-col gap-3">
+            <form onSubmit={form.handleSubmit(handleSaveDetails)} className="flex flex-col gap-3">
               <FormField
                 control={form.control}
                 name="displayName"
@@ -215,6 +218,20 @@ export function BrandingSection() {
                     <FormControl>
                       <Input placeholder={t('displayNamePlaceholder')} {...field} />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem className="max-w-sm">
+                    <FormLabel>{t('phoneLabel')}</FormLabel>
+                    <FormControl>
+                      <Input dir="ltr" placeholder={t('phonePlaceholder')} {...field} />
+                    </FormControl>
+                    <p className="text-xs text-muted-foreground">{t('phoneHint')}</p>
                     <FormMessage />
                   </FormItem>
                 )}

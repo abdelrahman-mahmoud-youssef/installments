@@ -299,7 +299,8 @@
     "telegramBroadcastsOnToast": "Announcements turned on.",
     "telegramBroadcastsOffToast": "Announcements turned off.",
     "telegramDisconnectedToast": "Telegram disconnected.",
-    "telegramError": "Something went wrong."
+    "telegramError": "Something went wrong.",
+    "whatsappLabel": "Chat on WhatsApp"
   },
   "announcements": {
     "title": "Announcements",
@@ -352,6 +353,9 @@
     "colorHint": "Used across your dashboard and customer portal.",
     "displayNameLabel": "Display name",
     "displayNamePlaceholder": "Shown to your customers",
+    "phoneLabel": "WhatsApp number",
+    "phonePlaceholder": "+20 100 123 4567",
+    "phoneHint": "Shown as a WhatsApp button on your customers' page. Include the country code.",
     "saveBranding": "Save",
     "publicPricingLabel": "Show pricing to customers",
     "publicPricingHint": "When off, customers won't see the down payment or total price on their page — only what they've paid and what's left.",

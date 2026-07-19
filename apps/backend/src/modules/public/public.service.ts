@@ -69,6 +69,7 @@ export class PublicService {
             brandColor: true,
             logoUrl: true,
             showPublicPricing: true,
+            phone: true,
           },
         },
         contracts: {

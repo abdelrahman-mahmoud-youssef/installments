@@ -4,6 +4,7 @@ export interface TenantBrandingSource {
   brandColor: string;
   logoUrl: string | null;
   showPublicPricing: boolean;
+  phone: string | null;
 }
 
 export interface TenantBranding {
@@ -11,6 +12,7 @@ export interface TenantBranding {
   brandColor: string;
   logoUrl: string | null;
   showPublicPricing: boolean;
+  phone: string | null;
 }
 
 export function toTenantBranding(tenant: TenantBrandingSource): TenantBranding {
@@ -19,5 +21,6 @@ export function toTenantBranding(tenant: TenantBrandingSource): TenantBranding {
     brandColor: tenant.brandColor,
     logoUrl: tenant.logoUrl,
     showPublicPricing: tenant.showPublicPricing,
+    phone: tenant.phone,
   };
 }

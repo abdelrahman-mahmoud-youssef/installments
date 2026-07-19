@@ -60,6 +60,7 @@ model Tenant {
   logoUrl            String?
   brandColor         String             @default("emerald")
   showPublicPricing  Boolean            @default(true)
+  phone              String?
   telegramBotToken   String?
   telegramBotUsername String?
   telegramChatId     String?

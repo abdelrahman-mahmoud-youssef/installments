@@ -14,4 +14,9 @@ export class UpdateBrandingDto {
   @IsOptional()
   @IsBoolean()
   showPublicPricing?: boolean;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(30)
+  phone?: string;
 }
