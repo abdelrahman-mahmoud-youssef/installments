@@ -1,5 +1,6 @@
 import type { NotificationLanguage } from '@/components/shared/notification-language-toggle';
 import { config } from '@/lib/config';
+import { TenantBranding } from './branding';
 
 export interface PublicUpcomingInstallment {
   dueDate: string;
@@ -8,8 +9,8 @@ export interface PublicUpcomingInstallment {
 
 export interface PublicContractSummary {
   productName: string;
-  totalAmount: number;
-  downPayment: number;
+  totalAmount?: number;
+  downPayment?: number;
   paidAmount: number;
   remainingAmount: number;
   paidInstallmentsCount: number;
@@ -36,6 +37,7 @@ export interface PublicCustomerResponse {
   name: string;
   contracts: PublicContractSummary[];
   telegram: PublicTelegramStatus;
+  branding: TenantBranding;
 }
 
 export async function getPublicCustomer(publicId: string): Promise<PublicCustomerResponse | null> {

@@ -351,6 +351,8 @@
     "displayNameLabel": "Display name",
     "displayNamePlaceholder": "Shown to your customers",
     "saveBranding": "Save",
+    "publicPricingLabel": "Show pricing to customers",
+    "publicPricingHint": "When off, customers won't see the down payment or total price on their page — only what they've paid and what's left.",
     "brandColor_emerald": "Emerald",
     "brandColor_teal": "Teal",
     "brandColor_blue": "Blue",

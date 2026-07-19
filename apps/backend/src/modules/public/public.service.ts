@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InstallmentStatus, NotificationLanguage } from '@prisma/client';
+import { TenantBranding, toTenantBranding } from '../../common/tenant-branding';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TelegramService } from '../telegram/telegram.service';
 
@@ -12,8 +13,8 @@ export interface PublicUpcomingInstallment {
 
 export interface PublicContractSummary {
   productName: string;
-  totalAmount: number;
-  downPayment: number;
+  totalAmount?: number;
+  downPayment?: number;
   paidAmount: number;
   remainingAmount: number;
   paidInstallmentsCount: number;
@@ -40,6 +41,7 @@ export interface PublicCustomerResponse {
   name: string;
   contracts: PublicContractSummary[];
   telegram: PublicTelegramStatus;
+  branding: TenantBranding;
 }
 
 @Injectable()
@@ -58,7 +60,17 @@ export class PublicService {
         telegramNotificationsEnabled: true,
         telegramBroadcastsEnabled: true,
         notificationLanguage: true,
-        tenant: { select: { telegramBotToken: true, telegramBotUsername: true } },
+        tenant: {
+          select: {
+            telegramBotToken: true,
+            telegramBotUsername: true,
+            name: true,
+            displayName: true,
+            brandColor: true,
+            logoUrl: true,
+            showPublicPricing: true,
+          },
+        },
         contracts: {
           select: {
             productName: true,
@@ -79,7 +91,9 @@ export class PublicService {
 
     return {
       name: customer.name,
-      contracts: customer.contracts.map((contract) => this.summarizeContract(contract)),
+      contracts: customer.contracts.map((contract) =>
+        this.summarizeContract(contract, customer.tenant.showPublicPricing),
+      ),
       telegram: {
         available: Boolean(customer.tenant.telegramBotToken && customer.tenant.telegramBotUsername),
         botUsername: customer.tenant.telegramBotUsername,
@@ -88,6 +102,7 @@ export class PublicService {
         broadcastsEnabled: customer.telegramBroadcastsEnabled,
         language: customer.notificationLanguage,
       },
+      branding: toTenantBranding(customer.tenant),
     };
   }
 
@@ -227,12 +242,15 @@ export class PublicService {
     return customer;
   }
 
-  private summarizeContract(contract: {
-    productName: string;
-    totalAmount: number;
-    downPayment: number;
-    installments: { dueDate: Date; amount: number; paidAmount: number; status: InstallmentStatus }[];
-  }): PublicContractSummary {
+  private summarizeContract(
+    contract: {
+      productName: string;
+      totalAmount: number;
+      downPayment: number;
+      installments: { dueDate: Date; amount: number; paidAmount: number; status: InstallmentStatus }[];
+    },
+    pricingVisible: boolean,
+  ): PublicContractSummary {
     const installmentsPaidAmount = contract.installments.reduce(
       (total, installment) => total + installment.paidAmount,
       0,
@@ -252,8 +270,7 @@ export class PublicService {
 
     return {
       productName: contract.productName,
-      totalAmount: contract.totalAmount,
-      downPayment: contract.downPayment,
+      ...(pricingVisible ? { totalAmount: contract.totalAmount, downPayment: contract.downPayment } : {}),
       paidAmount: contract.downPayment + installmentsPaidAmount,
       remainingAmount: installmentsTotal - installmentsPaidAmount,
       paidInstallmentsCount: contract.installments.filter(

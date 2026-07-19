@@ -1,8 +1,10 @@
 import { getLocale, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { LanguageSwitcher } from '@/components/shared/language-switcher';
-import { Logo } from '@/components/shared/logo';
+import { BrandLogo } from '@/components/shared/logo';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
+import { resolveAssetUrl } from '@/lib/assets';
+import { brandColorCssVars } from '@/lib/brand-colors';
 import { getPublicCustomer } from '@/lib/api/public';
 import { formatDate, formatMoney } from '@/lib/format';
 import { TelegramCard } from './telegram-card';
@@ -13,10 +15,9 @@ export default async function PublicCustomerPage({
   params: Promise<{ uuid: string }>;
 }) {
   const { uuid } = await params;
-  const [customer, t, tCommon, locale] = await Promise.all([
+  const [customer, t, locale] = await Promise.all([
     getPublicCustomer(uuid),
     getTranslations('publicCustomer'),
-    getTranslations('common'),
     getLocale(),
   ]);
 
@@ -26,12 +27,14 @@ export default async function PublicCustomerPage({
 
   const totalRemaining = customer.contracts.reduce((sum, contract) => sum + contract.remainingAmount, 0);
   const totalPaid = customer.contracts.reduce((sum, contract) => sum + contract.paidAmount, 0);
+  const logoUrl = resolveAssetUrl(customer.branding.logoUrl);
 
   return (
     <div className="min-h-screen bg-muted/25">
+      <style>{`:root{${brandColorCssVars(customer.branding.brandColor)}}`}</style>
       <header className="border-b border-border bg-background/80 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-2xl items-center justify-between px-4">
-          <Logo label={tCommon('appName')} />
+          <BrandLogo logoUrl={logoUrl} label={customer.branding.displayName} />
           <div className="flex items-center gap-1">
             <ThemeToggle />
             <LanguageSwitcher />
@@ -69,10 +72,9 @@ export default async function PublicCustomerPage({
           </div>
         ) : (
           customer.contracts.map((contract, index) => {
+            const contractTotal = contract.paidAmount + contract.remainingAmount;
             const ratio =
-              contract.totalAmount > 0
-                ? Math.min(1, Math.max(0, contract.paidAmount / contract.totalAmount))
-                : 0;
+              contractTotal > 0 ? Math.min(1, Math.max(0, contract.paidAmount / contractTotal)) : 0;
             return (
               <div key={index} className="space-y-4 rounded-xl border border-border bg-card p-5 shadow-xs">
                 <div className="flex items-center justify-between gap-3">
@@ -89,13 +91,17 @@ export default async function PublicCustomerPage({
                   />
                 </div>
 
-                <div className="grid grid-cols-3 gap-3 text-sm">
-                  <div>
-                    <p className="text-xs text-muted-foreground">{t('total')}</p>
-                    <p className="mt-0.5 font-medium tabular-nums">
-                      {formatMoney(contract.totalAmount, locale)}
-                    </p>
-                  </div>
+                <div
+                  className={`grid gap-3 text-sm ${contract.totalAmount !== undefined ? 'grid-cols-3' : 'grid-cols-2'}`}
+                >
+                  {contract.totalAmount !== undefined && (
+                    <div>
+                      <p className="text-xs text-muted-foreground">{t('total')}</p>
+                      <p className="mt-0.5 font-medium tabular-nums">
+                        {formatMoney(contract.totalAmount, locale)}
+                      </p>
+                    </div>
+                  )}
                   <div>
                     <p className="text-xs text-muted-foreground">{t('paid')}</p>
                     <p className="mt-0.5 font-medium tabular-nums text-success">
@@ -110,9 +116,9 @@ export default async function PublicCustomerPage({
                   </div>
                 </div>
 
-                {contract.downPayment > 0 && (
+                {Boolean(contract.downPayment) && (
                   <p className="text-xs text-muted-foreground">
-                    {t('downPayment')}: <span className="font-medium">{formatMoney(contract.downPayment, locale)}</span>
+                    {t('downPayment')}: <span className="font-medium">{formatMoney(contract.downPayment as number, locale)}</span>
                   </p>
                 )}
 
@@ -139,7 +145,7 @@ export default async function PublicCustomerPage({
         )}
       </main>
 
-      <footer className="pb-10 text-center text-xs text-muted-foreground">{tCommon('appName')}</footer>
+      <footer className="pb-10 text-center text-xs text-muted-foreground">{customer.branding.displayName}</footer>
     </div>
   );
 }

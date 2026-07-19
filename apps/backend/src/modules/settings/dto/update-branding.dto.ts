@@ -1,4 +1,4 @@
-import { IsIn, IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsBoolean, IsIn, IsOptional, IsString, MaxLength } from 'class-validator';
 import { BRAND_COLOR_PRESETS, BrandColorPreset } from '../../../common/constants';
 
 export class UpdateBrandingDto {
@@ -10,4 +10,8 @@ export class UpdateBrandingDto {
   @IsOptional()
   @IsIn(BRAND_COLOR_PRESETS)
   brandColor?: BrandColorPreset;
+
+  @IsOptional()
+  @IsBoolean()
+  showPublicPricing?: boolean;
 }

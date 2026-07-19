@@ -6,6 +6,7 @@ export interface TenantBranding {
   displayName: string;
   brandColor: BrandColorPreset;
   logoUrl: string | null;
+  showPublicPricing: boolean;
 }
 
 export async function getBrandingServer(token: string): Promise<TenantBranding | null> {
@@ -26,6 +27,7 @@ export async function getBrandingServer(token: string): Promise<TenantBranding |
 export interface UpdateBrandingInput {
   displayName?: string;
   brandColor?: BrandColorPreset;
+  showPublicPricing?: boolean;
 }
 
 export function getBranding(): Promise<TenantBranding> {

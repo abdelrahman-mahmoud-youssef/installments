@@ -1,25 +1,13 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { Tenant } from '@prisma/client';
 import { MAX_LOGO_UPLOAD_BYTES } from '../../common/constants';
+import { TenantBranding, toTenantBranding } from '../../common/tenant-branding';
 import { PrismaService } from '../../prisma/prisma.service';
 import { detectImageExtension } from '../storage/image-signature';
 import { StorageService } from '../storage/storage.service';
 import { UpdateBrandingDto } from './dto/update-branding.dto';
 import { UploadLogoDto } from './dto/upload-logo.dto';
 
-export interface TenantBranding {
-  displayName: string;
-  brandColor: string;
-  logoUrl: string | null;
-}
-
-function toBranding(tenant: Tenant): TenantBranding {
-  return {
-    displayName: tenant.displayName ?? tenant.name,
-    brandColor: tenant.brandColor,
-    logoUrl: tenant.logoUrl,
-  };
-}
+export type { TenantBranding };
 
 @Injectable()
 export class BrandingService {
@@ -30,15 +18,19 @@ export class BrandingService {
 
   async getBranding(tenantId: string): Promise<TenantBranding> {
     const tenant = await this.prisma.tenant.findUniqueOrThrow({ where: { id: tenantId } });
-    return toBranding(tenant);
+    return toTenantBranding(tenant);
   }
 
   async updateBranding(tenantId: string, dto: UpdateBrandingDto): Promise<TenantBranding> {
     const tenant = await this.prisma.tenant.update({
       where: { id: tenantId },
-      data: { displayName: dto.displayName, brandColor: dto.brandColor },
+      data: {
+        displayName: dto.displayName,
+        brandColor: dto.brandColor,
+        showPublicPricing: dto.showPublicPricing,
+      },
     });
-    return toBranding(tenant);
+    return toTenantBranding(tenant);
   }
 
   async uploadLogo(tenantId: string, dto: UploadLogoDto): Promise<TenantBranding> {
@@ -54,12 +46,12 @@ export class BrandingService {
 
     const logoUrl = await this.storage.saveLogo(tenantId, buffer, extension);
     const tenant = await this.prisma.tenant.update({ where: { id: tenantId }, data: { logoUrl } });
-    return toBranding(tenant);
+    return toTenantBranding(tenant);
   }
 
   async removeLogo(tenantId: string): Promise<TenantBranding> {
     await this.storage.deleteLogo(tenantId);
     const tenant = await this.prisma.tenant.update({ where: { id: tenantId }, data: { logoUrl: null } });
-    return toBranding(tenant);
+    return toTenantBranding(tenant);
   }
 }

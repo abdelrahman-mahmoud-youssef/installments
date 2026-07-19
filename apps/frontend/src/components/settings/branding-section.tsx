@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 import { useBranding, useRemoveLogo, useUpdateBranding, useUploadLogo } from '@/hooks/use-branding';
 import { ApiError } from '@/lib/api/client';
 import { resolveAssetUrl } from '@/lib/assets';
@@ -84,6 +85,15 @@ export function BrandingSection() {
   async function handleRemoveLogo() {
     try {
       await removeLogo.mutateAsync();
+      toast.success(t('brandingSaved'));
+    } catch (error) {
+      toast.error(error instanceof ApiError ? error.message : t('genericError'));
+    }
+  }
+
+  async function handleTogglePublicPricing(next: boolean) {
+    try {
+      await updateBranding.mutateAsync({ showPublicPricing: next });
       toast.success(t('brandingSaved'));
     } catch (error) {
       toast.error(error instanceof ApiError ? error.message : t('genericError'));
@@ -217,6 +227,22 @@ export function BrandingSection() {
               </div>
             </form>
           </Form>
+        )}
+
+        {isLoading ? (
+          <Skeleton className="h-9 w-full max-w-sm" />
+        ) : (
+          <div className="flex items-center justify-between gap-3 border-t border-border pt-5">
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-foreground">{t('publicPricingLabel')}</p>
+              <p className="text-xs text-muted-foreground">{t('publicPricingHint')}</p>
+            </div>
+            <Switch
+              checked={data?.showPublicPricing ?? true}
+              onCheckedChange={handleTogglePublicPricing}
+              disabled={updateBranding.isPending}
+            />
+          </div>
         )}
       </div>
     </Section>

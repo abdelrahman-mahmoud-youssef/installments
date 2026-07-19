@@ -351,6 +351,8 @@
     "displayNameLabel": "الاسم الظاهر",
     "displayNamePlaceholder": "بيظهر لعملائك",
     "saveBranding": "حفظ",
+    "publicPricingLabel": "إظهار السعر للعملاء",
+    "publicPricingHint": "لو مقفول، العميل مش هيشوف الدفعة المقدمة ولا السعر الإجمالي في صفحته — هيشوف بس اللي دفعه واللي باقي عليه.",
     "brandColor_emerald": "زمردي",
     "brandColor_teal": "تركواز",
     "brandColor_blue": "أزرق",
