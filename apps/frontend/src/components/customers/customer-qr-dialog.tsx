@@ -2,29 +2,23 @@
 
 import { QRCodeSVG } from 'qrcode.react';
 import { useTranslations } from 'next-intl';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 export function CustomerQrDialog({
-  trigger,
+  open,
+  onOpenChange,
   customerName,
   publicUrl,
 }: {
-  trigger: React.ReactElement;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   customerName: string;
   publicUrl: string;
 }) {
   const t = useTranslations('customers.detail');
 
   return (
-    <Dialog>
-      <DialogTrigger render={trigger} />
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-xs">
         <DialogHeader>
           <DialogTitle>{t('qrDialogTitle')}</DialogTitle>

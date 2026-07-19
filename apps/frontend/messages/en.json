@@ -148,6 +148,7 @@
     },
     "detail": {
       "notFound": "Customer not found",
+      "share": "Share",
       "copyLink": "Copy public link",
       "linkCopied": "Public link copied.",
       "qrCode": "QR code",

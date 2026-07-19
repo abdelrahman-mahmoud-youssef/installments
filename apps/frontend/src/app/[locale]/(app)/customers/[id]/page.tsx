@@ -1,8 +1,9 @@
 'use client';
 
-import { Copy, MapPin, MessageCircle, Pencil, Phone, Plus, QrCode, StickyNote, UserRoundX } from 'lucide-react';
+import { Copy, MapPin, MessageCircle, Pencil, Phone, Plus, QrCode, Share2, StickyNote, UserRoundX } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import { CustomerFormDialog } from '@/components/customers/customer-form-dialog';
 import { CustomerQrDialog } from '@/components/customers/customer-qr-dialog';
@@ -16,6 +17,12 @@ import { FadeIn } from '@/components/shared/motion';
 import { Section } from '@/components/shared/section';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Link } from '@/i18n/navigation';
 import type { CustomerContractSummary } from '@/lib/api/customers';
@@ -29,6 +36,7 @@ export default function CustomerDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { data: customer, isLoading, isError } = useCustomer(id);
   const updateCustomer = useUpdateCustomer(id);
+  const [qrOpen, setQrOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -113,35 +121,35 @@ export default function CustomerDetailPage() {
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                navigator.clipboard.writeText(publicUrl);
-                toast.success(t('linkCopied'));
-              }}
-            >
-              <Copy className="size-4" />
-              {t('copyLink')}
-            </Button>
-            <CustomerQrDialog
-              trigger={
-                <Button variant="outline" size="sm">
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <Button variant="outline" size="sm">
+                    <Share2 className="size-4" />
+                    {t('share')}
+                  </Button>
+                }
+              />
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={() => {
+                    navigator.clipboard.writeText(publicUrl);
+                    toast.success(t('linkCopied'));
+                  }}
+                >
+                  <Copy className="size-4" />
+                  {t('copyLink')}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setQrOpen(true)}>
                   <QrCode className="size-4" />
                   {t('qrCode')}
-                </Button>
-              }
-              customerName={customer.name}
-              publicUrl={publicUrl}
-            />
-            <Button
-              variant="outline"
-              size="sm"
-              render={<a href={whatsappUrl} target="_blank" rel="noopener noreferrer" />}
-            >
-              <MessageCircle className="size-4" />
-              {t('sendWhatsapp')}
-            </Button>
+                </DropdownMenuItem>
+                <DropdownMenuItem render={<a href={whatsappUrl} target="_blank" rel="noopener noreferrer" />}>
+                  <MessageCircle className="size-4" />
+                  {t('sendWhatsapp')}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <CustomerFormDialog
               trigger={
                 <Button variant="outline" size="sm">
@@ -197,6 +205,13 @@ export default function CustomerDetailPage() {
           />
         )}
       </FadeIn>
+
+      <CustomerQrDialog
+        open={qrOpen}
+        onOpenChange={setQrOpen}
+        customerName={customer.name}
+        publicUrl={publicUrl}
+      />
     </div>
   );
 }
