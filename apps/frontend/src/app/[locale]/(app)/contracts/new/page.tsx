@@ -236,7 +236,7 @@ export default function NewContractPage() {
                         <FormItem>
                           <FormLabel>{t('productPrice')}</FormLabel>
                           <FormControl>
-                            <NumberInput step="0.01" min="0" {...field} />
+                            <NumberInput step="1" min="0" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -249,7 +249,7 @@ export default function NewContractPage() {
                         <FormItem>
                           <FormLabel>{t('downPayment')}</FormLabel>
                           <FormControl>
-                            <NumberInput step="0.01" min="0" {...field} />
+                            <NumberInput step="1" min="0" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -311,7 +311,7 @@ export default function NewContractPage() {
                           <FormItem>
                             <FormLabel>{t('markupPercent')}</FormLabel>
                             <FormControl>
-                              <NumberInput step="0.01" min="0" {...field} />
+                              <NumberInput step="1" min="0" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -341,7 +341,7 @@ export default function NewContractPage() {
                           <FormItem>
                             <FormLabel>{t('fixedInstallmentAmount')}</FormLabel>
                             <FormControl>
-                              <NumberInput step="0.01" min="0" {...field} />
+                              <NumberInput step="1" min="0" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>

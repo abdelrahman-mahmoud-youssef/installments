@@ -92,7 +92,7 @@ export function RecordPaymentDialog({
                   <FormItem>
                     <FormLabel>{t('amount')}</FormLabel>
                     <FormControl>
-                      <NumberInput step="0.01" min="0" {...field} />
+                      <NumberInput step="1" min="0" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -163,7 +163,7 @@ export function RecordPaymentDialog({
                             </span>
                             <Input
                               type="number"
-                              step="0.01"
+                              step="1"
                               min="0"
                               className="h-8 w-28"
                               value={manualAmounts[installment.id] ?? ''}
