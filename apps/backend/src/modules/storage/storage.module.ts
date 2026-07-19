@@ -11,7 +11,7 @@ import { StorageService } from './storage.service';
     {
       provide: STORAGE_PROVIDER,
       useFactory: (config: ConfigService): StorageProvider =>
-        config.get<string>('STORAGE_PROVIDER') === 'local'
+        config.getOrThrow<string>('STORAGE_PROVIDER') === 'local'
           ? new LocalStorageProvider(config)
           : new BackblazeStorageProvider(config),
       inject: [ConfigService],

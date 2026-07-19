@@ -29,7 +29,7 @@ export class RemindersService implements OnModuleInit {
   }
 
   private async registerDailyReminderJob(): Promise<void> {
-    const hour = this.config.get<string>('REMINDER_HOUR', '8');
+    const hour = this.config.getOrThrow<number>('REMINDER_HOUR');
     try {
       await this.remindersQueue.add(
         DAILY_REMINDER_JOB_NAME,

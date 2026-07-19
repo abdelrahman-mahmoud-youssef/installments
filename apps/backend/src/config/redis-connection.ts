@@ -20,7 +20,7 @@ export function getRedisConnectionOptions(config: ConfigService): RedisConnectio
   }
 
   return {
-    host: config.get<string>('REDIS_HOST') ?? 'localhost',
-    port: Number(config.get<string>('REDIS_PORT') ?? 6379),
+    host: config.getOrThrow<string>('REDIS_HOST'),
+    port: config.getOrThrow<number>('REDIS_PORT'),
   };
 }

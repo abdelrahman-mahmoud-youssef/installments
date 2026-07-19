@@ -2,13 +2,13 @@ import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
-import { HttpExceptionFilter } from './common/filters/http-exception.filter';
-import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { getUploadsDir } from './config/uploads-dir';
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
+  app.useLogger(app.get(Logger));
   app.useBodyParser('json', { limit: '10mb' });
   const config = app.get(ConfigService);
   app.useStaticAssets(getUploadsDir(config), { prefix: '/uploads' });
@@ -18,10 +18,8 @@ async function bootstrap(): Promise<void> {
   app.useGlobalPipes(
     new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
   );
-  app.useGlobalFilters(new HttpExceptionFilter());
-  app.useGlobalInterceptors(new LoggingInterceptor());
 
-  const port = Number(config.get<string>('PORT') ?? 3001);
+  const port = config.getOrThrow<number>('PORT');
   await app.listen(port, '0.0.0.0');
   process.stderr.write(`Backend listening on port ${port}\n`);
 }
