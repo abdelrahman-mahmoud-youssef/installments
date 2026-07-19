@@ -4,7 +4,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Bell,
   CheckCircle2,
-  Download,
   Loader2,
   Mail,
   MessageCircle,
@@ -26,7 +25,7 @@ import {
 import { PageHeader } from '@/components/shared/page-header';
 import { Section } from '@/components/shared/section';
 import { BrandingSection } from '@/components/settings/branding-section';
-import { InstallAppSection } from '@/components/settings/install-app-section';
+import { InstallAppDialog } from '@/components/settings/install-app-dialog';
 import { ShopPageSection } from '@/components/settings/shop-page-section';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -112,7 +111,7 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       <FadeIn>
-        <PageHeader title={t('title')} description={t('subtitle')} />
+        <PageHeader title={t('title')} description={t('subtitle')} actions={<InstallAppDialog />} />
       </FadeIn>
 
       <FadeIn delay={0.05} className="mx-auto w-full max-w-2xl">
@@ -130,10 +129,6 @@ export default function SettingsPage() {
               <Bell className="size-4" />
               {t('tabNotifications')}
             </TabsTrigger>
-            <TabsTrigger value="installApp" className="gap-2 text-sm">
-              <Download className="size-4" />
-              {t('tabInstallApp')}
-            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="branding">
@@ -142,10 +137,6 @@ export default function SettingsPage() {
 
           <TabsContent value="shopPage">
             <ShopPageSection />
-          </TabsContent>
-
-          <TabsContent value="installApp">
-            <InstallAppSection />
           </TabsContent>
 
           <TabsContent value="notifications" className="space-y-6">
