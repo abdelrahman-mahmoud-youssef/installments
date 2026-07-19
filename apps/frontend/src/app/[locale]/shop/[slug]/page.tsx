@@ -1,7 +1,10 @@
 import { Camera, MessageCircle, Music2, ThumbsUp } from 'lucide-react';
+import type { Metadata } from 'next';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { FormattedText } from '@/components/shared/formatted-text';
+import { InstallAppButton } from '@/components/shared/install-app-button';
+import { IosInstallHint } from '@/components/shared/ios-install-hint';
 import { LanguageSwitcher } from '@/components/shared/language-switcher';
 import { BrandLogo } from '@/components/shared/logo';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
@@ -15,15 +18,25 @@ function withScheme(url: string): string {
   return /^https?:\/\//i.test(url) ? url : `https://${url}`;
 }
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  return { manifest: `/shop/${slug}/pwa-manifest` };
+}
+
 export default async function PublicShopPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const [shop, t, locale] = await Promise.all([
+  const [shop, t, tCommon, locale] = await Promise.all([
     getPublicShop(slug),
     getTranslations('publicShop'),
+    getTranslations('common'),
     getLocale(),
   ]);
 
@@ -95,6 +108,15 @@ export default async function PublicShopPage({
               ))}
             </div>
           )}
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <InstallAppButton label={t('installButtonLabel', { name: shop.displayName })} className="w-fit" />
+          <IosInstallHint
+            storageKey={`pwa-ios-hint-shop-${slug}`}
+            message={t('installIosHint', { name: shop.displayName })}
+            dismissLabel={tCommon('dismiss')}
+          />
         </div>
 
         {showCalculator ? (

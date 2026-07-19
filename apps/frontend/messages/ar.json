@@ -420,7 +420,9 @@
     "calculatorPlan": "مدة التقسيط",
     "calculatorMonths": "{count} شهر",
     "calculatorMonthlyPayment": "القسط الشهري المتوقع",
-    "calculatorEstimateNote": "ده تقدير تقريبي بس — الخطة النهائية بتتأكد مع المحل."
+    "calculatorEstimateNote": "ده تقدير تقريبي بس — الخطة النهائية بتتأكد مع المحل.",
+    "installButtonLabel": "ثبّت {name}",
+    "installIosHint": "ثبّت {name}: دوس على أيقونة المشاركة في سفاري، وبعدين \"إضافة إلى الشاشة الرئيسية\"."
   },
   "announcements": {
     "title": "الإعلانات",

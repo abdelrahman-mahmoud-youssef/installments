@@ -1,0 +1,11 @@
+import { getPublicShop } from '@/lib/api/public';
+import { resolveAssetUrl } from '@/lib/assets';
+import { renderIconResponse } from '@/lib/render-icon';
+
+export async function GET(_request: Request, { params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const shop = await getPublicShop(slug);
+  const logoUrl = shop ? resolveAssetUrl(shop.logoUrl) : null;
+
+  return renderIconResponse(logoUrl, { width: 192, height: 192 }, 42, { size: 120, strokeWidth: 1.8 });
+}

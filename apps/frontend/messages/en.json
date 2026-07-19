@@ -420,7 +420,9 @@
     "calculatorPlan": "Plan",
     "calculatorMonths": "{count} months",
     "calculatorMonthlyPayment": "Estimated monthly payment",
-    "calculatorEstimateNote": "This is an estimate only — the final plan is confirmed with the shop."
+    "calculatorEstimateNote": "This is an estimate only — the final plan is confirmed with the shop.",
+    "installButtonLabel": "Install {name}",
+    "installIosHint": "Install {name}: tap Share in Safari, then \"Add to Home Screen\"."
   },
   "announcements": {
     "title": "Announcements",
