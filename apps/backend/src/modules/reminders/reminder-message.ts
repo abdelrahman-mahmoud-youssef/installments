@@ -15,11 +15,11 @@ export function formatReminderMessage(
 ): string {
   if (language === NotificationLanguage.AR) {
     return [
-      `الملخّص اليومي لـ ${data.businessName}`,
+      `ملخص النهاردة بتاع ${data.businessName}`,
       '',
-      `مستحق اليوم: ${data.dueTodayCount} قسط - ${formatMoney(data.dueTodayTotal, language)}`,
-      `متأخّر: ${data.overdueCount} قسط - ${formatMoney(data.overdueTotal, language)}`,
-      `المتوقّع تحصيله اليوم: ${formatMoney(data.dueTodayTotal, language)}`,
+      `مستحق النهاردة: ${data.dueTodayCount} قسط - ${formatMoney(data.dueTodayTotal, language)}`,
+      `متأخر: ${data.overdueCount} قسط - ${formatMoney(data.overdueTotal, language)}`,
+      `المفروض يتحصّل النهاردة: ${formatMoney(data.dueTodayTotal, language)}`,
     ].join('\n');
   }
 

@@ -45,7 +45,7 @@ describe('formatCustomerReminderMessage', () => {
     );
 
     expect(message).toContain('تذكير من أكمي');
-    expect(message).toContain('مستحق اليوم:');
+    expect(message).toContain('مستحق النهاردة:');
     expect(message).toContain('هاتف');
   });
 });

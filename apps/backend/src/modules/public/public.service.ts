@@ -124,7 +124,7 @@ export class PublicService {
     await this.prisma.customer.update({ where: { id: customer.id }, data: { telegramChatId: chatId } });
     const message =
       customer.notificationLanguage === NotificationLanguage.AR
-        ? `✅ ${customer.name} — ستصلك تذكيرات الأقساط هنا.`
+        ? `✅ ${customer.name} — هتوصلك تذكيرات الأقساط هنا.`
         : `✅ ${customer.name} — you'll receive installment reminders here.`;
     await this.telegram.sendMessage(botToken, chatId, message);
 

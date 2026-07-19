@@ -32,7 +32,7 @@ describe('formatReminderMessage', () => {
     );
 
     expect(message).toContain('متجر تجريبي');
-    expect(message).toContain('مستحق اليوم:');
-    expect(message).toContain('متأخّر:');
+    expect(message).toContain('مستحق النهاردة:');
+    expect(message).toContain('متأخر:');
   });
 });

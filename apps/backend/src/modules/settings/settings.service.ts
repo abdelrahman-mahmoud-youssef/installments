@@ -75,7 +75,7 @@ export class SettingsService {
     });
     const message =
       tenant.notificationLanguage === NotificationLanguage.AR
-        ? `✅ ${tenant.name} — تم ربط إشعارات تيليجرام بنجاح.`
+        ? `✅ ${tenant.name} — اترابطت إشعارات تيليجرام بنجاح.`
         : `✅ ${tenant.name} — Telegram notifications are connected.`;
     await this.telegram.sendMessage(tenant.telegramBotToken, chatId, message);
   }

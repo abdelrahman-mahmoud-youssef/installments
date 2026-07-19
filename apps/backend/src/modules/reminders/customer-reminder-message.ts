@@ -16,8 +16,8 @@ export interface CustomerReminderData {
 const MESSAGE_COPY = {
   [NotificationLanguage.AR]: {
     header: (businessName: string) => `تذكير من ${businessName}`,
-    dueToday: 'مستحق اليوم:',
-    overdue: 'متأخّر:',
+    dueToday: 'مستحق النهاردة:',
+    overdue: 'متأخر:',
   },
   [NotificationLanguage.EN]: {
     header: (businessName: string) => `Reminder from ${businessName}`,
