@@ -16,6 +16,12 @@ import { useBranding, useRemoveLogo, useUpdateBranding, useUploadLogo } from '@/
 import { ApiError } from '@/lib/api/client';
 import { resolveAssetUrl } from '@/lib/assets';
 import { BRAND_COLOR_VALUES } from '@/lib/brand-colors';
+import {
+  DEFAULT_COUNTRY_CODE,
+  normalizeLocalPhoneInput,
+  toLocalPhoneNumber,
+  toStoredPhoneNumber,
+} from '@/lib/phone';
 import { BrandColorPreset, BRAND_COLOR_PRESETS, BrandingInput, brandingSchema } from '@/lib/schemas/branding';
 import { cn } from '@/lib/utils';
 
@@ -31,14 +37,14 @@ export function BrandingSection() {
 
   const form = useForm<BrandingInput>({
     resolver: zodResolver(brandingSchema),
-    values: { displayName: data?.displayName ?? '', phone: data?.phone ?? '' },
+    values: { displayName: data?.displayName ?? '', phone: toLocalPhoneNumber(data?.phone) },
   });
 
   async function handleSaveDetails(values: BrandingInput) {
     try {
       await updateBranding.mutateAsync({
         displayName: values.displayName.trim(),
-        phone: values.phone.trim(),
+        phone: toStoredPhoneNumber(values.phone),
       });
       toast.success(t('brandingSaved'));
     } catch (error) {
@@ -229,7 +235,21 @@ export function BrandingSection() {
                   <FormItem className="max-w-sm">
                     <FormLabel>{t('phoneLabel')}</FormLabel>
                     <FormControl>
-                      <Input dir="ltr" placeholder={t('phonePlaceholder')} {...field} />
+                      <div className="flex items-center gap-2" dir="ltr">
+                        <span className="flex h-9 shrink-0 items-center rounded-md border border-border bg-muted px-3 text-sm text-muted-foreground">
+                          {DEFAULT_COUNTRY_CODE}
+                        </span>
+                        <Input
+                          dir="ltr"
+                          inputMode="numeric"
+                          placeholder={t('phonePlaceholder')}
+                          {...field}
+                          onBlur={(event) => {
+                            field.onChange(normalizeLocalPhoneInput(event.target.value));
+                            field.onBlur();
+                          }}
+                        />
+                      </div>
                     </FormControl>
                     <p className="text-xs text-muted-foreground">{t('phoneHint')}</p>
                     <FormMessage />
