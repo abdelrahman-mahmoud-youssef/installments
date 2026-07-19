@@ -1,11 +1,10 @@
-import { MessageCircle } from 'lucide-react';
+import { ChevronRight, MessageCircle } from 'lucide-react';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { LanguageSwitcher } from '@/components/shared/language-switcher';
 import { BrandLogo } from '@/components/shared/logo';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Link } from '@/i18n/navigation';
 import { resolveAssetUrl } from '@/lib/assets';
 import { brandColorCssVars } from '@/lib/brand-colors';
@@ -84,7 +83,11 @@ export default async function PublicCustomerPage({
             const ratio =
               contractTotal > 0 ? Math.min(1, Math.max(0, contract.paidAmount / contractTotal)) : 0;
             return (
-              <div key={index} className="space-y-4 rounded-xl border border-border bg-card p-5 shadow-xs">
+              <Link
+                key={index}
+                href={routes.publicContract(uuid, contract.publicId)}
+                className="block space-y-4 rounded-xl border border-border bg-card p-5 shadow-xs transition-shadow hover:shadow-md"
+              >
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex min-w-0 items-center gap-2">
                     <h2 className="truncate font-heading font-semibold">{contract.productName}</h2>
@@ -133,53 +136,24 @@ export default async function PublicCustomerPage({
                   </p>
                 )}
 
-                {(contract.payments.length > 0 || contract.upcomingInstallments.length > 0) && (
-                  <div className="border-t border-border pt-4">
-                    <Tabs defaultValue="payments">
-                      <TabsList className="w-full">
-                        <TabsTrigger value="payments">{t('tabPayments')}</TabsTrigger>
-                        <TabsTrigger value="upcoming">{t('upcoming')}</TabsTrigger>
-                      </TabsList>
-                      <TabsContent value="payments">
-                        {contract.payments.length > 0 ? (
-                          <ul className="space-y-2">
-                            {contract.payments.map((payment, paymentIndex) => (
-                              <li key={paymentIndex} className="flex items-center justify-between text-sm">
-                                <span className="text-muted-foreground">
-                                  {formatDate(payment.paidAt, locale)}
-                                </span>
-                                <span className="font-medium tabular-nums text-success">
-                                  {formatMoney(payment.amount, locale)}
-                                </span>
-                              </li>
-                            ))}
-                          </ul>
-                        ) : (
-                          <p className="py-2 text-muted-foreground">{t('noPayments')}</p>
-                        )}
-                      </TabsContent>
-                      <TabsContent value="upcoming">
-                        {contract.upcomingInstallments.length > 0 ? (
-                          <ul className="space-y-2">
-                            {contract.upcomingInstallments.map((installment, installmentIndex) => (
-                              <li key={installmentIndex} className="flex items-center justify-between text-sm">
-                                <span className="text-muted-foreground">
-                                  {formatDate(installment.dueDate, locale)}
-                                </span>
-                                <span className="font-medium tabular-nums">
-                                  {formatMoney(installment.remainingAmount, locale)}
-                                </span>
-                              </li>
-                            ))}
-                          </ul>
-                        ) : (
-                          <p className="py-2 text-muted-foreground">{t('noUpcoming')}</p>
-                        )}
-                      </TabsContent>
-                    </Tabs>
+                {contract.nextInstallment && (
+                  <div className="flex items-center justify-between border-t border-border pt-4 text-sm">
+                    <span className="flex items-center gap-2 text-muted-foreground">
+                      {t('nextPayment')}
+                      {contract.nextInstallment.isOverdue && <StatusBadge status="OVERDUE" />}
+                    </span>
+                    <span className="font-medium tabular-nums">
+                      {formatDate(contract.nextInstallment.dueDate, locale)} ·{' '}
+                      {formatMoney(contract.nextInstallment.amount, locale)}
+                    </span>
                   </div>
                 )}
-              </div>
+
+                <div className="flex items-center justify-end gap-1 text-xs font-medium text-primary">
+                  {t('viewDetails')}
+                  <ChevronRight className="size-3.5 rtl:rotate-180" />
+                </div>
+              </Link>
             );
           })
         )}

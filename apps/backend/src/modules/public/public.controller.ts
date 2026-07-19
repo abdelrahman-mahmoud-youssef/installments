@@ -16,6 +16,14 @@ export class PublicController {
     return this.publicService.getCustomerByPublicId(publicId);
   }
 
+  @Get(':publicId/contracts/:contractPublicId')
+  getContractDetail(
+    @Param('publicId') publicId: string,
+    @Param('contractPublicId') contractPublicId: string,
+  ) {
+    return this.publicService.getContractDetail(publicId, contractPublicId);
+  }
+
   @Post(':publicId/telegram/verify')
   verifyTelegram(@Param('publicId') publicId: string) {
     return this.publicService.verifyTelegram(publicId);

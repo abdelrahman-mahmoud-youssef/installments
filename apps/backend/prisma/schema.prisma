@@ -120,6 +120,7 @@ model Contract {
   id                String            @id @default(cuid())
   tenantId          String
   customerId        String
+  publicId          String            @unique @default(uuid())
   productName       String
   productPrice      Int
   downPayment      Int

@@ -3,9 +3,10 @@ import { config } from '@/lib/config';
 import { ContractStatus } from '@/lib/enums';
 import { TenantBranding } from './branding';
 
-export interface PublicUpcomingInstallment {
+export interface PublicNextInstallment {
   dueDate: string;
-  remainingAmount: number;
+  amount: number;
+  isOverdue: boolean;
 }
 
 export interface PublicPayment {
@@ -13,16 +14,36 @@ export interface PublicPayment {
   amount: number;
 }
 
+export interface PublicInstallment {
+  sequence: number;
+  dueDate: string;
+  amount: number;
+  paidAmount: number;
+  status: string;
+  isOverdue: boolean;
+}
+
 export interface PublicContractSummary {
+  publicId: string;
   productName: string;
   status: ContractStatus;
   totalAmount?: number;
   downPayment?: number;
   paidAmount: number;
   remainingAmount: number;
-  paidInstallmentsCount: number;
+  nextInstallment: PublicNextInstallment | null;
+}
+
+export interface PublicContractDetail {
+  productName: string;
+  status: ContractStatus;
+  totalAmount?: number;
+  downPayment?: number;
+  paidAmount: number;
+  remainingAmount: number;
   payments: PublicPayment[];
-  upcomingInstallments: PublicUpcomingInstallment[];
+  installments: PublicInstallment[];
+  branding: TenantBranding;
 }
 
 export interface PublicTelegramStatus {
@@ -58,6 +79,23 @@ export async function getPublicCustomer(publicId: string): Promise<PublicCustome
     throw new Error('Failed to load customer.');
   }
   return response.json() as Promise<PublicCustomerResponse>;
+}
+
+export async function getPublicContractDetail(
+  publicId: string,
+  contractPublicId: string,
+): Promise<PublicContractDetail | null> {
+  const response = await fetch(`${config.backendUrl}/public/customers/${publicId}/contracts/${contractPublicId}`, {
+    cache: 'no-store',
+  });
+
+  if (response.status === 404) {
+    return null;
+  }
+  if (!response.ok) {
+    throw new Error('Failed to load contract.');
+  }
+  return response.json() as Promise<PublicContractDetail>;
 }
 
 export async function getPublicShop(publicId: string): Promise<TenantBranding | null> {

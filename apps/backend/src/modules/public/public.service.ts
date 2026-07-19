@@ -1,14 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ContractStatus, InstallmentStatus, NotificationLanguage } from '@prisma/client';
+import { getUtcToday } from '../../common/date/utc-date';
 import { TENANT_BRANDING_SELECT, TenantBranding, toTenantBranding } from '../../common/tenant-branding';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TelegramService } from '../telegram/telegram.service';
 
-const UPCOMING_INSTALLMENTS_LIMIT = 5;
-
-export interface PublicUpcomingInstallment {
+export interface PublicNextInstallment {
   dueDate: Date;
-  remainingAmount: number;
+  amount: number;
+  isOverdue: boolean;
 }
 
 export interface PublicPayment {
@@ -16,16 +16,36 @@ export interface PublicPayment {
   amount: number;
 }
 
+export interface PublicInstallment {
+  sequence: number;
+  dueDate: Date;
+  amount: number;
+  paidAmount: number;
+  status: InstallmentStatus;
+  isOverdue: boolean;
+}
+
 export interface PublicContractSummary {
+  publicId: string;
   productName: string;
   status: ContractStatus;
   totalAmount?: number;
   downPayment?: number;
   paidAmount: number;
   remainingAmount: number;
-  paidInstallmentsCount: number;
+  nextInstallment: PublicNextInstallment | null;
+}
+
+export interface PublicContractDetail {
+  productName: string;
+  status: ContractStatus;
+  totalAmount?: number;
+  downPayment?: number;
+  paidAmount: number;
+  remainingAmount: number;
   payments: PublicPayment[];
-  upcomingInstallments: PublicUpcomingInstallment[];
+  installments: PublicInstallment[];
+  branding: TenantBranding;
 }
 
 export interface PublicTelegramStatus {
@@ -76,14 +96,11 @@ export class PublicService {
         },
         contracts: {
           select: {
+            publicId: true,
             productName: true,
             status: true,
             totalAmount: true,
             downPayment: true,
-            payments: {
-              orderBy: { paidAt: 'desc' },
-              select: { paidAt: true, amount: true },
-            },
             installments: {
               orderBy: { sequence: 'asc' },
               select: { dueDate: true, amount: true, paidAmount: true, status: true },
@@ -261,33 +278,43 @@ export class PublicService {
     return customer;
   }
 
-  private summarizeContract(
-    contract: {
-      productName: string;
-      status: ContractStatus;
-      totalAmount: number;
-      downPayment: number;
-      payments: { paidAt: Date; amount: number }[];
-      installments: { dueDate: Date; amount: number; paidAmount: number; status: InstallmentStatus }[];
-    },
-    pricingVisible: boolean,
-  ): PublicContractSummary {
+  async getContractDetail(customerPublicId: string, contractPublicId: string): Promise<PublicContractDetail> {
+    const customer = await this.prisma.customer.findUnique({
+      where: { publicId: customerPublicId },
+      select: {
+        tenant: { select: TENANT_BRANDING_SELECT },
+        contracts: {
+          where: { publicId: contractPublicId },
+          select: {
+            productName: true,
+            status: true,
+            totalAmount: true,
+            downPayment: true,
+            payments: {
+              orderBy: { paidAt: 'desc' },
+              select: { paidAt: true, amount: true },
+            },
+            installments: {
+              orderBy: { sequence: 'asc' },
+              select: { sequence: true, dueDate: true, amount: true, paidAmount: true, status: true },
+            },
+          },
+        },
+      },
+    });
+
+    const contract = customer?.contracts[0];
+    if (!customer || !contract) {
+      throw new NotFoundException('Contract not found.');
+    }
+
+    const today = getUtcToday();
     const installmentsPaidAmount = contract.installments.reduce(
       (total, installment) => total + installment.paidAmount,
       0,
     );
     const installmentsTotal = contract.installments.reduce((total, installment) => total + installment.amount, 0);
-    const upcomingInstallments = contract.installments
-      .filter(
-        (installment) =>
-          installment.status === InstallmentStatus.PENDING ||
-          installment.status === InstallmentStatus.PARTIALLY_PAID,
-      )
-      .slice(0, UPCOMING_INSTALLMENTS_LIMIT)
-      .map((installment) => ({
-        dueDate: installment.dueDate,
-        remainingAmount: installment.amount - installment.paidAmount,
-      }));
+    const pricingVisible = customer.tenant.showPublicPricing;
 
     return {
       productName: contract.productName,
@@ -295,11 +322,58 @@ export class PublicService {
       ...(pricingVisible ? { totalAmount: contract.totalAmount, downPayment: contract.downPayment } : {}),
       paidAmount: contract.downPayment + installmentsPaidAmount,
       remainingAmount: installmentsTotal - installmentsPaidAmount,
-      paidInstallmentsCount: contract.installments.filter(
-        (installment) => installment.status === InstallmentStatus.PAID,
-      ).length,
       payments: contract.payments,
-      upcomingInstallments,
+      installments: contract.installments.map((installment) => ({
+        sequence: installment.sequence,
+        dueDate: installment.dueDate,
+        amount: installment.amount,
+        paidAmount: installment.paidAmount,
+        status: installment.status,
+        isOverdue:
+          installment.dueDate < today &&
+          (installment.status === InstallmentStatus.PENDING ||
+            installment.status === InstallmentStatus.PARTIALLY_PAID),
+      })),
+      branding: toTenantBranding(customer.tenant),
+    };
+  }
+
+  private summarizeContract(
+    contract: {
+      publicId: string;
+      productName: string;
+      status: ContractStatus;
+      totalAmount: number;
+      downPayment: number;
+      installments: { dueDate: Date; amount: number; paidAmount: number; status: InstallmentStatus }[];
+    },
+    pricingVisible: boolean,
+  ): PublicContractSummary {
+    const today = getUtcToday();
+    const installmentsPaidAmount = contract.installments.reduce(
+      (total, installment) => total + installment.paidAmount,
+      0,
+    );
+    const installmentsTotal = contract.installments.reduce((total, installment) => total + installment.amount, 0);
+    const nextOutstanding = contract.installments.find(
+      (installment) =>
+        installment.status === InstallmentStatus.PENDING || installment.status === InstallmentStatus.PARTIALLY_PAID,
+    );
+
+    return {
+      publicId: contract.publicId,
+      productName: contract.productName,
+      status: contract.status,
+      ...(pricingVisible ? { totalAmount: contract.totalAmount, downPayment: contract.downPayment } : {}),
+      paidAmount: contract.downPayment + installmentsPaidAmount,
+      remainingAmount: installmentsTotal - installmentsPaidAmount,
+      nextInstallment: nextOutstanding
+        ? {
+            dueDate: nextOutstanding.dueDate,
+            amount: nextOutstanding.amount - nextOutstanding.paidAmount,
+            isOverdue: nextOutstanding.dueDate < today,
+          }
+        : null,
     };
   }
 }
