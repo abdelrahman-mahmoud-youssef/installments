@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InstallmentStatus, NotificationLanguage } from '@prisma/client';
+import { ContractStatus, InstallmentStatus, NotificationLanguage } from '@prisma/client';
 import { TenantBranding, toTenantBranding } from '../../common/tenant-branding';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TelegramService } from '../telegram/telegram.service';
@@ -11,13 +11,20 @@ export interface PublicUpcomingInstallment {
   remainingAmount: number;
 }
 
+export interface PublicPayment {
+  paidAt: Date;
+  amount: number;
+}
+
 export interface PublicContractSummary {
   productName: string;
+  status: ContractStatus;
   totalAmount?: number;
   downPayment?: number;
   paidAmount: number;
   remainingAmount: number;
   paidInstallmentsCount: number;
+  payments: PublicPayment[];
   upcomingInstallments: PublicUpcomingInstallment[];
 }
 
@@ -75,8 +82,13 @@ export class PublicService {
         contracts: {
           select: {
             productName: true,
+            status: true,
             totalAmount: true,
             downPayment: true,
+            payments: {
+              orderBy: { paidAt: 'desc' },
+              select: { paidAt: true, amount: true },
+            },
             installments: {
               orderBy: { sequence: 'asc' },
               select: { dueDate: true, amount: true, paidAmount: true, status: true },
@@ -246,8 +258,10 @@ export class PublicService {
   private summarizeContract(
     contract: {
       productName: string;
+      status: ContractStatus;
       totalAmount: number;
       downPayment: number;
+      payments: { paidAt: Date; amount: number }[];
       installments: { dueDate: Date; amount: number; paidAmount: number; status: InstallmentStatus }[];
     },
     pricingVisible: boolean,
@@ -271,12 +285,14 @@ export class PublicService {
 
     return {
       productName: contract.productName,
+      status: contract.status,
       ...(pricingVisible ? { totalAmount: contract.totalAmount, downPayment: contract.downPayment } : {}),
       paidAmount: contract.downPayment + installmentsPaidAmount,
       remainingAmount: installmentsTotal - installmentsPaidAmount,
       paidInstallmentsCount: contract.installments.filter(
         (installment) => installment.status === InstallmentStatus.PAID,
       ).length,
+      payments: contract.payments,
       upcomingInstallments,
     };
   }

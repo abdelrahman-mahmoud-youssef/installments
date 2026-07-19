@@ -1,5 +1,6 @@
 import type { NotificationLanguage } from '@/components/shared/notification-language-toggle';
 import { config } from '@/lib/config';
+import { ContractStatus } from '@/lib/enums';
 import { TenantBranding } from './branding';
 
 export interface PublicUpcomingInstallment {
@@ -7,13 +8,20 @@ export interface PublicUpcomingInstallment {
   remainingAmount: number;
 }
 
+export interface PublicPayment {
+  paidAt: string;
+  amount: number;
+}
+
 export interface PublicContractSummary {
   productName: string;
+  status: ContractStatus;
   totalAmount?: number;
   downPayment?: number;
   paidAmount: number;
   remainingAmount: number;
   paidInstallmentsCount: number;
+  payments: PublicPayment[];
   upcomingInstallments: PublicUpcomingInstallment[];
 }
 

@@ -3,7 +3,9 @@ import { getLocale, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { LanguageSwitcher } from '@/components/shared/language-switcher';
 import { BrandLogo } from '@/components/shared/logo';
+import { StatusBadge } from '@/components/shared/status-badge';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { resolveAssetUrl } from '@/lib/assets';
 import { brandColorCssVars } from '@/lib/brand-colors';
 import { getPublicCustomer } from '@/lib/api/public';
@@ -80,8 +82,11 @@ export default async function PublicCustomerPage({
             return (
               <div key={index} className="space-y-4 rounded-xl border border-border bg-card p-5 shadow-xs">
                 <div className="flex items-center justify-between gap-3">
-                  <h2 className="font-heading font-semibold">{contract.productName}</h2>
-                  <span className="text-sm font-semibold tabular-nums text-primary">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <h2 className="truncate font-heading font-semibold">{contract.productName}</h2>
+                    <StatusBadge status={contract.status} />
+                  </div>
+                  <span className="shrink-0 text-sm font-semibold tabular-nums text-primary">
                     {Math.round(ratio * 100)}%
                   </span>
                 </div>
@@ -124,21 +129,50 @@ export default async function PublicCustomerPage({
                   </p>
                 )}
 
-                {contract.upcomingInstallments.length > 0 && (
+                {(contract.payments.length > 0 || contract.upcomingInstallments.length > 0) && (
                   <div className="border-t border-border pt-4">
-                    <p className="mb-2.5 text-xs font-medium text-muted-foreground">{t('upcoming')}</p>
-                    <ul className="space-y-2">
-                      {contract.upcomingInstallments.map((installment, installmentIndex) => (
-                        <li key={installmentIndex} className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">
-                            {formatDate(installment.dueDate, locale)}
-                          </span>
-                          <span className="font-medium tabular-nums">
-                            {formatMoney(installment.remainingAmount, locale)}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
+                    <Tabs defaultValue="payments">
+                      <TabsList>
+                        <TabsTrigger value="payments">{t('tabPayments')}</TabsTrigger>
+                        <TabsTrigger value="upcoming">{t('upcoming')}</TabsTrigger>
+                      </TabsList>
+                      <TabsContent value="payments">
+                        {contract.payments.length > 0 ? (
+                          <ul className="space-y-2">
+                            {contract.payments.map((payment, paymentIndex) => (
+                              <li key={paymentIndex} className="flex items-center justify-between text-sm">
+                                <span className="text-muted-foreground">
+                                  {formatDate(payment.paidAt, locale)}
+                                </span>
+                                <span className="font-medium tabular-nums text-success">
+                                  {formatMoney(payment.amount, locale)}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="py-2 text-muted-foreground">{t('noPayments')}</p>
+                        )}
+                      </TabsContent>
+                      <TabsContent value="upcoming">
+                        {contract.upcomingInstallments.length > 0 ? (
+                          <ul className="space-y-2">
+                            {contract.upcomingInstallments.map((installment, installmentIndex) => (
+                              <li key={installmentIndex} className="flex items-center justify-between text-sm">
+                                <span className="text-muted-foreground">
+                                  {formatDate(installment.dueDate, locale)}
+                                </span>
+                                <span className="font-medium tabular-nums">
+                                  {formatMoney(installment.remainingAmount, locale)}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="py-2 text-muted-foreground">{t('noUpcoming')}</p>
+                        )}
+                      </TabsContent>
+                    </Tabs>
                   </div>
                 )}
               </div>
