@@ -44,6 +44,11 @@ export async function generateMetadata({
   return {
     title: { default: t("appName"), template: `%s · ${t("appName")}` },
     description: t("appDescription"),
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "default",
+      title: t("appName"),
+    },
   };
 }
 

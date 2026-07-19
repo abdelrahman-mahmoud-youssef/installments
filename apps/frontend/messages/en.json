@@ -11,7 +11,10 @@
     "pageOf": "Page {page} of {totalPages}",
     "somethingWentWrong": "Something went wrong.",
     "tryAgain": "Please try again in a moment.",
-    "viewShopPage": "View shop page"
+    "viewShopPage": "View shop page",
+    "install": "Install",
+    "dismiss": "Dismiss",
+    "installBannerMessage": "Install this app for quick access from your home screen."
   },
   "theme": {
     "toggle": "Toggle theme",
@@ -23,6 +26,92 @@
     "title": "Page not found",
     "description": "The page you're looking for doesn't exist or may have been moved.",
     "backHome": "Back home"
+  },
+  "landing": {
+    "nav": {
+      "features": "Features",
+      "howItWorks": "How it works",
+      "faq": "FAQ",
+      "login": "Sign in",
+      "cta": "Create your workspace"
+    },
+    "hero": {
+      "badge": "Software for shops — not a lender",
+      "title": "Stop tracking installment payments in a notebook",
+      "subtitle": "Give every customer their own payment schedule, automatic reminders, and a page to check what they still owe — all under your shop's own name.",
+      "ctaPrimary": "Create your free workspace",
+      "ctaSecondary": "Sign in",
+      "imageAlt": "The dashboard showing customer contracts and upcoming collections"
+    },
+    "badges": {
+      "bilingual": "Arabic & English, right out of the box",
+      "reminders": "Automatic Telegram & WhatsApp reminders",
+      "branding": "Your logo, your colors, your customers"
+    },
+    "problem": {
+      "title": "Built for how shops actually sell on installment",
+      "item1Title": "No more notebooks or spreadsheets",
+      "item1Description": "Every contract generates its own payment schedule automatically — no manual math, no missed rows.",
+      "item2Title": "Customers forget what they owe",
+      "item2Description": "Daily reminders go out on Telegram, and you can send any customer their balance on WhatsApp in one tap.",
+      "item3Title": "No easy way for customers to check their balance",
+      "item3Description": "Every customer gets their own page — a link or a QR code — showing exactly what they've paid and what's next. No app to install."
+    },
+    "features": {
+      "title": "Everything a shop needs to run installments",
+      "portalTitle": "A page for every customer",
+      "portalDescription": "Branded with your shop's logo and colors, showing their schedule, payment history, and what's due next.",
+      "shareTitle": "Share it in one tap",
+      "shareDescription": "A QR code to print or display, or a WhatsApp message pre-filled with their link — whichever is faster for you.",
+      "dashboardTitle": "See what's due, at a glance",
+      "dashboardDescription": "Today's collections, what's overdue, and what's coming up — one dashboard, no spreadsheets.",
+      "brandingTitle": "It looks like your shop, not ours",
+      "brandingDescription": "Upload your logo and pick a brand color — it carries across your dashboard and every customer page.",
+      "bilingualTitle": "Arabic and English, properly",
+      "bilingualDescription": "Full right-to-left layout, not a translated afterthought — because that's how your customers actually read.",
+      "remindersTitle": "Reminders that send themselves",
+      "remindersDescription": "Daily Telegram reminders for what's due and overdue, with no one having to remember to send them."
+    },
+    "howItWorks": {
+      "title": "Up and running in three steps",
+      "step1Title": "Add a customer",
+      "step1Description": "Their name and phone number — that's all it takes.",
+      "step2Title": "Create a contract",
+      "step2Description": "Set the price, the down payment, and how many installments. The schedule builds itself.",
+      "step3Title": "Share their page",
+      "step3Description": "Send the link, a QR code, or straight to WhatsApp."
+    },
+    "trust": {
+      "title": "This isn't a loan app",
+      "body": "We don't lend money, charge interest, or run credit checks. You agree on the price, the down payment, and the schedule with your own customer — we just help you track it, remind everyone, and keep it organized.",
+      "point1": "You set every term — we never touch pricing or interest",
+      "point2": "Your customers' data stays between you and them",
+      "point3": "No approval process, no waiting — start today"
+    },
+    "faq": {
+      "title": "Questions shop owners actually ask",
+      "q1": "Do you lend money to my customers?",
+      "a1": "No. This is software only — you and your customer agree on the price and schedule yourselves. We just track it, send reminders, and give your customer a page to check their balance.",
+      "q2": "Does my customer need to install anything?",
+      "a2": "No. They get a link (or a QR code) to a page that works in any browser — no app, no account.",
+      "q3": "Is my customers' data private?",
+      "a3": "Yes. Each shop's data is fully isolated — only you and the specific customer can see their balance.",
+      "q4": "Can I use my own shop's branding?",
+      "a4": "Yes — upload your logo and pick a brand color, and it carries across your dashboard and your customers' pages.",
+      "q5": "Is it available in Arabic?",
+      "a5": "Yes, fully — Arabic and English, with proper right-to-left layout throughout.",
+      "q6": "How much does it cost?",
+      "a6": "It's currently free to use while we're in early access."
+    },
+    "finalCta": {
+      "title": "Ready to stop tracking installments by hand?",
+      "subtitle": "Create your workspace in under a minute.",
+      "cta": "Create your free workspace"
+    },
+    "footer": {
+      "tagline": "Installment tracking software for shops — not a lender.",
+      "rights": "All rights reserved."
+    }
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -372,6 +461,11 @@
     "subtitle": "Manage your branding and notifications.",
     "tabBranding": "Branding",
     "tabNotifications": "Notifications",
+    "tabInstallApp": "Install app",
+    "installAppTitle": "Install app",
+    "installAppDescription": "Add this app to your phone or computer for quick access, like any other app.",
+    "installAppButton": "Install app",
+    "installAppIosHint": "On iPhone/iPad: tap the Share icon in Safari, then \"Add to Home Screen\".",
     "brandingTitle": "Branding",
     "brandingDescription": "Customize your logo and brand color across the dashboard and your customer portal.",
     "brandingSaved": "Branding updated.",

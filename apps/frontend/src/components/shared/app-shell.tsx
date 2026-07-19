@@ -3,6 +3,7 @@
 import { LogOut, Menu, Store, User } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
+import { InstallBanner } from '@/components/shared/install-banner';
 import { LanguageSwitcher } from '@/components/shared/language-switcher';
 import { BrandLogo } from '@/components/shared/logo';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
@@ -173,6 +174,8 @@ export function AppShell({
             <UserMenu appLabel={appLabel} />
           </div>
         </header>
+
+        <InstallBanner storageKey="pwa-install-banner-dashboard" message={tCommon('installBannerMessage')} />
 
         <main className="flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
           <div className="mx-auto w-full max-w-6xl">{children}</div>
