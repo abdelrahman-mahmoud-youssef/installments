@@ -1,33 +1,16 @@
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { promises as fs } from 'fs';
-import { join } from 'path';
-import { getUploadsDir } from '../../config/uploads-dir';
+import { Inject, Injectable } from '@nestjs/common';
+import { STORAGE_PROVIDER, StorageProvider } from './storage-provider.interface';
 
 @Injectable()
 export class StorageService {
-  private readonly logosDir: string;
-
-  constructor(config: ConfigService) {
-    this.logosDir = join(getUploadsDir(config), 'logos');
-  }
+  constructor(@Inject(STORAGE_PROVIDER) private readonly provider: StorageProvider) {}
 
   async saveLogo(tenantId: string, buffer: Buffer, extension: string): Promise<string> {
-    await fs.mkdir(this.logosDir, { recursive: true });
     await this.deleteLogo(tenantId);
-    const fileName = `${tenantId}.${extension}`;
-    await fs.writeFile(join(this.logosDir, fileName), buffer);
-    return `/uploads/logos/${fileName}`;
+    return this.provider.save(`logos/${tenantId}.${extension}`, buffer);
   }
 
-  async deleteLogo(tenantId: string): Promise<void> {
-    let entries: string[];
-    try {
-      entries = await fs.readdir(this.logosDir);
-    } catch {
-      return;
-    }
-    const matches = entries.filter((entry) => entry.startsWith(`${tenantId}.`));
-    await Promise.all(matches.map((entry) => fs.rm(join(this.logosDir, entry), { force: true })));
+  deleteLogo(tenantId: string): Promise<void> {
+    return this.provider.deleteByPrefix(`logos/${tenantId}.`);
   }
 }
