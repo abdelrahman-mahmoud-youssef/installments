@@ -1,10 +1,11 @@
 'use client';
 
-import { Copy, MapPin, Pencil, Phone, Plus, StickyNote, UserRoundX } from 'lucide-react';
+import { Copy, MapPin, MessageCircle, Pencil, Phone, Plus, QrCode, StickyNote, UserRoundX } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { CustomerFormDialog } from '@/components/customers/customer-form-dialog';
+import { CustomerQrDialog } from '@/components/customers/customer-qr-dialog';
 import { BackLink } from '@/components/shared/back-link';
 import { DataTable, type Column } from '@/components/shared/data-table';
 import { DateText } from '@/components/shared/date-text';
@@ -19,6 +20,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Link } from '@/i18n/navigation';
 import type { CustomerContractSummary } from '@/lib/api/customers';
 import { useCustomer, useUpdateCustomer } from '@/hooks/use-customers';
+import { normalizeLocalPhoneInput } from '@/lib/phone';
 import { routes } from '@/lib/routes';
 
 export default function CustomerDetailPage() {
@@ -47,6 +49,7 @@ export default function CustomerDetailPage() {
   }
 
   const publicUrl = `${window.location.origin}${routes.publicCustomer(customer.publicId)}`;
+  const whatsappUrl = `https://wa.me/20${normalizeLocalPhoneInput(customer.phone)}?text=${encodeURIComponent(publicUrl)}`;
 
   const columns: Column<CustomerContractSummary>[] = [
     {
@@ -120,6 +123,24 @@ export default function CustomerDetailPage() {
             >
               <Copy className="size-4" />
               {t('copyLink')}
+            </Button>
+            <CustomerQrDialog
+              trigger={
+                <Button variant="outline" size="sm">
+                  <QrCode className="size-4" />
+                  {t('qrCode')}
+                </Button>
+              }
+              customerName={customer.name}
+              publicUrl={publicUrl}
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              render={<a href={whatsappUrl} target="_blank" rel="noopener noreferrer" />}
+            >
+              <MessageCircle className="size-4" />
+              {t('sendWhatsapp')}
             </Button>
             <CustomerFormDialog
               trigger={
