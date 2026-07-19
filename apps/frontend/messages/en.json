@@ -305,6 +305,23 @@
     "telegramError": "Something went wrong.",
     "whatsappLabel": "Chat on WhatsApp"
   },
+  "publicShop": {
+    "notFound": "Shop not found",
+    "aboutTab": "About",
+    "calculatorTab": "Calculator",
+    "noAbout": "This shop hasn't added a description yet.",
+    "instagramLabel": "Instagram",
+    "facebookLabel": "Facebook",
+    "tiktokLabel": "TikTok",
+    "whatsappLabel": "Chat on WhatsApp",
+    "calculatorTitle": "Estimate your installment",
+    "calculatorProductPrice": "Product price",
+    "calculatorDownPayment": "Down payment (optional)",
+    "calculatorPlan": "Plan",
+    "calculatorMonths": "{count} months",
+    "calculatorMonthlyPayment": "Estimated monthly payment",
+    "calculatorEstimateNote": "This is an estimate only — the final plan is confirmed with the shop."
+  },
   "announcements": {
     "title": "Announcements",
     "subtitle": "Send a Telegram message to your subscribers.",

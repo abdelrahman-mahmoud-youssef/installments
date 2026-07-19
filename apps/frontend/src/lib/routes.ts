@@ -11,4 +11,5 @@ export const routes = {
   announcements: '/announcements',
   settings: '/settings',
   publicCustomer: (publicId: string) => `/customer/${publicId}`,
+  publicShop: (publicId: string) => `/shop/${publicId}`,
 } as const;

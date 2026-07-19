@@ -60,6 +60,18 @@ export async function getPublicCustomer(publicId: string): Promise<PublicCustome
   return response.json() as Promise<PublicCustomerResponse>;
 }
 
+export async function getPublicShop(publicId: string): Promise<TenantBranding | null> {
+  const response = await fetch(`${config.backendUrl}/public/shops/${publicId}`, { cache: 'no-store' });
+
+  if (response.status === 404) {
+    return null;
+  }
+  if (!response.ok) {
+    throw new Error('Failed to load shop.');
+  }
+  return response.json() as Promise<TenantBranding>;
+}
+
 async function requestPublic<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`/api/public/${path}`, {
     ...init,

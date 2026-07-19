@@ -305,6 +305,23 @@
     "telegramError": "حصل خطأ.",
     "whatsappLabel": "كلمنا على واتساب"
   },
+  "publicShop": {
+    "notFound": "المحل مش موجود",
+    "aboutTab": "نبذة عنا",
+    "calculatorTab": "احسب قسطك",
+    "noAbout": "المحل لسه ما ضافش وصف.",
+    "instagramLabel": "إنستجرام",
+    "facebookLabel": "فيسبوك",
+    "tiktokLabel": "تيك توك",
+    "whatsappLabel": "كلمنا على واتساب",
+    "calculatorTitle": "احسب قسطك",
+    "calculatorProductPrice": "سعر المنتج",
+    "calculatorDownPayment": "الدفعة المقدمة (اختياري)",
+    "calculatorPlan": "مدة التقسيط",
+    "calculatorMonths": "{count} شهر",
+    "calculatorMonthlyPayment": "القسط الشهري المتوقع",
+    "calculatorEstimateNote": "ده تقدير تقريبي بس — الخطة النهائية بتتأكد مع المحل."
+  },
   "announcements": {
     "title": "الإعلانات",
     "subtitle": "ابعت رسالة تيليجرام للمشتركين عندك.",
