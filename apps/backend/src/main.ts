@@ -5,11 +5,13 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { getUploadsDir } from './config/uploads-dir';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.useBodyParser('json', { limit: '10mb' });
   const config = app.get(ConfigService);
+  app.useStaticAssets(getUploadsDir(config), { prefix: '/uploads' });
 
   const frontendUrl = config.get<string>('FRONTEND_URL');
   app.enableCors({ origin: frontendUrl ?? true, credentials: true });
