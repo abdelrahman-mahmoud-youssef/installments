@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
   IsArray,
@@ -7,17 +8,43 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  Matches,
   Max,
   MaxLength,
   Min,
+  MinLength,
+  ValidateNested,
 } from 'class-validator';
 import { BRAND_COLOR_PRESETS, BrandColorPreset } from '../../../common/constants';
+
+const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
+export class CalculatorPlanDto {
+  @IsInt()
+  @Min(1)
+  @Max(60)
+  months!: number;
+
+  @IsNumber()
+  @Min(0)
+  @Max(1000)
+  markupPercent!: number;
+}
 
 export class UpdateBrandingDto {
   @IsOptional()
   @IsString()
   @MaxLength(120)
   displayName?: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(3)
+  @MaxLength(60)
+  @Matches(SLUG_PATTERN, {
+    message: 'Link can only contain lowercase letters, numbers, and single hyphens between them.',
+  })
+  slug?: string;
 
   @IsOptional()
   @IsIn(BRAND_COLOR_PRESETS)
@@ -57,16 +84,9 @@ export class UpdateBrandingDto {
   showInstallmentCalculator?: boolean;
 
   @IsOptional()
-  @IsNumber()
-  @Min(0)
-  @Max(1000)
-  calculatorMarkupPercent?: number;
-
-  @IsOptional()
   @IsArray()
   @ArrayMaxSize(12)
-  @IsInt({ each: true })
-  @Min(1, { each: true })
-  @Max(60, { each: true })
-  calculatorInstallmentMonths?: number[];
+  @ValidateNested({ each: true })
+  @Type(() => CalculatorPlanDto)
+  calculatorPlans?: CalculatorPlanDto[];
 }

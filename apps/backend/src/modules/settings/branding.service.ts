@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { MAX_LOGO_UPLOAD_BYTES } from '../../common/constants';
 import { TenantBranding, toTenantBranding } from '../../common/tenant-branding';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -6,6 +7,8 @@ import { detectImageExtension } from '../storage/image-signature';
 import { StorageService } from '../storage/storage.service';
 import { UpdateBrandingDto } from './dto/update-branding.dto';
 import { UploadLogoDto } from './dto/upload-logo.dto';
+
+const SLUG_TAKEN_ERROR = 'This link is already taken. Try a different one.';
 
 export type { TenantBranding };
 
@@ -22,23 +25,32 @@ export class BrandingService {
   }
 
   async updateBranding(tenantId: string, dto: UpdateBrandingDto): Promise<TenantBranding> {
-    const tenant = await this.prisma.tenant.update({
-      where: { id: tenantId },
-      data: {
-        displayName: dto.displayName,
-        brandColor: dto.brandColor,
-        showPublicPricing: dto.showPublicPricing,
-        phone: dto.phone,
-        about: dto.about,
-        instagramUrl: dto.instagramUrl,
-        facebookUrl: dto.facebookUrl,
-        tiktokUrl: dto.tiktokUrl,
-        showInstallmentCalculator: dto.showInstallmentCalculator,
-        calculatorMarkupPercent: dto.calculatorMarkupPercent,
-        calculatorInstallmentMonths: dto.calculatorInstallmentMonths,
-      },
-    });
-    return toTenantBranding(tenant);
+    try {
+      const tenant = await this.prisma.tenant.update({
+        where: { id: tenantId },
+        data: {
+          displayName: dto.displayName,
+          slug: dto.slug,
+          brandColor: dto.brandColor,
+          showPublicPricing: dto.showPublicPricing,
+          phone: dto.phone,
+          about: dto.about,
+          instagramUrl: dto.instagramUrl,
+          facebookUrl: dto.facebookUrl,
+          tiktokUrl: dto.tiktokUrl,
+          showInstallmentCalculator: dto.showInstallmentCalculator,
+          ...(dto.calculatorPlans && {
+            calculatorPlans: dto.calculatorPlans as unknown as Prisma.InputJsonValue,
+          }),
+        },
+      });
+      return toTenantBranding(tenant);
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new BadRequestException(SLUG_TAKEN_ERROR);
+      }
+      throw error;
+    }
   }
 
   async uploadLogo(tenantId: string, dto: UploadLogoDto): Promise<TenantBranding> {

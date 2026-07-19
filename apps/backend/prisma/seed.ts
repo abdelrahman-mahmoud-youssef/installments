@@ -1,5 +1,6 @@
 import { CalculationMethod, PrismaClient, RecurrenceType } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import { slugify } from '../src/common/slugify';
 import { generateDueDates } from '../src/modules/contracts/installments/recurrence';
 import { calculateInstallmentSchedule } from '../src/modules/contracts/installments/schedule';
 
@@ -226,6 +227,7 @@ async function seed(): Promise<void> {
   const tenant = await prisma.tenant.create({
     data: {
       name: SEED_TENANT_NAME,
+      slug: slugify(SEED_TENANT_NAME),
       users: { create: { email: SEED_ADMIN_EMAIL, passwordHash } },
     },
   });

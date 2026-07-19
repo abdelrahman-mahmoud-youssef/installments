@@ -1,5 +1,10 @@
+export interface CalculatorPlan {
+  months: number;
+  markupPercent: number;
+}
+
 export interface TenantBrandingSource {
-  publicId: string;
+  slug: string;
   name: string;
   displayName: string | null;
   brandColor: string;
@@ -11,12 +16,11 @@ export interface TenantBrandingSource {
   facebookUrl: string | null;
   tiktokUrl: string | null;
   showInstallmentCalculator: boolean;
-  calculatorMarkupPercent: number | null;
-  calculatorInstallmentMonths: number[];
+  calculatorPlans: unknown;
 }
 
 export interface TenantBranding {
-  publicId: string;
+  slug: string;
   displayName: string;
   brandColor: string;
   logoUrl: string | null;
@@ -27,12 +31,11 @@ export interface TenantBranding {
   facebookUrl: string | null;
   tiktokUrl: string | null;
   showInstallmentCalculator: boolean;
-  calculatorMarkupPercent: number | null;
-  calculatorInstallmentMonths: number[];
+  calculatorPlans: CalculatorPlan[];
 }
 
 export const TENANT_BRANDING_SELECT = {
-  publicId: true,
+  slug: true,
   name: true,
   displayName: true,
   brandColor: true,
@@ -44,13 +47,12 @@ export const TENANT_BRANDING_SELECT = {
   facebookUrl: true,
   tiktokUrl: true,
   showInstallmentCalculator: true,
-  calculatorMarkupPercent: true,
-  calculatorInstallmentMonths: true,
+  calculatorPlans: true,
 } as const;
 
 export function toTenantBranding(tenant: TenantBrandingSource): TenantBranding {
   return {
-    publicId: tenant.publicId,
+    slug: tenant.slug,
     displayName: tenant.displayName ?? tenant.name,
     brandColor: tenant.brandColor,
     logoUrl: tenant.logoUrl,
@@ -61,7 +63,6 @@ export function toTenantBranding(tenant: TenantBrandingSource): TenantBranding {
     facebookUrl: tenant.facebookUrl,
     tiktokUrl: tenant.tiktokUrl,
     showInstallmentCalculator: tenant.showInstallmentCalculator,
-    calculatorMarkupPercent: tenant.calculatorMarkupPercent,
-    calculatorInstallmentMonths: tenant.calculatorInstallmentMonths,
+    calculatorPlans: (tenant.calculatorPlans as CalculatorPlan[] | null) ?? [],
   };
 }

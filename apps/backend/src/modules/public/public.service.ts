@@ -114,9 +114,9 @@ export class PublicService {
     };
   }
 
-  async getShopByPublicId(publicId: string): Promise<TenantBranding> {
+  async getShopBySlug(slug: string): Promise<TenantBranding> {
     const tenant = await this.prisma.tenant.findUnique({
-      where: { publicId },
+      where: { slug },
       select: TENANT_BRANDING_SELECT,
     });
     if (!tenant) {

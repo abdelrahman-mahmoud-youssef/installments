@@ -10,8 +10,8 @@ import { PublicService } from './public.service';
 export class PublicShopController {
   constructor(private readonly publicService: PublicService) {}
 
-  @Get(':publicId')
-  getShop(@Param('publicId') publicId: string): Promise<TenantBranding> {
-    return this.publicService.getShopByPublicId(publicId);
+  @Get(':slug')
+  getShop(@Param('slug') slug: string): Promise<TenantBranding> {
+    return this.publicService.getShopBySlug(slug);
   }
 }
