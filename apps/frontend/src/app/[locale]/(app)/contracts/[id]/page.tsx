@@ -237,9 +237,11 @@ export default function ContractDetailPage() {
               <DetailRow label={t('productPrice')}>
                 <Money minorUnits={contract.productPrice} />
               </DetailRow>
-              <DetailRow label={t('downPayment')}>
-                <Money minorUnits={contract.downPayment} />
-              </DetailRow>
+              {contract.downPayment > 0 && (
+                <DetailRow label={t('downPayment')}>
+                  <Money minorUnits={contract.downPayment} />
+                </DetailRow>
+              )}
               <DetailRow label={t('calculationMethod')}>
                 {tCalculationMethod(contract.calculationMethod)}
               </DetailRow>

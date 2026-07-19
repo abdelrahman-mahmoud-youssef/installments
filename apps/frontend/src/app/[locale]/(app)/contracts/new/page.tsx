@@ -428,7 +428,9 @@ export default function NewContractPage() {
                 <Section title={t('summary')} description={t('summaryHint')}>
                   <dl className="divide-y divide-border">
                     <SummaryRow label={t('contractTotal')}>{formatMoney(totalMinor, locale)}</SummaryRow>
-                    <SummaryRow label={t('downPayment')}>{formatMoney(downMinor, locale)}</SummaryRow>
+                    {downMinor > 0 && (
+                      <SummaryRow label={t('downPayment')}>{formatMoney(downMinor, locale)}</SummaryRow>
+                    )}
                     <SummaryRow label={t('financed')} emphasis>
                       {formatMoney(Math.max(remainingMinor, 0), locale)}
                     </SummaryRow>
