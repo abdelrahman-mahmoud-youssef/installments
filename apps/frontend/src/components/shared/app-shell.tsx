@@ -4,7 +4,7 @@ import { LogOut, Menu, User } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { LanguageSwitcher } from '@/components/shared/language-switcher';
-import { Logo } from '@/components/shared/logo';
+import { BrandLogo } from '@/components/shared/logo';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { Button } from '@/components/ui/button';
 import {
@@ -55,9 +55,8 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
-function UserMenu() {
+function UserMenu({ appLabel }: { appLabel: string }) {
   const t = useTranslations('nav');
-  const tCommon = useTranslations('common');
   const router = useRouter();
 
   async function handleLogout() {
@@ -79,7 +78,7 @@ function UserMenu() {
       />
       <DropdownMenuContent align="end" className="min-w-48">
         <DropdownMenuGroup>
-          <DropdownMenuLabel>{tCommon('appName')}</DropdownMenuLabel>
+          <DropdownMenuLabel>{appLabel}</DropdownMenuLabel>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem variant="destructive" onClick={handleLogout}>
@@ -91,17 +90,30 @@ function UserMenu() {
   );
 }
 
-export function AppShell({ children }: { children: React.ReactNode }) {
+export interface AppShellBranding {
+  logoUrl: string | null;
+  displayName: string | null;
+}
+
+export function AppShell({
+  children,
+  branding,
+}: {
+  children: React.ReactNode;
+  branding?: AppShellBranding | null;
+}) {
   const tCommon = useTranslations('common');
   const locale = useLocale();
   const [mobileOpen, setMobileOpen] = useState(false);
   const sheetSide = locale === 'ar' ? 'right' : 'left';
+  const appLabel = branding?.displayName ?? tCommon('appName');
+  const logoUrl = branding?.logoUrl ?? null;
 
   return (
     <div className="min-h-screen bg-background">
       <aside className="fixed inset-y-0 start-0 z-40 hidden w-64 flex-col border-e border-sidebar-border bg-sidebar md:flex">
         <div className="flex h-16 items-center px-5">
-          <Logo label={tCommon('appName')} />
+          <BrandLogo logoUrl={logoUrl} label={appLabel} />
         </div>
         <div className="flex-1 overflow-y-auto px-3 py-2">
           <NavLinks />
@@ -119,9 +131,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               }
             />
             <SheetContent side={sheetSide} className="w-72 p-0">
-              <SheetTitle className="sr-only">{tCommon('appName')}</SheetTitle>
+              <SheetTitle className="sr-only">{appLabel}</SheetTitle>
               <div className="flex h-16 items-center px-5">
-                <Logo label={tCommon('appName')} />
+                <BrandLogo logoUrl={logoUrl} label={appLabel} />
               </div>
               <div className="px-3 py-2">
                 <NavLinks onNavigate={() => setMobileOpen(false)} />
@@ -130,14 +142,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </Sheet>
 
           <div className="md:hidden">
-            <Logo label={tCommon('appName')} />
+            <BrandLogo logoUrl={logoUrl} label={appLabel} />
           </div>
 
           <div className="ms-auto flex items-center gap-1">
             <ThemeToggle />
             <LanguageSwitcher />
             <div className="mx-1 h-5 w-px bg-border" />
-            <UserMenu />
+            <UserMenu appLabel={appLabel} />
           </div>
         </header>
 

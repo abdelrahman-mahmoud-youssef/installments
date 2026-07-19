@@ -1,3 +1,4 @@
+import { config } from '@/lib/config';
 import { BrandColorPreset } from '@/lib/schemas/branding';
 import { apiClient } from './client';
 
@@ -5,6 +6,21 @@ export interface TenantBranding {
   displayName: string;
   brandColor: BrandColorPreset;
   logoUrl: string | null;
+}
+
+export async function getBrandingServer(token: string): Promise<TenantBranding | null> {
+  try {
+    const response = await fetch(`${config.backendUrl}/settings/branding`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: 'no-store',
+    });
+    if (!response.ok) {
+      return null;
+    }
+    return (await response.json()) as TenantBranding;
+  } catch {
+    return null;
+  }
 }
 
 export interface UpdateBrandingInput {

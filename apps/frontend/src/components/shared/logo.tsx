@@ -22,3 +22,17 @@ export function Logo({ label }: { label: string }) {
     </div>
   );
 }
+
+export function BrandLogo({ logoUrl, label }: { logoUrl: string | null; label: string }) {
+  if (!logoUrl) {
+    return <Logo label={label} />;
+  }
+
+  return (
+    <div className="flex items-center gap-2.5">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={logoUrl} alt="" className="size-8 rounded-[0.6rem] object-cover" />
+      <span className="text-[0.95rem] font-semibold tracking-tight">{label}</span>
+    </div>
+  );
+}

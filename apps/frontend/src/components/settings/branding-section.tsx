@@ -14,21 +14,11 @@ import { Input } from '@/components/ui/input';
 import { useBranding, useRemoveLogo, useUpdateBranding, useUploadLogo } from '@/hooks/use-branding';
 import { ApiError } from '@/lib/api/client';
 import { resolveAssetUrl } from '@/lib/assets';
+import { BRAND_COLOR_VALUES } from '@/lib/brand-colors';
 import { BrandColorPreset, BRAND_COLOR_PRESETS, BrandingInput, brandingSchema } from '@/lib/schemas/branding';
 import { cn } from '@/lib/utils';
 
 const MAX_LOGO_BYTES = 2 * 1024 * 1024;
-
-const BRAND_COLOR_SWATCHES: Record<BrandColorPreset, string> = {
-  emerald: '#059669',
-  teal: '#0d9488',
-  blue: '#2563eb',
-  indigo: '#4f46e5',
-  violet: '#7c3aed',
-  rose: '#e11d48',
-  amber: '#d97706',
-  slate: '#475569',
-};
 
 export function BrandingSection() {
   const t = useTranslations('settings');
@@ -191,7 +181,7 @@ export function BrandingSection() {
                       'grid size-8 place-items-center rounded-full ring-2 ring-offset-2 ring-offset-background transition-shadow',
                       isSelected ? 'ring-foreground' : 'ring-transparent hover:ring-border',
                     )}
-                    style={{ backgroundColor: BRAND_COLOR_SWATCHES[preset] }}
+                    style={{ backgroundColor: BRAND_COLOR_VALUES[preset] }}
                   >
                     {isSelected && <Check className="size-4 text-white" strokeWidth={3} />}
                   </button>
