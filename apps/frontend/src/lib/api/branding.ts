@@ -3,11 +3,19 @@ import { BrandColorPreset } from '@/lib/schemas/branding';
 import { apiClient } from './client';
 
 export interface TenantBranding {
+  publicId: string;
   displayName: string;
   brandColor: BrandColorPreset;
   logoUrl: string | null;
   showPublicPricing: boolean;
   phone: string | null;
+  about: string | null;
+  instagramUrl: string | null;
+  facebookUrl: string | null;
+  tiktokUrl: string | null;
+  showInstallmentCalculator: boolean;
+  calculatorMarkupPercent: number | null;
+  calculatorInstallmentMonths: number[];
 }
 
 export async function getBrandingServer(token: string): Promise<TenantBranding | null> {
@@ -30,6 +38,13 @@ export interface UpdateBrandingInput {
   brandColor?: BrandColorPreset;
   showPublicPricing?: boolean;
   phone?: string;
+  about?: string;
+  instagramUrl?: string;
+  facebookUrl?: string;
+  tiktokUrl?: string;
+  showInstallmentCalculator?: boolean;
+  calculatorMarkupPercent?: number;
+  calculatorInstallmentMonths?: number[];
 }
 
 export function getBranding(): Promise<TenantBranding> {

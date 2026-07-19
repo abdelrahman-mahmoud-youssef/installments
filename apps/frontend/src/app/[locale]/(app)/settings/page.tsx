@@ -1,7 +1,18 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Bell, CheckCircle2, Loader2, Mail, MessageCircle, Palette, Send, Smartphone, Trash2 } from 'lucide-react';
+import {
+  Bell,
+  CheckCircle2,
+  Loader2,
+  Mail,
+  MessageCircle,
+  Palette,
+  Send,
+  Smartphone,
+  Store,
+  Trash2,
+} from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { type ComponentType } from 'react';
 import { useForm } from 'react-hook-form';
@@ -14,6 +25,7 @@ import {
 import { PageHeader } from '@/components/shared/page-header';
 import { Section } from '@/components/shared/section';
 import { BrandingSection } from '@/components/settings/branding-section';
+import { ShopPageSection } from '@/components/settings/shop-page-section';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -108,6 +120,10 @@ export default function SettingsPage() {
               <Palette className="size-4" />
               {t('tabBranding')}
             </TabsTrigger>
+            <TabsTrigger value="shopPage" className="gap-2 text-sm">
+              <Store className="size-4" />
+              {t('tabShopPage')}
+            </TabsTrigger>
             <TabsTrigger value="notifications" className="gap-2 text-sm">
               <Bell className="size-4" />
               {t('tabNotifications')}
@@ -116,6 +132,10 @@ export default function SettingsPage() {
 
           <TabsContent value="branding">
             <BrandingSection />
+          </TabsContent>
+
+          <TabsContent value="shopPage">
+            <ShopPageSection />
           </TabsContent>
 
           <TabsContent value="notifications" className="space-y-6">

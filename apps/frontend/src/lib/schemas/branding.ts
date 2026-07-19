@@ -19,3 +19,14 @@ export const brandingSchema = z.object({
 });
 
 export type BrandingInput = z.infer<typeof brandingSchema>;
+
+export const INSTALLMENT_PLAN_MONTHS = [3, 6, 9, 12] as const;
+
+export const shopPageSchema = z.object({
+  about: z.string().max(500),
+  instagramUrl: z.string().max(200),
+  facebookUrl: z.string().max(200),
+  tiktokUrl: z.string().max(200),
+});
+
+export type ShopPageInput = z.infer<typeof shopPageSchema>;
