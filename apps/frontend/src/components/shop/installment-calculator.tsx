@@ -3,31 +3,26 @@
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { NumberInput } from '@/components/shared/number-input';
+import type { CalculatorPlan } from '@/lib/api/branding';
 import { formatMoney, toMinorUnits } from '@/lib/format';
 import { estimateMarkupInstallment } from '@/lib/markup-estimate';
 import { cn } from '@/lib/utils';
 
-export function InstallmentCalculator({
-  markupPercent,
-  months,
-  locale,
-}: {
-  markupPercent: number;
-  months: number[];
-  locale: string;
-}) {
+export function InstallmentCalculator({ plans, locale }: { plans: CalculatorPlan[]; locale: string }) {
   const t = useTranslations('publicShop');
   const [productPrice, setProductPrice] = useState<number | undefined>(undefined);
   const [downPayment, setDownPayment] = useState<number | undefined>(undefined);
-  const [selectedMonths, setSelectedMonths] = useState(months[0]);
+  const [selectedMonths, setSelectedMonths] = useState(plans[0]?.months);
+
+  const selectedPlan = plans.find((plan) => plan.months === selectedMonths) ?? plans[0];
 
   const priceMinor = toMinorUnits(productPrice ?? 0);
   const downMinor = toMinorUnits(downPayment ?? 0);
   const { monthlyPaymentMinor } = estimateMarkupInstallment({
     productPriceMinor: priceMinor,
     downPaymentMinor: downMinor,
-    markupPercent,
-    months: selectedMonths,
+    markupPercent: selectedPlan?.markupPercent ?? 0,
+    months: selectedPlan?.months ?? 1,
   });
 
   return (
@@ -46,20 +41,20 @@ export function InstallmentCalculator({
       <div>
         <p className="mb-1.5 text-xs text-muted-foreground">{t('calculatorPlan')}</p>
         <div className="flex flex-wrap gap-2">
-          {months.map((month) => (
+          {plans.map((plan) => (
             <button
-              key={month}
+              key={plan.months}
               type="button"
-              aria-pressed={selectedMonths === month}
-              onClick={() => setSelectedMonths(month)}
+              aria-pressed={selectedMonths === plan.months}
+              onClick={() => setSelectedMonths(plan.months)}
               className={cn(
                 'rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors',
-                selectedMonths === month
+                selectedMonths === plan.months
                   ? 'border-primary bg-primary/10 text-primary'
                   : 'border-border text-muted-foreground hover:bg-accent',
               )}
             >
-              {t('calculatorMonths', { count: month })}
+              {t('calculatorMonths', { count: plan.months })}
             </button>
           ))}
         </div>

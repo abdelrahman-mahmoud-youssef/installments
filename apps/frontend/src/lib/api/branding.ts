@@ -2,8 +2,13 @@ import { config } from '@/lib/config';
 import { BrandColorPreset } from '@/lib/schemas/branding';
 import { apiClient } from './client';
 
+export interface CalculatorPlan {
+  months: number;
+  markupPercent: number;
+}
+
 export interface TenantBranding {
-  publicId: string;
+  slug: string;
   displayName: string;
   brandColor: BrandColorPreset;
   logoUrl: string | null;
@@ -14,8 +19,7 @@ export interface TenantBranding {
   facebookUrl: string | null;
   tiktokUrl: string | null;
   showInstallmentCalculator: boolean;
-  calculatorMarkupPercent: number | null;
-  calculatorInstallmentMonths: number[];
+  calculatorPlans: CalculatorPlan[];
 }
 
 export async function getBrandingServer(token: string): Promise<TenantBranding | null> {
@@ -35,6 +39,7 @@ export async function getBrandingServer(token: string): Promise<TenantBranding |
 
 export interface UpdateBrandingInput {
   displayName?: string;
+  slug?: string;
   brandColor?: BrandColorPreset;
   showPublicPricing?: boolean;
   phone?: string;
@@ -43,8 +48,7 @@ export interface UpdateBrandingInput {
   facebookUrl?: string;
   tiktokUrl?: string;
   showInstallmentCalculator?: boolean;
-  calculatorMarkupPercent?: number;
-  calculatorInstallmentMonths?: number[];
+  calculatorPlans?: CalculatorPlan[];
 }
 
 export function getBranding(): Promise<TenantBranding> {

@@ -30,3 +30,15 @@ export const shopPageSchema = z.object({
 });
 
 export type ShopPageInput = z.infer<typeof shopPageSchema>;
+
+const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
+export const slugSchema = z.object({
+  slug: z
+    .string()
+    .min(3, 'Must be at least 3 characters.')
+    .max(60)
+    .regex(SLUG_PATTERN, 'Only lowercase letters, numbers, and single hyphens.'),
+});
+
+export type SlugInput = z.infer<typeof slugSchema>;

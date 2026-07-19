@@ -17,11 +17,11 @@ function withScheme(url: string): string {
 export default async function PublicShopPage({
   params,
 }: {
-  params: Promise<{ uuid: string }>;
+  params: Promise<{ slug: string }>;
 }) {
-  const { uuid } = await params;
+  const { slug } = await params;
   const [shop, t, locale] = await Promise.all([
-    getPublicShop(uuid),
+    getPublicShop(slug),
     getTranslations('publicShop'),
     getLocale(),
   ]);
@@ -32,7 +32,7 @@ export default async function PublicShopPage({
 
   const logoUrl = resolveAssetUrl(shop.logoUrl);
   const whatsappPhone = shop.phone?.replace(/\D/g, '') || null;
-  const showCalculator = shop.showInstallmentCalculator && shop.calculatorInstallmentMonths.length > 0;
+  const showCalculator = shop.showInstallmentCalculator && shop.calculatorPlans.length > 0;
 
   const socialLinks = [
     shop.instagramUrl && {
@@ -107,11 +107,7 @@ export default async function PublicShopPage({
                 <p className="text-sm whitespace-pre-line text-foreground">{shop.about || t('noAbout')}</p>
               </TabsContent>
               <TabsContent value="calculator">
-                <InstallmentCalculator
-                  markupPercent={shop.calculatorMarkupPercent ?? 0}
-                  months={shop.calculatorInstallmentMonths}
-                  locale={locale}
-                />
+                <InstallmentCalculator plans={shop.calculatorPlans} locale={locale} />
               </TabsContent>
             </Tabs>
           </div>
