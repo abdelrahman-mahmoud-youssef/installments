@@ -13,6 +13,7 @@ import {
 } from '@/components/shared/notification-language-toggle';
 import { PageHeader } from '@/components/shared/page-header';
 import { Section } from '@/components/shared/section';
+import { BrandingSection } from '@/components/settings/branding-section';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -100,6 +101,8 @@ export default function SettingsPage() {
       </FadeIn>
 
       <FadeIn delay={0.05} className="mx-auto w-full max-w-2xl space-y-6">
+        <BrandingSection />
+
         <Section
           title={t('telegramTitle')}
           description={t('telegramDescription')}
