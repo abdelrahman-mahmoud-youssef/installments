@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ContractStatus, InstallmentStatus, NotificationLanguage } from '@prisma/client';
-import { TenantBranding, toTenantBranding } from '../../common/tenant-branding';
+import { TENANT_BRANDING_SELECT, TenantBranding, toTenantBranding } from '../../common/tenant-branding';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TelegramService } from '../telegram/telegram.service';
 
@@ -71,12 +71,7 @@ export class PublicService {
           select: {
             telegramBotToken: true,
             telegramBotUsername: true,
-            name: true,
-            displayName: true,
-            brandColor: true,
-            logoUrl: true,
-            showPublicPricing: true,
-            phone: true,
+            ...TENANT_BRANDING_SELECT,
           },
         },
         contracts: {
@@ -117,6 +112,17 @@ export class PublicService {
       },
       branding: toTenantBranding(customer.tenant),
     };
+  }
+
+  async getShopByPublicId(publicId: string): Promise<TenantBranding> {
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { publicId },
+      select: TENANT_BRANDING_SELECT,
+    });
+    if (!tenant) {
+      throw new NotFoundException('Shop not found.');
+    }
+    return toTenantBranding(tenant);
   }
 
   async verifyTelegram(publicId: string): Promise<PublicTelegramState> {

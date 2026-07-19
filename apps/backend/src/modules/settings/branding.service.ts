@@ -29,6 +29,13 @@ export class BrandingService {
         brandColor: dto.brandColor,
         showPublicPricing: dto.showPublicPricing,
         phone: dto.phone,
+        about: dto.about,
+        instagramUrl: dto.instagramUrl,
+        facebookUrl: dto.facebookUrl,
+        tiktokUrl: dto.tiktokUrl,
+        showInstallmentCalculator: dto.showInstallmentCalculator,
+        calculatorMarkupPercent: dto.calculatorMarkupPercent,
+        calculatorInstallmentMonths: dto.calculatorInstallmentMonths,
       },
     });
     return toTenantBranding(tenant);

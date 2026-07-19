@@ -56,11 +56,19 @@ enum BroadcastStatus {
 model Tenant {
   id                 String             @id @default(cuid())
   name               String
+  publicId           String             @unique @default(uuid())
   displayName        String?
   logoUrl            String?
   brandColor         String             @default("emerald")
   showPublicPricing  Boolean            @default(true)
   phone              String?
+  about              String?
+  instagramUrl       String?
+  facebookUrl        String?
+  tiktokUrl          String?
+  showInstallmentCalculator   Boolean   @default(false)
+  calculatorMarkupPercent     Float?
+  calculatorInstallmentMonths Int[]     @default([])
   telegramBotToken   String?
   telegramBotUsername String?
   telegramChatId     String?
