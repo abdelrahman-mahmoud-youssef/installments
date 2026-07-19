@@ -25,7 +25,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <AppShell
         branding={
           branding
-            ? { logoUrl: resolveAssetUrl(branding.logoUrl), displayName: branding.displayName }
+            ? { logoUrl: resolveAssetUrl(branding.logoUrl), displayName: branding.displayName, slug: branding.slug }
             : null
         }
       >

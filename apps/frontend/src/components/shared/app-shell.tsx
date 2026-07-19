@@ -1,6 +1,6 @@
 'use client';
 
-import { LogOut, Menu, User } from 'lucide-react';
+import { LogOut, Menu, Store, User } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { LanguageSwitcher } from '@/components/shared/language-switcher';
@@ -93,6 +93,25 @@ function UserMenu({ appLabel }: { appLabel: string }) {
 export interface AppShellBranding {
   logoUrl: string | null;
   displayName: string | null;
+  slug: string | null;
+}
+
+function ViewShopPageLink({ slug, className }: { slug: string; className?: string }) {
+  const t = useTranslations('common');
+  return (
+    <Link
+      href={routes.publicShop(slug)}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={cn(
+        'inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-primary',
+        className,
+      )}
+    >
+      <Store className="size-3.5" />
+      {t('viewShopPage')}
+    </Link>
+  );
 }
 
 export function AppShell({
@@ -115,6 +134,7 @@ export function AppShell({
         <div className="flex h-16 items-center px-5">
           <BrandLogo logoUrl={logoUrl} label={appLabel} />
         </div>
+        {branding?.slug && <ViewShopPageLink slug={branding.slug} className="px-5 pb-3" />}
         <div className="flex-1 overflow-y-auto px-3 py-2">
           <NavLinks />
         </div>
@@ -135,6 +155,7 @@ export function AppShell({
               <div className="flex h-16 items-center px-5">
                 <BrandLogo logoUrl={logoUrl} label={appLabel} />
               </div>
+              {branding?.slug && <ViewShopPageLink slug={branding.slug} className="px-5 pb-3" />}
               <div className="px-3 py-2">
                 <NavLinks onNavigate={() => setMobileOpen(false)} />
               </div>

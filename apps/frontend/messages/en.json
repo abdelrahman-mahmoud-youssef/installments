@@ -10,7 +10,8 @@
     "next": "Next",
     "pageOf": "Page {page} of {totalPages}",
     "somethingWentWrong": "Something went wrong.",
-    "tryAgain": "Please try again in a moment."
+    "tryAgain": "Please try again in a moment.",
+    "viewShopPage": "View shop page"
   },
   "theme": {
     "toggle": "Toggle theme",

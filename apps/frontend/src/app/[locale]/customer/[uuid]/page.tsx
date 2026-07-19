@@ -6,10 +6,12 @@ import { BrandLogo } from '@/components/shared/logo';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Link } from '@/i18n/navigation';
 import { resolveAssetUrl } from '@/lib/assets';
 import { brandColorCssVars } from '@/lib/brand-colors';
 import { getPublicCustomer } from '@/lib/api/public';
 import { formatDate, formatMoney } from '@/lib/format';
+import { routes } from '@/lib/routes';
 import { TelegramCard } from './telegram-card';
 
 export default async function PublicCustomerPage({
@@ -38,7 +40,9 @@ export default async function PublicCustomerPage({
       <style>{`:root{${brandColorCssVars(customer.branding.brandColor)}}`}</style>
       <header className="border-b border-border bg-background/80 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-2xl items-center justify-between px-4">
-          <BrandLogo logoUrl={logoUrl} label={customer.branding.displayName} />
+          <Link href={routes.publicShop(customer.branding.slug)}>
+            <BrandLogo logoUrl={logoUrl} label={customer.branding.displayName} />
+          </Link>
           <div className="flex items-center gap-1">
             <ThemeToggle />
             <LanguageSwitcher />

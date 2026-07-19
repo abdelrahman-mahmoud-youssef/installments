@@ -10,7 +10,8 @@
     "next": "اللي بعده",
     "pageOf": "صفحة {page} من {totalPages}",
     "somethingWentWrong": "حصل خطأ.",
-    "tryAgain": "جرّب تاني بعد شوية."
+    "tryAgain": "جرّب تاني بعد شوية.",
+    "viewShopPage": "شوف صفحة المحل"
   },
   "theme": {
     "toggle": "تغيير الشكل",
