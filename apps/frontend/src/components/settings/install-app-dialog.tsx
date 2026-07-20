@@ -16,6 +16,7 @@ import {
 
 export function InstallAppDialog() {
   const t = useTranslations('settings');
+  const tCommon = useTranslations('common');
 
   return (
     <Dialog>
@@ -37,7 +38,7 @@ export function InstallAppDialog() {
           <IosInstallHint
             storageKey="pwa-ios-hint-dashboard"
             message={t('installAppIosHint')}
-            dismissLabel={t('dismiss')}
+            dismissLabel={tCommon('dismiss')}
           />
         </div>
       </DialogContent>
