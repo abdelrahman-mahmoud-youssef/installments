@@ -26,6 +26,7 @@ export class BackblazeStorageProvider implements StorageProvider {
     this.client = new S3Client({
       region: config.getOrThrow<string>('B2_REGION'),
       endpoint: config.getOrThrow<string>('B2_ENDPOINT'),
+      forcePathStyle: true,
       credentials: {
         accessKeyId: config.getOrThrow<string>('B2_KEY_ID'),
         secretAccessKey: config.getOrThrow<string>('B2_APPLICATION_KEY'),
