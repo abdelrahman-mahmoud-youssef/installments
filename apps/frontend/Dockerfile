@@ -11,6 +11,8 @@ RUN pnpm install --frozen-lockfile --filter frontend...
 FROM deps AS build
 COPY apps/frontend apps/frontend
 ENV BACKEND_URL=http://localhost:3001
+ARG NEXT_PUBLIC_BACKEND_URL
+ENV NEXT_PUBLIC_BACKEND_URL=$NEXT_PUBLIC_BACKEND_URL
 RUN pnpm --filter frontend build
 
 FROM base AS runtime
