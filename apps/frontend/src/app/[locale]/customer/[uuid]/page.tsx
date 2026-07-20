@@ -1,4 +1,5 @@
 import { ChevronRight, MessageCircle } from 'lucide-react';
+import type { Metadata } from 'next';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { LanguageSwitcher } from '@/components/shared/language-switcher';
@@ -12,6 +13,16 @@ import { getPublicCustomer } from '@/lib/api/public';
 import { formatDate, formatMoney } from '@/lib/format';
 import { routes } from '@/lib/routes';
 import { TelegramCard } from './telegram-card';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ uuid: string }>;
+}): Promise<Metadata> {
+  const { uuid } = await params;
+  const customer = await getPublicCustomer(uuid);
+  return { title: customer?.branding.displayName };
+}
 
 export default async function PublicCustomerPage({
   params,

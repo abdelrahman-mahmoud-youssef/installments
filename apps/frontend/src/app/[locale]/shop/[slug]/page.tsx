@@ -24,7 +24,11 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  return { manifest: `/shop/${slug}/pwa-manifest` };
+  const shop = await getPublicShop(slug);
+  return {
+    manifest: `/shop/${slug}/pwa-manifest`,
+    title: shop?.displayName,
+  };
 }
 
 export default async function PublicShopPage({

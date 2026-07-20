@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { BackLink } from '@/components/shared/back-link';
@@ -11,6 +12,16 @@ import { resolveAssetUrl } from '@/lib/assets';
 import { brandColorCssVars } from '@/lib/brand-colors';
 import { formatDate, formatMoney } from '@/lib/format';
 import { routes } from '@/lib/routes';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ uuid: string; contractId: string }>;
+}): Promise<Metadata> {
+  const { uuid, contractId } = await params;
+  const contract = await getPublicContractDetail(uuid, contractId);
+  return { title: contract ? `${contract.productName} · ${contract.branding.displayName}` : undefined };
+}
 
 export default async function PublicContractDetailPage({
   params,
