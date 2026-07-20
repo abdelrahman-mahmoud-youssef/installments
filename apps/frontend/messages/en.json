@@ -27,6 +27,11 @@
     "description": "The page you're looking for doesn't exist or may have been moved.",
     "backHome": "Back home"
   },
+  "error": {
+    "title": "Something went wrong",
+    "description": "We hit a server error on our end. Please try again in a moment.",
+    "retry": "Try again"
+  },
   "landing": {
     "nav": {
       "features": "Features",

@@ -21,6 +21,10 @@ export function getLoggerOptions(config: ConfigService): Params {
         paths: ['req.headers.authorization', 'req.headers.cookie', 'res.headers["set-cookie"]'],
         censor: '[Redacted]',
       },
+      serializers: {
+        req: (req: IncomingMessage & { id?: string }) => ({ id: req.id, method: req.method, url: req.url }),
+        res: (res: ServerResponse) => ({ statusCode: res.statusCode }),
+      },
       customProps: (req: RequestWithUser) => ({
         tenantId: req.user?.tenantId,
         userId: req.user?.userId,
@@ -34,8 +38,8 @@ export function getLoggerOptions(config: ConfigService): Params {
         }
         return 'info';
       },
-      customSuccessMessage: (req: IncomingMessage, res: ServerResponse) =>
-        `${req.method} ${req.url} ${res.statusCode}`,
+      customSuccessMessage: (req: IncomingMessage, res: ServerResponse, responseTimeMs: number) =>
+        `${req.method} ${req.url} ${res.statusCode} - ${responseTimeMs}ms`,
       customErrorMessage: (req: IncomingMessage, res: ServerResponse, error: Error) =>
         `${req.method} ${req.url} ${res.statusCode} - ${error.message}`,
       autoLogging: {
