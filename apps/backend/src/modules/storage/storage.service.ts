@@ -13,4 +13,8 @@ export class StorageService {
   deleteLogo(tenantId: string): Promise<void> {
     return this.provider.deleteByPrefix(`logos/${tenantId}.`);
   }
+
+  getAssetUrl(key: string): Promise<string> {
+    return this.provider.getAssetUrl(key);
+  }
 }

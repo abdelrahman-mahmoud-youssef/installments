@@ -28,6 +28,5 @@ export const envValidationSchema = Joi.object({
   B2_APPLICATION_KEY: b2VarSchema,
   B2_BUCKET: b2VarSchema,
   B2_ENDPOINT: b2VarSchema,
-  B2_PUBLIC_URL: b2VarSchema,
   B2_REGION: Joi.string().default('us-west-004'),
 });

@@ -32,4 +32,8 @@ export class LocalStorageProvider implements StorageProvider {
     const matches = entries.filter((entry) => entry.startsWith(filePrefix));
     await Promise.all(matches.map((entry) => fs.rm(join(dir, entry), { force: true })));
   }
+
+  async getAssetUrl(key: string): Promise<string> {
+    return `/uploads/${key}`;
+  }
 }

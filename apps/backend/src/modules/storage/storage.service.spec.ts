@@ -6,6 +6,7 @@ describe('StorageService', () => {
     const provider: jest.Mocked<StorageProvider> = {
       save: jest.fn().mockResolvedValue('https://example.com/logos/tenant-1.png'),
       deleteByPrefix: jest.fn().mockResolvedValue(undefined),
+      getAssetUrl: jest.fn().mockResolvedValue('https://signed.example.com/logos/tenant-1.png'),
     };
     return { service: new StorageService(provider), provider };
   }
@@ -27,5 +28,14 @@ describe('StorageService', () => {
     await service.deleteLogo('tenant-1');
 
     expect(provider.deleteByPrefix).toHaveBeenCalledWith('logos/tenant-1.');
+  });
+
+  it('delegates asset URL resolution to the provider', async () => {
+    const { service, provider } = createService();
+
+    const url = await service.getAssetUrl('logos/tenant-1.png');
+
+    expect(provider.getAssetUrl).toHaveBeenCalledWith('logos/tenant-1.png');
+    expect(url).toBe('https://signed.example.com/logos/tenant-1.png');
   });
 });
