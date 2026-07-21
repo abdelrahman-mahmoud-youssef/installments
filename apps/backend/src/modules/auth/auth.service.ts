@@ -1,8 +1,10 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import bcrypt from 'bcryptjs';
+import { User } from '@prisma/client';
+import { hashPassword, verifyPassword } from '../../common/password';
 import { slugify } from '../../common/slugify';
 import { PrismaService } from '../../prisma/prisma.service';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { JwtPayload } from './jwt-payload.interface';
@@ -10,8 +12,6 @@ import { JwtPayload } from './jwt-payload.interface';
 export interface LoginResult {
   accessToken: string;
 }
-
-const PASSWORD_HASH_ROUNDS = 10;
 
 @Injectable()
 export class AuthService {
@@ -26,16 +26,20 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password.');
     }
 
-    const isPasswordValid = await bcrypt.compare(loginDto.password, user.passwordHash);
+    const isPasswordValid = await verifyPassword(loginDto.password, user.passwordHash);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid email or password.');
     }
 
-    return this.issueToken(user.id, user.tenantId);
+    if (!user.isActive) {
+      throw new UnauthorizedException('This account has been deactivated.');
+    }
+
+    return this.issueToken(user);
   }
 
   async register(registerDto: RegisterDto): Promise<LoginResult> {
-    const passwordHash = await bcrypt.hash(registerDto.password, PASSWORD_HASH_ROUNDS);
+    const passwordHash = await hashPassword(registerDto.password);
     const slug = await this.generateUniqueSlug(registerDto.businessName);
 
     const user = await this.prisma.user.create({
@@ -46,7 +50,18 @@ export class AuthService {
       },
     });
 
-    return this.issueToken(user.id, user.tenantId);
+    return this.issueToken(user);
+  }
+
+  async changePassword(userId: string, dto: ChangePasswordDto): Promise<void> {
+    const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId } });
+    const isCurrentPasswordValid = await verifyPassword(dto.currentPassword, user.passwordHash);
+    if (!isCurrentPasswordValid) {
+      throw new BadRequestException('Current password is incorrect.');
+    }
+
+    const passwordHash = await hashPassword(dto.newPassword);
+    await this.prisma.user.update({ where: { id: userId }, data: { passwordHash } });
   }
 
   private async generateUniqueSlug(businessName: string): Promise<string> {
@@ -60,8 +75,8 @@ export class AuthService {
     return candidate;
   }
 
-  private async issueToken(userId: string, tenantId: string): Promise<LoginResult> {
-    const payload: JwtPayload = { sub: userId, tenantId };
+  private async issueToken(user: User): Promise<LoginResult> {
+    const payload: JwtPayload = { sub: user.id, tenantId: user.tenantId, role: user.role, email: user.email };
     return { accessToken: await this.jwtService.signAsync(payload) };
   }
 }

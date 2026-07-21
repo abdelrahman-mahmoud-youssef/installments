@@ -1,5 +1,8 @@
 import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Role } from '@prisma/client';
+import { Audit } from '../../common/decorators/audit.decorator';
 import { AuthenticatedUser, CurrentUser } from '../../common/decorators/current-user.decorator';
+import { Roles } from '../../common/decorators/roles.decorator';
 import { ContractsService } from './contracts.service';
 import { ContractQueryDto } from './dto/contract-query.dto';
 import { CreateContractDto } from './dto/create-contract.dto';
@@ -10,6 +13,7 @@ export class ContractsController {
   constructor(private readonly contractsService: ContractsService) {}
 
   @Post()
+  @Audit('contract.create', 'Contract')
   create(@CurrentUser() user: AuthenticatedUser, @Body() createContractDto: CreateContractDto) {
     return this.contractsService.create(user.tenantId, createContractDto);
   }
@@ -25,6 +29,8 @@ export class ContractsController {
   }
 
   @Patch(':id/status')
+  @Roles(Role.ADMIN)
+  @Audit('contract.cancel', 'Contract')
   updateStatus(
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,

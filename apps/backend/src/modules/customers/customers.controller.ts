@@ -10,6 +10,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { Audit } from '../../common/decorators/audit.decorator';
 import { CurrentUser, AuthenticatedUser } from '../../common/decorators/current-user.decorator';
 import { CustomersService } from './customers.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
@@ -21,6 +22,7 @@ export class CustomersController {
   constructor(private readonly customersService: CustomersService) {}
 
   @Post()
+  @Audit('customer.create', 'Customer')
   create(@CurrentUser() user: AuthenticatedUser, @Body() createCustomerDto: CreateCustomerDto) {
     return this.customersService.create(user.tenantId, createCustomerDto);
   }
@@ -36,6 +38,7 @@ export class CustomersController {
   }
 
   @Patch(':id')
+  @Audit('customer.update', 'Customer')
   update(
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
@@ -46,6 +49,7 @@ export class CustomersController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @Audit('customer.delete', 'Customer')
   remove(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.customersService.remove(user.tenantId, id);
   }

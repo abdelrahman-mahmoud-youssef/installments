@@ -1,5 +1,8 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Role } from '@prisma/client';
+import { Audit } from '../../common/decorators/audit.decorator';
 import { AuthenticatedUser, CurrentUser } from '../../common/decorators/current-user.decorator';
+import { Roles } from '../../common/decorators/roles.decorator';
 import { BroadcastsService } from './broadcasts.service';
 import { CreateBroadcastDto } from './dto/create-broadcast.dto';
 import { SubscriberQueryDto } from './dto/subscriber-query.dto';
@@ -19,6 +22,8 @@ export class BroadcastsController {
   }
 
   @Post()
+  @Roles(Role.ADMIN)
+  @Audit('announcement.send', 'Broadcast')
   create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateBroadcastDto) {
     return this.broadcastsService.createBroadcast(user.tenantId, dto);
   }

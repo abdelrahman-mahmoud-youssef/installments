@@ -5,9 +5,11 @@ import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { LoggerModule } from 'nestjs-pino';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { RolesGuard } from './common/guards/roles.guard';
 import { envValidationSchema } from './config/env.validation';
 import { getLoggerOptions } from './config/logger.config';
 import { getRedisConnectionOptions } from './config/redis-connection';
+import { AuditModule } from './modules/audit/audit.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtAuthGuard } from './modules/auth/jwt-auth.guard';
 import { BroadcastsModule } from './modules/broadcasts/broadcasts.module';
@@ -20,6 +22,7 @@ import { PublicModule } from './modules/public/public.module';
 import { RemindersModule } from './modules/reminders/reminders.module';
 import { ReportsModule } from './modules/reports/reports.module';
 import { SettingsModule } from './modules/settings/settings.module';
+import { UsersModule } from './modules/users/users.module';
 import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
@@ -52,9 +55,12 @@ import { PrismaModule } from './prisma/prisma.module';
     RemindersModule,
     SettingsModule,
     BroadcastsModule,
+    AuditModule,
+    UsersModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: RolesGuard },
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_FILTER, useClass: HttpExceptionFilter },
   ],
