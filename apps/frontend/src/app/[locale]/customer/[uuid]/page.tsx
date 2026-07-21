@@ -21,8 +21,13 @@ export async function generateMetadata({
   params: Promise<{ uuid: string }>;
 }): Promise<Metadata> {
   const { uuid } = await params;
-  const customer = await getPublicCustomer(uuid);
-  return { title: customer?.branding.displayName };
+  const [customer, t] = await Promise.all([getPublicCustomer(uuid), getTranslations('publicCustomer')]);
+  return {
+    title: customer?.branding.displayName,
+    description: customer
+      ? t('ogCustomerDescription', { name: customer.name, shop: customer.branding.displayName })
+      : undefined,
+  };
 }
 
 export default async function PublicCustomerPage({

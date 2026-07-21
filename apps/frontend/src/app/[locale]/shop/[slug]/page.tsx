@@ -24,10 +24,11 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const shop = await getPublicShop(slug);
+  const [shop, t] = await Promise.all([getPublicShop(slug), getTranslations('publicShop')]);
   return {
     manifest: `/shop/${slug}/pwa-manifest`,
     title: shop?.displayName,
+    description: shop ? t('ogDescription', { name: shop.displayName }) : undefined,
   };
 }
 

@@ -417,7 +417,11 @@
     "telegramDisconnectedToast": "Telegram disconnected.",
     "telegramError": "Something went wrong.",
     "whatsappLabel": "Chat on WhatsApp",
-    "visitStore": "Visit {name}"
+    "visitStore": "Visit {name}",
+    "ogCustomerSubtitle": "Installment account at {shop}",
+    "ogContractSubtitle": "Installment plan at {shop}",
+    "ogCustomerDescription": "View {name}'s installment contracts and payments at {shop}.",
+    "ogContractDescription": "{product} · installment plan at {shop}."
   },
   "publicShop": {
     "notFound": "Shop not found",
@@ -436,7 +440,9 @@
     "calculatorMonthlyPayment": "Estimated monthly payment",
     "calculatorEstimateNote": "This is an estimate only — the final plan is confirmed with the shop.",
     "installButtonLabel": "Install {name}",
-    "installIosHint": "Install {name}: tap Share in Safari, then \"Add to Home Screen\"."
+    "installIosHint": "Install {name}: tap Share in Safari, then \"Add to Home Screen\".",
+    "ogTagline": "Shop online and pay in easy installments",
+    "ogDescription": "Browse {name}'s products and installment plans."
   },
   "announcements": {
     "title": "Announcements",

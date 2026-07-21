@@ -21,8 +21,16 @@ export async function generateMetadata({
   params: Promise<{ uuid: string; contractId: string }>;
 }): Promise<Metadata> {
   const { uuid, contractId } = await params;
-  const contract = await getPublicContractDetail(uuid, contractId);
-  return { title: contract ? `${contract.productName} · ${contract.branding.displayName}` : undefined };
+  const [contract, t] = await Promise.all([
+    getPublicContractDetail(uuid, contractId),
+    getTranslations('publicCustomer'),
+  ]);
+  return {
+    title: contract ? `${contract.productName} · ${contract.branding.displayName}` : undefined,
+    description: contract
+      ? t('ogContractDescription', { product: contract.productName, shop: contract.branding.displayName })
+      : undefined,
+  };
 }
 
 export default async function PublicContractDetailPage({

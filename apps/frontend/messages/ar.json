@@ -417,7 +417,11 @@
     "telegramDisconnectedToast": "اتلغى ربط تيليجرام.",
     "telegramError": "حصل خطأ.",
     "whatsappLabel": "كلمنا على واتساب",
-    "visitStore": "زيارة {name}"
+    "visitStore": "زيارة {name}",
+    "ogCustomerSubtitle": "حساب أقساط في {shop}",
+    "ogContractSubtitle": "خطة تقسيط في {shop}",
+    "ogCustomerDescription": "شوف عقود ودفعات {name} في {shop}.",
+    "ogContractDescription": "{product} · خطة تقسيط في {shop}."
   },
   "publicShop": {
     "notFound": "المحل مش موجود",
@@ -436,7 +440,9 @@
     "calculatorMonthlyPayment": "القسط الشهري المتوقع",
     "calculatorEstimateNote": "ده تقدير تقريبي بس — الخطة النهائية بتتأكد مع المحل.",
     "installButtonLabel": "ثبّت {name}",
-    "installIosHint": "ثبّت {name}: دوس على أيقونة المشاركة في سفاري، وبعدين \"إضافة إلى الشاشة الرئيسية\"."
+    "installIosHint": "ثبّت {name}: دوس على أيقونة المشاركة في سفاري، وبعدين \"إضافة إلى الشاشة الرئيسية\".",
+    "ogTagline": "تسوق أونلاين وادفع بالتقسيط بسهولة",
+    "ogDescription": "تصفح منتجات وخطط تقسيط {name}."
   },
   "announcements": {
     "title": "الإعلانات",
