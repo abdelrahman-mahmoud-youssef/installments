@@ -56,6 +56,7 @@ export function SubmitPaymentDialog({
 
   const form = useForm<PaymentClaimInput>({
     resolver: zodResolver(paymentClaimSchema),
+    defaultValues: { paymentMethodId: '' },
   });
 
   async function handleSubmit(values: PaymentClaimInput) {
