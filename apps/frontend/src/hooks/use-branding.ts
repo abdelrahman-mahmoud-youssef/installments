@@ -5,6 +5,7 @@ import {
   TenantBranding,
   UpdateBrandingInput,
   updateBranding,
+  uploadAboutImage,
   uploadLogo,
 } from '@/lib/api/branding';
 
@@ -34,6 +35,10 @@ export function useUploadLogo() {
 
 export function useRemoveLogo() {
   return useBrandingMutation<void>(() => removeLogo());
+}
+
+export function useUploadAboutImage() {
+  return useMutation({ mutationFn: (image: string) => uploadAboutImage(image) });
 }
 
 export type { TenantBranding };

@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { FaFacebookF, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa6';
-import { FormattedText } from '@/components/shared/formatted-text';
 import { InstallAppButton } from '@/components/shared/install-app-button';
 import { IosInstallHint } from '@/components/shared/ios-install-hint';
 import { LanguageSwitcher } from '@/components/shared/language-switcher';
@@ -16,6 +15,18 @@ import { brandColorCssVars } from '@/lib/brand-colors';
 
 function withScheme(url: string): string {
   return /^https?:\/\//i.test(url) ? url : `https://${url}`;
+}
+
+function AboutContent({ about, noAboutLabel }: { about: string | null; noAboutLabel: string }) {
+  if (!about) {
+    return <p className="text-[0.95rem] leading-relaxed text-foreground">{noAboutLabel}</p>;
+  }
+  return (
+    <div
+      className="prose prose-sm dark:prose-invert max-w-none text-[0.95rem] leading-relaxed"
+      dangerouslySetInnerHTML={{ __html: about }}
+    />
+  );
 }
 
 export async function generateMetadata({
@@ -132,9 +143,7 @@ export default async function PublicShopPage({
                 <TabsTrigger value="calculator">{t('calculatorTab')}</TabsTrigger>
               </TabsList>
               <TabsContent value="about">
-                <p className="text-[0.95rem] leading-relaxed whitespace-pre-line text-foreground">
-                  {shop.about ? <FormattedText text={shop.about} /> : t('noAbout')}
-                </p>
+                <AboutContent about={shop.about} noAboutLabel={t('noAbout')} />
               </TabsContent>
               <TabsContent value="calculator">
                 <InstallmentCalculator plans={shop.calculatorPlans} locale={locale} />
@@ -143,9 +152,7 @@ export default async function PublicShopPage({
           </div>
         ) : (
           <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
-            <p className="text-[0.95rem] leading-relaxed whitespace-pre-line text-foreground">
-              {shop.about ? <FormattedText text={shop.about} /> : t('noAbout')}
-            </p>
+            <AboutContent about={shop.about} noAboutLabel={t('noAbout')} />
           </div>
         )}
       </main>

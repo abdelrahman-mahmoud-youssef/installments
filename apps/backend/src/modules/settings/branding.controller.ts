@@ -5,6 +5,7 @@ import { AuthenticatedUser, CurrentUser } from '../../common/decorators/current-
 import { Roles } from '../../common/decorators/roles.decorator';
 import { BrandingService, TenantBranding } from './branding.service';
 import { UpdateBrandingDto } from './dto/update-branding.dto';
+import { UploadAboutImageDto } from './dto/upload-about-image.dto';
 import { UploadLogoDto } from './dto/upload-logo.dto';
 
 @Controller('settings/branding')
@@ -39,5 +40,14 @@ export class BrandingController {
   @Audit('settings.branding.logo_remove', 'Tenant')
   removeLogo(@CurrentUser() user: AuthenticatedUser): Promise<TenantBranding> {
     return this.brandingService.removeLogo(user.tenantId);
+  }
+
+  @Post('about-image')
+  @Audit('settings.branding.about_image_upload', 'Tenant')
+  uploadAboutImage(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: UploadAboutImageDto,
+  ): Promise<{ url: string }> {
+    return this.brandingService.uploadAboutImage(user.tenantId, dto);
   }
 }

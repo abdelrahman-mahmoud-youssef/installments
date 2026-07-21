@@ -1,12 +1,13 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Bold, Calculator, Copy, Loader2 } from 'lucide-react';
+import { Calculator, Copy, Loader2 } from 'lucide-react';
 import { FaFacebookF, FaInstagram, FaTiktok } from 'react-icons/fa6';
 import { useTranslations } from 'next-intl';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { AboutEditor } from '@/components/settings/about-editor';
 import { NumberInput } from '@/components/shared/number-input';
 import { Section } from '@/components/shared/section';
 import { Button } from '@/components/ui/button';
@@ -14,7 +15,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
 import { useBranding, useUpdateBranding } from '@/hooks/use-branding';
 import { ApiError } from '@/lib/api/client';
 import { routes } from '@/lib/routes';
@@ -66,24 +66,6 @@ export function ShopPageSection() {
       tiktokUrl: data?.tiktokUrl ?? '',
     },
   });
-
-  const aboutTextareaRef = useRef<HTMLTextAreaElement>(null);
-
-  function handleBoldClick() {
-    const textarea = aboutTextareaRef.current;
-    if (!textarea) {
-      return;
-    }
-    const { selectionStart, selectionEnd, value } = textarea;
-    const selected = value.slice(selectionStart, selectionEnd) || t('aboutBoldPlaceholder');
-    const nextValue = `${value.slice(0, selectionStart)}**${selected}**${value.slice(selectionEnd)}`;
-    form.setValue('about', nextValue, { shouldDirty: true });
-    requestAnimationFrame(() => {
-      textarea.focus();
-      const cursor = selectionStart + selected.length + 4;
-      textarea.setSelectionRange(cursor, cursor);
-    });
-  }
 
   async function handleSave(values: ShopPageInput) {
     try {
@@ -194,29 +176,10 @@ export function ShopPageSection() {
                 control={form.control}
                 name="about"
                 render={({ field }) => (
-                  <FormItem className="max-w-sm">
-                    <div className="mb-1.5 flex items-center justify-between">
-                      <FormLabel>{t('aboutLabel')}</FormLabel>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="icon-sm"
-                        onClick={handleBoldClick}
-                        aria-label={t('aboutBoldButton')}
-                      >
-                        <Bold className="size-3.5" />
-                      </Button>
-                    </div>
+                  <FormItem className="max-w-2xl">
+                    <FormLabel>{t('aboutLabel')}</FormLabel>
                     <FormControl>
-                      <Textarea
-                        ref={aboutTextareaRef}
-                        rows={4}
-                        placeholder={t('aboutPlaceholder')}
-                        name={field.name}
-                        value={field.value}
-                        onChange={field.onChange}
-                        onBlur={field.onBlur}
-                      />
+                      <AboutEditor value={field.value} onChange={field.onChange} onBlur={field.onBlur} />
                     </FormControl>
                     <p className="text-xs text-muted-foreground">{t('aboutHint')}</p>
                     <FormMessage />

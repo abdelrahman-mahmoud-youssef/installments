@@ -10,6 +10,10 @@ export class StorageService {
     return this.provider.save(`logos/${tenantId}.${extension}`, buffer);
   }
 
+  saveKeyedImage(key: string, buffer: Buffer): Promise<string> {
+    return this.provider.save(key, buffer);
+  }
+
   deleteLogo(tenantId: string): Promise<void> {
     return this.provider.deleteByPrefix(`logos/${tenantId}.`);
   }

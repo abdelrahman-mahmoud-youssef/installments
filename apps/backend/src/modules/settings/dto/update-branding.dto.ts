@@ -15,7 +15,7 @@ import {
   MinLength,
   ValidateNested,
 } from 'class-validator';
-import { BRAND_COLOR_PRESETS, BrandColorPreset } from '../../../common/constants';
+import { ABOUT_MAX_LENGTH, BRAND_COLOR_PRESETS, BrandColorPreset } from '../../../common/constants';
 
 const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
@@ -61,7 +61,7 @@ export class UpdateBrandingDto {
 
   @IsOptional()
   @IsString()
-  @MaxLength(500)
+  @MaxLength(ABOUT_MAX_LENGTH)
   about?: string;
 
   @IsOptional()

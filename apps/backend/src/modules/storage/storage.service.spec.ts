@@ -30,6 +30,17 @@ describe('StorageService', () => {
     expect(provider.deleteByPrefix).toHaveBeenCalledWith('logos/tenant-1.');
   });
 
+  it('saves a keyed image without deleting any existing files', async () => {
+    const { service, provider } = createService();
+    const buffer = Buffer.from('image');
+
+    const url = await service.saveKeyedImage('about-images/tenant-1/abc.png', buffer);
+
+    expect(provider.deleteByPrefix).not.toHaveBeenCalled();
+    expect(provider.save).toHaveBeenCalledWith('about-images/tenant-1/abc.png', buffer);
+    expect(url).toBe('https://example.com/logos/tenant-1.png');
+  });
+
   it('delegates asset URL resolution to the provider', async () => {
     const { service, provider } = createService();
 

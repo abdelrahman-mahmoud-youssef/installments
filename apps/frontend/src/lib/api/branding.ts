@@ -66,3 +66,7 @@ export function uploadLogo(image: string): Promise<TenantBranding> {
 export function removeLogo(): Promise<TenantBranding> {
   return apiClient.delete('settings/branding/logo');
 }
+
+export function uploadAboutImage(image: string): Promise<{ url: string }> {
+  return apiClient.post('settings/branding/about-image', { image });
+}
