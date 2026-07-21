@@ -160,7 +160,8 @@
       "submitting": "Signing in…",
       "noAccount": "Don't have an account?",
       "createOne": "Create one",
-      "genericError": "Unable to sign in. Please try again."
+      "genericError": "Unable to sign in. Please try again.",
+      "accountDeactivated": "This account has been deactivated. Contact your shop admin."
     },
     "register": {
       "title": "Create your workspace",

@@ -34,7 +34,11 @@ export default function LoginPage() {
       router.push(routes.dashboard);
       router.refresh();
     } catch (error) {
-      setServerError(error instanceof ApiError ? error.message : t('genericError'));
+      if (error instanceof ApiError && error.message === 'This account has been deactivated.') {
+        setServerError(t('accountDeactivated'));
+      } else {
+        setServerError(error instanceof ApiError ? error.message : t('genericError'));
+      }
     }
   }
 
