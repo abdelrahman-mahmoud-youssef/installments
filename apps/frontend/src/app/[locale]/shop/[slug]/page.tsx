@@ -109,24 +109,28 @@ export default async function PublicShopPage({
 
       <main className="mx-auto max-w-2xl space-y-5 px-4 py-8">
         <div className="overflow-hidden rounded-2xl bg-primary p-6 text-primary-foreground shadow-brand">
-          <h1 className="font-heading text-2xl font-semibold tracking-tight">{shop.displayName}</h1>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h1 className="min-w-0 truncate font-heading text-2xl font-semibold tracking-tight">
+              {shop.displayName}
+            </h1>
 
-          {socialLinks.length > 0 && (
-            <div className="mt-4 flex items-center gap-2.5">
-              {socialLinks.map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={social.label}
-                  className={`grid size-10 place-items-center rounded-full text-white shadow-sm transition-transform hover:scale-105 ${social.className}`}
-                >
-                  <social.icon className="size-5" />
-                </a>
-              ))}
-            </div>
-          )}
+            {socialLinks.length > 0 && (
+              <div className="flex shrink-0 items-center gap-2">
+                {socialLinks.map((social) => (
+                  <a
+                    key={social.label}
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={social.label}
+                    className={`grid size-9 place-items-center rounded-full text-white shadow-sm transition-transform hover:scale-105 ${social.className}`}
+                  >
+                    <social.icon className="size-4" />
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-col gap-2">
