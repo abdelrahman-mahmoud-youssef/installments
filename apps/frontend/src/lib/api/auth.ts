@@ -1,4 +1,6 @@
-import { ApiError, ApiErrorBody } from './client';
+import { apiClient, ApiError, ApiErrorBody } from './client';
+
+export type Role = 'ADMIN' | 'STAFF';
 
 export interface LoginPayload {
   email: string;
@@ -9,6 +11,18 @@ export interface RegisterPayload {
   businessName: string;
   email: string;
   password: string;
+}
+
+export interface CurrentUser {
+  id: string;
+  email: string;
+  tenantId: string;
+  role: Role;
+}
+
+export interface ChangePasswordPayload {
+  currentPassword: string;
+  newPassword: string;
 }
 
 async function postAuth(path: 'login' | 'register', payload: unknown): Promise<void> {
@@ -34,4 +48,12 @@ export function register(payload: RegisterPayload): Promise<void> {
 
 export async function logout(): Promise<void> {
   await fetch('/api/auth/logout', { method: 'POST' });
+}
+
+export function getMe(): Promise<CurrentUser> {
+  return apiClient.get('auth/me');
+}
+
+export function changePassword(payload: ChangePasswordPayload): Promise<void> {
+  return apiClient.patch('auth/password', payload);
 }

@@ -35,6 +35,14 @@ export function formatDate(date: string | Date, locale = 'en'): string {
   }).format(new Date(date));
 }
 
+export function formatDateTime(date: string | Date, locale = 'en'): string {
+  return new Intl.DateTimeFormat(locale, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+    numberingSystem: 'latn',
+  }).format(new Date(date));
+}
+
 export function formatWeekday(date: string | Date, locale = 'en'): string {
   return new Intl.DateTimeFormat(locale, {
     weekday: 'short',

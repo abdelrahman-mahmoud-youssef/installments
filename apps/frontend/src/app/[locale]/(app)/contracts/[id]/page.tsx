@@ -39,6 +39,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Link } from '@/i18n/navigation';
 import type { Installment } from '@/lib/api/contracts';
 import { useCancelContract, useContract } from '@/hooks/use-contracts';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import { useCreatePayment } from '@/hooks/use-payments';
 import { ApiError } from '@/lib/api/client';
 import { getDisplayInstallmentStatus } from '@/lib/enums';
@@ -74,6 +75,8 @@ export default function ContractDetailPage() {
   const createPayment = useCreatePayment(id);
   const cancelContract = useCancelContract(id);
   const [qrOpen, setQrOpen] = useState(false);
+  const { data: currentUser } = useCurrentUser();
+  const canCancel = currentUser?.role === 'ADMIN';
 
   if (isLoading) {
     return (
@@ -217,26 +220,28 @@ export default function ContractDetailPage() {
                   outstandingInstallments={outstandingInstallments}
                   onSubmit={(input) => createPayment.mutateAsync(input)}
                 />
-                <ConfirmDialog
-                  trigger={
-                    <Button variant="outline">
-                      <XCircle className="size-4" />
-                      {t('cancelContract')}
-                    </Button>
-                  }
-                  title={t('cancelTitle')}
-                  description={t('cancelDescription')}
-                  confirmLabel={t('cancelContract')}
-                  destructive
-                  onConfirm={async () => {
-                    try {
-                      await cancelContract.mutateAsync();
-                      toast.success(t('cancelled'));
-                    } catch (error) {
-                      toast.error(error instanceof ApiError ? error.message : t('cancelError'));
+                {canCancel && (
+                  <ConfirmDialog
+                    trigger={
+                      <Button variant="outline">
+                        <XCircle className="size-4" />
+                        {t('cancelContract')}
+                      </Button>
                     }
-                  }}
-                />
+                    title={t('cancelTitle')}
+                    description={t('cancelDescription')}
+                    confirmLabel={t('cancelContract')}
+                    destructive
+                    onConfirm={async () => {
+                      try {
+                        await cancelContract.mutateAsync();
+                        toast.success(t('cancelled'));
+                      } catch (error) {
+                        toast.error(error instanceof ApiError ? error.message : t('cancelError'));
+                      }
+                    }}
+                  />
+                )}
               </>
             )}
           </div>

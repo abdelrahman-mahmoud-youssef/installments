@@ -19,6 +19,7 @@ import {
   useCreateBroadcast,
   useSubscribers,
 } from '@/hooks/use-announcements';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { ApiError } from '@/lib/api/client';
 import type { BroadcastAudience } from '@/lib/api/announcements';
@@ -32,6 +33,8 @@ export default function AnnouncementsPage() {
   const tCommon = useTranslations('common');
   const locale = useLocale();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { data: currentUser } = useCurrentUser();
+  const canCompose = currentUser?.role === 'ADMIN';
 
   const [body, setBody] = useState('');
   const [image, setImage] = useState<string | null>(null);
@@ -115,6 +118,7 @@ export default function AnnouncementsPage() {
       </FadeIn>
 
       <FadeIn delay={0.05} className="space-y-6">
+        {canCompose && (
         <Section title={t('composeTitle')} description={t('composeDescription')}>
           <div className="flex flex-col gap-4">
             <Textarea
@@ -195,6 +199,7 @@ export default function AnnouncementsPage() {
             )}
           </div>
         </Section>
+        )}
 
         <Section
           title={t('subscribersTitle')}

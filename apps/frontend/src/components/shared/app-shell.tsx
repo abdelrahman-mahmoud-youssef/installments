@@ -1,8 +1,9 @@
 'use client';
 
-import { LogOut, Menu, Store, User } from 'lucide-react';
+import { KeyRound, LogOut, Menu, Store, User } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
+import { ChangePasswordDialog } from '@/components/shared/change-password-dialog';
 import { InstallBanner } from '@/components/shared/install-banner';
 import { LanguageSwitcher } from '@/components/shared/language-switcher';
 import { BrandLogo } from '@/components/shared/logo';
@@ -18,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import { Link, usePathname, useRouter } from '@/i18n/navigation';
 import { logout } from '@/lib/api/auth';
 import { navigationItems } from '@/lib/navigation';
@@ -27,10 +29,12 @@ import { cn } from '@/lib/utils';
 function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   const t = useTranslations('nav');
   const pathname = usePathname();
+  const { data: currentUser } = useCurrentUser();
+  const visibleItems = navigationItems.filter((item) => !item.adminOnly || currentUser?.role === 'ADMIN');
 
   return (
     <nav className="flex flex-col gap-0.5">
-      {navigationItems.map((item) => {
+      {visibleItems.map((item) => {
         const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
         const Icon = item.icon;
         return (
@@ -58,7 +62,9 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
 
 function UserMenu({ appLabel }: { appLabel: string }) {
   const t = useTranslations('nav');
+  const tAccount = useTranslations('account');
   const router = useRouter();
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
 
   async function handleLogout() {
     await logout();
@@ -67,27 +73,34 @@ function UserMenu({ appLabel }: { appLabel: string }) {
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <Button variant="ghost" size="icon-sm" aria-label={t('account')}>
-            <span className="grid size-7 place-items-center rounded-full bg-primary/12 text-primary">
-              <User className="size-4" />
-            </span>
-          </Button>
-        }
-      />
-      <DropdownMenuContent align="end" className="min-w-48">
-        <DropdownMenuGroup>
-          <DropdownMenuLabel>{appLabel}</DropdownMenuLabel>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem variant="destructive" onClick={handleLogout}>
-          <LogOut className="size-4" />
-          {t('logout')}
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={
+            <Button variant="ghost" size="icon-sm" aria-label={t('account')}>
+              <span className="grid size-7 place-items-center rounded-full bg-primary/12 text-primary">
+                <User className="size-4" />
+              </span>
+            </Button>
+          }
+        />
+        <DropdownMenuContent align="end" className="min-w-48">
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>{appLabel}</DropdownMenuLabel>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => setChangePasswordOpen(true)}>
+            <KeyRound className="size-4" />
+            {tAccount('changePassword')}
+          </DropdownMenuItem>
+          <DropdownMenuItem variant="destructive" onClick={handleLogout}>
+            <LogOut className="size-4" />
+            {t('logout')}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <ChangePasswordDialog open={changePasswordOpen} onOpenChange={setChangePasswordOpen} />
+    </>
   );
 }
 

@@ -10,6 +10,8 @@ export const routes = {
   contract: (id: string) => `/contracts/${id}`,
   reports: '/reports',
   announcements: '/announcements',
+  staff: '/staff',
+  activity: '/activity',
   settings: '/settings',
   publicCustomer: (publicId: string) => `/customer/${publicId}`,
   publicContract: (publicId: string, contractPublicId: string) =>
