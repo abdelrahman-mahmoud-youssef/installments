@@ -3,9 +3,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Check, ImagePlus, Loader2, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { LogoEditDialog } from '@/components/settings/logo-edit-dialog';
 import { Section } from '@/components/shared/section';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -34,6 +35,7 @@ export function BrandingSection() {
   const uploadLogo = useUploadLogo();
   const removeLogo = useRemoveLogo();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [pendingLogoFile, setPendingLogoFile] = useState<File | null>(null);
 
   const form = useForm<BrandingInput>({
     resolver: zodResolver(brandingSchema),
@@ -74,21 +76,16 @@ export function BrandingSection() {
       toast.error(t('logoTooLarge'));
       return;
     }
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const result = reader.result as string;
-      const base64 = result.split(',')[1];
-      if (!base64) {
-        return;
-      }
-      try {
-        await uploadLogo.mutateAsync(base64);
-        toast.success(t('brandingSaved'));
-      } catch (error) {
-        toast.error(error instanceof ApiError ? error.message : t('genericError'));
-      }
-    };
-    reader.readAsDataURL(file);
+    setPendingLogoFile(file);
+  }
+
+  async function handleLogoConfirm(base64: string) {
+    try {
+      await uploadLogo.mutateAsync(base64);
+      toast.success(t('brandingSaved'));
+    } catch (error) {
+      toast.error(error instanceof ApiError ? error.message : t('genericError'));
+    }
   }
 
   async function handleRemoveLogo() {
@@ -282,6 +279,16 @@ export function BrandingSection() {
           </div>
         )}
       </div>
+
+      <LogoEditDialog
+        file={pendingLogoFile}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPendingLogoFile(null);
+          }
+        }}
+        onConfirm={handleLogoConfirm}
+      />
     </Section>
   );
 }
