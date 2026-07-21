@@ -320,7 +320,7 @@ export class PublicService {
       productName: contract.productName,
       status: contract.status,
       ...(pricingVisible ? { totalAmount: contract.totalAmount, downPayment: contract.downPayment } : {}),
-      paidAmount: contract.downPayment + installmentsPaidAmount,
+      paidAmount: installmentsPaidAmount,
       remainingAmount: installmentsTotal - installmentsPaidAmount,
       payments: contract.payments,
       installments: contract.installments.map((installment) => ({
@@ -365,7 +365,7 @@ export class PublicService {
       productName: contract.productName,
       status: contract.status,
       ...(pricingVisible ? { totalAmount: contract.totalAmount, downPayment: contract.downPayment } : {}),
-      paidAmount: contract.downPayment + installmentsPaidAmount,
+      paidAmount: installmentsPaidAmount,
       remainingAmount: installmentsTotal - installmentsPaidAmount,
       nextInstallment: nextOutstanding
         ? {
