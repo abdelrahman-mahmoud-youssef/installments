@@ -230,3 +230,28 @@
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum";
 }
+
+@keyframes attract-pulse {
+  0%,
+  92% {
+    transform: scale(1) rotate(0deg);
+  }
+  93.5% {
+    transform: scale(1.18) rotate(-8deg);
+  }
+  95% {
+    transform: scale(0.95) rotate(6deg);
+  }
+  96.5% {
+    transform: scale(1.1) rotate(-4deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .animate-attract {
+    animation: attract-pulse 30s ease-in-out infinite;
+  }
+}

@@ -1,10 +1,33 @@
+import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import { ImageResponse } from 'next/og';
 import { BRAND_COLOR_VALUES } from '@/lib/brand-colors';
 import { BrandColorPreset } from '@/lib/schemas/branding';
 
 export const OG_IMAGE_SIZE = { width: 1200, height: 630 };
 
-export function renderOgImageResponse({
+const ARABIC_CHAR_PATTERN = /[؀-ۿ]/;
+
+function visualOrder(text: string): string {
+  return ARABIC_CHAR_PATTERN.test(text) ? text.split(' ').reverse().join(' ') : text;
+}
+
+let arabicFontsPromise: Promise<{ name: string; data: Buffer; weight: 400 | 700; style: 'normal' }[]> | null = null;
+
+function loadArabicFonts() {
+  if (!arabicFontsPromise) {
+    arabicFontsPromise = Promise.all([
+      readFile(join(process.cwd(), 'assets/fonts/IBMPlexSansArabic-Regular.ttf')),
+      readFile(join(process.cwd(), 'assets/fonts/IBMPlexSansArabic-Bold.ttf')),
+    ]).then(([regular, bold]) => [
+      { name: 'IBM Plex Sans Arabic', data: regular, weight: 400 as const, style: 'normal' as const },
+      { name: 'IBM Plex Sans Arabic', data: bold, weight: 700 as const, style: 'normal' as const },
+    ]);
+  }
+  return arabicFontsPromise;
+}
+
+export async function renderOgImageResponse({
   logoUrl,
   brandColor,
   title,
@@ -14,8 +37,9 @@ export function renderOgImageResponse({
   brandColor: BrandColorPreset;
   title: string;
   subtitle?: string;
-}): ImageResponse {
+}): Promise<ImageResponse> {
   const color = BRAND_COLOR_VALUES[brandColor];
+  const fonts = await loadArabicFonts();
 
   return new ImageResponse(
     (
@@ -76,26 +100,28 @@ export function renderOgImageResponse({
             display: 'flex',
             fontSize: 56,
             fontWeight: 700,
+            fontFamily: 'IBM Plex Sans Arabic',
             color: 'white',
             textAlign: 'center',
           }}
         >
-          {title}
+          {visualOrder(title)}
         </div>
         {subtitle && (
           <div
             style={{
               display: 'flex',
               fontSize: 30,
+              fontFamily: 'IBM Plex Sans Arabic',
               color: 'rgba(255,255,255,0.85)',
               textAlign: 'center',
             }}
           >
-            {subtitle}
+            {visualOrder(subtitle)}
           </div>
         )}
       </div>
     ),
-    OG_IMAGE_SIZE,
+    { ...OG_IMAGE_SIZE, fonts },
   );
 }
