@@ -5,6 +5,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Toaster } from "@/components/ui/sonner";
 import { AppProviders } from "@/components/providers/app-providers";
+import { config } from "@/lib/config";
 import { routing } from "@/i18n/routing";
 import { themeInitScript } from "@/lib/theme";
 import "../globals.css";
@@ -42,6 +43,7 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "common" });
   return {
+    metadataBase: new URL(config.siteUrl),
     title: { default: t("appName"), template: `%s · ${t("appName")}` },
     description: t("appDescription"),
     appleWebApp: {

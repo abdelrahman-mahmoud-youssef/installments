@@ -13,5 +13,8 @@ export const config = {
     }
     return value;
   },
+  get siteUrl(): string {
+    return process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+  },
   authCookieName: 'installment_token',
 } as const;
