@@ -1,6 +1,6 @@
 'use client';
 
-import { KeyRound, LogOut, Menu, Store, User } from 'lucide-react';
+import { ArrowUpRight, KeyRound, LogOut, Menu, Store, User } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { ChangePasswordDialog } from '@/components/shared/change-password-dialog';
@@ -124,6 +124,7 @@ function ViewShopPageLink({ slug, className }: { slug: string; className?: strin
     >
       <Store className="size-3.5" />
       {t('viewShopPage')}
+      <ArrowUpRight className="size-3.5" />
     </Link>
   );
 }

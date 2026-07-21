@@ -416,7 +416,8 @@
     "telegramBroadcastsOffToast": "Announcements turned off.",
     "telegramDisconnectedToast": "Telegram disconnected.",
     "telegramError": "Something went wrong.",
-    "whatsappLabel": "Chat on WhatsApp"
+    "whatsappLabel": "Chat on WhatsApp",
+    "visitStore": "Visit {name}"
   },
   "publicShop": {
     "notFound": "Shop not found",

@@ -1,4 +1,4 @@
-import { ChevronRight, MessageCircle } from 'lucide-react';
+import { ChevronRight, MessageCircle, Store } from 'lucide-react';
 import type { Metadata } from 'next';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
@@ -170,7 +170,15 @@ export default async function PublicCustomerPage({
         )}
       </main>
 
-      <footer className="pb-10 text-center text-xs text-muted-foreground">{customer.branding.displayName}</footer>
+      <footer className="flex justify-center pb-10">
+        <Link
+          href={routes.publicShop(customer.branding.slug)}
+          className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-4 py-2 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
+        >
+          <Store className="size-3.5" />
+          {t('visitStore', { name: customer.branding.displayName })}
+        </Link>
+      </footer>
 
       {whatsappPhone && (
         <a

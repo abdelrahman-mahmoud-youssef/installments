@@ -416,7 +416,8 @@
     "telegramBroadcastsOffToast": "اتوقفت الإعلانات.",
     "telegramDisconnectedToast": "اتلغى ربط تيليجرام.",
     "telegramError": "حصل خطأ.",
-    "whatsappLabel": "كلمنا على واتساب"
+    "whatsappLabel": "كلمنا على واتساب",
+    "visitStore": "زيارة {name}"
   },
   "publicShop": {
     "notFound": "المحل مش موجود",
