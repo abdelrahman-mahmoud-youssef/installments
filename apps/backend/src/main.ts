@@ -13,8 +13,12 @@ async function bootstrap(): Promise<void> {
   const config = app.get(ConfigService);
   app.useStaticAssets(getUploadsDir(config), { prefix: '/uploads' });
 
-  const frontendUrl = config.get<string>('FRONTEND_URL');
-  app.enableCors({ origin: frontendUrl ?? true, credentials: true });
+  const frontendUrls = config
+    .get<string>('FRONTEND_URL')
+    ?.split(',')
+    .map((url) => url.trim())
+    .filter(Boolean);
+  app.enableCors({ origin: frontendUrls?.length ? frontendUrls : true, credentials: true });
   app.useGlobalPipes(
     new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
   );
