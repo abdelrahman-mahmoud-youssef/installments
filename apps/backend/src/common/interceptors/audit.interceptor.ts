@@ -1,4 +1,4 @@
-import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
+import { CallHandler, ExecutionContext, Injectable, Logger, NestInterceptor } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Observable, tap } from 'rxjs';
 import { AuditMetadata, AUDIT_KEY } from '../decorators/audit.decorator';
@@ -7,6 +7,8 @@ import { AuditLogService } from '../../modules/audit/audit-log.service';
 
 @Injectable()
 export class AuditInterceptor implements NestInterceptor {
+  private readonly logger = new Logger(AuditInterceptor.name);
+
   constructor(
     private readonly reflector: Reflector,
     private readonly auditLogService: AuditLogService,
@@ -25,13 +27,15 @@ export class AuditInterceptor implements NestInterceptor {
     return next.handle().pipe(
       tap((response) => {
         const entityId = request.params.id ?? (response as { id?: string } | undefined)?.id ?? null;
-        void this.auditLogService.record(
-          request.user.tenantId,
-          { id: request.user.userId, name: request.user.name, email: request.user.email },
-          metadata.action,
-          metadata.entityType,
-          entityId,
-        );
+        this.auditLogService
+          .record(
+            request.user.tenantId,
+            { id: request.user.userId, name: request.user.name ?? request.user.email, email: request.user.email },
+            metadata.action,
+            metadata.entityType,
+            entityId,
+          )
+          .catch((error: unknown) => this.logger.error('Failed to record audit log entry', error));
       }),
     );
   }
