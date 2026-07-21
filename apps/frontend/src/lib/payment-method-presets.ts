@@ -13,7 +13,7 @@ export const PAYMENT_METHOD_PRESETS: PaymentMethodPreset[] = [
   { key: 'etisalat_cash', label: 'Etisalat Cash', color: '#00a651', icon: Smartphone },
   { key: 'we_pay', label: 'WE Pay', color: '#4b2e83', icon: Smartphone },
   { key: 'instapay', label: 'InstaPay', color: '#6c2eb5', icon: Wallet },
-  { key: 'fawry', label: 'Fawry', color: '#00a99d', icon: Banknote },
+  { key: 'fawry', label: 'Fawry', color: '#fbbf24', icon: Banknote },
   { key: 'bank_transfer', label: 'Bank transfer', color: '#475569', icon: Landmark },
 ];
 

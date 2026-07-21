@@ -13,7 +13,7 @@ import { Link } from '@/i18n/navigation';
 import { resolveAssetUrl } from '@/lib/assets';
 import { brandColorCssVars } from '@/lib/brand-colors';
 import { getPublicCustomer } from '@/lib/api/public';
-import { formatDate, formatMoney } from '@/lib/format';
+import { formatMoney } from '@/lib/format';
 import { routes } from '@/lib/routes';
 import { TelegramCard } from './telegram-card';
 
@@ -158,34 +158,12 @@ export default async function PublicCustomerPage({
                 )}
 
                 {contract.nextInstallment && (
-                  <div className="space-y-2.5 border-t border-border pt-4 text-sm">
-                    <div className="flex items-center justify-between">
-                      <span className="flex items-center gap-2 text-muted-foreground">
-                        {t('nextPayment')}
-                        {contract.nextInstallment.isOverdue && <StatusBadge status="OVERDUE" />}
-                      </span>
-                      <span className="font-medium tabular-nums">
-                        {formatDate(contract.nextInstallment.dueDate, locale)} ·{' '}
-                        {formatMoney(contract.nextInstallment.amount, locale)}
-                      </span>
-                    </div>
-                    {contract.nextInstallment.latestClaim?.status === 'DECLINED' && (
-                      <p className="text-xs text-danger">
-                        {t('claimDeclined', {
-                          reason:
-                            contract.nextInstallment.latestClaim.declineReason || t('claimDeclinedNoReason'),
-                        })}
-                      </p>
-                    )}
-                    <div className="flex justify-end">
-                      <NextPaymentAction
-                        nextInstallment={contract.nextInstallment}
-                        paymentMethods={customer.paymentMethods}
-                        publicId={uuid}
-                        contractPublicId={contract.publicId}
-                      />
-                    </div>
-                  </div>
+                  <NextPaymentAction
+                    nextInstallment={contract.nextInstallment}
+                    paymentMethods={customer.paymentMethods}
+                    publicId={uuid}
+                    contractPublicId={contract.publicId}
+                  />
                 )}
 
                 <div className="flex items-center justify-end gap-1 text-xs font-medium text-primary">
