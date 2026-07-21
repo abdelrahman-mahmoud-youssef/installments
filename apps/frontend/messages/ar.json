@@ -19,8 +19,13 @@
   "theme": {
     "toggle": "تغيير الشكل",
     "light": "فاتح",
-    "dark": "غامق",
-    "system": "زي النظام"
+    "dark": "غامق"
+  },
+  "fontSize": {
+    "toggle": "حجم الخط",
+    "smaller": "أصغر",
+    "normal": "عادي",
+    "bigger": "أكبر"
   },
   "notFound": {
     "title": "الصفحة مش موجودة",

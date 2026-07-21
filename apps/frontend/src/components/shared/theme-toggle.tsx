@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, Monitor, Moon, Sun } from 'lucide-react';
+import { Check, Moon, Sun } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useSyncExternalStore } from 'react';
 import { useTheme } from '@/lib/theme';
@@ -16,7 +16,6 @@ import { cn } from '@/lib/utils';
 const OPTIONS = [
   { value: 'light', icon: Sun },
   { value: 'dark', icon: Moon },
-  { value: 'system', icon: Monitor },
 ] as const;
 
 const noopSubscribe = () => () => {};

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { FaFacebookF, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa6';
+import { FontSizeToggle } from '@/components/shared/font-size-toggle';
 import { InstallAppButton } from '@/components/shared/install-app-button';
 import { IosInstallHint } from '@/components/shared/ios-install-hint';
 import { LanguageSwitcher } from '@/components/shared/language-switcher';
@@ -98,6 +99,7 @@ export default async function PublicShopPage({
         <div className="mx-auto flex h-20 max-w-2xl items-center justify-between px-4">
           <BrandLogo logoUrl={logoUrl} label={shop.displayName} size="lg" />
           <div className="flex items-center gap-1">
+            <FontSizeToggle />
             <ThemeToggle />
             <LanguageSwitcher />
           </div>

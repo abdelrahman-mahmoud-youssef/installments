@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { Toaster } from "@/components/ui/sonner";
 import { AppProviders } from "@/components/providers/app-providers";
 import { config } from "@/lib/config";
+import { fontSizeInitScript } from "@/lib/font-size";
 import { routing } from "@/i18n/routing";
 import { themeInitScript } from "@/lib/theme";
 import "../globals.css";
@@ -78,6 +79,7 @@ export default async function LocaleLayout({
     >
       <body className="min-h-full">
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        <script dangerouslySetInnerHTML={{ __html: fontSizeInitScript }} />
         <NextIntlClientProvider>
           <AppProviders direction={direction}>
             {children}

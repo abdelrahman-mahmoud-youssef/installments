@@ -19,8 +19,13 @@
   "theme": {
     "toggle": "Toggle theme",
     "light": "Light",
-    "dark": "Dark",
-    "system": "System"
+    "dark": "Dark"
+  },
+  "fontSize": {
+    "toggle": "Text size",
+    "smaller": "Smaller",
+    "normal": "Normal",
+    "bigger": "Bigger"
   },
   "notFound": {
     "title": "Page not found",

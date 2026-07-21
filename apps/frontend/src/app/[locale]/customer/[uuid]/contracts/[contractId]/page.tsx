@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { BackLink } from '@/components/shared/back-link';
+import { FontSizeToggle } from '@/components/shared/font-size-toggle';
 import { LanguageSwitcher } from '@/components/shared/language-switcher';
 import { BrandLogo } from '@/components/shared/logo';
 import { StatusBadge } from '@/components/shared/status-badge';
@@ -65,6 +66,7 @@ export default async function PublicContractDetailPage({
             <BrandLogo logoUrl={logoUrl} label={contract.branding.displayName} size="lg" />
           </Link>
           <div className="flex items-center gap-1">
+            <FontSizeToggle />
             <ThemeToggle />
             <LanguageSwitcher />
           </div>
