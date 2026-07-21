@@ -20,6 +20,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JwtPayload): Promise<AuthenticatedUser> {
+    if ('purpose' in payload) {
+      throw new UnauthorizedException('Invalid token.');
+    }
+
     const user = await this.prisma.user.findUnique({ where: { id: payload.sub }, select: { isActive: true } });
     if (!user || !user.isActive) {
       throw new UnauthorizedException('This account has been deactivated.');

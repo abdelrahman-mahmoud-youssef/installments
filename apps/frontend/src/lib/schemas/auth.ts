@@ -22,3 +22,9 @@ export const changePasswordSchema = z.object({
 });
 
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+
+export const twoFactorCodeSchema = z.object({
+  code: z.string().min(6, 'Enter the 6-digit code.').max(11),
+});
+
+export type TwoFactorCodeInput = z.infer<typeof twoFactorCodeSchema>;

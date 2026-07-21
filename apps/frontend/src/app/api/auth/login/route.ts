@@ -17,6 +17,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json(data, { status: backendResponse.status });
   }
 
+  if ('requiresTwoFactor' in (data as object)) {
+    return NextResponse.json(data);
+  }
+
   const { accessToken } = data as { accessToken: string };
   await setAuthCookie(accessToken);
 

@@ -20,6 +20,7 @@ export interface CurrentUser {
   email: string;
   tenantId: string;
   role: Role;
+  twoFactorEnabled: boolean;
 }
 
 export interface ChangePasswordPayload {
@@ -27,25 +28,32 @@ export interface ChangePasswordPayload {
   newPassword: string;
 }
 
-async function postAuth(path: 'login' | 'register', payload: unknown): Promise<void> {
+export type LoginResponse = { success: true } | { requiresTwoFactor: true; challengeToken: string };
+
+async function postAuth(path: string, payload: unknown): Promise<LoginResponse> {
   const response = await fetch(`/api/auth/${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
 
+  const body = (await response.json()) as LoginResponse | ApiErrorBody;
   if (!response.ok) {
-    const body = (await response.json()) as ApiErrorBody;
-    throw new ApiError(body);
+    throw new ApiError(body as ApiErrorBody);
   }
+  return body as LoginResponse;
 }
 
-export function login(payload: LoginPayload): Promise<void> {
+export function login(payload: LoginPayload): Promise<LoginResponse> {
   return postAuth('login', payload);
 }
 
-export function register(payload: RegisterPayload): Promise<void> {
+export function register(payload: RegisterPayload): Promise<LoginResponse> {
   return postAuth('register', payload);
+}
+
+export function verifyTwoFactor(challengeToken: string, code: string): Promise<LoginResponse> {
+  return postAuth('verify-2fa', { challengeToken, code });
 }
 
 export async function logout(): Promise<void> {

@@ -167,7 +167,11 @@
       "noAccount": "Don't have an account?",
       "createOne": "Create one",
       "genericError": "Unable to sign in. Please try again.",
-      "accountDeactivated": "This account has been deactivated. Contact your shop admin."
+      "accountDeactivated": "This account has been deactivated. Contact your shop admin.",
+      "twoFactorTitle": "Two-factor authentication",
+      "twoFactorDescription": "Enter the 6-digit code from your authenticator app, or one of your backup codes.",
+      "twoFactorCodeLabel": "Code",
+      "twoFactorSubmit": "Verify"
     },
     "register": {
       "title": "Create your workspace",
@@ -655,6 +659,25 @@
     "save": "Save",
     "saving": "Saving…",
     "passwordChanged": "Password changed.",
+    "genericError": "Something went wrong.",
+    "twoFactorEnable": "Enable two-factor authentication",
+    "twoFactorManage": "Two-factor authentication"
+  },
+  "twoFactor": {
+    "setupTitle": "Set up two-factor authentication",
+    "setupDescription": "Scan the QR code with an authenticator app (like Google Authenticator or Authy), then enter the 6-digit code it shows.",
+    "manualEntryHint": "Can't scan it? Enter this code manually:",
+    "codePlaceholder": "123456",
+    "confirmButton": "Confirm & enable",
+    "backupCodesTitle": "Save your backup codes",
+    "backupCodesDescription": "Each code can be used once to sign in if you lose access to your authenticator app. Store them somewhere safe — you won't be able to see them again.",
+    "copyBackupCodes": "Copy codes",
+    "backupCodesCopied": "Backup codes copied.",
+    "doneButton": "Done",
+    "manageTitle": "Two-factor authentication",
+    "manageDescription": "Enter a code from your authenticator app (or a backup code) to disable two-factor authentication.",
+    "disableButton": "Disable two-factor authentication",
+    "disabled": "Two-factor authentication disabled.",
     "genericError": "Something went wrong."
   },
   "activity": {
@@ -685,7 +708,9 @@
     "action_paymentClaim_decline": "Declined payment claim",
     "action_paymentMethod_create": "Added payment method",
     "action_paymentMethod_update": "Updated payment method",
-    "action_paymentMethod_delete": "Deleted payment method"
+    "action_paymentMethod_delete": "Deleted payment method",
+    "action_auth_2fa_enable": "Enabled two-factor authentication",
+    "action_auth_2fa_disable": "Disabled two-factor authentication"
   },
   "paymentClaims": {
     "title": "Payment claims",

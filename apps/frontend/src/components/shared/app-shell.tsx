@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowUpRight, KeyRound, LogOut, Menu, Store, User } from 'lucide-react';
+import { ArrowUpRight, KeyRound, LogOut, Menu, ShieldCheck, Store, User } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { ChangePasswordDialog } from '@/components/shared/change-password-dialog';
@@ -8,6 +8,7 @@ import { InstallBanner } from '@/components/shared/install-banner';
 import { LanguageSwitcher } from '@/components/shared/language-switcher';
 import { BrandLogo } from '@/components/shared/logo';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
+import { TwoFactorSetupDialog } from '@/components/shared/two-factor-setup-dialog';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -64,7 +65,9 @@ function UserMenu({ appLabel }: { appLabel: string }) {
   const t = useTranslations('nav');
   const tAccount = useTranslations('account');
   const router = useRouter();
+  const { data: currentUser } = useCurrentUser();
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+  const [twoFactorOpen, setTwoFactorOpen] = useState(false);
 
   async function handleLogout() {
     await logout();
@@ -93,6 +96,10 @@ function UserMenu({ appLabel }: { appLabel: string }) {
             <KeyRound className="size-4" />
             {tAccount('changePassword')}
           </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setTwoFactorOpen(true)}>
+            <ShieldCheck className="size-4" />
+            {tAccount(currentUser?.twoFactorEnabled ? 'twoFactorManage' : 'twoFactorEnable')}
+          </DropdownMenuItem>
           <DropdownMenuItem variant="destructive" onClick={handleLogout}>
             <LogOut className="size-4" />
             {t('logout')}
@@ -100,6 +107,11 @@ function UserMenu({ appLabel }: { appLabel: string }) {
         </DropdownMenuContent>
       </DropdownMenu>
       <ChangePasswordDialog open={changePasswordOpen} onOpenChange={setChangePasswordOpen} />
+      <TwoFactorSetupDialog
+        open={twoFactorOpen}
+        onOpenChange={setTwoFactorOpen}
+        twoFactorEnabled={currentUser?.twoFactorEnabled ?? false}
+      />
     </>
   );
 }

@@ -167,7 +167,11 @@
       "noAccount": "معندكش حساب؟",
       "createOne": "اعمل حساب",
       "genericError": "مقدرناش نسجّلك دخول. جرّب تاني.",
-      "accountDeactivated": "الحساب ده اتوقف. كلّم مسؤول المحل بتاعك."
+      "accountDeactivated": "الحساب ده اتوقف. كلّم مسؤول المحل بتاعك.",
+      "twoFactorTitle": "التحقق بخطوتين",
+      "twoFactorDescription": "اكتب الكود المكوّن من 6 أرقام من تطبيق المصادقة، أو أي كود من أكواد النسخ الاحتياطي بتاعتك.",
+      "twoFactorCodeLabel": "الكود",
+      "twoFactorSubmit": "تحقق"
     },
     "register": {
       "title": "اعمل مساحة شغلك",
@@ -655,6 +659,25 @@
     "save": "حفظ",
     "saving": "بيتم الحفظ…",
     "passwordChanged": "اتغيّرت كلمة المرور.",
+    "genericError": "حصل خطأ ما.",
+    "twoFactorEnable": "تفعيل التحقق بخطوتين",
+    "twoFactorManage": "التحقق بخطوتين"
+  },
+  "twoFactor": {
+    "setupTitle": "تفعيل التحقق بخطوتين",
+    "setupDescription": "امسح الكود ده بتطبيق مصادقة (زي Google Authenticator أو Authy)، وبعدين اكتب الكود المكوّن من 6 أرقام اللي هيظهرلك.",
+    "manualEntryHint": "مش قادر تمسح الكود؟ اكتب الكود ده يدويًا:",
+    "codePlaceholder": "123456",
+    "confirmButton": "تأكيد وتفعيل",
+    "backupCodesTitle": "احفظ أكواد النسخ الاحتياطي",
+    "backupCodesDescription": "كل كود ممكن تستخدمه مرة واحدة بس عشان تسجّل دخول لو ضيّعت تطبيق المصادقة. احفظهم في مكان آمن — مش هتقدر تشوفهم تاني.",
+    "copyBackupCodes": "نسخ الأكواد",
+    "backupCodesCopied": "اتنسخت أكواد النسخ الاحتياطي.",
+    "doneButton": "تم",
+    "manageTitle": "التحقق بخطوتين",
+    "manageDescription": "اكتب كود من تطبيق المصادقة (أو كود احتياطي) عشان توقف التحقق بخطوتين.",
+    "disableButton": "إيقاف التحقق بخطوتين",
+    "disabled": "اتوقف التحقق بخطوتين.",
     "genericError": "حصل خطأ ما."
   },
   "activity": {
@@ -685,7 +708,9 @@
     "action_paymentClaim_decline": "رفض مطالبة دفع",
     "action_paymentMethod_create": "أضاف وسيلة دفع",
     "action_paymentMethod_update": "عدّل وسيلة دفع",
-    "action_paymentMethod_delete": "حذف وسيلة دفع"
+    "action_paymentMethod_delete": "حذف وسيلة دفع",
+    "action_auth_2fa_enable": "فعّل التحقق بخطوتين",
+    "action_auth_2fa_disable": "أوقف التحقق بخطوتين"
   },
   "paymentClaims": {
     "title": "مطالبات الدفع",

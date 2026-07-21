@@ -99,17 +99,20 @@ model Tenant {
 }
 
 model User {
-  id           String     @id @default(cuid())
-  tenantId     String
-  name         String
-  email        String     @unique
-  passwordHash String
-  role         Role       @default(ADMIN)
-  isActive     Boolean    @default(true)
-  createdAt    DateTime   @default(now())
-  tenant       Tenant     @relation(fields: [tenantId], references: [id])
-  auditLogs    AuditLog[]
-  reviewedPaymentClaims PaymentClaim[]
+  id                        String     @id @default(cuid())
+  tenantId                  String
+  name                      String
+  email                     String     @unique
+  passwordHash              String
+  role                      Role       @default(ADMIN)
+  isActive                  Boolean    @default(true)
+  twoFactorSecret           String?
+  twoFactorEnabled          Boolean    @default(false)
+  twoFactorBackupCodeHashes String[]   @default([])
+  createdAt                 DateTime   @default(now())
+  tenant                    Tenant     @relation(fields: [tenantId], references: [id])
+  auditLogs                 AuditLog[]
+  reviewedPaymentClaims     PaymentClaim[]
 
   @@index([tenantId])
 }

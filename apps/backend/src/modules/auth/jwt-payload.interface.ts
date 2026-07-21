@@ -7,3 +7,8 @@ export interface JwtPayload {
   email: string;
   name: string;
 }
+
+export interface TwoFactorChallengePayload {
+  sub: string;
+  purpose: 'two_factor_challenge';
+}
