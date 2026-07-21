@@ -28,7 +28,7 @@ export function renderOgImageResponse({
           alignItems: 'center',
           justifyContent: 'center',
           gap: 28,
-          background: `linear-gradient(140deg, ${color}, ${color}cc)`,
+          background: color,
           padding: 80,
         }}
       >

@@ -1,6 +1,6 @@
-import { getTranslations } from 'next-intl/server';
 import { getPublicShop } from '@/lib/api/public';
 import { resolveAssetUrl } from '@/lib/assets';
+import { ogMessage } from '@/lib/og-messages';
 import { OG_IMAGE_SIZE, renderOgImageResponse } from '@/lib/render-og-image';
 
 export const size = OG_IMAGE_SIZE;
@@ -12,16 +12,20 @@ export default async function Image({
   params: Promise<{ locale: string; slug: string }>;
 }) {
   const { locale, slug } = await params;
-  const [shop, t] = await Promise.all([getPublicShop(slug), getTranslations({ locale, namespace: 'publicShop' })]);
+  const shop = await getPublicShop(slug);
 
   if (!shop) {
-    return renderOgImageResponse({ logoUrl: null, brandColor: 'emerald', title: t('notFound') });
+    return renderOgImageResponse({
+      logoUrl: null,
+      brandColor: 'emerald',
+      title: ogMessage(locale, 'publicShop', 'notFound'),
+    });
   }
 
   return renderOgImageResponse({
     logoUrl: resolveAssetUrl(shop.logoUrl),
     brandColor: shop.brandColor,
     title: shop.displayName,
-    subtitle: t('ogTagline'),
+    subtitle: ogMessage(locale, 'publicShop', 'ogTagline'),
   });
 }
