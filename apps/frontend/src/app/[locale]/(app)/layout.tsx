@@ -15,10 +15,11 @@ export async function generateMetadata(): Promise<Metadata> {
   const branding = token ? await getBrandingServer(token) : null;
 
   if (!branding) {
-    return {};
+    return { manifest: '/dashboard-manifest' };
   }
   return {
     title: { default: branding.displayName, template: `%s · ${branding.displayName}` },
+    manifest: '/dashboard-manifest',
   };
 }
 

@@ -28,6 +28,7 @@ export async function generateMetadata({
     description: customer
       ? t('ogCustomerDescription', { name: customer.name, shop: customer.branding.displayName })
       : undefined,
+    manifest: `/customer/${uuid}/pwa-manifest`,
   };
 }
 
