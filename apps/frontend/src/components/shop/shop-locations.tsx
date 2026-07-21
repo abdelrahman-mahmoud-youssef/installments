@@ -1,16 +1,20 @@
 import { ExternalLink, MapPin } from 'lucide-react';
 import { config } from '@/lib/config';
 import type { TenantLocation } from '@/lib/api/branding';
+import { resolveMapCoordinates } from '@/lib/google-maps';
 
 function directionsUrl(location: TenantLocation): string {
   return location.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location.address)}`;
 }
 
-function embedUrl(address: string, apiKey: string): string {
-  return `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${encodeURIComponent(address)}`;
+function embedUrl(location: TenantLocation, coordinates: { lat: number; lng: number } | null, apiKey: string): string {
+  if (coordinates) {
+    return `https://www.google.com/maps/embed/v1/search?key=${apiKey}&q=${coordinates.lat},${coordinates.lng}`;
+  }
+  return `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${encodeURIComponent(location.address)}`;
 }
 
-export function ShopLocations({
+export async function ShopLocations({
   locations,
   title,
   directionsLabel,
@@ -25,6 +29,12 @@ export function ShopLocations({
 
   const apiKey = config.googleMapsApiKey;
 
+  const coordinatesByLocation = apiKey
+    ? await Promise.all(
+        locations.map((location) => (location.mapUrl ? resolveMapCoordinates(location.mapUrl) : null)),
+      )
+    : locations.map(() => null);
+
   return (
     <div className="space-y-3">
       <h2 className="flex items-center gap-1.5 font-heading text-sm font-semibold text-foreground">
@@ -32,11 +42,11 @@ export function ShopLocations({
         {title}
       </h2>
       <div className="space-y-3">
-        {locations.map((location) => (
+        {locations.map((location, index) => (
           <div key={location.id} className="overflow-hidden rounded-xl border border-border bg-card shadow-xs">
             {apiKey && (
               <iframe
-                src={embedUrl(location.address, apiKey)}
+                src={embedUrl(location, coordinatesByLocation[index], apiKey)}
                 className="h-48 w-full border-0"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
