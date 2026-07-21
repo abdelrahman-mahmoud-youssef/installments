@@ -6,7 +6,7 @@ export const contractSchema = z
     customerId: z.string().min(1, 'Select a customer.'),
     productName: z.string().min(1, 'Product name is required.').max(200),
     productPrice: z.number().positive('Product price must be greater than zero.'),
-    downPayment: z.number().min(0, 'Down payment cannot be negative.'),
+    downPayment: z.number().min(0, 'Down payment cannot be negative.').optional(),
     calculationMethod: z.enum(CALCULATION_METHODS),
     markupPercent: z.number().positive().optional(),
     installmentCount: z.number().int().positive().optional(),

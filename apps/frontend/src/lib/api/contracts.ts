@@ -66,7 +66,7 @@ function toCreateContractPayload(input: ContractInput): Record<string, unknown> 
     customerId: input.customerId,
     productName: input.productName,
     productPrice: toMinorUnits(input.productPrice),
-    downPayment: toMinorUnits(input.downPayment),
+    downPayment: toMinorUnits(input.downPayment ?? 0),
     calculationMethod: input.calculationMethod,
     markupPercent: input.markupPercent,
     installmentCount: input.installmentCount,
