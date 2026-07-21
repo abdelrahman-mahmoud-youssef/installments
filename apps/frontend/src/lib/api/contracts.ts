@@ -48,7 +48,8 @@ export interface ContractListItem {
 }
 
 export interface ContractDetail extends Omit<ContractListItem, 'customer'> {
-  customer: ContractCustomer & { address: string | null; notes: string | null };
+  publicId: string;
+  customer: ContractCustomer & { publicId: string; address: string | null; notes: string | null };
   installments: Installment[];
   payments: ContractPayment[];
 }

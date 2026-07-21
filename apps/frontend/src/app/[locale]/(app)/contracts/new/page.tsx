@@ -1,12 +1,13 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CalendarClock, ListOrdered, Loader2, Percent } from 'lucide-react';
+import { CalendarClock, ListOrdered, Loader2, Percent, UserPlus } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { CustomerFormDialog } from '@/components/customers/customer-form-dialog';
 import { BackLink } from '@/components/shared/back-link';
 import { NumberInput } from '@/components/shared/number-input';
 import { PageHeader } from '@/components/shared/page-header';
@@ -24,7 +25,7 @@ import {
 } from '@/components/ui/select';
 import { useRouter } from '@/i18n/navigation';
 import { useCreateContract } from '@/hooks/use-contracts';
-import { useCustomers } from '@/hooks/use-customers';
+import { useCreateCustomer, useCustomers } from '@/hooks/use-customers';
 import { ApiError } from '@/lib/api/client';
 import { CALCULATION_METHODS, type CalculationMethod, RECURRENCE_TYPES } from '@/lib/enums';
 import { formatMoney } from '@/lib/format';
@@ -110,6 +111,7 @@ function oneMonthLaterIso(): string {
 
 export default function NewContractPage() {
   const t = useTranslations('contracts.new');
+  const tCustomers = useTranslations('customers');
   const tCalculationMethod = useTranslations('calculationMethod');
   const tRecurrenceType = useTranslations('recurrenceType');
   const tNav = useTranslations('nav');
@@ -120,14 +122,15 @@ export default function NewContractPage() {
 
   const { data: customers, isLoading: isLoadingCustomers } = useCustomers({ limit: 100 });
   const createContract = useCreateContract();
+  const createCustomer = useCreateCustomer();
 
   const form = useForm<ContractInput>({
     resolver: zodResolver(contractSchema),
     defaultValues: {
       customerId: preselectedCustomerId,
       productName: '',
-      productPrice: 0,
-      downPayment: 0,
+      productPrice: undefined,
+      downPayment: undefined,
       calculationMethod: 'FIXED_COUNT',
       recurrenceType: 'MONTHLY',
       startDate: '',
@@ -194,7 +197,21 @@ export default function NewContractPage() {
                     name="customerId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('customer')}</FormLabel>
+                        <div className="flex items-center justify-between gap-2">
+                          <FormLabel>{t('customer')}</FormLabel>
+                          <CustomerFormDialog
+                            trigger={
+                              <Button type="button" variant="ghost" size="sm" className="h-auto p-0 text-primary">
+                                <UserPlus className="size-3.5" />
+                                {tCustomers('newCustomer')}
+                              </Button>
+                            }
+                            onSubmit={async (input) => {
+                              const customer = await createCustomer.mutateAsync(input);
+                              field.onChange(customer.id);
+                            }}
+                          />
+                        </div>
                         <Select value={field.value} onValueChange={field.onChange} items={customerItems}>
                           <FormControl>
                             <SelectTrigger className="w-full">

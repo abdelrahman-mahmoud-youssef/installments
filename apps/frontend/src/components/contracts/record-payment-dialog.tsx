@@ -43,7 +43,7 @@ export function RecordPaymentDialog({
 
   const form = useForm<PaymentInput>({
     resolver: zodResolver(paymentSchema),
-    defaultValues: { amount: 0, note: '' },
+    defaultValues: { amount: undefined, note: '' },
   });
 
   const nextRemaining = outstandingInstallments[0]
@@ -66,7 +66,7 @@ export function RecordPaymentDialog({
       await onSubmit({ ...values, allocations });
       toast.success(t('recorded'));
       setOpen(false);
-      form.reset({ amount: 0, note: '' });
+      form.reset({ amount: undefined, note: '' });
       setManualAmounts({});
       setIsManual(false);
     } catch (error) {

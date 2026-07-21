@@ -1,10 +1,22 @@
 'use client';
 
-import { CalendarClock, FileWarning, Receipt, XCircle } from 'lucide-react';
+import {
+  CalendarClock,
+  ChevronRight,
+  Copy,
+  FileWarning,
+  MessageCircle,
+  QrCode,
+  Receipt,
+  Share2,
+  XCircle,
+} from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import { RecordPaymentDialog } from '@/components/contracts/record-payment-dialog';
+import { CustomerQrDialog } from '@/components/customers/customer-qr-dialog';
 import { BackLink } from '@/components/shared/back-link';
 import { CollectionProgress } from '@/components/shared/collection-progress';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
@@ -17,6 +29,12 @@ import { ProgressRing } from '@/components/shared/progress-ring';
 import { Section } from '@/components/shared/section';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Link } from '@/i18n/navigation';
 import type { Installment } from '@/lib/api/contracts';
@@ -24,6 +42,7 @@ import { useCancelContract, useContract } from '@/hooks/use-contracts';
 import { useCreatePayment } from '@/hooks/use-payments';
 import { ApiError } from '@/lib/api/client';
 import { getDisplayInstallmentStatus } from '@/lib/enums';
+import { normalizeLocalPhoneInput } from '@/lib/phone';
 import { routes } from '@/lib/routes';
 
 function HeroStat({ label, children }: { label: string; children: React.ReactNode }) {
@@ -46,6 +65,7 @@ function DetailRow({ label, children }: { label: string; children: React.ReactNo
 
 export default function ContractDetailPage() {
   const t = useTranslations('contracts.detail');
+  const tShare = useTranslations('customers.detail');
   const tNav = useTranslations('nav');
   const tCalculationMethod = useTranslations('calculationMethod');
   const tRecurrenceType = useTranslations('recurrenceType');
@@ -53,6 +73,7 @@ export default function ContractDetailPage() {
   const { data: contract, isLoading, isError } = useContract(id);
   const createPayment = useCreatePayment(id);
   const cancelContract = useCancelContract(id);
+  const [qrOpen, setQrOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -82,6 +103,8 @@ export default function ContractDetailPage() {
   const upcomingInstallment = outstandingInstallments[0];
   const ratio = installmentsTotal > 0 ? paidAmount / installmentsTotal : 0;
   const isActive = contract.status === 'ACTIVE';
+  const publicUrl = `${window.location.origin}${routes.publicContract(contract.customer.publicId, contract.publicId)}`;
+  const whatsappUrl = `https://wa.me/20${normalizeLocalPhoneInput(contract.customer.phone)}?text=${encodeURIComponent(publicUrl)}`;
 
   const scheduleColumns: Column<Installment>[] = [
     {
@@ -142,51 +165,90 @@ export default function ContractDetailPage() {
             </div>
             <Link
               href={routes.customer(contract.customer.id)}
-              className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+              className="inline-flex items-center gap-1.5 text-sm text-primary underline-offset-4 hover:underline"
             >
               {contract.customer.name}
               <span className="text-border">·</span>
               <span dir="ltr" className="tabular-nums">
                 {contract.customer.phone}
               </span>
+              <ChevronRight className="size-3.5 rtl:rotate-180" />
             </Link>
           </div>
-          {isActive && (
-            <div className="flex flex-wrap items-center gap-2">
-              <RecordPaymentDialog
-                trigger={
-                  <Button>
-                    <Receipt className="size-4" />
-                    {t('recordPayment')}
-                  </Button>
-                }
-                outstandingInstallments={outstandingInstallments}
-                onSubmit={(input) => createPayment.mutateAsync(input)}
-              />
-              <ConfirmDialog
-                trigger={
+          <div className="flex flex-wrap items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
                   <Button variant="outline">
-                    <XCircle className="size-4" />
-                    {t('cancelContract')}
+                    <Share2 className="size-4" />
+                    {tShare('share')}
                   </Button>
                 }
-                title={t('cancelTitle')}
-                description={t('cancelDescription')}
-                confirmLabel={t('cancelContract')}
-                destructive
-                onConfirm={async () => {
-                  try {
-                    await cancelContract.mutateAsync();
-                    toast.success(t('cancelled'));
-                  } catch (error) {
-                    toast.error(error instanceof ApiError ? error.message : t('cancelError'));
-                  }
-                }}
               />
-            </div>
-          )}
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={() => {
+                    navigator.clipboard.writeText(publicUrl);
+                    toast.success(tShare('linkCopied'));
+                  }}
+                >
+                  <Copy className="size-4" />
+                  {tShare('copyLink')}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setQrOpen(true)}>
+                  <QrCode className="size-4" />
+                  {tShare('qrCode')}
+                </DropdownMenuItem>
+                <DropdownMenuItem render={<a href={whatsappUrl} target="_blank" rel="noopener noreferrer" />}>
+                  <MessageCircle className="size-4" />
+                  {tShare('sendWhatsapp')}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            {isActive && (
+              <>
+                <RecordPaymentDialog
+                  trigger={
+                    <Button>
+                      <Receipt className="size-4" />
+                      {t('recordPayment')}
+                    </Button>
+                  }
+                  outstandingInstallments={outstandingInstallments}
+                  onSubmit={(input) => createPayment.mutateAsync(input)}
+                />
+                <ConfirmDialog
+                  trigger={
+                    <Button variant="outline">
+                      <XCircle className="size-4" />
+                      {t('cancelContract')}
+                    </Button>
+                  }
+                  title={t('cancelTitle')}
+                  description={t('cancelDescription')}
+                  confirmLabel={t('cancelContract')}
+                  destructive
+                  onConfirm={async () => {
+                    try {
+                      await cancelContract.mutateAsync();
+                      toast.success(t('cancelled'));
+                    } catch (error) {
+                      toast.error(error instanceof ApiError ? error.message : t('cancelError'));
+                    }
+                  }}
+                />
+              </>
+            )}
+          </div>
         </div>
       </FadeIn>
+
+      <CustomerQrDialog
+        open={qrOpen}
+        onOpenChange={setQrOpen}
+        customerName={contract.productName}
+        publicUrl={publicUrl}
+      />
 
       <FadeIn delay={0.08}>
         <div className="rounded-xl border border-border bg-card p-6 shadow-xs">
