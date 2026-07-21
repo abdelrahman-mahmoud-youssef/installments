@@ -50,8 +50,8 @@ export default async function PublicContractDetailPage({
     <div className="min-h-screen bg-muted/25">
       <style>{`:root{${brandColorCssVars(contract.branding.brandColor)}}`}</style>
       <header className="border-b border-border bg-background/80 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-2xl items-center justify-between px-4">
-          <BrandLogo logoUrl={logoUrl} label={contract.branding.displayName} />
+        <div className="mx-auto flex h-20 max-w-2xl items-center justify-between px-4">
+          <BrandLogo logoUrl={logoUrl} label={contract.branding.displayName} size="lg" />
           <div className="flex items-center gap-1">
             <ThemeToggle />
             <LanguageSwitcher />

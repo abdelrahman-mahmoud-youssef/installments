@@ -49,9 +49,9 @@ export default async function PublicCustomerPage({
     <div className="min-h-screen bg-muted/25">
       <style>{`:root{${brandColorCssVars(customer.branding.brandColor)}}`}</style>
       <header className="border-b border-border bg-background/80 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-2xl items-center justify-between px-4">
+        <div className="mx-auto flex h-20 max-w-2xl items-center justify-between px-4">
           <Link href={routes.publicShop(customer.branding.slug)}>
-            <BrandLogo logoUrl={logoUrl} label={customer.branding.displayName} />
+            <BrandLogo logoUrl={logoUrl} label={customer.branding.displayName} size="lg" />
           </Link>
           <div className="flex items-center gap-1">
             <ThemeToggle />
