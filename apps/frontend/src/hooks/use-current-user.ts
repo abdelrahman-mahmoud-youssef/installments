@@ -6,7 +6,7 @@ export const currentUserKeys = {
 };
 
 export function useCurrentUser() {
-  return useQuery({ queryKey: currentUserKeys.all, queryFn: getMe, staleTime: Infinity });
+  return useQuery({ queryKey: currentUserKeys.all, queryFn: getMe });
 }
 
 export function useChangePassword() {
