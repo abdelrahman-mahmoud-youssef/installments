@@ -1,6 +1,7 @@
 import type { NotificationLanguage } from '@/components/shared/notification-language-toggle';
 import { config } from '@/lib/config';
 import { ContractStatus } from '@/lib/enums';
+import { ApiError, ApiErrorBody } from './client';
 import { TenantBranding } from './branding';
 
 export interface PublicNextInstallment {
@@ -14,13 +15,27 @@ export interface PublicPayment {
   amount: number;
 }
 
+export interface PublicInstallmentClaim {
+  status: 'PENDING' | 'APPROVED' | 'DECLINED';
+  declineReason: string | null;
+}
+
 export interface PublicInstallment {
+  id: string;
   sequence: number;
   dueDate: string;
   amount: number;
   paidAmount: number;
   status: string;
   isOverdue: boolean;
+  latestClaim: PublicInstallmentClaim | null;
+}
+
+export interface PublicPaymentMethod {
+  id: string;
+  label: string;
+  details: string;
+  presetKey: string | null;
 }
 
 export interface PublicContractSummary {
@@ -43,6 +58,7 @@ export interface PublicContractDetail {
   remainingAmount: number;
   payments: PublicPayment[];
   installments: PublicInstallment[];
+  paymentMethods: PublicPaymentMethod[];
   branding: TenantBranding;
 }
 
@@ -115,10 +131,11 @@ async function requestPublic<T>(path: string, init?: RequestInit): Promise<T> {
     ...init,
     headers: { ...(init?.body ? { 'Content-Type': 'application/json' } : {}), ...init?.headers },
   });
+  const body: unknown = await response.json();
   if (!response.ok) {
-    throw new Error('Request failed.');
+    throw new ApiError(body as ApiErrorBody);
   }
-  return response.json() as Promise<T>;
+  return body as T;
 }
 
 export function verifyPublicTelegram(publicId: string): Promise<PublicTelegramState> {
@@ -156,5 +173,22 @@ export function setPublicTelegramBroadcasts(
   return requestPublic(`customers/${publicId}/telegram/broadcasts`, {
     method: 'PATCH',
     body: JSON.stringify({ enabled }),
+  });
+}
+
+export interface SubmitPaymentClaimInput {
+  installmentId: string;
+  paymentMethodId: string;
+  screenshot: string;
+}
+
+export function submitPaymentClaim(
+  publicId: string,
+  contractPublicId: string,
+  input: SubmitPaymentClaimInput,
+): Promise<{ status: 'PENDING' }> {
+  return requestPublic(`customers/${publicId}/contracts/${contractPublicId}/payment-claims`, {
+    method: 'POST',
+    body: JSON.stringify(input),
   });
 }

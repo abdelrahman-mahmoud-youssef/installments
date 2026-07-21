@@ -15,6 +15,7 @@ import { resolveAssetUrl } from '@/lib/assets';
 import { brandColorCssVars } from '@/lib/brand-colors';
 import { formatDate, formatMoney } from '@/lib/format';
 import { routes } from '@/lib/routes';
+import { UpcomingInstallments } from './upcoming-installments';
 
 export async function generateMetadata({
   params,
@@ -54,10 +55,6 @@ export default async function PublicContractDetailPage({
   const logoUrl = resolveAssetUrl(contract.branding.logoUrl);
   const contractTotal = contract.paidAmount + contract.remainingAmount;
   const ratio = contractTotal > 0 ? Math.min(1, Math.max(0, contract.paidAmount / contractTotal)) : 0;
-  const outstandingInstallments = contract.installments.filter(
-    (installment) => installment.status === 'PENDING' || installment.status === 'PARTIALLY_PAID',
-  );
-
   return (
     <div className="min-h-screen bg-muted/25">
       <style>{`:root{${brandColorCssVars(contract.branding.brandColor)}}`}</style>
@@ -144,23 +141,12 @@ export default async function PublicContractDetailPage({
               )}
             </TabsContent>
             <TabsContent value="upcoming">
-              {outstandingInstallments.length > 0 ? (
-                <ul className="space-y-2">
-                  {outstandingInstallments.map((installment) => (
-                    <li key={installment.sequence} className="flex items-center justify-between text-sm">
-                      <span className="flex items-center gap-2 text-muted-foreground">
-                        #{installment.sequence} · {formatDate(installment.dueDate, locale)}
-                        {installment.isOverdue && <StatusBadge status="OVERDUE" />}
-                      </span>
-                      <span className="font-medium tabular-nums">
-                        {formatMoney(installment.amount - installment.paidAmount, locale)}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="py-2 text-muted-foreground">{t('noUpcoming')}</p>
-              )}
+              <UpcomingInstallments
+                installments={contract.installments}
+                paymentMethods={contract.paymentMethods}
+                publicId={uuid}
+                contractPublicId={contractId}
+              />
             </TabsContent>
           </Tabs>
         </div>

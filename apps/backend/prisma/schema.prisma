@@ -58,6 +58,12 @@ enum Role {
   STAFF
 }
 
+enum PaymentClaimStatus {
+  PENDING
+  APPROVED
+  DECLINED
+}
+
 model Tenant {
   id                 String             @id @default(cuid())
   name               String
@@ -88,6 +94,8 @@ model Tenant {
   reminderLogs       ReminderLog[]
   broadcasts         Broadcast[]
   auditLogs          AuditLog[]
+  paymentMethods     PaymentMethod[]
+  paymentClaims      PaymentClaim[]
 }
 
 model User {
@@ -101,6 +109,7 @@ model User {
   createdAt    DateTime   @default(now())
   tenant       Tenant     @relation(fields: [tenantId], references: [id])
   auditLogs    AuditLog[]
+  reviewedPaymentClaims PaymentClaim[]
 
   @@index([tenantId])
 }
@@ -165,6 +174,7 @@ model Contract {
   customer          Customer          @relation(fields: [customerId], references: [id])
   installments      Installment[]
   payments          Payment[]
+  paymentClaims     PaymentClaim[]
 
   @@index([tenantId, status])
   @@index([tenantId, customerId])
@@ -182,6 +192,7 @@ model Installment {
   tenant      Tenant              @relation(fields: [tenantId], references: [id])
   contract    Contract            @relation(fields: [contractId], references: [id])
   allocations PaymentAllocation[]
+  paymentClaims PaymentClaim[]
 
   @@unique([contractId, sequence])
   @@index([tenantId, dueDate, status])
@@ -241,4 +252,42 @@ model Broadcast {
   tenant            Tenant            @relation(fields: [tenantId], references: [id])
 
   @@index([tenantId, createdAt])
+}
+
+model PaymentMethod {
+  id        String         @id @default(cuid())
+  tenantId  String
+  label     String
+  details   String
+  presetKey String?
+  isActive  Boolean        @default(true)
+  sortOrder Int            @default(0)
+  createdAt DateTime       @default(now())
+  tenant    Tenant         @relation(fields: [tenantId], references: [id])
+  claims    PaymentClaim[]
+
+  @@index([tenantId, isActive])
+}
+
+model PaymentClaim {
+  id               String             @id @default(cuid())
+  tenantId         String
+  contractId       String
+  installmentId    String
+  paymentMethodId  String
+  amount           Int
+  screenshotUrl    String
+  status           PaymentClaimStatus @default(PENDING)
+  declineReason    String?
+  reviewedByUserId String?
+  reviewedAt       DateTime?
+  createdAt        DateTime           @default(now())
+  tenant           Tenant             @relation(fields: [tenantId], references: [id])
+  contract         Contract           @relation(fields: [contractId], references: [id])
+  installment      Installment        @relation(fields: [installmentId], references: [id])
+  paymentMethod    PaymentMethod      @relation(fields: [paymentMethodId], references: [id])
+  reviewedBy       User?              @relation(fields: [reviewedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, status, createdAt])
+  @@index([installmentId])
 }

@@ -3,6 +3,7 @@ import { Throttle } from '@nestjs/throttler';
 import { Public } from '../../common/decorators/public.decorator';
 import { SetTelegramEnabledDto } from './dto/set-telegram-enabled.dto';
 import { SetTelegramLanguageDto } from './dto/set-telegram-language.dto';
+import { SubmitPaymentClaimDto } from './dto/submit-payment-claim.dto';
 import { PublicService } from './public.service';
 
 @Public()
@@ -22,6 +23,16 @@ export class PublicController {
     @Param('contractPublicId') contractPublicId: string,
   ) {
     return this.publicService.getContractDetail(publicId, contractPublicId);
+  }
+
+  @Post(':publicId/contracts/:contractPublicId/payment-claims')
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  submitPaymentClaim(
+    @Param('publicId') publicId: string,
+    @Param('contractPublicId') contractPublicId: string,
+    @Body() dto: SubmitPaymentClaimDto,
+  ) {
+    return this.publicService.submitPaymentClaim(publicId, contractPublicId, dto);
   }
 
   @Post(':publicId/telegram/verify')

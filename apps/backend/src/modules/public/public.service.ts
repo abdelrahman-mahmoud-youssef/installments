@@ -1,9 +1,19 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { ContractStatus, InstallmentStatus, NotificationLanguage } from '@prisma/client';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ContractStatus,
+  InstallmentStatus,
+  NotificationLanguage,
+  PaymentClaimStatus,
+} from '@prisma/client';
+import { randomUUID } from 'node:crypto';
+import { MAX_PAYMENT_PROOF_UPLOAD_BYTES } from '../../common/constants';
 import { getUtcToday } from '../../common/date/utc-date';
 import { TENANT_BRANDING_SELECT, TenantBranding, toTenantBranding } from '../../common/tenant-branding';
 import { PrismaService } from '../../prisma/prisma.service';
+import { detectImageExtension } from '../storage/image-signature';
+import { StorageService } from '../storage/storage.service';
 import { TelegramService } from '../telegram/telegram.service';
+import { SubmitPaymentClaimDto } from './dto/submit-payment-claim.dto';
 
 export interface PublicNextInstallment {
   dueDate: Date;
@@ -16,13 +26,27 @@ export interface PublicPayment {
   amount: number;
 }
 
+export interface PublicInstallmentClaim {
+  status: PaymentClaimStatus;
+  declineReason: string | null;
+}
+
 export interface PublicInstallment {
+  id: string;
   sequence: number;
   dueDate: Date;
   amount: number;
   paidAmount: number;
   status: InstallmentStatus;
   isOverdue: boolean;
+  latestClaim: PublicInstallmentClaim | null;
+}
+
+export interface PublicPaymentMethod {
+  id: string;
+  label: string;
+  details: string;
+  presetKey: string | null;
 }
 
 export interface PublicContractSummary {
@@ -45,6 +69,7 @@ export interface PublicContractDetail {
   remainingAmount: number;
   payments: PublicPayment[];
   installments: PublicInstallment[];
+  paymentMethods: PublicPaymentMethod[];
   branding: TenantBranding;
 }
 
@@ -76,6 +101,7 @@ export class PublicService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly telegram: TelegramService,
+    private readonly storage: StorageService,
   ) {}
 
   async getCustomerByPublicId(publicId: string): Promise<PublicCustomerResponse> {
@@ -282,7 +308,7 @@ export class PublicService {
     const customer = await this.prisma.customer.findUnique({
       where: { publicId: customerPublicId },
       select: {
-        tenant: { select: TENANT_BRANDING_SELECT },
+        tenant: { select: { id: true, ...TENANT_BRANDING_SELECT } },
         contracts: {
           where: { publicId: contractPublicId },
           select: {
@@ -296,7 +322,19 @@ export class PublicService {
             },
             installments: {
               orderBy: { sequence: 'asc' },
-              select: { sequence: true, dueDate: true, amount: true, paidAmount: true, status: true },
+              select: {
+                id: true,
+                sequence: true,
+                dueDate: true,
+                amount: true,
+                paidAmount: true,
+                status: true,
+                paymentClaims: {
+                  orderBy: { createdAt: 'desc' },
+                  take: 1,
+                  select: { status: true, declineReason: true },
+                },
+              },
             },
           },
         },
@@ -307,6 +345,12 @@ export class PublicService {
     if (!customer || !contract) {
       throw new NotFoundException('Contract not found.');
     }
+
+    const paymentMethods = await this.prisma.paymentMethod.findMany({
+      where: { tenantId: customer.tenant.id, isActive: true },
+      orderBy: { sortOrder: 'asc' },
+      select: { id: true, label: true, details: true, presetKey: true },
+    });
 
     const today = getUtcToday();
     const installmentsPaidAmount = contract.installments.reduce(
@@ -323,7 +367,9 @@ export class PublicService {
       paidAmount: installmentsPaidAmount,
       remainingAmount: installmentsTotal - installmentsPaidAmount,
       payments: contract.payments,
+      paymentMethods,
       installments: contract.installments.map((installment) => ({
+        id: installment.id,
         sequence: installment.sequence,
         dueDate: installment.dueDate,
         amount: installment.amount,
@@ -333,9 +379,113 @@ export class PublicService {
           installment.dueDate < today &&
           (installment.status === InstallmentStatus.PENDING ||
             installment.status === InstallmentStatus.PARTIALLY_PAID),
+        latestClaim: installment.paymentClaims[0] ?? null,
       })),
       branding: toTenantBranding(customer.tenant),
     };
+  }
+
+  async submitPaymentClaim(
+    customerPublicId: string,
+    contractPublicId: string,
+    dto: SubmitPaymentClaimDto,
+  ): Promise<{ status: PaymentClaimStatus }> {
+    const customer = await this.prisma.customer.findUnique({
+      where: { publicId: customerPublicId },
+      select: {
+        name: true,
+        tenant: { select: { id: true, telegramBotToken: true, telegramChatId: true } },
+        contracts: {
+          where: { publicId: contractPublicId },
+          select: {
+            id: true,
+            productName: true,
+            status: true,
+            installments: {
+              where: { id: dto.installmentId },
+              select: { id: true, amount: true, paidAmount: true, status: true },
+            },
+          },
+        },
+      },
+    });
+
+    const contract = customer?.contracts[0];
+    const installment = contract?.installments[0];
+    if (!customer || !contract || !installment) {
+      throw new NotFoundException('Contract or installment not found.');
+    }
+    if (contract.status !== ContractStatus.ACTIVE) {
+      throw new BadRequestException('This contract is not active.');
+    }
+    if (
+      installment.status !== InstallmentStatus.PENDING &&
+      installment.status !== InstallmentStatus.PARTIALLY_PAID
+    ) {
+      throw new BadRequestException('This installment is already settled.');
+    }
+
+    const paymentMethod = await this.prisma.paymentMethod.findFirst({
+      where: { id: dto.paymentMethodId, tenantId: customer.tenant.id, isActive: true },
+    });
+    if (!paymentMethod) {
+      throw new NotFoundException('Payment method not found.');
+    }
+
+    const existingPendingClaim = await this.prisma.paymentClaim.findFirst({
+      where: { installmentId: installment.id, status: PaymentClaimStatus.PENDING },
+    });
+    if (existingPendingClaim) {
+      throw new BadRequestException('There is already a payment claim under review for this installment.');
+    }
+
+    const rawBuffer = Buffer.from(dto.screenshot, 'base64');
+    if (rawBuffer.byteLength > MAX_PAYMENT_PROOF_UPLOAD_BYTES) {
+      throw new BadRequestException('Screenshot is too large. The maximum size is 4 MB.');
+    }
+    const extension = detectImageExtension(rawBuffer);
+    if (!extension) {
+      throw new BadRequestException('Screenshot must be a PNG or JPEG image.');
+    }
+
+    const amount = installment.amount - installment.paidAmount;
+    const screenshotUrl = await this.storage.saveKeyedImage(
+      `payment-claims/${customer.tenant.id}/${randomUUID()}.${extension}`,
+      rawBuffer,
+    );
+
+    await this.prisma.paymentClaim.create({
+      data: {
+        tenantId: customer.tenant.id,
+        contractId: contract.id,
+        installmentId: installment.id,
+        paymentMethodId: paymentMethod.id,
+        amount,
+        screenshotUrl,
+      },
+    });
+
+    await this.notifyAdminOfClaim(customer.tenant, customer.name, contract.productName, amount, rawBuffer);
+
+    return { status: PaymentClaimStatus.PENDING };
+  }
+
+  private async notifyAdminOfClaim(
+    tenant: { telegramBotToken: string | null; telegramChatId: string | null },
+    customerName: string,
+    productName: string,
+    amount: number,
+    screenshot: Buffer,
+  ): Promise<void> {
+    if (!tenant.telegramBotToken || !tenant.telegramChatId) {
+      return;
+    }
+    try {
+      const caption = `💰 New payment claim\n${customerName} — ${productName}\nAmount: ${(amount / 100).toFixed(2)}`;
+      await this.telegram.sendPhoto(tenant.telegramBotToken, tenant.telegramChatId, screenshot, caption);
+    } catch {
+      return;
+    }
   }
 
   private summarizeContract(
