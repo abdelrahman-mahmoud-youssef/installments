@@ -127,18 +127,8 @@ export default async function PublicShopPage({
           <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
             <Tabs defaultValue="about">
               <TabsList className="w-full">
-                <TabsTrigger
-                  value="about"
-                  className="data-active:bg-primary data-active:text-primary-foreground dark:data-active:bg-primary dark:data-active:text-primary-foreground"
-                >
-                  {t('aboutTab')}
-                </TabsTrigger>
-                <TabsTrigger
-                  value="calculator"
-                  className="data-active:bg-primary data-active:text-primary-foreground dark:data-active:bg-primary dark:data-active:text-primary-foreground"
-                >
-                  {t('calculatorTab')}
-                </TabsTrigger>
+                <TabsTrigger value="about">{t('aboutTab')}</TabsTrigger>
+                <TabsTrigger value="calculator">{t('calculatorTab')}</TabsTrigger>
               </TabsList>
               <TabsContent value="about">
                 <p className="text-[0.95rem] leading-relaxed whitespace-pre-line text-foreground">
