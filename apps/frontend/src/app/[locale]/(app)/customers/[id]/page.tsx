@@ -1,9 +1,10 @@
 'use client';
 
-import { Copy, MapPin, MessageCircle, Pencil, Phone, Plus, QrCode, Share2, StickyNote, UserRoundX } from 'lucide-react';
+import { Copy, MapPin, Pencil, Phone, Plus, QrCode, Share2, StickyNote, UserRoundX } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useState } from 'react';
+import { FaWhatsapp } from 'react-icons/fa6';
 import { toast } from 'sonner';
 import { CustomerFormDialog } from '@/components/customers/customer-form-dialog';
 import { CustomerQrDialog } from '@/components/customers/customer-qr-dialog';
@@ -145,7 +146,7 @@ export default function CustomerDetailPage() {
                   {t('qrCode')}
                 </DropdownMenuItem>
                 <DropdownMenuItem render={<a href={whatsappUrl} target="_blank" rel="noopener noreferrer" />}>
-                  <MessageCircle className="size-4" />
+                  <FaWhatsapp className="size-4" />
                   {t('sendWhatsapp')}
                 </DropdownMenuItem>
               </DropdownMenuContent>

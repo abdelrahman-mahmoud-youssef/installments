@@ -1,4 +1,5 @@
-import { ChevronRight, MessageCircle, Store } from 'lucide-react';
+import { ChevronRight, Store } from 'lucide-react';
+import { FaWhatsapp } from 'react-icons/fa6';
 import type { Metadata } from 'next';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
@@ -188,7 +189,7 @@ export default async function PublicCustomerPage({
           aria-label={t('whatsappLabel')}
           className="fixed bottom-5 end-5 z-50 grid size-14 place-items-center rounded-full bg-[#25D366] text-white shadow-lg transition-transform hover:scale-105"
         >
-          <MessageCircle className="size-7" fill="currentColor" />
+          <FaWhatsapp className="size-7" />
         </a>
       )}
     </div>

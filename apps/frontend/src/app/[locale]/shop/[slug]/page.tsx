@@ -1,7 +1,7 @@
-import { Camera, MessageCircle, Music2, ThumbsUp } from 'lucide-react';
 import type { Metadata } from 'next';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
+import { FaFacebookF, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa6';
 import { FormattedText } from '@/components/shared/formatted-text';
 import { InstallAppButton } from '@/components/shared/install-app-button';
 import { IosInstallHint } from '@/components/shared/ios-install-hint';
@@ -56,28 +56,28 @@ export default async function PublicShopPage({
     shop.instagramUrl && {
       href: withScheme(shop.instagramUrl),
       label: t('instagramLabel'),
-      icon: Camera,
+      icon: FaInstagram,
       className: 'bg-gradient-to-br from-pink-500 to-purple-600',
     },
     shop.facebookUrl && {
       href: withScheme(shop.facebookUrl),
       label: t('facebookLabel'),
-      icon: ThumbsUp,
+      icon: FaFacebookF,
       className: 'bg-blue-600',
     },
     shop.tiktokUrl && {
       href: withScheme(shop.tiktokUrl),
       label: t('tiktokLabel'),
-      icon: Music2,
+      icon: FaTiktok,
       className: 'bg-neutral-900',
     },
     whatsappPhone && {
       href: `https://wa.me/${whatsappPhone}`,
       label: t('whatsappLabel'),
-      icon: MessageCircle,
+      icon: FaWhatsapp,
       className: 'bg-[#25D366]',
     },
-  ].filter(Boolean) as { href: string; label: string; icon: typeof Camera; className: string }[];
+  ].filter(Boolean) as { href: string; label: string; icon: typeof FaInstagram; className: string }[];
 
   return (
     <div className="min-h-screen bg-muted/25">

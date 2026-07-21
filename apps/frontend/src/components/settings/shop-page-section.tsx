@@ -1,7 +1,8 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Bold, Calculator, Camera, Copy, Link2, Loader2, ThumbsUp } from 'lucide-react';
+import { Bold, Calculator, Copy, Loader2 } from 'lucide-react';
+import { FaFacebookF, FaInstagram, FaTiktok } from 'react-icons/fa6';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -229,7 +230,7 @@ export function ShopPageSection() {
                 render={({ field }) => (
                   <FormItem className="max-w-sm">
                     <FormLabel className="flex items-center gap-1.5">
-                      <Camera className="size-4" />
+                      <FaInstagram className="size-4" />
                       {t('instagramLabel')}
                     </FormLabel>
                     <FormControl>
@@ -246,7 +247,7 @@ export function ShopPageSection() {
                 render={({ field }) => (
                   <FormItem className="max-w-sm">
                     <FormLabel className="flex items-center gap-1.5">
-                      <ThumbsUp className="size-4" />
+                      <FaFacebookF className="size-4" />
                       {t('facebookLabel')}
                     </FormLabel>
                     <FormControl>
@@ -263,7 +264,7 @@ export function ShopPageSection() {
                 render={({ field }) => (
                   <FormItem className="max-w-sm">
                     <FormLabel className="flex items-center gap-1.5">
-                      <Link2 className="size-4" />
+                      <FaTiktok className="size-4" />
                       {t('tiktokLabel')}
                     </FormLabel>
                     <FormControl>

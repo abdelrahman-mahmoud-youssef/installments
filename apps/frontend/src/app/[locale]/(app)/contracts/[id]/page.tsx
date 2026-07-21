@@ -5,7 +5,6 @@ import {
   ChevronRight,
   Copy,
   FileWarning,
-  MessageCircle,
   QrCode,
   Receipt,
   Share2,
@@ -14,6 +13,7 @@ import {
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useState } from 'react';
+import { FaWhatsapp } from 'react-icons/fa6';
 import { toast } from 'sonner';
 import { RecordPaymentDialog } from '@/components/contracts/record-payment-dialog';
 import { CustomerQrDialog } from '@/components/customers/customer-qr-dialog';
@@ -203,7 +203,7 @@ export default function ContractDetailPage() {
                   {tShare('qrCode')}
                 </DropdownMenuItem>
                 <DropdownMenuItem render={<a href={whatsappUrl} target="_blank" rel="noopener noreferrer" />}>
-                  <MessageCircle className="size-4" />
+                  <FaWhatsapp className="size-4" />
                   {tShare('sendWhatsapp')}
                 </DropdownMenuItem>
               </DropdownMenuContent>

@@ -6,7 +6,6 @@ import {
   CheckCircle2,
   Loader2,
   Mail,
-  MessageCircle,
   Palette,
   Send,
   Smartphone,
@@ -16,6 +15,7 @@ import {
 import { useTranslations } from 'next-intl';
 import { type ComponentType } from 'react';
 import { useForm } from 'react-hook-form';
+import { FaWhatsapp } from 'react-icons/fa6';
 import { toast } from 'sonner';
 import { FadeIn } from '@/components/shared/motion';
 import {
@@ -46,7 +46,7 @@ import { NotificationSettingsInput, notificationSettingsSchema } from '@/lib/sch
 const setupSteps = ['step1', 'step2', 'step3', 'step4'] as const;
 const comingSoonChannels: { key: string; icon: ComponentType<{ className?: string }> }[] = [
   { key: 'channelEmail', icon: Mail },
-  { key: 'channelWhatsapp', icon: MessageCircle },
+  { key: 'channelWhatsapp', icon: FaWhatsapp },
   { key: 'channelSms', icon: Smartphone },
 ];
 
