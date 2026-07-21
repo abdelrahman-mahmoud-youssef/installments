@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useUploadAboutImage } from '@/hooks/use-branding';
 import { ApiError } from '@/lib/api/client';
+import { resolveAssetUrl } from '@/lib/assets';
 import { cn } from '@/lib/utils';
 
 const MAX_ABOUT_IMAGE_BYTES = 2 * 1024 * 1024;
@@ -96,7 +97,10 @@ export function AboutEditor({
     try {
       const dataUrl = await readFileAsDataUrl(file);
       const { url } = await uploadAboutImage.mutateAsync(dataUrl.split(',')[1]);
-      editor.chain().focus().setImage({ src: url }).run();
+      const absoluteUrl = resolveAssetUrl(url);
+      if (absoluteUrl) {
+        editor.chain().focus().setImage({ src: absoluteUrl }).run();
+      }
     } catch (error) {
       toast.error(error instanceof ApiError ? error.message : t('genericError'));
     }
