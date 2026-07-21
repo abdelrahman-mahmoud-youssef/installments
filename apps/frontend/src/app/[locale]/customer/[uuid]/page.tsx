@@ -3,6 +3,7 @@ import { FaWhatsapp } from 'react-icons/fa6';
 import type { Metadata } from 'next';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
+import { NextPaymentAction } from '@/components/customer-portal/next-payment-action';
 import { FontSizeToggle } from '@/components/shared/font-size-toggle';
 import { LanguageSwitcher } from '@/components/shared/language-switcher';
 import { BrandLogo } from '@/components/shared/logo';
@@ -157,15 +158,33 @@ export default async function PublicCustomerPage({
                 )}
 
                 {contract.nextInstallment && (
-                  <div className="flex items-center justify-between border-t border-border pt-4 text-sm">
-                    <span className="flex items-center gap-2 text-muted-foreground">
-                      {t('nextPayment')}
-                      {contract.nextInstallment.isOverdue && <StatusBadge status="OVERDUE" />}
-                    </span>
-                    <span className="font-medium tabular-nums">
-                      {formatDate(contract.nextInstallment.dueDate, locale)} ·{' '}
-                      {formatMoney(contract.nextInstallment.amount, locale)}
-                    </span>
+                  <div className="space-y-2.5 border-t border-border pt-4 text-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="flex items-center gap-2 text-muted-foreground">
+                        {t('nextPayment')}
+                        {contract.nextInstallment.isOverdue && <StatusBadge status="OVERDUE" />}
+                      </span>
+                      <span className="font-medium tabular-nums">
+                        {formatDate(contract.nextInstallment.dueDate, locale)} ·{' '}
+                        {formatMoney(contract.nextInstallment.amount, locale)}
+                      </span>
+                    </div>
+                    {contract.nextInstallment.latestClaim?.status === 'DECLINED' && (
+                      <p className="text-xs text-danger">
+                        {t('claimDeclined', {
+                          reason:
+                            contract.nextInstallment.latestClaim.declineReason || t('claimDeclinedNoReason'),
+                        })}
+                      </p>
+                    )}
+                    <div className="flex justify-end">
+                      <NextPaymentAction
+                        nextInstallment={contract.nextInstallment}
+                        paymentMethods={customer.paymentMethods}
+                        publicId={uuid}
+                        contractPublicId={contract.publicId}
+                      />
+                    </div>
                   </div>
                 )}
 

@@ -4,20 +4,22 @@ import { ContractStatus } from '@/lib/enums';
 import { ApiError, ApiErrorBody } from './client';
 import { TenantBranding } from './branding';
 
+export interface PublicInstallmentClaim {
+  status: 'PENDING' | 'APPROVED' | 'DECLINED';
+  declineReason: string | null;
+}
+
 export interface PublicNextInstallment {
+  id: string;
   dueDate: string;
   amount: number;
   isOverdue: boolean;
+  latestClaim: PublicInstallmentClaim | null;
 }
 
 export interface PublicPayment {
   paidAt: string;
   amount: number;
-}
-
-export interface PublicInstallmentClaim {
-  status: 'PENDING' | 'APPROVED' | 'DECLINED';
-  declineReason: string | null;
 }
 
 export interface PublicInstallment {
@@ -81,6 +83,7 @@ export interface PublicTelegramState {
 export interface PublicCustomerResponse {
   name: string;
   contracts: PublicContractSummary[];
+  paymentMethods: PublicPaymentMethod[];
   telegram: PublicTelegramStatus;
   branding: TenantBranding;
 }

@@ -8,8 +8,8 @@ import { DateText } from '@/components/shared/date-text';
 import { Money } from '@/components/shared/money';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { useRouter } from '@/i18n/navigation';
+import { SubmitPaymentDialog } from '@/components/customer-portal/submit-payment-dialog';
 import { PublicInstallment, PublicPaymentMethod } from '@/lib/api/public';
-import { SubmitPaymentDialog } from './submit-payment-dialog';
 
 export function UpcomingInstallments({
   installments,

@@ -15,20 +15,22 @@ import { StorageService } from '../storage/storage.service';
 import { TelegramService } from '../telegram/telegram.service';
 import { SubmitPaymentClaimDto } from './dto/submit-payment-claim.dto';
 
+export interface PublicInstallmentClaim {
+  status: PaymentClaimStatus;
+  declineReason: string | null;
+}
+
 export interface PublicNextInstallment {
+  id: string;
   dueDate: Date;
   amount: number;
   isOverdue: boolean;
+  latestClaim: PublicInstallmentClaim | null;
 }
 
 export interface PublicPayment {
   paidAt: Date;
   amount: number;
-}
-
-export interface PublicInstallmentClaim {
-  status: PaymentClaimStatus;
-  declineReason: string | null;
 }
 
 export interface PublicInstallment {
@@ -92,6 +94,7 @@ export interface PublicTelegramState {
 export interface PublicCustomerResponse {
   name: string;
   contracts: PublicContractSummary[];
+  paymentMethods: PublicPaymentMethod[];
   telegram: PublicTelegramStatus;
   branding: TenantBranding;
 }
@@ -115,6 +118,7 @@ export class PublicService {
         notificationLanguage: true,
         tenant: {
           select: {
+            id: true,
             telegramBotToken: true,
             telegramBotUsername: true,
             ...TENANT_BRANDING_SELECT,
@@ -129,7 +133,18 @@ export class PublicService {
             downPayment: true,
             installments: {
               orderBy: { sequence: 'asc' },
-              select: { dueDate: true, amount: true, paidAmount: true, status: true },
+              select: {
+                id: true,
+                dueDate: true,
+                amount: true,
+                paidAmount: true,
+                status: true,
+                paymentClaims: {
+                  orderBy: { createdAt: 'desc' },
+                  take: 1,
+                  select: { status: true, declineReason: true },
+                },
+              },
             },
           },
         },
@@ -140,11 +155,18 @@ export class PublicService {
       throw new NotFoundException('Customer not found.');
     }
 
+    const paymentMethods = await this.prisma.paymentMethod.findMany({
+      where: { tenantId: customer.tenant.id, isActive: true },
+      orderBy: { sortOrder: 'asc' },
+      select: { id: true, label: true, details: true, presetKey: true },
+    });
+
     return {
       name: customer.name,
       contracts: customer.contracts.map((contract) =>
         this.summarizeContract(contract, customer.tenant.showPublicPricing),
       ),
+      paymentMethods,
       telegram: {
         available: Boolean(customer.tenant.telegramBotToken && customer.tenant.telegramBotUsername),
         botUsername: customer.tenant.telegramBotUsername,
@@ -495,7 +517,14 @@ export class PublicService {
       status: ContractStatus;
       totalAmount: number;
       downPayment: number;
-      installments: { dueDate: Date; amount: number; paidAmount: number; status: InstallmentStatus }[];
+      installments: {
+        id: string;
+        dueDate: Date;
+        amount: number;
+        paidAmount: number;
+        status: InstallmentStatus;
+        paymentClaims: PublicInstallmentClaim[];
+      }[];
     },
     pricingVisible: boolean,
   ): PublicContractSummary {
@@ -519,9 +548,11 @@ export class PublicService {
       remainingAmount: installmentsTotal - installmentsPaidAmount,
       nextInstallment: nextOutstanding
         ? {
+            id: nextOutstanding.id,
             dueDate: nextOutstanding.dueDate,
             amount: nextOutstanding.amount - nextOutstanding.paidAmount,
             isOverdue: nextOutstanding.dueDate < today,
+            latestClaim: nextOutstanding.paymentClaims[0] ?? null,
           }
         : null,
     };
