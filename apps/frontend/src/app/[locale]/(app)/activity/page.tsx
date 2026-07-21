@@ -27,11 +27,7 @@ export default function ActivityPage() {
       id: 'actor',
       header: t('actor'),
       role: 'primary',
-      cell: (entry) => (
-        <span dir="ltr" className="text-left font-medium">
-          {entry.userEmail}
-        </span>
-      ),
+      cell: (entry) => <span className="font-medium">{entry.userName}</span>,
     },
     {
       id: 'action',

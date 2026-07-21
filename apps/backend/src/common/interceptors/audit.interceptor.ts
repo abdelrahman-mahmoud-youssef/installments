@@ -27,7 +27,7 @@ export class AuditInterceptor implements NestInterceptor {
         const entityId = request.params.id ?? (response as { id?: string } | undefined)?.id ?? null;
         void this.auditLogService.record(
           request.user.tenantId,
-          { id: request.user.userId, email: request.user.email },
+          { id: request.user.userId, name: request.user.name, email: request.user.email },
           metadata.action,
           metadata.entityType,
           entityId,

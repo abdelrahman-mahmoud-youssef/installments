@@ -6,6 +6,11 @@ export class RegisterDto {
   @MaxLength(200)
   businessName!: string;
 
+  @IsString()
+  @MinLength(1)
+  @MaxLength(200)
+  name!: string;
+
   @IsEmail()
   email!: string;
 

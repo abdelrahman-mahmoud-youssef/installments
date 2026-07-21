@@ -3,6 +3,7 @@ import { buildQuery, PaginatedResult } from './pagination';
 
 export interface AuditLogEntry {
   id: string;
+  userName: string;
   userEmail: string;
   action: string;
   entityType: string;

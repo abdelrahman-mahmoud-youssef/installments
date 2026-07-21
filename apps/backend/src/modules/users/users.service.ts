@@ -7,6 +7,7 @@ import { UpdateStaffDto } from './dto/update-staff.dto';
 
 export interface StaffMember {
   id: string;
+  name: string;
   email: string;
   isActive: boolean;
   createdAt: Date;
@@ -14,8 +15,16 @@ export interface StaffMember {
 
 const EMAIL_TAKEN_ERROR = 'This email is already in use.';
 
-function toStaffMember(user: { id: string; email: string; isActive: boolean; createdAt: Date }): StaffMember {
-  return { id: user.id, email: user.email, isActive: user.isActive, createdAt: user.createdAt };
+const STAFF_SELECT = { id: true, name: true, email: true, isActive: true, createdAt: true } as const;
+
+function toStaffMember(user: {
+  id: string;
+  name: string;
+  email: string;
+  isActive: boolean;
+  createdAt: Date;
+}): StaffMember {
+  return { id: user.id, name: user.name, email: user.email, isActive: user.isActive, createdAt: user.createdAt };
 }
 
 @Injectable()
@@ -26,7 +35,7 @@ export class UsersService {
     const staff = await this.prisma.user.findMany({
       where: { tenantId, role: Role.STAFF },
       orderBy: { createdAt: 'desc' },
-      select: { id: true, email: true, isActive: true, createdAt: true },
+      select: STAFF_SELECT,
     });
     return staff.map(toStaffMember);
   }
@@ -35,8 +44,8 @@ export class UsersService {
     const passwordHash = await hashPassword(dto.password);
     try {
       const user = await this.prisma.user.create({
-        data: { tenantId, email: dto.email, passwordHash, role: Role.STAFF },
-        select: { id: true, email: true, isActive: true, createdAt: true },
+        data: { tenantId, name: dto.name, email: dto.email, passwordHash, role: Role.STAFF },
+        select: STAFF_SELECT,
       });
       return toStaffMember(user);
     } catch (error) {
@@ -68,7 +77,7 @@ export class UsersService {
     const user = await this.prisma.user.update({
       where: { id },
       data: { isActive: dto.isActive },
-      select: { id: true, email: true, isActive: true, createdAt: true },
+      select: STAFF_SELECT,
     });
     return toStaffMember(user);
   }

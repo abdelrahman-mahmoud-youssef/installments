@@ -228,7 +228,7 @@ async function seed(): Promise<void> {
     data: {
       name: SEED_TENANT_NAME,
       slug: slugify(SEED_TENANT_NAME),
-      users: { create: { email: SEED_ADMIN_EMAIL, passwordHash } },
+      users: { create: { name: 'Admin', email: SEED_ADMIN_EMAIL, passwordHash } },
     },
   });
 

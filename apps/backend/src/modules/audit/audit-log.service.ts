@@ -6,6 +6,7 @@ import { PaginatedResult, buildPaginatedResult } from '../../common/pagination/p
 
 export interface AuditActor {
   id: string;
+  name: string;
   email: string;
 }
 
@@ -25,6 +26,7 @@ export class AuditLogService {
         data: {
           tenantId,
           userId: actor.id,
+          userName: actor.name,
           userEmail: actor.email,
           action,
           entityType,

@@ -9,6 +9,7 @@ import { RegisterDto } from './dto/register.dto';
 
 export interface CurrentUserResponse {
   id: string;
+  name: string;
   email: string;
   tenantId: string;
   role: Role;
@@ -34,7 +35,7 @@ export class AuthController {
 
   @Get('me')
   getMe(@CurrentUser() user: AuthenticatedUser): CurrentUserResponse {
-    return { id: user.userId, email: user.email, tenantId: user.tenantId, role: user.role };
+    return { id: user.userId, name: user.name, email: user.email, tenantId: user.tenantId, role: user.role };
   }
 
   @Patch('password')

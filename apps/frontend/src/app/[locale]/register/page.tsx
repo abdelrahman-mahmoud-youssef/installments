@@ -24,7 +24,7 @@ export default function RegisterPage() {
 
   const form = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { businessName: '', email: '', password: '' },
+    defaultValues: { businessName: '', name: '', email: '', password: '' },
   });
 
   async function onSubmit(values: RegisterInput) {
@@ -62,6 +62,19 @@ export default function RegisterPage() {
                   <FormLabel>{t('businessName')}</FormLabel>
                   <FormControl>
                     <Input autoComplete="organization" placeholder={t('businessNamePlaceholder')} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('name')}</FormLabel>
+                  <FormControl>
+                    <Input autoComplete="name" placeholder={t('namePlaceholder')} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

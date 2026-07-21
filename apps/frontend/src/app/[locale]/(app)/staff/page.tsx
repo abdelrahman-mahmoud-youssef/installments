@@ -36,7 +36,7 @@ function AddStaffDialog() {
 
   const form = useForm<CreateStaffInput>({
     resolver: zodResolver(createStaffSchema),
-    defaultValues: { email: '', password: '' },
+    defaultValues: { name: '', email: '', password: '' },
   });
 
   async function handleSubmit(values: CreateStaffInput) {
@@ -75,6 +75,19 @@ function AddStaffDialog() {
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('staffName')}</FormLabel>
+                  <FormControl>
+                    <Input autoComplete="off" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="email"
@@ -147,7 +160,8 @@ export default function StaffPage() {
               {staff.map((member) => (
                 <div key={member.id} className="flex items-center justify-between gap-4 px-4 py-3.5">
                   <div className="min-w-0">
-                    <p dir="ltr" className="truncate text-left text-sm font-medium">
+                    <p className="truncate text-sm font-medium">{member.name}</p>
+                    <p dir="ltr" className="truncate text-left text-xs text-muted-foreground">
                       {member.email}
                     </p>
                     <p className="text-xs text-muted-foreground">

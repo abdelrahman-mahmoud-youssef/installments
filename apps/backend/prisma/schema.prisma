@@ -92,6 +92,7 @@ model Tenant {
 model User {
   id           String     @id @default(cuid())
   tenantId     String
+  name         String
   email        String     @unique
   passwordHash String
   role         Role       @default(ADMIN)
@@ -107,6 +108,7 @@ model AuditLog {
   id         String   @id @default(cuid())
   tenantId   String
   userId     String?
+  userName   String
   userEmail  String
   action     String
   entityType String

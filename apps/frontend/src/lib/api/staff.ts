@@ -3,6 +3,7 @@ import { apiClient } from './client';
 
 export interface StaffMember {
   id: string;
+  name: string;
   email: string;
   isActive: boolean;
   createdAt: string;

@@ -44,6 +44,7 @@ export class AuthService {
 
     const user = await this.prisma.user.create({
       data: {
+        name: registerDto.name,
         email: registerDto.email,
         passwordHash,
         tenant: { create: { name: registerDto.businessName, slug } },
@@ -76,7 +77,13 @@ export class AuthService {
   }
 
   private async issueToken(user: User): Promise<LoginResult> {
-    const payload: JwtPayload = { sub: user.id, tenantId: user.tenantId, role: user.role, email: user.email };
+    const payload: JwtPayload = {
+      sub: user.id,
+      tenantId: user.tenantId,
+      role: user.role,
+      email: user.email,
+      name: user.name,
+    };
     return { accessToken: await this.jwtService.signAsync(payload) };
   }
 }

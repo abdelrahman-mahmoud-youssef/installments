@@ -9,12 +9,14 @@ export interface LoginPayload {
 
 export interface RegisterPayload {
   businessName: string;
+  name: string;
   email: string;
   password: string;
 }
 
 export interface CurrentUser {
   id: string;
+  name: string;
   email: string;
   tenantId: string;
   role: Role;

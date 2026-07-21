@@ -6,6 +6,7 @@ export interface AuthenticatedUser {
   tenantId: string;
   role: Role;
   email: string;
+  name: string;
 }
 
 export const CurrentUser = createParamDecorator(
