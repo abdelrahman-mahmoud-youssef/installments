@@ -3,6 +3,13 @@ export interface CalculatorPlan {
   markupPercent: number;
 }
 
+export interface TenantLocation {
+  id: string;
+  name: string;
+  address: string;
+  mapUrl?: string;
+}
+
 export interface TenantBrandingSource {
   slug: string;
   name: string;
@@ -17,6 +24,7 @@ export interface TenantBrandingSource {
   tiktokUrl: string | null;
   showInstallmentCalculator: boolean;
   calculatorPlans: unknown;
+  locations: unknown;
 }
 
 export interface TenantBranding {
@@ -32,6 +40,7 @@ export interface TenantBranding {
   tiktokUrl: string | null;
   showInstallmentCalculator: boolean;
   calculatorPlans: CalculatorPlan[];
+  locations: TenantLocation[];
 }
 
 export const TENANT_BRANDING_SELECT = {
@@ -48,6 +57,7 @@ export const TENANT_BRANDING_SELECT = {
   tiktokUrl: true,
   showInstallmentCalculator: true,
   calculatorPlans: true,
+  locations: true,
 } as const;
 
 export function toTenantBranding(tenant: TenantBrandingSource): TenantBranding {
@@ -64,5 +74,6 @@ export function toTenantBranding(tenant: TenantBrandingSource): TenantBranding {
     tiktokUrl: tenant.tiktokUrl,
     showInstallmentCalculator: tenant.showInstallmentCalculator,
     calculatorPlans: (tenant.calculatorPlans as CalculatorPlan[] | null) ?? [],
+    locations: (tenant.locations as TenantLocation[] | null) ?? [],
   };
 }

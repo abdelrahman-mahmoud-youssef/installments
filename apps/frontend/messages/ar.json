@@ -447,7 +447,9 @@
     "installButtonLabel": "ثبّت {name}",
     "installIosHint": "ثبّت {name}: دوس على أيقونة المشاركة في سفاري، وبعدين \"إضافة إلى الشاشة الرئيسية\".",
     "ogTagline": "تسوق أونلاين وادفع بالتقسيط بسهولة",
-    "ogDescription": "تصفح منتجات وخطط تقسيط {name}."
+    "ogDescription": "تصفح منتجات وخطط تقسيط {name}.",
+    "locationsTitle": "الفروع",
+    "getDirections": "اعرف الاتجاهات"
   },
   "announcements": {
     "title": "الإعلانات",
@@ -551,6 +553,17 @@
     "calculatorMarkupLabel": "نسبة الزيادة %",
     "calculatorPlansLabel": "مدد التقسيط اللي بتقدمها",
     "calculatorMonths": "{count} شهر",
+    "locationsLabel": "الفروع",
+    "locationsHint": "ضيف فرع أو أكتر لمحلك. كل فرع ممكن يظهر بخريطة في صفحة محلك.",
+    "locationNameLabel": "الاسم",
+    "locationNamePlaceholder": "الفرع الرئيسي",
+    "locationAddressLabel": "العنوان",
+    "locationAddressPlaceholder": "12 شارع النيل، القاهرة",
+    "locationMapUrlLabel": "لينك جوجل مابس (اختياري)",
+    "locationMapUrlPlaceholder": "https://maps.google.com/...",
+    "locationMapUrlHint": "بيتستخدم في لينك \"اعرف الاتجاهات\". لو سايبه فاضي، هيتعمل لينك تلقائي من العنوان.",
+    "locationRemove": "احذف الفرع",
+    "locationAdd": "ضيف فرع",
     "telegramTitle": "بوت تيليجرام",
     "telegramDescription": "اربط بوت تيليجرام بتاعك عشان تستلم التذكيرات اليومية.",
     "connected": "متصل",

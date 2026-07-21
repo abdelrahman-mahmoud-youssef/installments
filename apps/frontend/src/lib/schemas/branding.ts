@@ -33,6 +33,22 @@ export const shopPageSchema = z.object({
 
 export type ShopPageInput = z.infer<typeof shopPageSchema>;
 
+export const MAX_LOCATIONS = 10;
+
+export const locationSchema = z.object({
+  id: z.string(),
+  name: z.string().max(80),
+  address: z.string().min(1, 'Address is required.').max(300),
+  mapUrl: z.union([z.string().max(500).url('Must be a valid URL.'), z.literal('')]),
+});
+
+export const locationsFormSchema = z.object({
+  locations: z.array(locationSchema).max(MAX_LOCATIONS),
+});
+
+export type LocationInput = z.infer<typeof locationSchema>;
+export type LocationsFormInput = z.infer<typeof locationsFormSchema>;
+
 const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 export const slugSchema = z.object({

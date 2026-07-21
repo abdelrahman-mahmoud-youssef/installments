@@ -73,6 +73,7 @@ model Tenant {
   tiktokUrl          String?
   showInstallmentCalculator Boolean     @default(false)
   calculatorPlans    Json               @default("[]")
+  locations          Json               @default("[]")
   telegramBotToken   String?
   telegramBotUsername String?
   telegramChatId     String?

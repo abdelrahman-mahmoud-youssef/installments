@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { AboutEditor } from '@/components/settings/about-editor';
+import { LocationsSection } from '@/components/settings/locations-section';
 import { NumberInput } from '@/components/shared/number-input';
 import { Section } from '@/components/shared/section';
 import { Button } from '@/components/ui/button';
@@ -306,6 +307,8 @@ export function ShopPageSection() {
             )}
           </div>
         )}
+
+        <LocationsSection />
       </div>
     </Section>
   );

@@ -7,6 +7,13 @@ export interface CalculatorPlan {
   markupPercent: number;
 }
 
+export interface TenantLocation {
+  id: string;
+  name: string;
+  address: string;
+  mapUrl?: string;
+}
+
 export interface TenantBranding {
   slug: string;
   displayName: string;
@@ -20,6 +27,7 @@ export interface TenantBranding {
   tiktokUrl: string | null;
   showInstallmentCalculator: boolean;
   calculatorPlans: CalculatorPlan[];
+  locations: TenantLocation[];
 }
 
 export async function getBrandingServer(token: string): Promise<TenantBranding | null> {
@@ -49,6 +57,7 @@ export interface UpdateBrandingInput {
   tiktokUrl?: string;
   showInstallmentCalculator?: boolean;
   calculatorPlans?: CalculatorPlan[];
+  locations?: TenantLocation[];
 }
 
 export function getBranding(): Promise<TenantBranding> {

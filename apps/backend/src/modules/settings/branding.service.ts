@@ -64,6 +64,9 @@ export class BrandingService {
           ...(dto.calculatorPlans && {
             calculatorPlans: dto.calculatorPlans as unknown as Prisma.InputJsonValue,
           }),
+          ...(dto.locations && {
+            locations: dto.locations as unknown as Prisma.InputJsonValue,
+          }),
         },
       });
       return toTenantBranding(tenant);

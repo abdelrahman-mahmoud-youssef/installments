@@ -447,7 +447,9 @@
     "installButtonLabel": "Install {name}",
     "installIosHint": "Install {name}: tap Share in Safari, then \"Add to Home Screen\".",
     "ogTagline": "Shop online and pay in easy installments",
-    "ogDescription": "Browse {name}'s products and installment plans."
+    "ogDescription": "Browse {name}'s products and installment plans.",
+    "locationsTitle": "Locations",
+    "getDirections": "Get directions"
   },
   "announcements": {
     "title": "Announcements",
@@ -551,6 +553,17 @@
     "calculatorMarkupLabel": "Markup %",
     "calculatorPlansLabel": "Plan lengths you offer",
     "calculatorMonths": "{count} months",
+    "locationsLabel": "Locations",
+    "locationsHint": "Add one or more shop locations. Each one can show an embedded map on your shop page.",
+    "locationNameLabel": "Name",
+    "locationNamePlaceholder": "Main branch",
+    "locationAddressLabel": "Address",
+    "locationAddressPlaceholder": "12 Nile St, Cairo",
+    "locationMapUrlLabel": "Google Maps link (optional)",
+    "locationMapUrlPlaceholder": "https://maps.google.com/...",
+    "locationMapUrlHint": "Used for the \"Get directions\" link. If left empty, one is generated from the address.",
+    "locationRemove": "Remove location",
+    "locationAdd": "Add location",
     "telegramTitle": "Telegram bot",
     "telegramDescription": "Connect your own Telegram bot to receive daily reminders.",
     "connected": "Connected",

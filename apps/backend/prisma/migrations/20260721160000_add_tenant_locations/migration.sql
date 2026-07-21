@@ -1,0 +1,1 @@
+ALTER TABLE "Tenant" ADD COLUMN "locations" JSONB NOT NULL DEFAULT '[]';

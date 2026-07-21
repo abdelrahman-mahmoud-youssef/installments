@@ -9,6 +9,7 @@ import { LanguageSwitcher } from '@/components/shared/language-switcher';
 import { BrandLogo } from '@/components/shared/logo';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { InstallmentCalculator } from '@/components/shop/installment-calculator';
+import { ShopLocations } from '@/components/shop/shop-locations';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { getPublicShop } from '@/lib/api/public';
 import { resolveAssetUrl } from '@/lib/assets';
@@ -157,6 +158,8 @@ export default async function PublicShopPage({
             <AboutContent about={shop.about} noAboutLabel={t('noAbout')} />
           </div>
         )}
+
+        <ShopLocations locations={shop.locations} title={t('locationsTitle')} directionsLabel={t('getDirections')} />
       </main>
 
       <footer className="pb-10 text-center text-xs text-muted-foreground">{shop.displayName}</footer>

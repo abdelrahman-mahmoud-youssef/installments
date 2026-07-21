@@ -5,9 +5,11 @@ import {
   IsBoolean,
   IsIn,
   IsInt,
+  IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
+  IsUrl,
   Matches,
   Max,
   MaxLength,
@@ -29,6 +31,27 @@ export class CalculatorPlanDto {
   @Min(0)
   @Max(1000)
   markupPercent!: number;
+}
+
+export class LocationDto {
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(60)
+  id!: string;
+
+  @IsString()
+  @MaxLength(80)
+  name!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(300)
+  address!: string;
+
+  @IsOptional()
+  @IsUrl({}, { message: 'Must be a valid URL.' })
+  @MaxLength(500)
+  mapUrl?: string;
 }
 
 export class UpdateBrandingDto {
@@ -89,4 +112,11 @@ export class UpdateBrandingDto {
   @ValidateNested({ each: true })
   @Type(() => CalculatorPlanDto)
   calculatorPlans?: CalculatorPlanDto[];
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(10)
+  @ValidateNested({ each: true })
+  @Type(() => LocationDto)
+  locations?: LocationDto[];
 }
