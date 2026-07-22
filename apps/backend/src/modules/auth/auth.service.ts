@@ -125,12 +125,6 @@ export class AuthService {
     if (!resolution.valid) {
       throw new BadRequestException('Invalid or expired code.');
     }
-    if (resolution.remainingBackupCodeHashes) {
-      await this.prisma.user.update({
-        where: { id: user.id },
-        data: { twoFactorBackupCodeHashes: resolution.remainingBackupCodeHashes },
-      });
-    }
 
     return this.issueToken(user);
   }
@@ -184,10 +178,13 @@ export class AuthService {
 
     const backupCodes = generateBackupCodes();
     const backupCodeHashes = await Promise.all(backupCodes.map((code) => hashPassword(code)));
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: { twoFactorEnabled: true, twoFactorBackupCodeHashes: backupCodeHashes },
-    });
+    await this.prisma.$transaction([
+      this.prisma.twoFactorBackupCode.deleteMany({ where: { userId } }),
+      this.prisma.twoFactorBackupCode.createMany({
+        data: backupCodeHashes.map((codeHash) => ({ userId, codeHash })),
+      }),
+      this.prisma.user.update({ where: { id: userId }, data: { twoFactorEnabled: true } }),
+    ]);
 
     return { backupCodes };
   }
@@ -203,16 +200,16 @@ export class AuthService {
       throw new BadRequestException('Invalid or expired code.');
     }
 
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: { twoFactorEnabled: false, twoFactorSecret: null, twoFactorBackupCodeHashes: [] },
-    });
+    await this.prisma.$transaction([
+      this.prisma.twoFactorBackupCode.deleteMany({ where: { userId } }),
+      this.prisma.user.update({
+        where: { id: userId },
+        data: { twoFactorEnabled: false, twoFactorSecret: null },
+      }),
+    ]);
   }
 
-  private async resolveTwoFactorCode(
-    user: User,
-    code: string,
-  ): Promise<{ valid: boolean; remainingBackupCodeHashes?: string[] }> {
+  private async resolveTwoFactorCode(user: User, code: string): Promise<{ valid: boolean }> {
     if (user.twoFactorSecret) {
       const secret = decrypt(user.twoFactorSecret, this.twoFactorEncryptionKey());
       if (verifyTotpCode(secret, code)) {
@@ -221,17 +218,22 @@ export class AuthService {
     }
 
     const normalizedCode = code.trim().toUpperCase();
+    const backupCodes = await this.prisma.twoFactorBackupCode.findMany({
+      where: { userId: user.id, usedAt: null },
+    });
     const matches = await Promise.all(
-      user.twoFactorBackupCodeHashes.map((hash) => verifyPassword(normalizedCode, hash)),
+      backupCodes.map((backupCode) => verifyPassword(normalizedCode, backupCode.codeHash)),
     );
     const matchIndex = matches.indexOf(true);
     if (matchIndex === -1) {
       return { valid: false };
     }
-    const remainingBackupCodeHashes = user.twoFactorBackupCodeHashes.filter(
-      (_, index) => index !== matchIndex,
-    );
-    return { valid: true, remainingBackupCodeHashes };
+
+    await this.prisma.twoFactorBackupCode.update({
+      where: { id: backupCodes[matchIndex].id },
+      data: { usedAt: new Date() },
+    });
+    return { valid: true };
   }
 
   private twoFactorEncryptionKey(): string {

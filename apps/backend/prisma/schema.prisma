@@ -115,13 +115,24 @@ model User {
   isActive                  Boolean    @default(true)
   twoFactorSecret           String?
   twoFactorEnabled          Boolean    @default(false)
-  twoFactorBackupCodeHashes String[]   @default([])
   createdAt                 DateTime   @default(now())
   tenant                    Tenant     @relation(fields: [tenantId], references: [id])
   auditLogs                 AuditLog[]
   reviewedPaymentClaims     PaymentClaim[]
+  twoFactorBackupCodes      TwoFactorBackupCode[]
 
   @@index([tenantId, role])
+}
+
+model TwoFactorBackupCode {
+  id        String    @id @default(cuid())
+  userId    String
+  codeHash  String
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, usedAt])
 }
 
 model AuditLog {
