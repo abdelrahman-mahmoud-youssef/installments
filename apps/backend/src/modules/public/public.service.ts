@@ -200,60 +200,69 @@ export class PublicService {
   async getOutstandingInstallments(publicId: string): Promise<PublicOutstandingResponse> {
     const customer = await this.prisma.customer.findUnique({
       where: { publicId },
-      select: {
-        tenant: { select: { id: true, ...TENANT_BRANDING_SELECT } },
-        contracts: {
-          where: { status: ContractStatus.ACTIVE },
-          select: {
-            publicId: true,
-            productName: true,
-            installments: {
-              where: { status: { in: [InstallmentStatus.PENDING, InstallmentStatus.PARTIALLY_PAID] } },
-              orderBy: { sequence: 'asc' },
-              select: {
-                id: true,
-                sequence: true,
-                dueDate: true,
-                amount: true,
-                paidAmount: true,
-                paymentClaims: {
-                  orderBy: { createdAt: 'desc' },
-                  take: 1,
-                  select: { status: true, declineReason: true },
-                },
-              },
-            },
-          },
-        },
-      },
+      select: { id: true, tenant: { select: { id: true, ...TENANT_BRANDING_SELECT } } },
     });
 
     if (!customer) {
       throw new NotFoundException('Customer not found.');
     }
 
-    const paymentMethods = await this.prisma.paymentMethod.findMany({
-      where: { tenantId: customer.tenant.id, isActive: true },
-      orderBy: { sortOrder: 'asc' },
-      select: { id: true, label: true, details: true, presetKey: true },
+    const today = getUtcToday();
+    const outstandingWhere = {
+      status: { in: [InstallmentStatus.PENDING, InstallmentStatus.PARTIALLY_PAID] },
+      contract: { customerId: customer.id, status: ContractStatus.ACTIVE },
+    };
+    const installmentSelect = {
+      id: true,
+      sequence: true,
+      dueDate: true,
+      amount: true,
+      paidAmount: true,
+      contract: { select: { publicId: true, productName: true } },
+      paymentClaims: {
+        orderBy: { createdAt: 'desc' as const },
+        take: 1,
+        select: { status: true, declineReason: true },
+      },
+    };
+
+    const [overdueInstallments, nextUpcomingInstallment, paymentMethods] = await Promise.all([
+      this.prisma.installment.findMany({
+        where: { ...outstandingWhere, dueDate: { lt: today } },
+        orderBy: { dueDate: 'asc' },
+        select: installmentSelect,
+      }),
+      this.prisma.installment.findFirst({
+        where: { ...outstandingWhere, dueDate: { gte: today } },
+        orderBy: { dueDate: 'asc' },
+        select: installmentSelect,
+      }),
+      this.prisma.paymentMethod.findMany({
+        where: { tenantId: customer.tenant.id, isActive: true },
+        orderBy: { sortOrder: 'asc' },
+        select: { id: true, label: true, details: true, presetKey: true },
+      }),
+    ]);
+
+    const toPublicInstallment = (
+      installment: (typeof overdueInstallments)[number],
+      isOverdue: boolean,
+    ) => ({
+      id: installment.id,
+      contractPublicId: installment.contract.publicId,
+      productName: installment.contract.productName,
+      sequence: installment.sequence,
+      dueDate: installment.dueDate,
+      amount: installment.amount,
+      paidAmount: installment.paidAmount,
+      isOverdue,
+      latestClaim: installment.paymentClaims[0] ?? null,
     });
 
-    const today = getUtcToday();
-    const installments = customer.contracts
-      .flatMap((contract) =>
-        contract.installments.map((installment) => ({
-          id: installment.id,
-          contractPublicId: contract.publicId,
-          productName: contract.productName,
-          sequence: installment.sequence,
-          dueDate: installment.dueDate,
-          amount: installment.amount,
-          paidAmount: installment.paidAmount,
-          isOverdue: installment.dueDate < today,
-          latestClaim: installment.paymentClaims[0] ?? null,
-        })),
-      )
-      .sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
+    const installments = [
+      ...overdueInstallments.map((installment) => toPublicInstallment(installment, true)),
+      ...(nextUpcomingInstallment ? [toPublicInstallment(nextUpcomingInstallment, false)] : []),
+    ];
 
     return { installments, paymentMethods, branding: toTenantBranding(customer.tenant) };
   }
