@@ -14,6 +14,7 @@ import { Audit } from '../../common/decorators/audit.decorator';
 import { CurrentUser, AuthenticatedUser } from '../../common/decorators/current-user.decorator';
 import { CustomersService } from './customers.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
+import { CustomerNotificationQueryDto } from './dto/customer-notification-query.dto';
 import { CustomerQueryDto } from './dto/customer-query.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 
@@ -35,6 +36,15 @@ export class CustomersController {
   @Get(':id')
   findOne(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.customersService.findOne(user.tenantId, id);
+  }
+
+  @Get(':id/notifications')
+  getNotificationHistory(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Query() query: CustomerNotificationQueryDto,
+  ) {
+    return this.customersService.getNotificationHistory(user.tenantId, id, query);
   }
 
   @Patch(':id')

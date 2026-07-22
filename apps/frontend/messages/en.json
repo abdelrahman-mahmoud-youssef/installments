@@ -274,7 +274,16 @@
       "product": "Product",
       "total": "Total",
       "status": "Status",
-      "created": "Created"
+      "created": "Created",
+      "history": "History",
+      "historyTitle": "Notification history",
+      "historyDescription": "Every reminder and broadcast sent to {name}.",
+      "historyEmpty": "No notifications sent yet",
+      "historyLoadError": "Couldn't load notification history",
+      "historyReminder": "Daily reminder",
+      "historyBroadcast": "Broadcast",
+      "historyDelivered": "Delivered",
+      "historyFailed": "Failed"
     }
   },
   "contracts": {

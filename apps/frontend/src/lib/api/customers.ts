@@ -50,3 +50,28 @@ export function updateCustomer(id: string, input: Partial<CustomerInput>): Promi
 export function deleteCustomer(id: string): Promise<void> {
   return apiClient.delete(`customers/${id}`);
 }
+
+export type CustomerNotificationType = 'REMINDER' | 'BROADCAST';
+export type CustomerNotificationChannel = 'TELEGRAM' | 'WHATSAPP';
+
+export interface CustomerNotificationHistoryItem {
+  id: string;
+  type: CustomerNotificationType;
+  channel: CustomerNotificationChannel;
+  success: boolean;
+  error: string | null;
+  sentAt: string;
+  preview: string | null;
+}
+
+export interface CustomerNotificationParams {
+  page?: number;
+  limit?: number;
+}
+
+export function getCustomerNotifications(
+  id: string,
+  params: CustomerNotificationParams,
+): Promise<PaginatedResult<CustomerNotificationHistoryItem>> {
+  return apiClient.get(`customers/${id}/notifications${buildQuery(params)}`);
+}

@@ -3,8 +3,10 @@ import {
   createCustomer,
   Customer,
   CustomerListParams,
+  CustomerNotificationParams,
   deleteCustomer,
   getCustomer,
+  getCustomerNotifications,
   listCustomers,
   updateCustomer,
 } from '@/lib/api/customers';
@@ -14,6 +16,8 @@ export const customerKeys = {
   all: ['customers'] as const,
   list: (params: CustomerListParams) => [...customerKeys.all, 'list', params] as const,
   detail: (id: string) => [...customerKeys.all, 'detail', id] as const,
+  notifications: (id: string, params: CustomerNotificationParams) =>
+    [...customerKeys.all, 'notifications', id, params] as const,
 };
 
 export function useCustomers(params: CustomerListParams) {
@@ -48,6 +52,15 @@ export function useUpdateCustomer(id: string) {
       queryClient.invalidateQueries({ queryKey: customerKeys.all });
       queryClient.invalidateQueries({ queryKey: customerKeys.detail(id) });
     },
+  });
+}
+
+export function useCustomerNotifications(id: string, params: CustomerNotificationParams, enabled: boolean) {
+  return useQuery({
+    queryKey: customerKeys.notifications(id, params),
+    queryFn: () => getCustomerNotifications(id, params),
+    enabled: enabled && Boolean(id),
+    placeholderData: (previousData) => previousData,
   });
 }
 

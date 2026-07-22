@@ -1,10 +1,23 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Customer, Prisma } from '@prisma/client';
+import { BroadcastRecipientStatus, Customer, Prisma, ReminderChannel } from '@prisma/client';
 import { buildPaginatedResult, PaginatedResult } from '../../common/pagination/paginated-result.interface';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
+import { CustomerNotificationQueryDto } from './dto/customer-notification-query.dto';
 import { CustomerQueryDto } from './dto/customer-query.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
+
+export type CustomerNotificationType = 'REMINDER' | 'BROADCAST';
+
+export interface CustomerNotificationHistoryItem {
+  id: string;
+  type: CustomerNotificationType;
+  channel: ReminderChannel;
+  success: boolean;
+  error: string | null;
+  sentAt: Date;
+  preview: string | null;
+}
 
 @Injectable()
 export class CustomersService {
@@ -60,6 +73,70 @@ export class CustomersService {
   async remove(tenantId: string, id: string): Promise<void> {
     await this.ensureExists(tenantId, id);
     await this.prisma.customer.delete({ where: { id } });
+  }
+
+  async getNotificationHistory(
+    tenantId: string,
+    customerId: string,
+    query: CustomerNotificationQueryDto,
+  ): Promise<PaginatedResult<CustomerNotificationHistoryItem>> {
+    await this.ensureExists(tenantId, customerId);
+
+    const fetchLimit = query.page * query.limit;
+
+    const [reminderLogs, reminderTotal, broadcastRecipients, broadcastTotal] = await Promise.all([
+      this.prisma.customerNotificationLog.findMany({
+        where: { tenantId, customerId },
+        orderBy: { sentAt: 'desc' },
+        take: fetchLimit,
+      }),
+      this.prisma.customerNotificationLog.count({ where: { tenantId, customerId } }),
+      this.prisma.broadcastRecipient.findMany({
+        where: { tenantId, customerId, status: { not: BroadcastRecipientStatus.PENDING } },
+        orderBy: { sentAt: 'desc' },
+        take: fetchLimit,
+        select: {
+          id: true,
+          status: true,
+          sentAt: true,
+          error: true,
+          broadcast: { select: { body: true, createdAt: true } },
+        },
+      }),
+      this.prisma.broadcastRecipient.count({
+        where: { tenantId, customerId, status: { not: BroadcastRecipientStatus.PENDING } },
+      }),
+    ]);
+
+    const items: CustomerNotificationHistoryItem[] = [
+      ...reminderLogs.map(
+        (log): CustomerNotificationHistoryItem => ({
+          id: log.id,
+          type: 'REMINDER',
+          channel: log.channel,
+          success: log.success,
+          error: log.error,
+          sentAt: log.sentAt,
+          preview: null,
+        }),
+      ),
+      ...broadcastRecipients.map(
+        (recipient): CustomerNotificationHistoryItem => ({
+          id: recipient.id,
+          type: 'BROADCAST',
+          channel: ReminderChannel.TELEGRAM,
+          success: recipient.status === BroadcastRecipientStatus.SENT,
+          error: recipient.error,
+          sentAt: recipient.sentAt ?? recipient.broadcast.createdAt,
+          preview: recipient.broadcast.body,
+        }),
+      ),
+    ].sort((a, b) => b.sentAt.getTime() - a.sentAt.getTime());
+
+    const start = (query.page - 1) * query.limit;
+    const data = items.slice(start, start + query.limit);
+
+    return buildPaginatedResult(data, reminderTotal + broadcastTotal, query.page, query.limit);
   }
 
   private async ensureExists(tenantId: string, id: string): Promise<void> {

@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { FaWhatsapp } from 'react-icons/fa6';
 import { toast } from 'sonner';
 import { CustomerFormDialog } from '@/components/customers/customer-form-dialog';
+import { CustomerNotificationHistoryDialog } from '@/components/customers/customer-notification-history-dialog';
 import { CustomerQrDialog } from '@/components/customers/customer-qr-dialog';
 import { BackLink } from '@/components/shared/back-link';
 import { DataTable, type Column } from '@/components/shared/data-table';
@@ -151,6 +152,7 @@ export default function CustomerDetailPage() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            <CustomerNotificationHistoryDialog customerId={customer.id} customerName={customer.name} />
             <CustomerFormDialog
               trigger={
                 <Button variant="outline" size="sm">

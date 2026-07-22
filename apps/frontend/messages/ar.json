@@ -274,6 +274,15 @@
       "product": "المنتج",
       "total": "الإجمالي",
       "status": "الحالة",
+      "history": "السجل",
+      "historyTitle": "سجل الإشعارات",
+      "historyDescription": "كل تذكير وإعلان اتبعت لـ {name}.",
+      "historyEmpty": "لسه مفيش إشعارات اتبعتت",
+      "historyLoadError": "معرفناش نحمّل سجل الإشعارات",
+      "historyReminder": "تذكير يومي",
+      "historyBroadcast": "إعلان جماعي",
+      "historyDelivered": "اتبعتت",
+      "historyFailed": "فشلت",
       "created": "تاريخ الإنشاء"
     }
   },

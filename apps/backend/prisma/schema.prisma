@@ -114,6 +114,7 @@ model Tenant {
   auditLogs          AuditLog[]
   paymentMethods     PaymentMethod[]
   paymentClaims      PaymentClaim[]
+  customerNotificationLogs CustomerNotificationLog[]
 }
 
 model User {
@@ -176,6 +177,7 @@ model Customer {
   telegramBroadcastsEnabled    Boolean @default(true)
   notificationLanguage         NotificationLanguage @default(AR)
   broadcastRecipients          BroadcastRecipient[]
+  notificationLogs             CustomerNotificationLog[]
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   tenant    Tenant     @relation(fields: [tenantId], references: [id])
@@ -271,6 +273,20 @@ model ReminderLog {
   tenant   Tenant          @relation(fields: [tenantId], references: [id])
 
   @@index([tenantId, sentAt])
+}
+
+model CustomerNotificationLog {
+  id         String          @id @default(cuid())
+  tenantId   String
+  customerId String
+  channel    ReminderChannel @default(TELEGRAM)
+  success    Boolean
+  error      String?
+  sentAt     DateTime        @default(now())
+  tenant     Tenant          @relation(fields: [tenantId], references: [id])
+  customer   Customer        @relation(fields: [customerId], references: [id])
+
+  @@index([tenantId, customerId, sentAt])
 }
 
 model Broadcast {

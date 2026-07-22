@@ -8,6 +8,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { TelegramService } from '../telegram/telegram.service';
 import { WhatsappService } from '../whatsapp/whatsapp.service';
 import { CustomerReminderItem, formatCustomerReminderMessage } from './customer-reminder-message';
+import { buildCustomerWhatsappReminderParams } from './customer-whatsapp-reminder-message';
 import { buildEveningSummaryTemplateParams } from './evening-summary-message';
 import { buildReminderTemplateParams, formatReminderMessage } from './reminder-message';
 
@@ -29,6 +30,16 @@ const WHATSAPP_MORNING_SUMMARY_TEMPLATE: Record<NotificationLanguage, WhatsappTe
 const WHATSAPP_EVENING_SUMMARY_TEMPLATE: Record<NotificationLanguage, WhatsappTemplate> = {
   [NotificationLanguage.AR]: { name: 'admin_evening_summary_ar', languageCode: 'ar' },
   [NotificationLanguage.EN]: { name: 'admin_evening_summary_en', languageCode: 'en' },
+};
+
+const CUSTOMER_REMINDER_WITH_PAY_BUTTON_TEMPLATE: Record<NotificationLanguage, WhatsappTemplate> = {
+  [NotificationLanguage.AR]: { name: 'customer_reminder_pay_ar', languageCode: 'ar' },
+  [NotificationLanguage.EN]: { name: 'customer_reminder_pay_en', languageCode: 'en' },
+};
+
+const CUSTOMER_REMINDER_NO_PAY_BUTTON_TEMPLATE: Record<NotificationLanguage, WhatsappTemplate> = {
+  [NotificationLanguage.AR]: { name: 'customer_reminder_no_pay_ar', languageCode: 'ar' },
+  [NotificationLanguage.EN]: { name: 'customer_reminder_no_pay_en', languageCode: 'en' },
 };
 
 interface ReminderTotals {
@@ -95,6 +106,10 @@ export class RemindersService implements OnModuleInit {
     const phoneNumberId = this.config.get<string>('WHATSAPP_PHONE_NUMBER_ID');
     const accessToken = this.config.get<string>('WHATSAPP_ACCESS_TOKEN');
     return phoneNumberId && accessToken ? { phoneNumberId, accessToken } : null;
+  }
+
+  private toWhatsappRecipient(phone: string): string {
+    return `20${phone.replace(/\D/g, '').replace(/^0/, '')}`;
   }
 
   async sendRemindersForAllTenants(): Promise<void> {
@@ -196,14 +211,31 @@ export class RemindersService implements OnModuleInit {
 
   async sendCustomerReminders(): Promise<void> {
     const today = getUtcToday();
+    const whatsappCredentials = this.getWhatsappCredentials();
+
     const tenants = await this.prisma.tenant.findMany({
-      where: { telegramBotToken: { not: null }, telegramBotUsername: { not: null } },
-      select: { id: true, name: true, telegramBotToken: true },
+      where: whatsappCredentials
+        ? undefined
+        : { telegramBotToken: { not: null }, telegramBotUsername: { not: null } },
+      select: { id: true, name: true, telegramBotToken: true, telegramBotUsername: true },
     });
 
     for (const tenant of tenants) {
       try {
-        await this.sendCustomerRemindersForTenant(tenant.id, tenant.name, tenant.telegramBotToken as string, today);
+        const hasActivePaymentMethod = whatsappCredentials
+          ? (await this.prisma.paymentMethod.count({ where: { tenantId: tenant.id, isActive: true } })) > 0
+          : false;
+        const telegramBotToken =
+          tenant.telegramBotToken && tenant.telegramBotUsername ? tenant.telegramBotToken : null;
+
+        await this.sendCustomerRemindersForTenant(
+          tenant.id,
+          tenant.name,
+          telegramBotToken,
+          whatsappCredentials,
+          hasActivePaymentMethod,
+          today,
+        );
       } catch (error) {
         this.logger.error(
           `Customer reminders failed for tenant ${tenant.id}: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -215,14 +247,22 @@ export class RemindersService implements OnModuleInit {
   private async sendCustomerRemindersForTenant(
     tenantId: string,
     businessName: string,
-    telegramBotToken: string,
+    telegramBotToken: string | null,
+    whatsappCredentials: { phoneNumberId: string; accessToken: string } | null,
+    hasActivePaymentMethod: boolean,
     today: Date,
   ): Promise<void> {
     const customers = await this.prisma.customer.findMany({
-      where: { tenantId, telegramChatId: { not: null }, telegramNotificationsEnabled: true },
+      where: whatsappCredentials
+        ? { tenantId }
+        : { tenantId, telegramChatId: { not: null }, telegramNotificationsEnabled: true },
       select: {
+        id: true,
+        name: true,
         publicId: true,
+        phone: true,
         telegramChatId: true,
+        telegramNotificationsEnabled: true,
         notificationLanguage: true,
         contracts: {
           select: {
@@ -250,20 +290,49 @@ export class RemindersService implements OnModuleInit {
         }
       }
 
-      const message = formatCustomerReminderMessage(
-        { businessName, dueToday, overdue, payUrl: this.buildPayUrl(customer.publicId, customer.notificationLanguage) },
-        customer.notificationLanguage,
-      );
-      if (!message) {
-        continue;
+      if (telegramBotToken && customer.telegramChatId && customer.telegramNotificationsEnabled) {
+        const message = formatCustomerReminderMessage(
+          { businessName, dueToday, overdue, payUrl: this.buildPayUrl(customer.publicId, customer.notificationLanguage) },
+          customer.notificationLanguage,
+        );
+        if (message) {
+          try {
+            await this.telegram.sendMessage(telegramBotToken, customer.telegramChatId, message);
+            await this.prisma.customerNotificationLog.create({
+              data: { tenantId, customerId: customer.id, channel: ReminderChannel.TELEGRAM, success: true },
+            });
+          } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            this.logger.error(`Customer reminder failed: ${errorMessage}`);
+            await this.prisma.customerNotificationLog.create({
+              data: {
+                tenantId,
+                customerId: customer.id,
+                channel: ReminderChannel.TELEGRAM,
+                success: false,
+                error: errorMessage,
+              },
+            });
+          }
+        }
       }
 
-      try {
-        await this.telegram.sendMessage(telegramBotToken, customer.telegramChatId as string, message);
-      } catch (error) {
-        this.logger.error(
-          `Customer reminder failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        );
+      if (whatsappCredentials) {
+        const totalOutstanding = [...dueToday, ...overdue].reduce((sum, item) => sum + item.remainingAmount, 0);
+        if (totalOutstanding > 0) {
+          await this.sendCustomerWhatsappReminder(
+            tenantId,
+            customer.id,
+            customer.publicId,
+            customer.phone,
+            customer.name,
+            businessName,
+            customer.notificationLanguage,
+            totalOutstanding,
+            hasActivePaymentMethod,
+            whatsappCredentials,
+          );
+        }
       }
     }
   }
@@ -279,6 +348,46 @@ export class RemindersService implements OnModuleInit {
     }
     const localePrefix = language === NotificationLanguage.AR ? '/ar' : '';
     return `${frontendUrl}${localePrefix}/customer/${customerPublicId}/pay`;
+  }
+
+  private async sendCustomerWhatsappReminder(
+    tenantId: string,
+    customerId: string,
+    customerPublicId: string,
+    customerPhone: string,
+    customerName: string,
+    businessName: string,
+    language: NotificationLanguage,
+    totalOutstanding: number,
+    hasActivePaymentMethod: boolean,
+    credentials: { phoneNumberId: string; accessToken: string },
+  ): Promise<void> {
+    const template = hasActivePaymentMethod
+      ? CUSTOMER_REMINDER_WITH_PAY_BUTTON_TEMPLATE[language]
+      : CUSTOMER_REMINDER_NO_PAY_BUTTON_TEMPLATE[language];
+    const params = buildCustomerWhatsappReminderParams({ customerName, businessName, totalOutstanding }, language);
+    const recipient = this.toWhatsappRecipient(customerPhone);
+
+    try {
+      await this.whatsapp.sendTemplateMessage(
+        credentials.phoneNumberId,
+        credentials.accessToken,
+        recipient,
+        template.name,
+        template.languageCode,
+        params,
+        hasActivePaymentMethod ? customerPublicId : undefined,
+      );
+      await this.prisma.customerNotificationLog.create({
+        data: { tenantId, customerId, channel: ReminderChannel.WHATSAPP, success: true },
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`WhatsApp customer reminder failed: ${errorMessage}`);
+      await this.prisma.customerNotificationLog.create({
+        data: { tenantId, customerId, channel: ReminderChannel.WHATSAPP, success: false, error: errorMessage },
+      });
+    }
   }
 
   private async computeReminderTotals(tenantId: string): Promise<ReminderTotals> {

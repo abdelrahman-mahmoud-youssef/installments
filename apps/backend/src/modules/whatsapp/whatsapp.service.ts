@@ -2,6 +2,13 @@ import { Injectable } from '@nestjs/common';
 
 const GRAPH_API_VERSION = 'v22.0';
 
+interface TemplateComponent {
+  type: 'body' | 'button';
+  sub_type?: 'url';
+  index?: string;
+  parameters: { type: 'text'; text: string }[];
+}
+
 @Injectable()
 export class WhatsappService {
   async sendTemplateMessage(
@@ -10,8 +17,22 @@ export class WhatsappService {
     to: string,
     templateName: string,
     languageCode: string,
-    params: string[] = [],
+    bodyParams: string[] = [],
+    buttonUrlParam?: string,
   ): Promise<void> {
+    const components: TemplateComponent[] = [];
+    if (bodyParams.length > 0) {
+      components.push({ type: 'body', parameters: bodyParams.map((text) => ({ type: 'text', text })) });
+    }
+    if (buttonUrlParam) {
+      components.push({
+        type: 'button',
+        sub_type: 'url',
+        index: '0',
+        parameters: [{ type: 'text', text: buttonUrlParam }],
+      });
+    }
+
     const response = await fetch(
       `https://graph.facebook.com/${GRAPH_API_VERSION}/${phoneNumberId}/messages`,
       {
@@ -27,9 +48,7 @@ export class WhatsappService {
           template: {
             name: templateName,
             language: { code: languageCode },
-            ...(params.length > 0 && {
-              components: [{ type: 'body', parameters: params.map((text) => ({ type: 'text', text })) }],
-            }),
+            ...(components.length > 0 && { components }),
           },
         }),
       },
