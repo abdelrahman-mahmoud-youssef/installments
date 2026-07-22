@@ -43,6 +43,7 @@ export class PaymentsService {
 
       await tx.paymentAllocation.createMany({
         data: allocationResult.allocations.map((allocation) => ({
+          tenantId,
           paymentId: payment.id,
           installmentId: allocation.installmentId,
           amount: allocation.amount,

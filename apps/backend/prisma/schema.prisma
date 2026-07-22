@@ -249,12 +249,14 @@ model Payment {
 
 model PaymentAllocation {
   id            String      @id @default(cuid())
+  tenantId      String
   paymentId     String
   installmentId String
   amount        Int
   payment       Payment     @relation(fields: [paymentId], references: [id])
   installment   Installment @relation(fields: [installmentId], references: [id])
 
+  @@index([tenantId])
   @@index([paymentId])
   @@index([installmentId])
 }
@@ -299,6 +301,7 @@ model BroadcastRecipient {
 
   @@index([broadcastId, status])
   @@index([customerId])
+  @@index([tenantId])
 }
 
 model PaymentMethod {
