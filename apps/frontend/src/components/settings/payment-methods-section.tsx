@@ -121,19 +121,14 @@ function AddPaymentMethodDialog({
   );
 }
 
-function PaymentMethodPresetPicker({ existingPresetKeys }: { existingPresetKeys: Set<string> }) {
+function PaymentMethodPresetPicker() {
   const t = useTranslations('settings');
-  const availablePresets = PAYMENT_METHOD_PRESETS.filter((preset) => !existingPresetKeys.has(preset.key));
-
-  if (availablePresets.length === 0) {
-    return null;
-  }
 
   return (
     <div className="space-y-2">
       <p className="text-xs font-medium text-muted-foreground">{t('paymentMethodPresetsLabel')}</p>
       <div className="flex flex-wrap gap-2">
-        {availablePresets.map((preset) => (
+        {PAYMENT_METHOD_PRESETS.map((preset) => (
           <AddPaymentMethodDialog
             key={preset.key}
             presetKey={preset.key}
@@ -214,9 +209,6 @@ function PaymentMethodRow({ method }: { method: PaymentMethod }) {
 export function PaymentMethodsSection() {
   const t = useTranslations('settings');
   const { data: paymentMethods, isLoading } = usePaymentMethods();
-  const existingPresetKeys = new Set(
-    (paymentMethods ?? []).map((method) => method.presetKey).filter((key): key is string => Boolean(key)),
-  );
 
   return (
     <Section
@@ -235,7 +227,7 @@ export function PaymentMethodsSection() {
       }
     >
       <div className="space-y-5">
-        <PaymentMethodPresetPicker existingPresetKeys={existingPresetKeys} />
+        <PaymentMethodPresetPicker />
 
         {isLoading ? (
           <Skeleton className="h-16 w-full" />

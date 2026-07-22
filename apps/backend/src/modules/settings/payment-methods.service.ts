@@ -1,8 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { PaymentMethod } from '@prisma/client';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { PaymentMethod, Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreatePaymentMethodDto } from './dto/create-payment-method.dto';
 import { UpdatePaymentMethodDto } from './dto/update-payment-method.dto';
+
+const PRESET_ALREADY_ADDED_ERROR = 'This payment method has already been added.';
 
 @Injectable()
 export class PaymentMethodsService {
@@ -17,15 +19,22 @@ export class PaymentMethodsService {
 
   async createPaymentMethod(tenantId: string, dto: CreatePaymentMethodDto): Promise<PaymentMethod> {
     const count = await this.prisma.paymentMethod.count({ where: { tenantId } });
-    return this.prisma.paymentMethod.create({
-      data: {
-        tenantId,
-        label: dto.label,
-        details: dto.details,
-        presetKey: dto.presetKey,
-        sortOrder: count,
-      },
-    });
+    try {
+      return await this.prisma.paymentMethod.create({
+        data: {
+          tenantId,
+          label: dto.label,
+          details: dto.details,
+          presetKey: dto.presetKey,
+          sortOrder: count,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new BadRequestException(PRESET_ALREADY_ADDED_ERROR);
+      }
+      throw error;
+    }
   }
 
   async updatePaymentMethod(

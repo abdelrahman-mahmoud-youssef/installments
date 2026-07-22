@@ -269,6 +269,7 @@ model PaymentMethod {
   tenant    Tenant         @relation(fields: [tenantId], references: [id])
   claims    PaymentClaim[]
 
+  @@unique([tenantId, presetKey, details])
   @@index([tenantId, isActive])
 }
 
