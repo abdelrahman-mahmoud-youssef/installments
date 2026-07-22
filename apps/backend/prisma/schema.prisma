@@ -33,10 +33,6 @@ enum CalculationMethod {
   MARKUP_PERCENT
 }
 
-enum AllocationStrategy {
-  OLDEST_FIRST
-}
-
 enum NotificationLanguage {
   AR
   EN
@@ -95,7 +91,6 @@ model Tenant {
   telegramBotUsername String?
   telegramChatId     String?
   notificationLanguage NotificationLanguage @default(AR)
-  allocationStrategy AllocationStrategy @default(OLDEST_FIRST)
   createdAt          DateTime           @default(now())
   users              User[]
   customers          Customer[]
@@ -126,7 +121,7 @@ model User {
   auditLogs                 AuditLog[]
   reviewedPaymentClaims     PaymentClaim[]
 
-  @@index([tenantId])
+  @@index([tenantId, role])
 }
 
 model AuditLog {
@@ -322,4 +317,5 @@ model PaymentClaim {
   @@index([tenantId, status, createdAt])
   @@index([installmentId])
   @@index([tenantId, contractId])
+  @@index([paymentMethodId])
 }
