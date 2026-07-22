@@ -315,4 +315,5 @@ model PaymentClaim {
 
   @@index([tenantId, status, createdAt])
   @@index([installmentId])
+  @@index([tenantId, contractId])
 }
