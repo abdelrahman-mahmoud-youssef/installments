@@ -5,6 +5,10 @@ import { basename, dirname, join } from 'path';
 import { getUploadsDir } from '../../config/uploads-dir';
 import { StorageProvider } from './storage-provider.interface';
 
+function contentTypeFor(key: string): string {
+  return key.endsWith('.png') ? 'image/png' : 'image/jpeg';
+}
+
 @Injectable()
 export class LocalStorageProvider implements StorageProvider {
   private readonly uploadsDir: string;
@@ -35,5 +39,10 @@ export class LocalStorageProvider implements StorageProvider {
 
   async getAssetUrl(key: string): Promise<string> {
     return `/uploads/${key}`;
+  }
+
+  async getAssetBytes(key: string): Promise<{ buffer: Buffer; contentType: string }> {
+    const buffer = await fs.readFile(join(this.uploadsDir, key));
+    return { buffer, contentType: contentTypeFor(key) };
   }
 }

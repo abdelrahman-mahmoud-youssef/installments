@@ -21,4 +21,8 @@ export class StorageService {
   getAssetUrl(key: string): Promise<string> {
     return this.provider.getAssetUrl(key);
   }
+
+  getAssetBytes(key: string): Promise<{ buffer: Buffer; contentType: string }> {
+    return this.provider.getAssetBytes(key);
+  }
 }

@@ -7,6 +7,7 @@ describe('StorageService', () => {
       save: jest.fn().mockResolvedValue('https://example.com/logos/tenant-1.png'),
       deleteByPrefix: jest.fn().mockResolvedValue(undefined),
       getAssetUrl: jest.fn().mockResolvedValue('https://signed.example.com/logos/tenant-1.png'),
+      getAssetBytes: jest.fn().mockResolvedValue({ buffer: Buffer.from('image'), contentType: 'image/png' }),
     };
     return { service: new StorageService(provider), provider };
   }
@@ -48,5 +49,14 @@ describe('StorageService', () => {
 
     expect(provider.getAssetUrl).toHaveBeenCalledWith('logos/tenant-1.png');
     expect(url).toBe('https://signed.example.com/logos/tenant-1.png');
+  });
+
+  it('delegates asset byte fetching to the provider', async () => {
+    const { service, provider } = createService();
+
+    const result = await service.getAssetBytes('logos/tenant-1.png');
+
+    expect(provider.getAssetBytes).toHaveBeenCalledWith('logos/tenant-1.png');
+    expect(result).toEqual({ buffer: Buffer.from('image'), contentType: 'image/png' });
   });
 });

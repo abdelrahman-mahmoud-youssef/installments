@@ -8,12 +8,21 @@ import {
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Readable } from 'node:stream';
 import { StorageProvider } from './storage-provider.interface';
 
 const SIGNED_URL_EXPIRY_SECONDS = 300;
 
 function contentTypeFor(key: string): string {
   return key.endsWith('.png') ? 'image/png' : 'image/jpeg';
+}
+
+async function streamToBuffer(stream: Readable): Promise<Buffer> {
+  const chunks: Buffer[] = [];
+  for await (const chunk of stream) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  }
+  return Buffer.concat(chunks);
 }
 
 @Injectable()
@@ -44,6 +53,12 @@ export class BackblazeStorageProvider implements StorageProvider {
   async getAssetUrl(key: string): Promise<string> {
     const command = new GetObjectCommand({ Bucket: this.bucket, Key: key });
     return getSignedUrl(this.client, command, { expiresIn: SIGNED_URL_EXPIRY_SECONDS });
+  }
+
+  async getAssetBytes(key: string): Promise<{ buffer: Buffer; contentType: string }> {
+    const response = await this.client.send(new GetObjectCommand({ Bucket: this.bucket, Key: key }));
+    const buffer = await streamToBuffer(response.Body as Readable);
+    return { buffer, contentType: contentTypeFor(key) };
   }
 
   async deleteByPrefix(prefix: string): Promise<void> {
