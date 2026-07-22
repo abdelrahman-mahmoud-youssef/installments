@@ -3,25 +3,45 @@ import { BadRequestException, Injectable, Logger, OnModuleInit } from '@nestjs/c
 import { ConfigService } from '@nestjs/config';
 import { InstallmentStatus, NotificationLanguage, ReminderChannel } from '@prisma/client';
 import { Queue } from 'bullmq';
-import { getUtcToday } from '../../common/date/utc-date';
+import { addUtcDays, getUtcToday } from '../../common/date/utc-date';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TelegramService } from '../telegram/telegram.service';
 import { WhatsappService } from '../whatsapp/whatsapp.service';
 import { CustomerReminderItem, formatCustomerReminderMessage } from './customer-reminder-message';
+import { buildEveningSummaryTemplateParams } from './evening-summary-message';
 import { buildReminderTemplateParams, formatReminderMessage } from './reminder-message';
 
-const REMINDERS_QUEUE = 'reminders';
-const DAILY_REMINDER_JOB_NAME = 'send-daily-reminders';
+export const REMINDERS_QUEUE = 'reminders';
+export const DAILY_REMINDER_JOB_NAME = 'send-daily-reminders';
+export const EVENING_SUMMARY_JOB_NAME = 'send-evening-summary';
 const OUTSTANDING_STATUSES = [InstallmentStatus.PENDING, InstallmentStatus.PARTIALLY_PAID];
 
-const WHATSAPP_REMINDER_TEMPLATE_NAME = 'payment_reminder';
-const WHATSAPP_REMINDER_TEMPLATE_LANGUAGE = 'ar';
+interface WhatsappTemplate {
+  name: string;
+  languageCode: string;
+}
+
+const WHATSAPP_MORNING_SUMMARY_TEMPLATE: Record<NotificationLanguage, WhatsappTemplate> = {
+  [NotificationLanguage.AR]: { name: 'admin_morning_summary_ar', languageCode: 'ar' },
+  [NotificationLanguage.EN]: { name: 'admin_morning_summary_en', languageCode: 'en' },
+};
+
+const WHATSAPP_EVENING_SUMMARY_TEMPLATE: Record<NotificationLanguage, WhatsappTemplate> = {
+  [NotificationLanguage.AR]: { name: 'admin_evening_summary_ar', languageCode: 'ar' },
+  [NotificationLanguage.EN]: { name: 'admin_evening_summary_en', languageCode: 'en' },
+};
 
 interface ReminderTotals {
   dueTodayCount: number;
   dueTodayTotal: number;
   overdueCount: number;
   overdueTotal: number;
+}
+
+interface EveningTotals {
+  collectedToday: number;
+  overdueTotal: number;
+  dueTomorrowTotal: number;
 }
 
 @Injectable()
@@ -38,6 +58,7 @@ export class RemindersService implements OnModuleInit {
 
   onModuleInit(): void {
     void this.registerDailyReminderJob();
+    void this.registerEveningSummaryJob();
   }
 
   private async registerDailyReminderJob(): Promise<void> {
@@ -51,6 +72,21 @@ export class RemindersService implements OnModuleInit {
     } catch (error) {
       this.logger.error(
         `Could not register the daily reminder job: ${error instanceof Error ? error.message : 'unknown error'}`,
+      );
+    }
+  }
+
+  private async registerEveningSummaryJob(): Promise<void> {
+    const hour = this.config.getOrThrow<number>('EVENING_SUMMARY_HOUR');
+    try {
+      await this.remindersQueue.add(
+        EVENING_SUMMARY_JOB_NAME,
+        {},
+        { repeat: { pattern: `0 ${hour} * * *` }, jobId: EVENING_SUMMARY_JOB_NAME },
+      );
+    } catch (error) {
+      this.logger.error(
+        `Could not register the evening summary job: ${error instanceof Error ? error.message : 'unknown error'}`,
       );
     }
   }
@@ -108,6 +144,33 @@ export class RemindersService implements OnModuleInit {
             `WhatsApp reminder failed for tenant ${tenant.id}: ${error instanceof Error ? error.message : 'Unknown error'}`,
           );
         }
+      }
+    }
+  }
+
+  async sendEveningSummaryForAllTenants(): Promise<void> {
+    const whatsappCredentials = this.getWhatsappCredentials();
+    if (!whatsappCredentials) {
+      return;
+    }
+
+    const tenants = await this.prisma.tenant.findMany({ where: { phone: { not: null } } });
+
+    for (const tenant of tenants) {
+      try {
+        const totals = await this.computeEveningTotals(tenant.id);
+        await this.sendWhatsappEveningSummary(
+          tenant.id,
+          tenant.name,
+          tenant.phone as string,
+          whatsappCredentials,
+          tenant.notificationLanguage,
+          totals,
+        );
+      } catch (error) {
+        this.logger.error(
+          `Evening summary failed for tenant ${tenant.id}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        );
       }
     }
   }
@@ -228,6 +291,33 @@ export class RemindersService implements OnModuleInit {
     };
   }
 
+  private async computeEveningTotals(tenantId: string): Promise<EveningTotals> {
+    const today = getUtcToday();
+    const tomorrow = addUtcDays(today, 1);
+    const dayAfterTomorrow = addUtcDays(today, 2);
+
+    const [collected, overdue, dueTomorrow] = await Promise.all([
+      this.prisma.payment.aggregate({
+        where: { tenantId, paidAt: { gte: today, lt: tomorrow } },
+        _sum: { amount: true },
+      }),
+      this.prisma.installment.aggregate({
+        where: { tenantId, status: { in: OUTSTANDING_STATUSES }, dueDate: { lt: today } },
+        _sum: { amount: true, paidAmount: true },
+      }),
+      this.prisma.installment.aggregate({
+        where: { tenantId, status: { in: OUTSTANDING_STATUSES }, dueDate: { gte: tomorrow, lt: dayAfterTomorrow } },
+        _sum: { amount: true, paidAmount: true },
+      }),
+    ]);
+
+    return {
+      collectedToday: collected._sum.amount ?? 0,
+      overdueTotal: (overdue._sum.amount ?? 0) - (overdue._sum.paidAmount ?? 0),
+      dueTomorrowTotal: (dueTomorrow._sum.amount ?? 0) - (dueTomorrow._sum.paidAmount ?? 0),
+    };
+  }
+
   private async sendTelegramReminder(
     tenantId: string,
     businessName: string,
@@ -260,6 +350,7 @@ export class RemindersService implements OnModuleInit {
     language: NotificationLanguage,
     totals: ReminderTotals,
   ): Promise<void> {
+    const template = WHATSAPP_MORNING_SUMMARY_TEMPLATE[language];
     const params = buildReminderTemplateParams({ businessName, ...totals }, language);
 
     try {
@@ -267,8 +358,40 @@ export class RemindersService implements OnModuleInit {
         credentials.phoneNumberId,
         credentials.accessToken,
         recipientPhone,
-        WHATSAPP_REMINDER_TEMPLATE_NAME,
-        WHATSAPP_REMINDER_TEMPLATE_LANGUAGE,
+        template.name,
+        template.languageCode,
+        params,
+      );
+      await this.prisma.reminderLog.create({
+        data: { tenantId, channel: ReminderChannel.WHATSAPP, success: true },
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      await this.prisma.reminderLog.create({
+        data: { tenantId, channel: ReminderChannel.WHATSAPP, success: false, error: errorMessage },
+      });
+      throw error;
+    }
+  }
+
+  private async sendWhatsappEveningSummary(
+    tenantId: string,
+    businessName: string,
+    recipientPhone: string,
+    credentials: { phoneNumberId: string; accessToken: string },
+    language: NotificationLanguage,
+    totals: EveningTotals,
+  ): Promise<void> {
+    const template = WHATSAPP_EVENING_SUMMARY_TEMPLATE[language];
+    const params = buildEveningSummaryTemplateParams({ businessName, ...totals }, language);
+
+    try {
+      await this.whatsapp.sendTemplateMessage(
+        credentials.phoneNumberId,
+        credentials.accessToken,
+        recipientPhone,
+        template.name,
+        template.languageCode,
         params,
       );
       await this.prisma.reminderLog.create({

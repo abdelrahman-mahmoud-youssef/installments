@@ -1,6 +1,6 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
-import { RemindersService } from './reminders.service';
+import { EVENING_SUMMARY_JOB_NAME, RemindersService } from './reminders.service';
 
 @Processor('reminders')
 export class RemindersProcessor extends WorkerHost {
@@ -8,7 +8,12 @@ export class RemindersProcessor extends WorkerHost {
     super();
   }
 
-  async process(_job: Job): Promise<void> {
+  async process(job: Job): Promise<void> {
+    if (job.name === EVENING_SUMMARY_JOB_NAME) {
+      await this.remindersService.sendEveningSummaryForAllTenants();
+      return;
+    }
+
     await this.remindersService.sendRemindersForAllTenants();
     await this.remindersService.sendCustomerReminders();
   }
