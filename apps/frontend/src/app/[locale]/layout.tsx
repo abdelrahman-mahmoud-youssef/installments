@@ -3,7 +3,6 @@ import { IBM_Plex_Mono, IBM_Plex_Sans, IBM_Plex_Sans_Arabic } from "next/font/go
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
-import Script from "next/script";
 import { Toaster } from "@/components/ui/sonner";
 import { AppProviders } from "@/components/providers/app-providers";
 import { config } from "@/lib/config";
@@ -79,10 +78,10 @@ export default async function LocaleLayout({
       className={`${plexSans.variable} ${plexArabic.variable} ${plexMono.variable} h-full antialiased`}
     >
       <body className="min-h-full">
-        <Script id="theme-init" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: themeInitScript }} />
-        <Script
+        <script id="theme-init" suppressHydrationWarning dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        <script
           id="font-size-init"
-          strategy="beforeInteractive"
+          suppressHydrationWarning
           dangerouslySetInnerHTML={{ __html: fontSizeInitScript }}
         />
         <NextIntlClientProvider>
