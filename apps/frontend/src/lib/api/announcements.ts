@@ -12,16 +12,31 @@ export interface BroadcastSubscriber {
   telegramBroadcastsEnabled: boolean;
 }
 
+export interface BroadcastCounts {
+  pending: number;
+  sent: number;
+  failed: number;
+  total: number;
+}
+
 export interface Broadcast {
   id: string;
   body: string;
   hasImage: boolean;
   audience: BroadcastAudience;
-  recipientCount: number;
-  sentCount: number;
-  failedCount: number;
   status: BroadcastStatus;
   createdAt: string;
+  counts: BroadcastCounts;
+}
+
+export interface CreatedBroadcast {
+  id: string;
+  body: string;
+  hasImage: boolean;
+  audience: BroadcastAudience;
+  status: BroadcastStatus;
+  createdAt: string;
+  recipientCount: number;
 }
 
 export interface CreateBroadcastInput {
@@ -47,6 +62,6 @@ export function listBroadcasts(params: ListParams): Promise<PaginatedResult<Broa
   return apiClient.get(`announcements${buildQuery(params)}`);
 }
 
-export function createBroadcast(input: CreateBroadcastInput): Promise<Broadcast> {
+export function createBroadcast(input: CreateBroadcastInput): Promise<CreatedBroadcast> {
   return apiClient.post('announcements', input);
 }

@@ -53,6 +53,12 @@ enum BroadcastStatus {
   DONE
 }
 
+enum BroadcastRecipientStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
 enum Role {
   ADMIN
   STAFF
@@ -93,6 +99,7 @@ model Tenant {
   payments           Payment[]
   reminderLogs       ReminderLog[]
   broadcasts         Broadcast[]
+  broadcastRecipients BroadcastRecipient[]
   auditLogs          AuditLog[]
   paymentMethods     PaymentMethod[]
   paymentClaims      PaymentClaim[]
@@ -146,6 +153,7 @@ model Customer {
   telegramNotificationsEnabled Boolean @default(true)
   telegramBroadcastsEnabled    Boolean @default(true)
   notificationLanguage         NotificationLanguage @default(AR)
+  broadcastRecipients          BroadcastRecipient[]
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   tenant    Tenant     @relation(fields: [tenantId], references: [id])
@@ -241,20 +249,33 @@ model ReminderLog {
 }
 
 model Broadcast {
-  id                String            @id @default(cuid())
-  tenantId          String
-  body              String
-  hasImage          Boolean           @default(false)
-  audience          BroadcastAudience
-  targetCustomerIds String[]          @default([])
-  recipientCount    Int               @default(0)
-  sentCount         Int               @default(0)
-  failedCount       Int               @default(0)
-  status            BroadcastStatus   @default(QUEUED)
-  createdAt         DateTime          @default(now())
-  tenant            Tenant            @relation(fields: [tenantId], references: [id])
+  id         String              @id @default(cuid())
+  tenantId   String
+  body       String
+  hasImage   Boolean             @default(false)
+  audience   BroadcastAudience
+  status     BroadcastStatus     @default(QUEUED)
+  createdAt  DateTime            @default(now())
+  tenant     Tenant              @relation(fields: [tenantId], references: [id])
+  recipients BroadcastRecipient[]
 
   @@index([tenantId, createdAt])
+}
+
+model BroadcastRecipient {
+  id          String                   @id @default(cuid())
+  tenantId    String
+  broadcastId String
+  customerId  String
+  status      BroadcastRecipientStatus @default(PENDING)
+  sentAt      DateTime?
+  error       String?
+  tenant      Tenant                   @relation(fields: [tenantId], references: [id])
+  broadcast   Broadcast                @relation(fields: [broadcastId], references: [id])
+  customer    Customer                 @relation(fields: [customerId], references: [id])
+
+  @@index([broadcastId, status])
+  @@index([customerId])
 }
 
 model PaymentMethod {

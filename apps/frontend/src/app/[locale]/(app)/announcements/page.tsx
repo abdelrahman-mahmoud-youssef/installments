@@ -276,9 +276,9 @@ export default function AnnouncementsPage() {
                         {t(`status_${broadcast.status}`)}
                       </Badge>
                       {broadcast.hasImage && <Badge variant="outline">{t('withImage')}</Badge>}
-                      <span>{t('sentCount', { sent: broadcast.sentCount, total: broadcast.recipientCount })}</span>
-                      {broadcast.failedCount > 0 && (
-                        <span className="text-danger">{t('failedCount', { count: broadcast.failedCount })}</span>
+                      <span>{t('sentCount', { sent: broadcast.counts.sent, total: broadcast.counts.total })}</span>
+                      {broadcast.counts.failed > 0 && (
+                        <span className="text-danger">{t('failedCount', { count: broadcast.counts.failed })}</span>
                       )}
                     </div>
                   </li>

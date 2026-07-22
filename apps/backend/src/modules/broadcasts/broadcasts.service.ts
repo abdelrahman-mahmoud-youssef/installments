@@ -1,6 +1,6 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import { Broadcast, BroadcastAudience, BroadcastStatus, Prisma } from '@prisma/client';
+import { Broadcast, BroadcastAudience, BroadcastRecipientStatus, BroadcastStatus, Prisma } from '@prisma/client';
 import { Queue } from 'bullmq';
 import { buildPaginatedResult, PaginatedResult } from '../../common/pagination/paginated-result.interface';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -13,6 +13,7 @@ const SEND_BROADCAST_JOB = 'send-broadcast';
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const CAPTION_LIMIT = 1024;
 const SEND_DELAY_MS = 50;
+const EMPTY_COUNTS: BroadcastCounts = { pending: 0, sent: 0, failed: 0, total: 0 };
 
 export interface BroadcastSubscriber {
   id: string;
@@ -20,6 +21,17 @@ export interface BroadcastSubscriber {
   telegramNotificationsEnabled: boolean;
   telegramBroadcastsEnabled: boolean;
 }
+
+export interface BroadcastCounts {
+  pending: number;
+  sent: number;
+  failed: number;
+  total: number;
+}
+
+export type BroadcastWithCounts = Broadcast & { counts: BroadcastCounts };
+
+export type CreatedBroadcast = Broadcast & { recipientCount: number };
 
 export interface SendBroadcastJob {
   broadcastId: string;
@@ -65,7 +77,10 @@ export class BroadcastsService {
     return buildPaginatedResult(data, total, query.page, query.limit);
   }
 
-  async listBroadcasts(tenantId: string, query: SubscriberQueryDto): Promise<PaginatedResult<Broadcast>> {
+  async listBroadcasts(
+    tenantId: string,
+    query: SubscriberQueryDto,
+  ): Promise<PaginatedResult<BroadcastWithCounts>> {
     const where: Prisma.BroadcastWhereInput = { tenantId };
     const [data, total] = await Promise.all([
       this.prisma.broadcast.findMany({
@@ -76,10 +91,17 @@ export class BroadcastsService {
       }),
       this.prisma.broadcast.count({ where }),
     ]);
-    return buildPaginatedResult(data, total, query.page, query.limit);
+
+    const counts = await this.countsByBroadcastId(data.map((broadcast) => broadcast.id));
+    const withCounts = data.map((broadcast) => ({
+      ...broadcast,
+      counts: counts.get(broadcast.id) ?? EMPTY_COUNTS,
+    }));
+
+    return buildPaginatedResult(withCounts, total, query.page, query.limit);
   }
 
-  async createBroadcast(tenantId: string, dto: CreateBroadcastDto): Promise<Broadcast> {
+  async createBroadcast(tenantId: string, dto: CreateBroadcastDto): Promise<CreatedBroadcast> {
     const body = dto.body.trim();
     const hasImage = Boolean(dto.image);
     if (!body && !hasImage) {
@@ -89,21 +111,23 @@ export class BroadcastsService {
       throw new BadRequestException('Image is too large. The maximum size is 5 MB.');
     }
 
-    const targetCustomerIds = dto.audience === BroadcastAudience.SELECTED ? (dto.customerIds ?? []) : [];
-    const recipientCount = await this.prisma.customer.count({
-      where: this.recipientWhere(tenantId, dto.audience, targetCustomerIds),
+    const recipients = await this.prisma.customer.findMany({
+      where: this.recipientWhere(tenantId, dto.audience, dto.customerIds ?? []),
+      select: { id: true },
     });
 
-    const broadcast = await this.prisma.broadcast.create({
-      data: {
-        tenantId,
-        body,
-        hasImage,
-        audience: dto.audience,
-        targetCustomerIds,
-        recipientCount,
-        status: BroadcastStatus.QUEUED,
-      },
+    const broadcast = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.broadcast.create({
+        data: { tenantId, body, hasImage, audience: dto.audience, status: BroadcastStatus.QUEUED },
+      });
+      await tx.broadcastRecipient.createMany({
+        data: recipients.map((recipient) => ({
+          tenantId,
+          broadcastId: created.id,
+          customerId: recipient.id,
+        })),
+      });
+      return created;
     });
 
     await this.broadcastsQueue.add(
@@ -112,7 +136,7 @@ export class BroadcastsService {
       { removeOnComplete: true, removeOnFail: 100 },
     );
 
-    return broadcast;
+    return { ...broadcast, recipientCount: recipients.length };
   }
 
   async processBroadcast(broadcastId: string, image: string | null): Promise<void> {
@@ -122,47 +146,46 @@ export class BroadcastsService {
     }
 
     const tenant = await this.prisma.tenant.findUniqueOrThrow({ where: { id: broadcast.tenantId } });
+
     if (!tenant.telegramBotToken) {
-      await this.prisma.broadcast.update({
-        where: { id: broadcastId },
-        data: { status: BroadcastStatus.DONE },
+      await this.prisma.broadcastRecipient.updateMany({
+        where: { broadcastId, status: BroadcastRecipientStatus.PENDING },
+        data: { status: BroadcastRecipientStatus.FAILED, error: 'Telegram is not connected for this shop.' },
       });
+      await this.prisma.broadcast.update({ where: { id: broadcastId }, data: { status: BroadcastStatus.DONE } });
       return;
     }
 
-    const recipients = await this.prisma.customer.findMany({
-      where: this.recipientWhere(broadcast.tenantId, broadcast.audience, broadcast.targetCustomerIds),
-      select: { telegramChatId: true },
-    });
+    await this.prisma.broadcast.update({ where: { id: broadcastId }, data: { status: BroadcastStatus.SENDING } });
 
-    await this.prisma.broadcast.update({
-      where: { id: broadcastId },
-      data: { status: BroadcastStatus.SENDING, recipientCount: recipients.length },
+    const pendingRecipients = await this.prisma.broadcastRecipient.findMany({
+      where: { broadcastId, status: BroadcastRecipientStatus.PENDING },
+      select: { id: true, customer: { select: { telegramChatId: true } } },
     });
 
     const imageBuffer = image ? Buffer.from(image, 'base64') : null;
     let fileId: string | null = null;
-    let sentCount = 0;
-    let failedCount = 0;
 
-    for (const recipient of recipients) {
-      const chatId = recipient.telegramChatId as string;
+    for (const recipient of pendingRecipients) {
+      const chatId = recipient.customer.telegramChatId as string;
       try {
         fileId = await this.sendToRecipient(tenant.telegramBotToken, chatId, broadcast.body, imageBuffer, fileId);
-        sentCount += 1;
+        await this.prisma.broadcastRecipient.update({
+          where: { id: recipient.id },
+          data: { status: BroadcastRecipientStatus.SENT, sentAt: new Date() },
+        });
       } catch (error) {
-        failedCount += 1;
-        this.logger.error(
-          `Broadcast ${broadcastId} failed for a recipient: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        );
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        await this.prisma.broadcastRecipient.update({
+          where: { id: recipient.id },
+          data: { status: BroadcastRecipientStatus.FAILED, error: message },
+        });
+        this.logger.error(`Broadcast ${broadcastId} failed for recipient ${recipient.id}: ${message}`);
       }
       await this.sleep(SEND_DELAY_MS);
     }
 
-    await this.prisma.broadcast.update({
-      where: { id: broadcastId },
-      data: { status: BroadcastStatus.DONE, sentCount, failedCount },
-    });
+    await this.prisma.broadcast.update({ where: { id: broadcastId }, data: { status: BroadcastStatus.DONE } });
   }
 
   private async sendToRecipient(
@@ -202,6 +225,32 @@ export class BroadcastsService {
       telegramBroadcastsEnabled: true,
       ...(audience === BroadcastAudience.SELECTED ? { id: { in: targetCustomerIds } } : {}),
     };
+  }
+
+  private async countsByBroadcastId(broadcastIds: string[]): Promise<Map<string, BroadcastCounts>> {
+    if (broadcastIds.length === 0) {
+      return new Map();
+    }
+    const grouped = await this.prisma.broadcastRecipient.groupBy({
+      by: ['broadcastId', 'status'],
+      where: { broadcastId: { in: broadcastIds } },
+      _count: true,
+    });
+
+    const counts = new Map<string, BroadcastCounts>();
+    for (const row of grouped) {
+      const current = counts.get(row.broadcastId) ?? { pending: 0, sent: 0, failed: 0, total: 0 };
+      if (row.status === BroadcastRecipientStatus.PENDING) {
+        current.pending += row._count;
+      } else if (row.status === BroadcastRecipientStatus.SENT) {
+        current.sent += row._count;
+      } else if (row.status === BroadcastRecipientStatus.FAILED) {
+        current.failed += row._count;
+      }
+      current.total += row._count;
+      counts.set(row.broadcastId, current);
+    }
+    return counts;
   }
 
   private sleep(ms: number): Promise<void> {
