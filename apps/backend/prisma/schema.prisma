@@ -42,6 +42,11 @@ enum NotificationLanguage {
   EN
 }
 
+enum ReminderChannel {
+  TELEGRAM
+  WHATSAPP
+}
+
 enum BroadcastAudience {
   ALL
   SELECTED
@@ -238,12 +243,13 @@ model PaymentAllocation {
 }
 
 model ReminderLog {
-  id       String   @id @default(cuid())
+  id       String          @id @default(cuid())
   tenantId String
-  sentAt   DateTime @default(now())
+  channel  ReminderChannel @default(TELEGRAM)
+  sentAt   DateTime        @default(now())
   success  Boolean
   error    String?
-  tenant   Tenant   @relation(fields: [tenantId], references: [id])
+  tenant   Tenant          @relation(fields: [tenantId], references: [id])
 
   @@index([tenantId, sentAt])
 }

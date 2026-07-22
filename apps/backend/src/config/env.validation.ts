@@ -22,6 +22,8 @@ export const envValidationSchema = Joi.object({
   REDIS_HOST: Joi.string().default('localhost'),
   REDIS_PORT: Joi.number().port().default(6379),
   TELEGRAM_BOT_TOKEN: Joi.string().allow('').optional(),
+  WHATSAPP_PHONE_NUMBER_ID: Joi.string().allow('').optional(),
+  WHATSAPP_ACCESS_TOKEN: Joi.string().allow('').optional(),
   REMINDER_HOUR: Joi.number().integer().min(0).max(23).default(8),
   UPLOADS_DIR: Joi.string().default('./uploads'),
   STORAGE_PROVIDER: Joi.string().valid('backblaze', 'local').default('backblaze'),

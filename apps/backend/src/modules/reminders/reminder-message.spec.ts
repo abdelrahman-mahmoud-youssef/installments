@@ -1,5 +1,5 @@
 import { NotificationLanguage } from '@prisma/client';
-import { formatReminderMessage } from './reminder-message';
+import { buildReminderTemplateParams, formatReminderMessage } from './reminder-message';
 
 describe('formatReminderMessage', () => {
   it('includes the business name, due-today, and overdue figures in English', () => {
@@ -34,5 +34,22 @@ describe('formatReminderMessage', () => {
     expect(message).toContain('متجر تجريبي');
     expect(message).toContain('مستحق النهاردة:');
     expect(message).toContain('متأخر:');
+  });
+});
+
+describe('buildReminderTemplateParams', () => {
+  it('returns positional params in template order for the WhatsApp template', () => {
+    const params = buildReminderTemplateParams(
+      {
+        businessName: 'Demo Business',
+        dueTodayCount: 3,
+        dueTodayTotal: 15_000,
+        overdueCount: 2,
+        overdueTotal: 5_000,
+      },
+      NotificationLanguage.EN,
+    );
+
+    expect(params).toEqual(['Demo Business', '3', 'EGP 150.00', '2', 'EGP 50.00']);
   });
 });

@@ -31,3 +31,16 @@ export function formatReminderMessage(
     `Expected collections today: ${formatMoney(data.dueTodayTotal, language)}`,
   ].join('\n');
 }
+
+export function buildReminderTemplateParams(
+  data: ReminderMessageData,
+  language: NotificationLanguage,
+): string[] {
+  return [
+    data.businessName,
+    String(data.dueTodayCount),
+    formatMoney(data.dueTodayTotal, language),
+    String(data.overdueCount),
+    formatMoney(data.overdueTotal, language),
+  ];
+}
