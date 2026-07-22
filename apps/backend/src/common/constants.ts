@@ -1,15 +1,8 @@
-export const BRAND_COLOR_PRESETS = [
-  'emerald',
-  'teal',
-  'blue',
-  'indigo',
-  'violet',
-  'rose',
-  'amber',
-  'slate',
-] as const;
+import { BrandColor } from '@prisma/client';
 
-export type BrandColorPreset = (typeof BRAND_COLOR_PRESETS)[number];
+export const BRAND_COLOR_PRESETS = Object.values(BrandColor);
+
+export type BrandColorPreset = BrandColor;
 
 export const MAX_LOGO_UPLOAD_BYTES = 2 * 1024 * 1024;
 

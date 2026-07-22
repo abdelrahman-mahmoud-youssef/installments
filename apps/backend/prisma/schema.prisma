@@ -71,13 +71,24 @@ enum PaymentClaimStatus {
   DECLINED
 }
 
+enum BrandColor {
+  emerald
+  teal
+  blue
+  indigo
+  violet
+  rose
+  amber
+  slate
+}
+
 model Tenant {
   id                 String             @id @default(cuid())
   name               String
   slug               String             @unique
   displayName        String?
   logoUrl            String?
-  brandColor         String             @default("emerald")
+  brandColor         BrandColor         @default(emerald)
   showPublicPricing  Boolean            @default(true)
   phone              String?
   about              String?
