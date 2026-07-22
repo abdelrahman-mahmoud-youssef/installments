@@ -522,6 +522,7 @@
     "subtitle": "Manage your branding and notifications.",
     "tabBranding": "Branding",
     "tabNotifications": "Notifications",
+    "tabPaymentMethods": "Payment methods",
     "tabInstallApp": "Install app",
     "installAppTitle": "Install app",
     "installAppDescription": "Add this app to your phone or computer for quick access, like any other app.",
@@ -633,6 +634,10 @@
     "paymentMethodPresetsLabel": "Quick add",
     "addPaymentMethodTitle": "Add a payment method",
     "addPaymentMethodDescription": "Customers will see this name and these details when submitting a payment.",
+    "editPaymentMethod": "Edit",
+    "editPaymentMethodTitle": "Edit payment method",
+    "editPaymentMethodDescription": "Update the name or account details customers will see.",
+    "paymentMethodSaveChanges": "Save changes",
     "paymentMethodLabel": "Name",
     "paymentMethodLabelPlaceholder": "Vodafone Cash",
     "paymentMethodDetails": "Account details",
@@ -757,7 +762,6 @@
     "alreadyApproved": "This claim was already approved.",
     "alreadyDeclined": "Declined: {reason}",
     "noReason": "No reason given",
-    "managePaymentMethods": "Payment methods",
-    "managePaymentMethodsDescription": "Manage the ways customers can pay you directly."
+    "managePaymentMethods": "Payment methods"
   }
 }

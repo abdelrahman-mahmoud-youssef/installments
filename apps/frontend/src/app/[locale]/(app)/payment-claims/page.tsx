@@ -12,20 +12,13 @@ import { PageHeader } from '@/components/shared/page-header';
 import { PaginationControls } from '@/components/shared/pagination-controls';
 import { Section } from '@/components/shared/section';
 import { TableSkeleton } from '@/components/shared/skeletons';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ClaimReviewDialog } from '@/components/payment-claims/claim-review-dialog';
-import { PaymentMethodsSection } from '@/components/settings/payment-methods-section';
+import { Link } from '@/i18n/navigation';
 import { usePaymentClaims } from '@/hooks/use-payment-claims';
 import { PaymentClaimEntry, PaymentClaimStatus } from '@/lib/api/payment-claims';
 import { formatDateTime } from '@/lib/format';
+import { routes } from '@/lib/routes';
 
 const STATUS_TABS: { value: PaymentClaimStatus | 'ALL'; labelKey: string }[] = [
   { value: 'PENDING', labelKey: 'tabPending' },
@@ -118,22 +111,15 @@ export default function PaymentClaimsPage() {
           title={t('title')}
           description={t('subtitle')}
           actions={
-            <Dialog>
-              <DialogTrigger
-                render={
-                  <Button type="button" variant="outline" size="icon-sm" aria-label={t('managePaymentMethods')}>
-                    <Settings2 className="size-4" />
-                  </Button>
-                }
-              />
-              <DialogContent className="sm:max-w-lg">
-                <DialogHeader>
-                  <DialogTitle>{t('managePaymentMethods')}</DialogTitle>
-                  <DialogDescription>{t('managePaymentMethodsDescription')}</DialogDescription>
-                </DialogHeader>
-                <PaymentMethodsSection />
-              </DialogContent>
-            </Dialog>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon-sm"
+              aria-label={t('managePaymentMethods')}
+              render={<Link href={`${routes.settings}?tab=paymentMethods`} />}
+            >
+              <Settings2 className="size-4" />
+            </Button>
           }
         />
       </FadeIn>
@@ -146,13 +132,15 @@ export default function PaymentClaimsPage() {
             setPage(1);
           }}
         >
-          <TabsList>
-            {STATUS_TABS.map((tab) => (
-              <TabsTrigger key={tab.value} value={tab.value}>
-                {t(tab.labelKey)}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+          <div className="-mx-1 overflow-x-auto px-1">
+            <TabsList className="min-w-fit">
+              {STATUS_TABS.map((tab) => (
+                <TabsTrigger key={tab.value} value={tab.value} className="shrink-0">
+                  {t(tab.labelKey)}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
         </Tabs>
 
         {isLoading ? (

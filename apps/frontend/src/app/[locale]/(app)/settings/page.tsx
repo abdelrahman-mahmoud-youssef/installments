@@ -11,8 +11,10 @@ import {
   Smartphone,
   Store,
   Trash2,
+  Wallet,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useSearchParams } from 'next/navigation';
 import { type ComponentType } from 'react';
 import { useForm } from 'react-hook-form';
 import { FaWhatsapp } from 'react-icons/fa6';
@@ -26,6 +28,7 @@ import { PageHeader } from '@/components/shared/page-header';
 import { Section } from '@/components/shared/section';
 import { BrandingSection } from '@/components/settings/branding-section';
 import { InstallAppDialog } from '@/components/settings/install-app-dialog';
+import { PaymentMethodsSection } from '@/components/settings/payment-methods-section';
 import { ShopPageSection } from '@/components/settings/shop-page-section';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -50,8 +53,13 @@ const comingSoonChannels: { key: string; icon: ComponentType<{ className?: strin
   { key: 'channelSms', icon: Smartphone },
 ];
 
+const VALID_TABS = ['branding', 'shopPage', 'paymentMethods', 'notifications'] as const;
+
 export default function SettingsPage() {
   const t = useTranslations('settings');
+  const searchParams = useSearchParams();
+  const requestedTab = searchParams.get('tab');
+  const initialTab = VALID_TABS.find((tab) => tab === requestedTab) ?? 'branding';
   const { data, isLoading } = useNotificationSettings();
   const updateSettings = useUpdateNotificationSettings();
   const sendTest = useSendTestNotification();
@@ -115,7 +123,7 @@ export default function SettingsPage() {
       </FadeIn>
 
       <FadeIn delay={0.05} className="mx-auto w-full max-w-2xl">
-        <Tabs defaultValue="branding">
+        <Tabs defaultValue={initialTab}>
           <TabsList className="mb-6 w-full p-1">
             <TabsTrigger value="branding" className="gap-2 text-sm">
               <Palette className="size-4" />
@@ -124,6 +132,10 @@ export default function SettingsPage() {
             <TabsTrigger value="shopPage" className="gap-2 text-sm">
               <Store className="size-4" />
               {t('tabShopPage')}
+            </TabsTrigger>
+            <TabsTrigger value="paymentMethods" className="gap-2 text-sm">
+              <Wallet className="size-4" />
+              {t('tabPaymentMethods')}
             </TabsTrigger>
             <TabsTrigger value="notifications" className="gap-2 text-sm">
               <Bell className="size-4" />
@@ -137,6 +149,10 @@ export default function SettingsPage() {
 
           <TabsContent value="shopPage">
             <ShopPageSection />
+          </TabsContent>
+
+          <TabsContent value="paymentMethods">
+            <PaymentMethodsSection />
           </TabsContent>
 
           <TabsContent value="notifications" className="space-y-6">

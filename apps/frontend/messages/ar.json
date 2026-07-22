@@ -522,6 +522,7 @@
     "subtitle": "تحكم في هوية نشاطك التجاري والإشعارات.",
     "tabBranding": "الشعار والألوان",
     "tabNotifications": "الإشعارات",
+    "tabPaymentMethods": "وسائل الدفع",
     "tabInstallApp": "تثبيت التطبيق",
     "installAppTitle": "ثبّت التطبيق",
     "installAppDescription": "ضيف التطبيق ده لموبايلك أو الكمبيوتر عشان توصله بسرعة زي أي تطبيق تاني.",
@@ -633,6 +634,10 @@
     "paymentMethodPresetsLabel": "إضافة سريعة",
     "addPaymentMethodTitle": "إضافة وسيلة دفع",
     "addPaymentMethodDescription": "العملاء هيشوفوا الاسم والتفاصيل دي لما يبعتوا دفعة.",
+    "editPaymentMethod": "تعديل",
+    "editPaymentMethodTitle": "تعديل وسيلة الدفع",
+    "editPaymentMethodDescription": "غيّر الاسم أو تفاصيل الحساب اللي هيشوفها العملاء.",
+    "paymentMethodSaveChanges": "حفظ التغييرات",
     "paymentMethodLabel": "الاسم",
     "paymentMethodLabelPlaceholder": "فودافون كاش",
     "paymentMethodDetails": "تفاصيل الحساب",
@@ -757,7 +762,6 @@
     "alreadyApproved": "المطالبة دي اتوافق عليها بالفعل.",
     "alreadyDeclined": "اترفضت: {reason}",
     "noReason": "من غير سبب",
-    "managePaymentMethods": "وسائل الدفع",
-    "managePaymentMethodsDescription": "تحكّم في الطرق اللي العملاء يقدروا يدفعولك بيها مباشرة."
+    "managePaymentMethods": "وسائل الدفع"
   }
 }

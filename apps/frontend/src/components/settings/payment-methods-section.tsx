@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2, Plus, Trash2, Wallet } from 'lucide-react';
+import { Loader2, Pencil, Plus, Trash2, Wallet } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -35,27 +35,37 @@ import { PaymentMethod } from '@/lib/api/payment-methods';
 import { PAYMENT_METHOD_PRESETS } from '@/lib/payment-method-presets';
 import { PaymentMethodInput, paymentMethodSchema } from '@/lib/schemas/payment-method';
 
-function AddPaymentMethodDialog({
+function PaymentMethodFormDialog({
   trigger,
+  method,
   defaultLabel,
   presetKey,
 }: {
   trigger: React.ReactElement;
+  method?: PaymentMethod;
   defaultLabel: string;
   presetKey?: string;
 }) {
   const t = useTranslations('settings');
   const [open, setOpen] = useState(false);
   const createPaymentMethod = useCreatePaymentMethod();
+  const updatePaymentMethod = useUpdatePaymentMethod();
 
   const form = useForm<PaymentMethodInput>({
     resolver: zodResolver(paymentMethodSchema),
-    defaultValues: { label: defaultLabel, details: '', presetKey },
+    defaultValues: { label: method?.label ?? defaultLabel, details: method?.details ?? '', presetKey },
   });
 
   async function handleSubmit(values: PaymentMethodInput) {
     try {
-      await createPaymentMethod.mutateAsync(values);
+      if (method) {
+        await updatePaymentMethod.mutateAsync({
+          id: method.id,
+          input: { label: values.label, details: values.details },
+        });
+      } else {
+        await createPaymentMethod.mutateAsync(values);
+      }
       toast.success(t('paymentMethodSaved'));
       setOpen(false);
       form.reset();
@@ -70,15 +80,17 @@ function AddPaymentMethodDialog({
       onOpenChange={(nextOpen) => {
         setOpen(nextOpen);
         if (nextOpen) {
-          form.reset({ label: defaultLabel, details: '', presetKey });
+          form.reset({ label: method?.label ?? defaultLabel, details: method?.details ?? '', presetKey });
         }
       }}
     >
       <DialogTrigger render={trigger} />
-      <DialogContent>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{t('addPaymentMethodTitle')}</DialogTitle>
-          <DialogDescription>{t('addPaymentMethodDescription')}</DialogDescription>
+          <DialogTitle>{method ? t('editPaymentMethodTitle') : t('addPaymentMethodTitle')}</DialogTitle>
+          <DialogDescription>
+            {method ? t('editPaymentMethodDescription') : t('addPaymentMethodDescription')}
+          </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-4">
@@ -111,7 +123,7 @@ function AddPaymentMethodDialog({
             <DialogFooter>
               <Button type="submit" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting && <Loader2 className="size-4 animate-spin" />}
-                {t('addPaymentMethod')}
+                {method ? t('paymentMethodSaveChanges') : t('addPaymentMethod')}
               </Button>
             </DialogFooter>
           </form>
@@ -129,7 +141,7 @@ function PaymentMethodPresetPicker() {
       <p className="text-xs font-medium text-muted-foreground">{t('paymentMethodPresetsLabel')}</p>
       <div className="flex flex-wrap gap-2">
         {PAYMENT_METHOD_PRESETS.map((preset) => (
-          <AddPaymentMethodDialog
+          <PaymentMethodFormDialog
             key={preset.key}
             presetKey={preset.key}
             defaultLabel={preset.label}
@@ -189,6 +201,15 @@ function PaymentMethodRow({ method }: { method: PaymentMethod }) {
           disabled={updatePaymentMethod.isPending}
           aria-label={t('paymentMethodActive')}
         />
+        <PaymentMethodFormDialog
+          method={method}
+          defaultLabel={method.label}
+          trigger={
+            <Button type="button" variant="ghost" size="icon-sm" aria-label={t('editPaymentMethod')}>
+              <Pencil className="size-4" />
+            </Button>
+          }
+        />
         <ConfirmDialog
           trigger={
             <Button type="button" variant="ghost" size="icon-sm">
@@ -215,7 +236,7 @@ export function PaymentMethodsSection() {
       title={t('paymentMethodsTitle')}
       description={t('paymentMethodsDescription')}
       action={
-        <AddPaymentMethodDialog
+        <PaymentMethodFormDialog
           defaultLabel=""
           trigger={
             <Button size="sm" variant="outline">
