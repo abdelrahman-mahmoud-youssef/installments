@@ -11,11 +11,12 @@ export const paymentClaimKeys = {
   list: (params: PaymentClaimQueryParams) => [...paymentClaimKeys.all, 'list', params] as const,
 };
 
-export function usePaymentClaims(params: PaymentClaimQueryParams) {
+export function usePaymentClaims(params: PaymentClaimQueryParams, options?: { refetchInterval?: number }) {
   return useQuery({
     queryKey: paymentClaimKeys.list(params),
     queryFn: () => listPaymentClaims(params),
     placeholderData: (previousData) => previousData,
+    ...options,
   });
 }
 

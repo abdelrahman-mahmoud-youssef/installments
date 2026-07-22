@@ -9,6 +9,7 @@ import { LanguageSwitcher } from '@/components/shared/language-switcher';
 import { BrandLogo } from '@/components/shared/logo';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { TwoFactorSetupDialog } from '@/components/shared/two-factor-setup-dialog';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -21,16 +22,23 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { usePaymentClaims } from '@/hooks/use-payment-claims';
 import { Link, usePathname, useRouter } from '@/i18n/navigation';
 import { logout } from '@/lib/api/auth';
 import { navigationItems } from '@/lib/navigation';
 import { routes } from '@/lib/routes';
 import { cn } from '@/lib/utils';
 
+const PENDING_CLAIMS_POLL_INTERVAL_MS = 60_000;
+
 function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   const t = useTranslations('nav');
   const pathname = usePathname();
   const { data: currentUser } = useCurrentUser();
+  const { data: pendingClaims } = usePaymentClaims(
+    { status: 'PENDING', page: 1, limit: 1 },
+    { refetchInterval: PENDING_CLAIMS_POLL_INTERVAL_MS },
+  );
   const visibleItems = navigationItems.filter((item) => !item.adminOnly || currentUser?.role === 'ADMIN');
 
   return (
@@ -38,6 +46,7 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
       {visibleItems.map((item) => {
         const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
         const Icon = item.icon;
+        const pendingCount = item.href === routes.paymentClaims ? pendingClaims?.total : undefined;
         return (
           <Link
             key={item.href}
@@ -53,7 +62,8 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
             )}
           >
             <Icon className="size-[1.15rem]" strokeWidth={isActive ? 2.4 : 2} />
-            {t(item.labelKey)}
+            <span className="flex-1">{t(item.labelKey)}</span>
+            {Boolean(pendingCount) && <Badge className="tabular-nums">{pendingCount}</Badge>}
           </Link>
         );
       })}
