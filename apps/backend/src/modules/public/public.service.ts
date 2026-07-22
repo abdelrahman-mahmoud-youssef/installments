@@ -62,6 +62,24 @@ export interface PublicContractSummary {
   nextInstallment: PublicNextInstallment | null;
 }
 
+export interface PublicOutstandingInstallment {
+  id: string;
+  contractPublicId: string;
+  productName: string;
+  sequence: number;
+  dueDate: Date;
+  amount: number;
+  paidAmount: number;
+  isOverdue: boolean;
+  latestClaim: PublicInstallmentClaim | null;
+}
+
+export interface PublicOutstandingResponse {
+  installments: PublicOutstandingInstallment[];
+  paymentMethods: PublicPaymentMethod[];
+  branding: TenantBranding;
+}
+
 export interface PublicContractDetail {
   productName: string;
   status: ContractStatus;
@@ -177,6 +195,67 @@ export class PublicService {
       },
       branding: toTenantBranding(customer.tenant),
     };
+  }
+
+  async getOutstandingInstallments(publicId: string): Promise<PublicOutstandingResponse> {
+    const customer = await this.prisma.customer.findUnique({
+      where: { publicId },
+      select: {
+        tenant: { select: { id: true, ...TENANT_BRANDING_SELECT } },
+        contracts: {
+          where: { status: ContractStatus.ACTIVE },
+          select: {
+            publicId: true,
+            productName: true,
+            installments: {
+              where: { status: { in: [InstallmentStatus.PENDING, InstallmentStatus.PARTIALLY_PAID] } },
+              orderBy: { sequence: 'asc' },
+              select: {
+                id: true,
+                sequence: true,
+                dueDate: true,
+                amount: true,
+                paidAmount: true,
+                paymentClaims: {
+                  orderBy: { createdAt: 'desc' },
+                  take: 1,
+                  select: { status: true, declineReason: true },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!customer) {
+      throw new NotFoundException('Customer not found.');
+    }
+
+    const paymentMethods = await this.prisma.paymentMethod.findMany({
+      where: { tenantId: customer.tenant.id, isActive: true },
+      orderBy: { sortOrder: 'asc' },
+      select: { id: true, label: true, details: true, presetKey: true },
+    });
+
+    const today = getUtcToday();
+    const installments = customer.contracts
+      .flatMap((contract) =>
+        contract.installments.map((installment) => ({
+          id: installment.id,
+          contractPublicId: contract.publicId,
+          productName: contract.productName,
+          sequence: installment.sequence,
+          dueDate: installment.dueDate,
+          amount: installment.amount,
+          paidAmount: installment.paidAmount,
+          isOverdue: installment.dueDate < today,
+          latestClaim: installment.paymentClaims[0] ?? null,
+        })),
+      )
+      .sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
+
+    return { installments, paymentMethods, branding: toTenantBranding(customer.tenant) };
   }
 
   async getShopBySlug(slug: string): Promise<TenantBranding> {

@@ -5,7 +5,7 @@ describe('formatCustomerReminderMessage', () => {
   it('returns null when nothing is due or overdue', () => {
     expect(
       formatCustomerReminderMessage(
-        { businessName: 'Acme', dueToday: [], overdue: [] },
+        { businessName: 'Acme', dueToday: [], overdue: [], payUrl: null },
         NotificationLanguage.EN,
       ),
     ).toBeNull();
@@ -17,6 +17,7 @@ describe('formatCustomerReminderMessage', () => {
         businessName: 'Acme Electronics',
         dueToday: [{ productName: 'iPhone 15', remainingAmount: 125_000, dueDate: new Date('2026-07-18') }],
         overdue: [{ productName: 'Laptop', remainingAmount: 90_000, dueDate: new Date('2026-07-10') }],
+        payUrl: null,
       },
       NotificationLanguage.EN,
     );
@@ -40,6 +41,7 @@ describe('formatCustomerReminderMessage', () => {
         businessName: 'أكمي',
         dueToday: [{ productName: 'هاتف', remainingAmount: 125_000, dueDate: new Date('2026-07-18') }],
         overdue: [],
+        payUrl: null,
       },
       NotificationLanguage.AR,
     );
@@ -47,5 +49,19 @@ describe('formatCustomerReminderMessage', () => {
     expect(message).toContain('تذكير من أكمي');
     expect(message).toContain('مستحق النهاردة:');
     expect(message).toContain('هاتف');
+  });
+
+  it('appends a pay link when payUrl is provided', () => {
+    const message = formatCustomerReminderMessage(
+      {
+        businessName: 'Acme',
+        dueToday: [{ productName: 'iPhone 15', remainingAmount: 125_000, dueDate: new Date('2026-07-18') }],
+        overdue: [],
+        payUrl: 'https://example.com/customer/abc/pay',
+      },
+      NotificationLanguage.EN,
+    );
+
+    expect(message).toContain('Pay here: https://example.com/customer/abc/pay');
   });
 });

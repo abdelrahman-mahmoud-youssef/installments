@@ -11,6 +11,7 @@ export interface CustomerReminderData {
   businessName: string;
   dueToday: CustomerReminderItem[];
   overdue: CustomerReminderItem[];
+  payUrl: string | null;
 }
 
 const MESSAGE_COPY = {
@@ -18,11 +19,13 @@ const MESSAGE_COPY = {
     header: (businessName: string) => `تذكير من ${businessName}`,
     dueToday: 'مستحق النهاردة:',
     overdue: 'متأخر:',
+    payCta: (url: string) => `ادفع من هنا: ${url}`,
   },
   [NotificationLanguage.EN]: {
     header: (businessName: string) => `Reminder from ${businessName}`,
     dueToday: 'Due today:',
     overdue: 'Overdue:',
+    payCta: (url: string) => `Pay here: ${url}`,
   },
 };
 
@@ -47,6 +50,10 @@ export function formatCustomerReminderMessage(
 
   if (data.overdue.length > 0) {
     lines.push('', copy.overdue, ...data.overdue.map((item) => formatItem(item, language)));
+  }
+
+  if (data.payUrl) {
+    lines.push('', copy.payCta(data.payUrl));
   }
 
   return lines.join('\n');

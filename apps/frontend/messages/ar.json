@@ -444,7 +444,12 @@
     "submitPaymentError": "حصل خطأ. جرّب تاني.",
     "claimPending": "الدفع تحت المراجعة",
     "claimDeclined": "اترفض: {reason}",
-    "claimDeclinedNoReason": "ماتقبلش — جرّب تاني أو كلّم المحل."
+    "claimDeclinedNoReason": "ماتقبلش — جرّب تاني أو كلّم المحل.",
+    "makePaymentLink": "ادفع دلوقتي",
+    "payPageTitle": "ادفع",
+    "payHintTitle": "إزاي تدفع",
+    "payHintDescription": "ابعت المبلغ لأي وسيلة من دول، وبعدين ارفع صورة إثبات الدفع.",
+    "noOutstandingInstallments": "كله تمام — مفيش حاجة مستحقة دلوقتي."
   },
   "publicShop": {
     "notFound": "المحل مش موجود",

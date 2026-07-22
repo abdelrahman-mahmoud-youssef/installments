@@ -221,6 +221,7 @@ export class RemindersService implements OnModuleInit {
     const customers = await this.prisma.customer.findMany({
       where: { tenantId, telegramChatId: { not: null }, telegramNotificationsEnabled: true },
       select: {
+        publicId: true,
         telegramChatId: true,
         notificationLanguage: true,
         contracts: {
@@ -250,7 +251,7 @@ export class RemindersService implements OnModuleInit {
       }
 
       const message = formatCustomerReminderMessage(
-        { businessName, dueToday, overdue },
+        { businessName, dueToday, overdue, payUrl: this.buildPayUrl(customer.publicId, customer.notificationLanguage) },
         customer.notificationLanguage,
       );
       if (!message) {
@@ -265,6 +266,19 @@ export class RemindersService implements OnModuleInit {
         );
       }
     }
+  }
+
+  private buildPayUrl(customerPublicId: string, language: NotificationLanguage): string | null {
+    const frontendUrl = this.config
+      .get<string>('FRONTEND_URL')
+      ?.split(',')
+      .map((url) => url.trim())
+      .filter(Boolean)[0];
+    if (!frontendUrl) {
+      return null;
+    }
+    const localePrefix = language === NotificationLanguage.AR ? '/ar' : '';
+    return `${frontendUrl}${localePrefix}/customer/${customerPublicId}/pay`;
   }
 
   private async computeReminderTotals(tenantId: string): Promise<ReminderTotals> {

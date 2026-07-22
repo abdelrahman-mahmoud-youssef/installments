@@ -2,29 +2,25 @@
 
 import { ChevronRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
-import { SubmitPaymentDialog } from '@/components/customer-portal/submit-payment-dialog';
 import { DateText } from '@/components/shared/date-text';
 import { Money } from '@/components/shared/money';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { Badge } from '@/components/ui/badge';
 import { useRouter } from '@/i18n/navigation';
 import { PublicNextInstallment, PublicPaymentMethod } from '@/lib/api/public';
+import { routes } from '@/lib/routes';
 
 export function NextPaymentAction({
   nextInstallment,
   paymentMethods,
   publicId,
-  contractPublicId,
 }: {
   nextInstallment: PublicNextInstallment;
   paymentMethods: PublicPaymentMethod[];
   publicId: string;
-  contractPublicId: string;
 }) {
   const t = useTranslations('publicCustomer');
   const router = useRouter();
-  const [open, setOpen] = useState(false);
 
   const isPending = nextInstallment.latestClaim?.status === 'PENDING';
   const isPayable = !isPending && paymentMethods.length > 0;
@@ -70,36 +66,21 @@ export function NextPaymentAction({
   }
 
   return (
-    <>
-      <button
-        type="button"
-        onClick={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          setOpen(true);
-        }}
-        className="block w-full space-y-2.5 border-t border-border pt-4 text-start text-sm"
-      >
-        {info}
-        {declinedNote}
-        <div className="flex items-center justify-between rounded-lg bg-primary px-3.5 py-2.5 font-medium text-primary-foreground transition-transform active:scale-[0.99]">
-          {t('submitPaymentButton')}
-          <ChevronRight className="size-4 rtl:rotate-180" />
-        </div>
-      </button>
-      <SubmitPaymentDialog
-        open={open}
-        onOpenChange={setOpen}
-        publicId={publicId}
-        contractPublicId={contractPublicId}
-        installmentId={nextInstallment.id}
-        amount={nextInstallment.amount}
-        paymentMethods={paymentMethods}
-        onSubmitted={() => {
-          setOpen(false);
-          router.refresh();
-        }}
-      />
-    </>
+    <button
+      type="button"
+      onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        router.push(routes.publicCustomerPay(publicId));
+      }}
+      className="block w-full space-y-2.5 border-t border-border pt-4 text-start text-sm"
+    >
+      {info}
+      {declinedNote}
+      <div className="flex items-center justify-between rounded-lg bg-primary px-3.5 py-2.5 font-medium text-primary-foreground transition-transform active:scale-[0.99]">
+        {t('submitPaymentButton')}
+        <ChevronRight className="size-4 rtl:rotate-180" />
+      </div>
+    </button>
   );
 }

@@ -40,6 +40,24 @@ export interface PublicPaymentMethod {
   presetKey: string | null;
 }
 
+export interface PublicOutstandingInstallment {
+  id: string;
+  contractPublicId: string;
+  productName: string;
+  sequence: number;
+  dueDate: string;
+  amount: number;
+  paidAmount: number;
+  isOverdue: boolean;
+  latestClaim: PublicInstallmentClaim | null;
+}
+
+export interface PublicOutstandingResponse {
+  installments: PublicOutstandingInstallment[];
+  paymentMethods: PublicPaymentMethod[];
+  branding: TenantBranding;
+}
+
 export interface PublicContractSummary {
   publicId: string;
   productName: string;
@@ -115,6 +133,20 @@ export async function getPublicContractDetail(
     throw new Error('Failed to load contract.');
   }
   return response.json() as Promise<PublicContractDetail>;
+}
+
+export async function getPublicOutstanding(publicId: string): Promise<PublicOutstandingResponse | null> {
+  const response = await fetch(`${config.backendUrl}/public/customers/${publicId}/outstanding-installments`, {
+    cache: 'no-store',
+  });
+
+  if (response.status === 404) {
+    return null;
+  }
+  if (!response.ok) {
+    throw new Error('Failed to load outstanding installments.');
+  }
+  return response.json() as Promise<PublicOutstandingResponse>;
 }
 
 export async function getPublicShop(publicId: string): Promise<TenantBranding | null> {

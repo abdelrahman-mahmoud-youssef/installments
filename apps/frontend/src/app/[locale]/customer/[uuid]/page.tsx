@@ -162,7 +162,6 @@ export default async function PublicCustomerPage({
                     nextInstallment={contract.nextInstallment}
                     paymentMethods={customer.paymentMethods}
                     publicId={uuid}
-                    contractPublicId={contract.publicId}
                   />
                 )}
 

@@ -141,12 +141,7 @@ export default async function PublicContractDetailPage({
               )}
             </TabsContent>
             <TabsContent value="upcoming">
-              <UpcomingInstallments
-                installments={contract.installments}
-                paymentMethods={contract.paymentMethods}
-                publicId={uuid}
-                contractPublicId={contractId}
-              />
+              <UpcomingInstallments installments={contract.installments} publicId={uuid} />
             </TabsContent>
           </Tabs>
         </div>

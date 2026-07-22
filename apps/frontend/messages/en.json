@@ -444,7 +444,12 @@
     "submitPaymentError": "Something went wrong. Please try again.",
     "claimPending": "Payment under review",
     "claimDeclined": "Declined: {reason}",
-    "claimDeclinedNoReason": "Not accepted — try again or contact the shop."
+    "claimDeclinedNoReason": "Not accepted — try again or contact the shop.",
+    "makePaymentLink": "Make a payment",
+    "payPageTitle": "Make a payment",
+    "payHintTitle": "How to pay",
+    "payHintDescription": "Send the amount to one of these, then upload a screenshot as proof.",
+    "noOutstandingInstallments": "You're all caught up — nothing due right now."
   },
   "publicShop": {
     "notFound": "Shop not found",

@@ -1,30 +1,21 @@
-'use client';
-
+import { ChevronRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { DateText } from '@/components/shared/date-text';
 import { Money } from '@/components/shared/money';
 import { StatusBadge } from '@/components/shared/status-badge';
-import { useRouter } from '@/i18n/navigation';
-import { SubmitPaymentDialog } from '@/components/customer-portal/submit-payment-dialog';
-import { PublicInstallment, PublicPaymentMethod } from '@/lib/api/public';
+import { Link } from '@/i18n/navigation';
+import { PublicInstallment } from '@/lib/api/public';
+import { routes } from '@/lib/routes';
 
 export function UpcomingInstallments({
   installments,
-  paymentMethods,
   publicId,
-  contractPublicId,
 }: {
   installments: PublicInstallment[];
-  paymentMethods: PublicPaymentMethod[];
   publicId: string;
-  contractPublicId: string;
 }) {
   const t = useTranslations('publicCustomer');
-  const router = useRouter();
-  const [activeInstallmentId, setActiveInstallmentId] = useState<string | null>(null);
 
   const outstanding = installments.filter(
     (installment) => installment.status === 'PENDING' || installment.status === 'PARTIALLY_PAID',
@@ -34,10 +25,15 @@ export function UpcomingInstallments({
     return <p className="py-2 text-muted-foreground">{t('noUpcoming')}</p>;
   }
 
-  const activeInstallment = outstanding.find((installment) => installment.id === activeInstallmentId) ?? null;
-
   return (
-    <>
+    <div className="space-y-3">
+      <Link
+        href={routes.publicCustomerPay(publicId)}
+        className="flex items-center justify-between gap-1 rounded-lg bg-primary px-3.5 py-2.5 text-sm font-medium text-primary-foreground"
+      >
+        {t('makePaymentLink')}
+        <ChevronRight className="size-4 rtl:rotate-180" />
+      </Link>
       <ul className="space-y-2">
         {outstanding.map((installment) => {
           const remaining = installment.amount - installment.paidAmount;
@@ -60,41 +56,14 @@ export function UpcomingInstallments({
                 ) : (
                   <span />
                 )}
-                {installment.latestClaim?.status === 'PENDING' ? (
+                {installment.latestClaim?.status === 'PENDING' && (
                   <Badge variant="secondary">{t('claimPending')}</Badge>
-                ) : paymentMethods.length > 0 ? (
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setActiveInstallmentId(installment.id)}
-                  >
-                    {t('submitPaymentButton')}
-                  </Button>
-                ) : null}
+                )}
               </div>
             </li>
           );
         })}
       </ul>
-
-      <SubmitPaymentDialog
-        open={activeInstallment !== null}
-        onOpenChange={(next) => {
-          if (!next) {
-            setActiveInstallmentId(null);
-          }
-        }}
-        publicId={publicId}
-        contractPublicId={contractPublicId}
-        installmentId={activeInstallment?.id ?? ''}
-        amount={activeInstallment ? activeInstallment.amount - activeInstallment.paidAmount : 0}
-        paymentMethods={paymentMethods}
-        onSubmitted={() => {
-          setActiveInstallmentId(null);
-          router.refresh();
-        }}
-      />
-    </>
+    </div>
   );
 }
