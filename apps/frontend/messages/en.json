@@ -266,6 +266,7 @@
       "qrDialogTitle": "Scan to view",
       "qrDialogDescription": "Scan this code to open {name}'s page.",
       "sendWhatsapp": "Send via WhatsApp",
+      "openWhatsapp": "WhatsApp",
       "viewIdImage": "View ID image",
       "edit": "Edit",
       "newContract": "New contract",

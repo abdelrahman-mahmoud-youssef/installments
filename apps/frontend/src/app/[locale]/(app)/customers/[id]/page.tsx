@@ -114,6 +114,16 @@ export default function CustomerDetailPage() {
                     {customer.phone}
                   </span>
                 </span>
+                <a
+                  href={`https://wa.me/20${normalizeLocalPhoneInput(customer.phone)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title={t('openWhatsapp')}
+                  className="flex items-center gap-1.5 hover:text-foreground hover:underline"
+                >
+                  <FaWhatsapp className="size-3.5" />
+                  {t('openWhatsapp')}
+                </a>
                 {customer.address && (
                   <span className="flex items-center gap-1.5">
                     <MapPin className="size-3.5" />
