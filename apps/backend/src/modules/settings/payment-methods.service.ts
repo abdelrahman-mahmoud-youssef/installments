@@ -100,11 +100,18 @@ export class PaymentMethodsService {
     try {
       await this.prisma.paymentMethod.delete({ where: { id } });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2003') {
+      if (this.isForeignKeyRestrictionError(error)) {
         throw new BadRequestException(IN_USE_ERROR);
       }
       throw error;
     }
+  }
+
+  private isForeignKeyRestrictionError(error: unknown): boolean {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2003') {
+      return true;
+    }
+    return error instanceof Prisma.PrismaClientUnknownRequestError && /foreign key constraint/i.test(error.message);
   }
 
   private async findOwned(tenantId: string, id: string): Promise<PaymentMethod> {
