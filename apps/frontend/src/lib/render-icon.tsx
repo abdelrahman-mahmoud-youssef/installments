@@ -1,10 +1,7 @@
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { ImageResponse } from 'next/og';
+import { QISTAK_LOGO_BASE64 } from './qistak-logo-data';
 
-const QISTAK_LOGO_DATA_URL = `data:image/png;base64,${readFileSync(
-  join(process.cwd(), 'public/qistak.png'),
-).toString('base64')}`;
+const QISTAK_LOGO_DATA_URL = `data:image/png;base64,${QISTAK_LOGO_BASE64}`;
 
 function renderImage(src: string, size: { width: number; height: number }, radius: number): Response {
   return new ImageResponse(
