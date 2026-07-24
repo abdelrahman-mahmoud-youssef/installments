@@ -390,6 +390,8 @@
       "title": "سجّل دفعة",
       "description": "الدفعة بتتطبّق على أقدم قسط لسه ما اتدفعش الأول، وأي مبلغ زيادة بيترحّل للقسط اللي بعده.",
       "amount": "المبلغ",
+      "paymentMethod": "وسيلة الدفع",
+      "cash": "كاش",
       "paidAt": "تاريخ الدفع",
       "quickNext": "القسط الجاي",
       "quickFull": "كل المتبقي",
@@ -670,7 +672,18 @@
     "deletePaymentMethodTitle": "حذف وسيلة الدفع؟",
     "deletePaymentMethodDescription": "العملاء مش هيقدروا يختاروا \"{label}\" تاني.",
     "delete": "حذف",
-    "noPaymentMethods": "لسه مفيش وسائل دفع."
+    "noPaymentMethods": "لسه مفيش وسائل دفع.",
+    "paymentMethodMonthlyLimit": "الحد الشهري (اختياري)",
+    "paymentMethodMonthlyLimitHint": "هتوصلك رسالة واتساب لما استخدام الشهر ده يقرب من الحد.",
+    "logTransaction": "سجّل عملية",
+    "paymentMethodUsageDialogTitle": "استخدام {label} الشهر ده",
+    "transactionDirectionOut": "مرسلة",
+    "transactionDirectionIn": "مستلمة",
+    "transactionAmount": "المبلغ",
+    "transactionDate": "التاريخ",
+    "transactionNote": "ملاحظة (اختياري)",
+    "transactionLogged": "اتسجلت العملية.",
+    "noTransactionsYet": "لسه مفيش عمليات مسجلة"
   },
   "staff": {
     "title": "الموظفين",

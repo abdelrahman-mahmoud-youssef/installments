@@ -71,6 +71,11 @@ enum PaymentClaimStatus {
   DECLINED
 }
 
+enum PaymentDirection {
+  IN
+  OUT
+}
+
 enum BrandColor {
   emerald
   teal
@@ -113,6 +118,7 @@ model Tenant {
   broadcastRecipients BroadcastRecipient[]
   auditLogs          AuditLog[]
   paymentMethods     PaymentMethod[]
+  paymentMethodTransactions PaymentMethodTransaction[]
   paymentClaims      PaymentClaim[]
   customerNotificationLogs CustomerNotificationLog[]
 }
@@ -237,19 +243,22 @@ model Installment {
 }
 
 model Payment {
-  id          String              @id @default(cuid())
-  tenantId    String
-  contractId  String
-  amount      Int
-  paidAt      DateTime            @default(now())
-  note        String?
-  createdAt   DateTime            @default(now())
-  tenant      Tenant              @relation(fields: [tenantId], references: [id])
-  contract    Contract            @relation(fields: [contractId], references: [id])
-  allocations PaymentAllocation[]
+  id              String              @id @default(cuid())
+  tenantId        String
+  contractId      String
+  paymentMethodId String?
+  amount          Int
+  paidAt          DateTime            @default(now())
+  note            String?
+  createdAt       DateTime            @default(now())
+  tenant          Tenant              @relation(fields: [tenantId], references: [id])
+  contract        Contract            @relation(fields: [contractId], references: [id])
+  paymentMethod   PaymentMethod?      @relation(fields: [paymentMethodId], references: [id], onDelete: SetNull)
+  allocations     PaymentAllocation[]
 
   @@index([tenantId, paidAt])
   @@index([tenantId, contractId])
+  @@index([tenantId, paymentMethodId, paidAt])
 }
 
 model PaymentAllocation {
@@ -324,19 +333,38 @@ model BroadcastRecipient {
 }
 
 model PaymentMethod {
-  id        String         @id @default(cuid())
-  tenantId  String
-  label     String
-  details   String
-  presetKey String?
-  isActive  Boolean        @default(true)
-  sortOrder Int            @default(0)
-  createdAt DateTime       @default(now())
-  tenant    Tenant         @relation(fields: [tenantId], references: [id])
-  claims    PaymentClaim[]
+  id                  String                     @id @default(cuid())
+  tenantId            String
+  label               String
+  details             String
+  presetKey           String?
+  isActive            Boolean                    @default(true)
+  sortOrder           Int                        @default(0)
+  monthlyLimit        Int?
+  lastLimitAlertMonth String?
+  createdAt           DateTime                   @default(now())
+  tenant              Tenant                     @relation(fields: [tenantId], references: [id])
+  claims              PaymentClaim[]
+  payments            Payment[]
+  transactions        PaymentMethodTransaction[]
 
   @@unique([tenantId, presetKey, details])
   @@index([tenantId, isActive])
+}
+
+model PaymentMethodTransaction {
+  id              String           @id @default(cuid())
+  tenantId        String
+  paymentMethodId String
+  direction       PaymentDirection
+  amount          Int
+  note            String?
+  occurredAt      DateTime         @default(now())
+  createdAt       DateTime         @default(now())
+  tenant          Tenant           @relation(fields: [tenantId], references: [id])
+  paymentMethod   PaymentMethod    @relation(fields: [paymentMethodId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, paymentMethodId, occurredAt])
 }
 
 model PaymentClaim {

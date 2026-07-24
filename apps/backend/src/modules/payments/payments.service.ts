@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { ContractStatus, InstallmentStatus, Prisma } from '@prisma/client';
 import { buildPaginatedResult, PaginatedResult } from '../../common/pagination/paginated-result.interface';
 import { PrismaService } from '../../prisma/prisma.service';
+import { PaymentMethodLimitService } from '../settings/payment-method-limit.service';
 import { allocateManually, allocateOldestFirst, AllocationResult } from './allocation';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { PaymentQueryDto } from './dto/payment-query.dto';
@@ -10,7 +11,10 @@ type PaymentDetail = Prisma.PaymentGetPayload<{ include: { allocations: true } }
 
 @Injectable()
 export class PaymentsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly paymentMethodLimitService: PaymentMethodLimitService,
+  ) {}
 
   async create(tenantId: string, createPaymentDto: CreatePaymentDto): Promise<PaymentDetail> {
     const contract = await this.prisma.contract.findFirst({
@@ -18,6 +22,15 @@ export class PaymentsService {
     });
     if (!contract) {
       throw new NotFoundException('Contract not found.');
+    }
+
+    if (createPaymentDto.paymentMethodId) {
+      const paymentMethod = await this.prisma.paymentMethod.findFirst({
+        where: { id: createPaymentDto.paymentMethodId, tenantId, isActive: true },
+      });
+      if (!paymentMethod) {
+        throw new NotFoundException('Payment method not found.');
+      }
     }
 
     const paymentId = await this.prisma.$transaction(async (tx) => {
@@ -35,6 +48,7 @@ export class PaymentsService {
         data: {
           tenantId,
           contractId: createPaymentDto.contractId,
+          paymentMethodId: createPaymentDto.paymentMethodId,
           amount: createPaymentDto.amount,
           paidAt: createPaymentDto.paidAt ? new Date(createPaymentDto.paidAt) : undefined,
           note: createPaymentDto.note,
@@ -83,6 +97,10 @@ export class PaymentsService {
 
       return payment.id;
     });
+
+    if (createPaymentDto.paymentMethodId) {
+      void this.paymentMethodLimitService.checkAndAlert(tenantId, createPaymentDto.paymentMethodId);
+    }
 
     return this.findOne(tenantId, paymentId);
   }

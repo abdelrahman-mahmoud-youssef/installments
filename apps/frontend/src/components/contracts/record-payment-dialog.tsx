@@ -8,6 +8,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { Money } from '@/components/shared/money';
 import { NumberInput } from '@/components/shared/number-input';
+import { PaymentMethodIcon } from '@/components/shared/payment-method-icon';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -20,7 +21,9 @@ import {
 } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { usePaymentMethods } from '@/hooks/use-payment-methods';
 import { ApiError } from '@/lib/api/client';
 import { Installment } from '@/lib/api/contracts';
 import { toMinorUnits, toMajorUnits, todayIso } from '@/lib/format';
@@ -40,10 +43,12 @@ export function RecordPaymentDialog({
   const [open, setOpen] = useState(false);
   const [isManual, setIsManual] = useState(false);
   const [manualAmounts, setManualAmounts] = useState<Record<string, string>>({});
+  const { data: paymentMethods } = usePaymentMethods();
+  const activePaymentMethods = (paymentMethods ?? []).filter((method) => method.isActive);
 
   const form = useForm<PaymentInput>({
     resolver: zodResolver(paymentSchema),
-    defaultValues: { amount: undefined, paidAt: todayIso(), note: '' },
+    defaultValues: { amount: undefined, paymentMethodId: '', paidAt: todayIso(), note: '' },
   });
 
   const nextRemaining = outstandingInstallments[0]
@@ -66,7 +71,7 @@ export function RecordPaymentDialog({
       await onSubmit({ ...values, allocations });
       toast.success(t('recorded'));
       setOpen(false);
-      form.reset({ amount: undefined, paidAt: todayIso(), note: '' });
+      form.reset({ amount: undefined, paymentMethodId: '', paidAt: todayIso(), note: '' });
       setManualAmounts({});
       setIsManual(false);
     } catch (error) {
@@ -123,6 +128,33 @@ export function RecordPaymentDialog({
                   )}
                 </div>
               )}
+
+              <FormField
+                control={form.control}
+                name="paymentMethodId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('paymentMethod')}</FormLabel>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="">{t('cash')}</SelectItem>
+                        {activePaymentMethods.map((method) => (
+                          <SelectItem key={method.id} value={method.id}>
+                            <PaymentMethodIcon presetKey={method.presetKey} className="size-5" />
+                            {method.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}

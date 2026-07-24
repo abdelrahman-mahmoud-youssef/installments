@@ -1,3 +1,4 @@
+import { toMinorUnits } from '@/lib/format';
 import { apiClient } from './client';
 
 export interface PaymentMethod {
@@ -7,6 +8,8 @@ export interface PaymentMethod {
   presetKey: string | null;
   isActive: boolean;
   sortOrder: number;
+  monthlyLimit: number | null;
+  monthToDateUsage: number;
   createdAt: string;
 }
 
@@ -14,12 +17,14 @@ export interface CreatePaymentMethodInput {
   label: string;
   details: string;
   presetKey?: string;
+  monthlyLimit?: number;
 }
 
 export interface UpdatePaymentMethodInput {
   label?: string;
   details?: string;
   isActive?: boolean;
+  monthlyLimit?: number | null;
 }
 
 export function listPaymentMethods(): Promise<PaymentMethod[]> {
@@ -27,11 +32,20 @@ export function listPaymentMethods(): Promise<PaymentMethod[]> {
 }
 
 export function createPaymentMethod(input: CreatePaymentMethodInput): Promise<PaymentMethod> {
-  return apiClient.post('settings/payment-methods', input);
+  return apiClient.post('settings/payment-methods', {
+    ...input,
+    monthlyLimit: input.monthlyLimit !== undefined ? toMinorUnits(input.monthlyLimit) : undefined,
+  });
 }
 
 export function updatePaymentMethod(id: string, input: UpdatePaymentMethodInput): Promise<PaymentMethod> {
-  return apiClient.patch(`settings/payment-methods/${id}`, input);
+  return apiClient.patch(`settings/payment-methods/${id}`, {
+    ...input,
+    monthlyLimit:
+      input.monthlyLimit !== undefined && input.monthlyLimit !== null
+        ? toMinorUnits(input.monthlyLimit)
+        : input.monthlyLimit,
+  });
 }
 
 export function deletePaymentMethod(id: string): Promise<void> {

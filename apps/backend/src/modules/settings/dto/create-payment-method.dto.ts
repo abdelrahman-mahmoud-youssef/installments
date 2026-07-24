@@ -1,4 +1,4 @@
-import { IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import { IsInt, IsOptional, IsPositive, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class CreatePaymentMethodDto {
   @IsString()
@@ -15,4 +15,9 @@ export class CreatePaymentMethodDto {
   @IsString()
   @MaxLength(50)
   presetKey?: string;
+
+  @IsOptional()
+  @IsInt()
+  @IsPositive()
+  monthlyLimit?: number;
 }

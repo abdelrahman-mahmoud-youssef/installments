@@ -65,6 +65,7 @@ export class PaymentClaimsService {
     await this.paymentsService.create(tenantId, {
       contractId: claim.contractId,
       amount: finalAmount,
+      paymentMethodId: claim.paymentMethodId,
       note: `Approved payment claim #${claim.id}`,
       ...(claim.installmentId && {
         allocations: [{ installmentId: claim.installmentId, amount: finalAmount }],

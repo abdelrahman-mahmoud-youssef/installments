@@ -1,20 +1,63 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PaymentMethod, Prisma } from '@prisma/client';
+import { getUtcToday, startOfUtcMonth } from '../../common/date/utc-date';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreatePaymentMethodDto } from './dto/create-payment-method.dto';
 import { UpdatePaymentMethodDto } from './dto/update-payment-method.dto';
 
 const PRESET_ALREADY_ADDED_ERROR = 'This payment method has already been added.';
 
+export type PaymentMethodWithUsage = PaymentMethod & { monthToDateUsage: number };
+
 @Injectable()
 export class PaymentMethodsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  listPaymentMethods(tenantId: string): Promise<PaymentMethod[]> {
-    return this.prisma.paymentMethod.findMany({
+  async listPaymentMethods(tenantId: string): Promise<PaymentMethodWithUsage[]> {
+    const methods = await this.prisma.paymentMethod.findMany({
       where: { tenantId },
       orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
     });
+
+    const limitedMethodIds = methods.filter((method) => method.monthlyLimit != null).map((method) => method.id);
+    if (limitedMethodIds.length === 0) {
+      return methods.map((method) => ({ ...method, monthToDateUsage: 0 }));
+    }
+
+    const usageByMethodId = await this.getMonthToDateUsageByMethod(tenantId, limitedMethodIds);
+    return methods.map((method) => ({ ...method, monthToDateUsage: usageByMethodId.get(method.id) ?? 0 }));
+  }
+
+  private async getMonthToDateUsageByMethod(
+    tenantId: string,
+    paymentMethodIds: string[],
+  ): Promise<Map<string, number>> {
+    const monthStart = startOfUtcMonth(getUtcToday());
+    const monthEnd = startOfUtcMonth(monthStart, 1);
+
+    const [paymentSums, transactionSums] = await Promise.all([
+      this.prisma.payment.groupBy({
+        by: ['paymentMethodId'],
+        where: { tenantId, paymentMethodId: { in: paymentMethodIds }, paidAt: { gte: monthStart, lt: monthEnd } },
+        _sum: { amount: true },
+      }),
+      this.prisma.paymentMethodTransaction.groupBy({
+        by: ['paymentMethodId'],
+        where: { tenantId, paymentMethodId: { in: paymentMethodIds }, occurredAt: { gte: monthStart, lt: monthEnd } },
+        _sum: { amount: true },
+      }),
+    ]);
+
+    const usageByMethodId = new Map<string, number>();
+    for (const row of paymentSums) {
+      if (row.paymentMethodId) {
+        usageByMethodId.set(row.paymentMethodId, (usageByMethodId.get(row.paymentMethodId) ?? 0) + (row._sum.amount ?? 0));
+      }
+    }
+    for (const row of transactionSums) {
+      usageByMethodId.set(row.paymentMethodId, (usageByMethodId.get(row.paymentMethodId) ?? 0) + (row._sum.amount ?? 0));
+    }
+    return usageByMethodId;
   }
 
   async createPaymentMethod(tenantId: string, dto: CreatePaymentMethodDto): Promise<PaymentMethod> {
@@ -26,6 +69,7 @@ export class PaymentMethodsService {
           label: dto.label,
           details: dto.details,
           presetKey: dto.presetKey,
+          monthlyLimit: dto.monthlyLimit,
           sortOrder: count,
         },
       });
@@ -45,7 +89,7 @@ export class PaymentMethodsService {
     await this.findOwned(tenantId, id);
     return this.prisma.paymentMethod.update({
       where: { id },
-      data: { label: dto.label, details: dto.details, isActive: dto.isActive },
+      data: { label: dto.label, details: dto.details, isActive: dto.isActive, monthlyLimit: dto.monthlyLimit },
     });
   }
 

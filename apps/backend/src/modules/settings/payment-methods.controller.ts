@@ -5,7 +5,7 @@ import { AuthenticatedUser, CurrentUser } from '../../common/decorators/current-
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CreatePaymentMethodDto } from './dto/create-payment-method.dto';
 import { UpdatePaymentMethodDto } from './dto/update-payment-method.dto';
-import { PaymentMethodsService } from './payment-methods.service';
+import { PaymentMethodsService, PaymentMethodWithUsage } from './payment-methods.service';
 
 @Controller('settings/payment-methods')
 @Roles(Role.ADMIN)
@@ -13,7 +13,7 @@ export class PaymentMethodsController {
   constructor(private readonly paymentMethodsService: PaymentMethodsService) {}
 
   @Get()
-  listPaymentMethods(@CurrentUser() user: AuthenticatedUser): Promise<PaymentMethod[]> {
+  listPaymentMethods(@CurrentUser() user: AuthenticatedUser): Promise<PaymentMethodWithUsage[]> {
     return this.paymentMethodsService.listPaymentMethods(user.tenantId);
   }
 

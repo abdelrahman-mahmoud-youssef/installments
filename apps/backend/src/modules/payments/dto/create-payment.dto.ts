@@ -28,6 +28,10 @@ export class CreatePaymentDto {
   amount!: number;
 
   @IsOptional()
+  @IsString()
+  paymentMethodId?: string;
+
+  @IsOptional()
   @IsDateString()
   paidAt?: string;
 

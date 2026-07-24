@@ -1,13 +1,15 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2, Pencil, Plus, Trash2, Wallet } from 'lucide-react';
+import { Loader2, Pencil, Plus, Receipt, Trash2, Wallet } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import { EmptyState } from '@/components/shared/empty-state';
+import { Money } from '@/components/shared/money';
+import { NumberInput } from '@/components/shared/number-input';
 import { PaymentMethodIcon } from '@/components/shared/payment-method-icon';
 import { Section } from '@/components/shared/section';
 import { Button } from '@/components/ui/button';
@@ -32,8 +34,9 @@ import {
 } from '@/hooks/use-payment-methods';
 import { ApiError } from '@/lib/api/client';
 import { PaymentMethod } from '@/lib/api/payment-methods';
-import { PAYMENT_METHOD_PRESETS } from '@/lib/payment-method-presets';
+import { getPaymentMethodPreset, PAYMENT_METHOD_PRESETS } from '@/lib/payment-method-presets';
 import { PaymentMethodInput, paymentMethodSchema } from '@/lib/schemas/payment-method';
+import { PaymentMethodUsageDialog } from './payment-method-usage-dialog';
 
 function PaymentMethodFormDialog({
   trigger,
@@ -51,9 +54,20 @@ function PaymentMethodFormDialog({
   const createPaymentMethod = useCreatePaymentMethod();
   const updatePaymentMethod = useUpdatePaymentMethod();
 
+  const defaultMonthlyLimit = method
+    ? (method.monthlyLimit ?? undefined)
+    : presetKey
+      ? getPaymentMethodPreset(presetKey).suggestedMonthlyLimit
+      : undefined;
+
   const form = useForm<PaymentMethodInput>({
     resolver: zodResolver(paymentMethodSchema),
-    defaultValues: { label: method?.label ?? defaultLabel, details: method?.details ?? '', presetKey },
+    defaultValues: {
+      label: method?.label ?? defaultLabel,
+      details: method?.details ?? '',
+      presetKey,
+      monthlyLimit: defaultMonthlyLimit,
+    },
   });
 
   async function handleSubmit(values: PaymentMethodInput) {
@@ -61,7 +75,7 @@ function PaymentMethodFormDialog({
       if (method) {
         await updatePaymentMethod.mutateAsync({
           id: method.id,
-          input: { label: values.label, details: values.details },
+          input: { label: values.label, details: values.details, monthlyLimit: values.monthlyLimit ?? null },
         });
       } else {
         await createPaymentMethod.mutateAsync(values);
@@ -80,7 +94,12 @@ function PaymentMethodFormDialog({
       onOpenChange={(nextOpen) => {
         setOpen(nextOpen);
         if (nextOpen) {
-          form.reset({ label: method?.label ?? defaultLabel, details: method?.details ?? '', presetKey });
+          form.reset({
+            label: method?.label ?? defaultLabel,
+            details: method?.details ?? '',
+            presetKey,
+            monthlyLimit: defaultMonthlyLimit,
+          });
         }
       }}
     >
@@ -116,6 +135,20 @@ function PaymentMethodFormDialog({
                   <FormControl>
                     <Input dir="ltr" placeholder={t('paymentMethodDetailsPlaceholder')} {...field} />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="monthlyLimit"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('paymentMethodMonthlyLimit')}</FormLabel>
+                  <FormControl>
+                    <NumberInput step="1" min="0" {...field} />
+                  </FormControl>
+                  <p className="text-xs text-muted-foreground">{t('paymentMethodMonthlyLimitHint')}</p>
                   <FormMessage />
                 </FormItem>
               )}
@@ -183,6 +216,8 @@ function PaymentMethodRow({ method }: { method: PaymentMethod }) {
     }
   }
 
+  const usageRatio = method.monthlyLimit ? Math.min(1, method.monthToDateUsage / method.monthlyLimit) : 0;
+
   return (
     <div className="flex items-center justify-between gap-4 px-4 py-3.5">
       <div className="flex min-w-0 items-center gap-3">
@@ -192,9 +227,32 @@ function PaymentMethodRow({ method }: { method: PaymentMethod }) {
           <p dir="ltr" className="truncate text-left text-xs text-muted-foreground">
             {method.details}
           </p>
+          {method.monthlyLimit != null && (
+            <div className="mt-1.5 w-40 space-y-1">
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                <div
+                  className={usageRatio >= 0.8 ? 'h-full rounded-full bg-danger' : 'h-full rounded-full bg-primary'}
+                  style={{ width: `${usageRatio * 100}%` }}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                <Money minorUnits={method.monthToDateUsage} /> / <Money minorUnits={method.monthlyLimit} />
+              </p>
+            </div>
+          )}
         </div>
       </div>
       <div className="flex shrink-0 items-center gap-3">
+        {method.monthlyLimit != null && (
+          <PaymentMethodUsageDialog
+            method={method}
+            trigger={
+              <Button type="button" variant="ghost" size="icon-sm" aria-label={t('logTransaction')}>
+                <Receipt className="size-4" />
+              </Button>
+            }
+          />
+        )}
         <Switch
           checked={method.isActive}
           onCheckedChange={handleToggleActive}

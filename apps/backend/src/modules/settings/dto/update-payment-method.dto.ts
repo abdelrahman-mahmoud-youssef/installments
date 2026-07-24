@@ -1,4 +1,4 @@
-import { IsBoolean, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import { IsBoolean, IsInt, IsOptional, IsPositive, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class UpdatePaymentMethodDto {
   @IsOptional()
@@ -16,4 +16,9 @@ export class UpdatePaymentMethodDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @IsOptional()
+  @IsInt()
+  @IsPositive()
+  monthlyLimit?: number | null;
 }
