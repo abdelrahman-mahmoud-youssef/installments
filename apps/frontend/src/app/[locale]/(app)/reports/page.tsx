@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertTriangle, CalendarDays, TrendingUp, Wallet } from 'lucide-react';
+import { AlertTriangle, CalendarClock, CalendarDays, FileText, TrendingUp, Users, Wallet } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { DataTable, type Column } from '@/components/shared/data-table';
 import { EmptyState } from '@/components/shared/empty-state';
@@ -28,6 +28,7 @@ export default function ReportsPage() {
       <div className="space-y-6">
         {header}
         <MetricsSkeleton count={3} />
+        <MetricsSkeleton count={4} />
         <TableSkeleton />
       </div>
     );
@@ -114,6 +115,34 @@ export default function ReportsPage() {
       </Stagger>
 
       <FadeIn delay={0.05} className="space-y-3">
+        <h2 className="font-heading text-sm font-semibold">{t('overview')}</h2>
+        <Stagger className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <StaggerItem>
+            <MetricCard label={t('totalContracts')} value={data.totalContracts} icon={FileText} tone="primary" />
+          </StaggerItem>
+          <StaggerItem>
+            <MetricCard
+              label={t('activeContracts')}
+              value={data.activeContracts}
+              icon={TrendingUp}
+              tone="success"
+            />
+          </StaggerItem>
+          <StaggerItem>
+            <MetricCard label={t('totalCustomers')} value={data.totalCustomers} icon={Users} tone="neutral" />
+          </StaggerItem>
+          <StaggerItem>
+            <MetricCard
+              label={t('installmentsThisMonth')}
+              value={data.installmentsThisMonth}
+              icon={CalendarClock}
+              tone="info"
+            />
+          </StaggerItem>
+        </Stagger>
+      </FadeIn>
+
+      <FadeIn delay={0.1} className="space-y-3">
         <h2 className="font-heading text-sm font-semibold">{t('overdueCustomers')}</h2>
         {data.overdueCustomers.length === 0 ? (
           <Section>

@@ -26,6 +26,8 @@ export interface DashboardResponse {
   dueNext7Days: DashboardInstallmentSummary[];
   totalExpectedToday: number;
   recentPayments: DashboardPaymentSummary[];
+  totalCustomers: number;
+  activeContracts: number;
 }
 
 export function getDashboard(): Promise<DashboardResponse> {

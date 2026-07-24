@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { InstallmentStatus } from '@prisma/client';
+import { ContractStatus, InstallmentStatus } from '@prisma/client';
 import { addUtcDays, getUtcToday, startOfUtcMonth } from '../../common/date/utc-date';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ReportQueryDto } from './dto/report-query.dto';
@@ -23,6 +23,10 @@ export interface ReportsResponse {
   monthlyCollections: number;
   overdueBalance: number;
   overdueCustomers: OverdueCustomerSummary[];
+  totalContracts: number;
+  activeContracts: number;
+  totalCustomers: number;
+  installmentsThisMonth: number;
 }
 
 @Injectable()
@@ -35,7 +39,15 @@ export class ReportsService {
     const monthStart = this.resolveMonthStart(query.month, today);
     const monthEnd = startOfUtcMonth(monthStart, 1);
 
-    const [todayPayments, monthlyPayments, overdueInstallments] = await Promise.all([
+    const [
+      todayPayments,
+      monthlyPayments,
+      overdueInstallments,
+      totalContracts,
+      activeContracts,
+      totalCustomers,
+      installmentsThisMonth,
+    ] = await Promise.all([
       this.prisma.payment.aggregate({
         where: { tenantId, paidAt: { gte: today, lt: tomorrow } },
         _sum: { amount: true },
@@ -56,6 +68,12 @@ export class ReportsService {
           contract: { select: { customerId: true, customer: { select: { name: true, phone: true } } } },
         },
       }),
+      this.prisma.contract.count({ where: { tenantId } }),
+      this.prisma.contract.count({ where: { tenantId, status: ContractStatus.ACTIVE } }),
+      this.prisma.customer.count({ where: { tenantId } }),
+      this.prisma.installment.count({
+        where: { tenantId, dueDate: { gte: monthStart, lt: monthEnd } },
+      }),
     ]);
 
     return {
@@ -63,6 +81,10 @@ export class ReportsService {
       monthlyCollections: monthlyPayments._sum.amount ?? 0,
       overdueBalance: overdueInstallments.reduce((total, row) => total + (row.amount - row.paidAmount), 0),
       overdueCustomers: this.groupOverdueByCustomer(overdueInstallments),
+      totalContracts,
+      activeContracts,
+      totalCustomers,
+      installmentsThisMonth,
     };
   }
 

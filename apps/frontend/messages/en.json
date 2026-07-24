@@ -214,6 +214,8 @@
     "noOverdue": "No overdue installments.",
     "recentPayments": "Recent payments",
     "noPayments": "No payments recorded yet.",
+    "activeContracts": "Active contracts",
+    "totalCustomers": "Total customers",
     "loadError": "Couldn't load the dashboard",
     "customer": "Customer",
     "product": "Product",
@@ -411,7 +413,12 @@
     "customer": "Customer",
     "phone": "Phone",
     "overdueInstallments": "Overdue installments",
-    "loadError": "Couldn't load reports"
+    "loadError": "Couldn't load reports",
+    "overview": "Overview",
+    "totalContracts": "Total contracts",
+    "activeContracts": "Active contracts",
+    "totalCustomers": "Total customers",
+    "installmentsThisMonth": "Installments this month"
   },
   "publicCustomer": {
     "welcome": "Welcome,",

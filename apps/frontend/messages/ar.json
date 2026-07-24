@@ -214,6 +214,8 @@
     "noOverdue": "مفيش أقساط متأخرة.",
     "recentPayments": "آخر الدفعات",
     "noPayments": "لسه مفيش دفعات اتسجلت.",
+    "activeContracts": "العقود النشطة",
+    "totalCustomers": "إجمالي العملاء",
     "loadError": "معرفناش نحمّل لوحة التحكم",
     "customer": "العميل",
     "product": "المنتج",
@@ -411,7 +413,12 @@
     "customer": "العميل",
     "phone": "التليفون",
     "overdueInstallments": "الأقساط المتأخرة",
-    "loadError": "معرفناش نحمّل التقارير"
+    "loadError": "معرفناش نحمّل التقارير",
+    "overview": "نظرة عامة",
+    "totalContracts": "إجمالي العقود",
+    "activeContracts": "العقود النشطة",
+    "totalCustomers": "إجمالي العملاء",
+    "installmentsThisMonth": "أقساط الشهر ده"
   },
   "publicCustomer": {
     "welcome": "أهلًا،",

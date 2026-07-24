@@ -5,7 +5,9 @@ import {
   ArrowDownLeft,
   CalendarClock,
   CalendarRange,
+  FileText,
   Plus,
+  Users,
   Wallet,
 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
@@ -165,6 +167,12 @@ export default function DashboardPage() {
             icon={CalendarRange}
             tone="info"
           />
+        </StaggerItem>
+        <StaggerItem>
+          <MetricCard label={t('activeContracts')} value={data.activeContracts} icon={FileText} tone="primary" />
+        </StaggerItem>
+        <StaggerItem>
+          <MetricCard label={t('totalCustomers')} value={data.totalCustomers} icon={Users} tone="neutral" />
         </StaggerItem>
       </Stagger>
 

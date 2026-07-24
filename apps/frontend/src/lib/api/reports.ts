@@ -14,6 +14,10 @@ export interface ReportsResponse {
   monthlyCollections: number;
   overdueBalance: number;
   overdueCustomers: OverdueCustomerSummary[];
+  totalContracts: number;
+  activeContracts: number;
+  totalCustomers: number;
+  installmentsThisMonth: number;
 }
 
 export function getReports(month?: string): Promise<ReportsResponse> {
