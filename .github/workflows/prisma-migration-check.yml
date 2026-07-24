@@ -1,0 +1,56 @@
+name: Prisma migration check
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - apps/backend/prisma/**
+  pull_request:
+    paths:
+      - apps/backend/prisma/**
+  workflow_dispatch:
+
+jobs:
+  check-drift:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: prisma
+          POSTGRES_PASSWORD: prisma
+          POSTGRES_DB: prisma_shadow
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://prisma:prisma@localhost:5432/prisma_shadow
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.10.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Apply every committed migration
+        working-directory: apps/backend
+        run: npx prisma migrate deploy
+
+      - name: Fail if schema.prisma has changes with no matching migration
+        working-directory: apps/backend
+        run: npx prisma migrate diff --from-url "$DATABASE_URL" --to-schema-datamodel ./prisma/schema.prisma --exit-code
