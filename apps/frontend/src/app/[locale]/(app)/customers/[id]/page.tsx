@@ -13,6 +13,7 @@ import { BackLink } from '@/components/shared/back-link';
 import { DataTable, type Column } from '@/components/shared/data-table';
 import { DateText } from '@/components/shared/date-text';
 import { EmptyState } from '@/components/shared/empty-state';
+import { ImagePreviewDialog } from '@/components/shared/image-preview-dialog';
 import { InitialAvatar } from '@/components/shared/initial-avatar';
 import { Money } from '@/components/shared/money';
 import { FadeIn } from '@/components/shared/motion';
@@ -131,15 +132,19 @@ export default function CustomerDetailPage() {
                   </span>
                 )}
                 {customer.idImageUrl && (
-                  <a
-                    href={resolveAssetUrl(customer.idImageUrl) ?? undefined}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center gap-1.5 hover:text-foreground hover:underline"
-                  >
-                    <IdCard className="size-3.5" />
-                    {t('viewIdImage')}
-                  </a>
+                  <ImagePreviewDialog
+                    src={resolveAssetUrl(customer.idImageUrl) ?? ''}
+                    alt={t('viewIdImage')}
+                    trigger={
+                      <button
+                        type="button"
+                        className="flex items-center gap-1.5 hover:text-foreground hover:underline"
+                      >
+                        <IdCard className="size-3.5" />
+                        {t('viewIdImage')}
+                      </button>
+                    }
+                  />
                 )}
               </div>
             </div>

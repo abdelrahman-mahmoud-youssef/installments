@@ -24,6 +24,7 @@ import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import { DataTable, type Column } from '@/components/shared/data-table';
 import { DateText } from '@/components/shared/date-text';
 import { EmptyState } from '@/components/shared/empty-state';
+import { ImagePreviewDialog } from '@/components/shared/image-preview-dialog';
 import { Money } from '@/components/shared/money';
 import { FadeIn } from '@/components/shared/motion';
 import { ProgressRing } from '@/components/shared/progress-ring';
@@ -180,15 +181,19 @@ export default function ContractDetailPage() {
               <ChevronRight className="size-3.5 rtl:rotate-180" />
             </Link>
             {contract.imageUrl && (
-              <a
-                href={resolveAssetUrl(contract.imageUrl) ?? undefined}
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground hover:underline"
-              >
-                <Paperclip className="size-3.5" />
-                {t('viewImage')}
-              </a>
+              <ImagePreviewDialog
+                src={resolveAssetUrl(contract.imageUrl) ?? ''}
+                alt={t('viewImage')}
+                trigger={
+                  <button
+                    type="button"
+                    className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground hover:underline"
+                  >
+                    <Paperclip className="size-3.5" />
+                    {t('viewImage')}
+                  </button>
+                }
+              />
             )}
           </div>
           <div className="flex flex-wrap items-center gap-2">

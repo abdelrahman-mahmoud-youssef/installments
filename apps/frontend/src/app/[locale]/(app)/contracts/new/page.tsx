@@ -296,6 +296,7 @@ export default function NewContractPage() {
                               {...field}
                               type="file"
                               accept="image/png,image/jpeg"
+                              capture="environment"
                               className="hidden"
                               value={undefined}
                               onChange={(event) => {

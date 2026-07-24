@@ -19,6 +19,7 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { ImagePreviewDialog } from '@/components/shared/image-preview-dialog';
 import { ApiError } from '@/lib/api/client';
 import { Customer } from '@/lib/api/customers';
 import { resolveAssetUrl } from '@/lib/assets';
@@ -142,18 +143,19 @@ export function CustomerFormDialog({
                 <FormItem>
                   <FormLabel>{t('idImage')}</FormLabel>
                   {customer?.idImageUrl && !idImageName && (
-                    <a
-                      href={resolveAssetUrl(customer.idImageUrl) ?? undefined}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="block"
-                    >
-                      <img
-                        src={resolveAssetUrl(customer.idImageUrl) ?? undefined}
-                        alt={t('idImage')}
-                        className="h-20 rounded-lg border border-border object-cover"
-                      />
-                    </a>
+                    <ImagePreviewDialog
+                      src={resolveAssetUrl(customer.idImageUrl) ?? ''}
+                      alt={t('idImage')}
+                      trigger={
+                        <button type="button" className="block">
+                          <img
+                            src={resolveAssetUrl(customer.idImageUrl) ?? undefined}
+                            alt={t('idImage')}
+                            className="h-20 rounded-lg border border-border object-cover"
+                          />
+                        </button>
+                      }
+                    />
                   )}
                   <FormControl>
                     <label className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-dashed border-border p-3.5 text-sm text-muted-foreground transition-colors hover:bg-accent">
@@ -163,6 +165,7 @@ export function CustomerFormDialog({
                         {...field}
                         type="file"
                         accept="image/png,image/jpeg"
+                        capture="environment"
                         className="hidden"
                         value={undefined}
                         onChange={(event) => {
