@@ -3,12 +3,15 @@ import {
   IsDateString,
   IsEnum,
   IsInt,
+  IsOptional,
   IsPositive,
   IsString,
+  MaxLength,
   Min,
   MinLength,
   ValidateIf,
 } from 'class-validator';
+import { MAX_CONTRACT_IMAGE_UPLOAD_BYTES } from '../../../common/constants';
 
 export class CreateContractDto {
   @IsString()
@@ -60,4 +63,9 @@ export class CreateContractDto {
 
   @IsDateString()
   firstPaymentDate!: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(Math.ceil((MAX_CONTRACT_IMAGE_UPLOAD_BYTES * 4) / 3))
+  image?: string;
 }

@@ -5,6 +5,7 @@ import {
   ChevronRight,
   Copy,
   FileWarning,
+  Paperclip,
   QrCode,
   Receipt,
   Share2,
@@ -42,6 +43,7 @@ import { useCancelContract, useContract } from '@/hooks/use-contracts';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useCreatePayment } from '@/hooks/use-payments';
 import { ApiError } from '@/lib/api/client';
+import { resolveAssetUrl } from '@/lib/assets';
 import { getDisplayInstallmentStatus } from '@/lib/enums';
 import { normalizeLocalPhoneInput } from '@/lib/phone';
 import { routes } from '@/lib/routes';
@@ -177,6 +179,17 @@ export default function ContractDetailPage() {
               </span>
               <ChevronRight className="size-3.5 rtl:rotate-180" />
             </Link>
+            {contract.imageUrl && (
+              <a
+                href={resolveAssetUrl(contract.imageUrl) ?? undefined}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground hover:underline"
+              >
+                <Paperclip className="size-3.5" />
+                {t('viewImage')}
+              </a>
+            )}
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <DropdownMenu>

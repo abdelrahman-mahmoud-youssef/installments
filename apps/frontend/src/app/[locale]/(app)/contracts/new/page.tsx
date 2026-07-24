@@ -1,10 +1,10 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CalendarClock, ListOrdered, Loader2, Percent, UserPlus } from 'lucide-react';
+import { CalendarClock, ListOrdered, Loader2, Percent, Upload, UserPlus } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { CustomerFormDialog } from '@/components/customers/customer-form-dialog';
@@ -123,6 +123,7 @@ export default function NewContractPage() {
   const { data: customers, isLoading: isLoadingCustomers } = useCustomers({ limit: 100 });
   const createContract = useCreateContract();
   const createCustomer = useCreateCustomer();
+  const [imageName, setImageName] = useState<string | null>(null);
 
   const form = useForm<ContractInput>({
     resolver: zodResolver(contractSchema),
@@ -273,6 +274,34 @@ export default function NewContractPage() {
                       )}
                     />
                   </div>
+                  <FormField
+                    control={form.control}
+                    name="image"
+                    render={({ field: { value, onChange, ...field } }) => (
+                      <FormItem>
+                        <FormLabel>{t('image')}</FormLabel>
+                        <FormControl>
+                          <label className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-dashed border-border p-3.5 text-sm text-muted-foreground transition-colors hover:bg-accent">
+                            <Upload className="size-4 shrink-0" />
+                            <span className="truncate">{imageName ?? t('imageHint')}</span>
+                            <input
+                              {...field}
+                              type="file"
+                              accept="image/png,image/jpeg"
+                              className="hidden"
+                              value={undefined}
+                              onChange={(event) => {
+                                const file = event.target.files?.[0] ?? null;
+                                onChange(file ?? undefined);
+                                setImageName(file?.name ?? null);
+                              }}
+                            />
+                          </label>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               </Section>
 

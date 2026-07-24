@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Upload } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -21,6 +21,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { ApiError } from '@/lib/api/client';
 import { Customer } from '@/lib/api/customers';
+import { resolveAssetUrl } from '@/lib/assets';
 import { CustomerInput, customerSchema } from '@/lib/schemas/customer';
 
 export function CustomerFormDialog({
@@ -34,6 +35,7 @@ export function CustomerFormDialog({
 }) {
   const t = useTranslations('customers.form');
   const [open, setOpen] = useState(false);
+  const [idImageName, setIdImageName] = useState<string | null>(null);
 
   const form = useForm<CustomerInput>({
     resolver: zodResolver(customerSchema),
@@ -51,6 +53,7 @@ export function CustomerFormDialog({
       toast.success(customer ? t('updated') : t('created'));
       setOpen(false);
       form.reset();
+      setIdImageName(null);
     } catch (error) {
       toast.error(error instanceof ApiError ? error.message : t('genericError'));
     }
@@ -68,6 +71,7 @@ export function CustomerFormDialog({
             address: customer?.address ?? '',
             notes: customer?.notes ?? '',
           });
+          setIdImageName(null);
         }
       }}
     >
@@ -126,6 +130,48 @@ export function CustomerFormDialog({
                   <FormLabel>{t('notes')}</FormLabel>
                   <FormControl>
                     <Textarea rows={3} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="idImage"
+              render={({ field: { value, onChange, ...field } }) => (
+                <FormItem>
+                  <FormLabel>{t('idImage')}</FormLabel>
+                  {customer?.idImageUrl && !idImageName && (
+                    <a
+                      href={resolveAssetUrl(customer.idImageUrl) ?? undefined}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="block"
+                    >
+                      <img
+                        src={resolveAssetUrl(customer.idImageUrl) ?? undefined}
+                        alt={t('idImage')}
+                        className="h-20 rounded-lg border border-border object-cover"
+                      />
+                    </a>
+                  )}
+                  <FormControl>
+                    <label className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-dashed border-border p-3.5 text-sm text-muted-foreground transition-colors hover:bg-accent">
+                      <Upload className="size-4 shrink-0" />
+                      <span className="truncate">{idImageName ?? t('idImageHint')}</span>
+                      <input
+                        {...field}
+                        type="file"
+                        accept="image/png,image/jpeg"
+                        className="hidden"
+                        value={undefined}
+                        onChange={(event) => {
+                          const file = event.target.files?.[0] ?? null;
+                          onChange(file ?? undefined);
+                          setIdImageName(file?.name ?? null);
+                        }}
+                      />
+                    </label>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

@@ -1,4 +1,5 @@
 import { CalculationMethod, ContractStatus, InstallmentStatus, RecurrenceType } from '@/lib/enums';
+import { fileToBase64 } from '@/lib/file';
 import { toMinorUnits } from '@/lib/format';
 import { ContractInput } from '@/lib/schemas/contract';
 import { apiClient } from './client';
@@ -44,6 +45,7 @@ export interface ContractListItem {
   recurrenceType: RecurrenceType;
   status: ContractStatus;
   createdAt: string;
+  imageUrl: string | null;
   customer: ContractCustomer;
 }
 
@@ -61,7 +63,7 @@ export interface ContractListParams {
   limit?: number;
 }
 
-function toCreateContractPayload(input: ContractInput): Record<string, unknown> {
+async function toCreateContractPayload(input: ContractInput): Promise<Record<string, unknown>> {
   return {
     customerId: input.customerId,
     productName: input.productName,
@@ -76,6 +78,7 @@ function toCreateContractPayload(input: ContractInput): Record<string, unknown> 
     intervalDays: input.intervalDays,
     startDate: input.startDate,
     firstPaymentDate: input.firstPaymentDate,
+    image: input.image ? await fileToBase64(input.image) : undefined,
   };
 }
 
@@ -87,8 +90,8 @@ export function getContract(id: string): Promise<ContractDetail> {
   return apiClient.get(`contracts/${id}`);
 }
 
-export function createContract(input: ContractInput): Promise<ContractDetail> {
-  return apiClient.post('contracts', toCreateContractPayload(input));
+export async function createContract(input: ContractInput): Promise<ContractDetail> {
+  return apiClient.post('contracts', await toCreateContractPayload(input));
 }
 
 export function cancelContract(id: string): Promise<ContractDetail> {

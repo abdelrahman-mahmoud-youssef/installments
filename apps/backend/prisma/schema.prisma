@@ -172,6 +172,7 @@ model Customer {
   phone     String
   address   String?
   notes     String?
+  idImageUrl String?
   telegramChatId               String?
   telegramNotificationsEnabled Boolean @default(true)
   telegramBroadcastsEnabled    Boolean @default(true)
@@ -194,6 +195,7 @@ model Contract {
   publicId          String            @unique @default(uuid())
   productName       String
   productPrice      Int
+  costPrice         Int?
   downPayment      Int
   totalAmount       Int
   calculationMethod CalculationMethod
@@ -204,6 +206,7 @@ model Contract {
   startDate         DateTime          @db.Date
   firstPaymentDate  DateTime          @db.Date
   status            ContractStatus    @default(ACTIVE)
+  imageUrl          String?
   createdAt         DateTime          @default(now())
   tenant            Tenant            @relation(fields: [tenantId], references: [id])
   customer          Customer          @relation(fields: [customerId], references: [id])

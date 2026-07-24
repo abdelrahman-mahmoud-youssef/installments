@@ -1,7 +1,11 @@
+import { randomUUID } from 'node:crypto';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { BroadcastRecipientStatus, Customer, Prisma, ReminderChannel } from '@prisma/client';
+import { MAX_CUSTOMER_ID_UPLOAD_BYTES } from '../../common/constants';
+import { decodeImageUpload } from '../../common/decode-image-upload';
 import { buildPaginatedResult, PaginatedResult } from '../../common/pagination/paginated-result.interface';
 import { PrismaService } from '../../prisma/prisma.service';
+import { StorageService } from '../storage/storage.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { CustomerNotificationQueryDto } from './dto/customer-notification-query.dto';
 import { CustomerQueryDto } from './dto/customer-query.dto';
@@ -21,10 +25,15 @@ export interface CustomerNotificationHistoryItem {
 
 @Injectable()
 export class CustomersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storage: StorageService,
+  ) {}
 
   async create(tenantId: string, createCustomerDto: CreateCustomerDto): Promise<Customer> {
-    return this.prisma.customer.create({ data: { ...createCustomerDto, tenantId } });
+    const { idImage, ...rest } = createCustomerDto;
+    const idImageUrl = idImage ? await this.saveIdImage(tenantId, idImage) : undefined;
+    return this.prisma.customer.create({ data: { ...rest, tenantId, idImageUrl } });
   }
 
   async findAll(tenantId: string, query: CustomerQueryDto): Promise<PaginatedResult<Customer>> {
@@ -67,7 +76,12 @@ export class CustomersService {
 
   async update(tenantId: string, id: string, updateCustomerDto: UpdateCustomerDto): Promise<Customer> {
     await this.ensureExists(tenantId, id);
-    return this.prisma.customer.update({ where: { id }, data: updateCustomerDto });
+    const { idImage, ...rest } = updateCustomerDto;
+    const idImageUrl = idImage ? await this.saveIdImage(tenantId, idImage) : undefined;
+    return this.prisma.customer.update({
+      where: { id },
+      data: { ...rest, ...(idImageUrl && { idImageUrl }) },
+    });
   }
 
   async remove(tenantId: string, id: string): Promise<void> {
@@ -144,5 +158,10 @@ export class CustomersService {
     if (!customer) {
       throw new NotFoundException('Customer not found.');
     }
+  }
+
+  private async saveIdImage(tenantId: string, idImage: string): Promise<string> {
+    const { buffer, extension } = decodeImageUpload(idImage, MAX_CUSTOMER_ID_UPLOAD_BYTES);
+    return this.storage.saveKeyedImage(`customer-ids/${tenantId}/${randomUUID()}.${extension}`, buffer);
   }
 }

@@ -1,7 +1,11 @@
+import { randomUUID } from 'node:crypto';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InstallmentStatus, Prisma } from '@prisma/client';
+import { MAX_CONTRACT_IMAGE_UPLOAD_BYTES } from '../../common/constants';
+import { decodeImageUpload } from '../../common/decode-image-upload';
 import { buildPaginatedResult, PaginatedResult } from '../../common/pagination/paginated-result.interface';
 import { PrismaService } from '../../prisma/prisma.service';
+import { StorageService } from '../storage/storage.service';
 import { ContractQueryDto } from './dto/contract-query.dto';
 import { CreateContractDto } from './dto/create-contract.dto';
 import { generateDueDates } from './installments/recurrence';
@@ -21,7 +25,10 @@ type ContractDetail = Prisma.ContractGetPayload<{
 
 @Injectable()
 export class ContractsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storage: StorageService,
+  ) {}
 
   async create(tenantId: string, createContractDto: CreateContractDto): Promise<ContractDetail> {
     const customer = await this.prisma.customer.findFirst({
@@ -30,6 +37,10 @@ export class ContractsService {
     if (!customer) {
       throw new NotFoundException('Customer not found.');
     }
+
+    const imageUrl = createContractDto.image
+      ? await this.saveContractImage(tenantId, createContractDto.image)
+      : undefined;
 
     const schedule = calculateInstallmentSchedule({
       calculationMethod: createContractDto.calculationMethod,
@@ -63,6 +74,7 @@ export class ContractsService {
           intervalDays: createContractDto.intervalDays,
           startDate: new Date(createContractDto.startDate),
           firstPaymentDate: new Date(createContractDto.firstPaymentDate),
+          imageUrl,
         },
       });
 
@@ -139,5 +151,10 @@ export class ContractsService {
     });
 
     return this.findOne(tenantId, id);
+  }
+
+  private async saveContractImage(tenantId: string, image: string): Promise<string> {
+    const { buffer, extension } = decodeImageUpload(image, MAX_CONTRACT_IMAGE_UPLOAD_BYTES);
+    return this.storage.saveKeyedImage(`contracts/${tenantId}/${randomUUID()}.${extension}`, buffer);
   }
 }

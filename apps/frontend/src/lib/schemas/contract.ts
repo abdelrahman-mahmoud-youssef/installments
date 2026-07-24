@@ -1,6 +1,9 @@
 import { z } from 'zod';
 import { CALCULATION_METHODS, RECURRENCE_TYPES } from '@/lib/enums';
 
+const MAX_CONTRACT_IMAGE_BYTES = 4 * 1024 * 1024;
+const ACCEPTED_IMAGE_TYPES = ['image/png', 'image/jpeg'];
+
 export const contractSchema = z
   .object({
     customerId: z.string().min(1, 'Select a customer.'),
@@ -15,6 +18,14 @@ export const contractSchema = z
     intervalDays: z.number().int().positive().optional(),
     startDate: z.string().min(1, 'Start date is required.'),
     firstPaymentDate: z.string().min(1, 'First payment date is required.'),
+    image: z
+      .instanceof(File)
+      .optional()
+      .refine((file) => !file || file.size <= MAX_CONTRACT_IMAGE_BYTES, 'Image must be under 4 MB.')
+      .refine(
+        (file) => !file || ACCEPTED_IMAGE_TYPES.includes(file.type),
+        'Image must be a PNG or JPEG image.',
+      ),
   })
   .superRefine((data, ctx) => {
     if (data.calculationMethod === 'MARKUP_PERCENT' && !data.markupPercent) {

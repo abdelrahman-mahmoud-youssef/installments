@@ -1,3 +1,4 @@
+import { fileToBase64 } from '@/lib/file';
 import { CustomerInput } from '@/lib/schemas/customer';
 import { apiClient } from './client';
 import { buildQuery, PaginatedResult } from './pagination';
@@ -9,6 +10,7 @@ export interface Customer {
   phone: string;
   address: string | null;
   notes: string | null;
+  idImageUrl: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -39,12 +41,17 @@ export function getCustomer(id: string): Promise<CustomerDetail> {
   return apiClient.get(`customers/${id}`);
 }
 
-export function createCustomer(input: CustomerInput): Promise<Customer> {
-  return apiClient.post('customers', input);
+async function toCustomerPayload(input: Partial<CustomerInput>): Promise<Record<string, unknown>> {
+  const { idImage, ...rest } = input;
+  return { ...rest, idImage: idImage ? await fileToBase64(idImage) : undefined };
 }
 
-export function updateCustomer(id: string, input: Partial<CustomerInput>): Promise<Customer> {
-  return apiClient.patch(`customers/${id}`, input);
+export async function createCustomer(input: CustomerInput): Promise<Customer> {
+  return apiClient.post('customers', await toCustomerPayload(input));
+}
+
+export async function updateCustomer(id: string, input: Partial<CustomerInput>): Promise<Customer> {
+  return apiClient.patch(`customers/${id}`, await toCustomerPayload(input));
 }
 
 export function deleteCustomer(id: string): Promise<void> {

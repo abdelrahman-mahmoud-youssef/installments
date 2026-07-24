@@ -1,6 +1,6 @@
 'use client';
 
-import { Copy, MapPin, Pencil, Phone, Plus, QrCode, Share2, StickyNote, UserRoundX } from 'lucide-react';
+import { Copy, IdCard, MapPin, Pencil, Phone, Plus, QrCode, Share2, StickyNote, UserRoundX } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useState } from 'react';
@@ -29,6 +29,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Link } from '@/i18n/navigation';
 import type { CustomerContractSummary } from '@/lib/api/customers';
 import { useCustomer, useUpdateCustomer } from '@/hooks/use-customers';
+import { resolveAssetUrl } from '@/lib/assets';
 import { normalizeLocalPhoneInput } from '@/lib/phone';
 import { routes } from '@/lib/routes';
 
@@ -118,6 +119,17 @@ export default function CustomerDetailPage() {
                     <MapPin className="size-3.5" />
                     {customer.address}
                   </span>
+                )}
+                {customer.idImageUrl && (
+                  <a
+                    href={resolveAssetUrl(customer.idImageUrl) ?? undefined}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-1.5 hover:text-foreground hover:underline"
+                  >
+                    <IdCard className="size-3.5" />
+                    {t('viewIdImage')}
+                  </a>
                 )}
               </div>
             </div>
