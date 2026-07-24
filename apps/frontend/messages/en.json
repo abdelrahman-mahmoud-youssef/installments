@@ -216,6 +216,8 @@
     "noPayments": "No payments recorded yet.",
     "activeContracts": "Active contracts",
     "totalCustomers": "Total customers",
+    "overdueBalance": "Overdue balance",
+    "pendingPaymentClaims": "Pending payment claims",
     "loadError": "Couldn't load the dashboard",
     "customer": "Customer",
     "product": "Product",

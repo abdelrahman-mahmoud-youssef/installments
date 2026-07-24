@@ -11,7 +11,7 @@ export async function GET(
   const customer = await getPublicCustomer(uuid);
   const prefix = locale === routing.defaultLocale ? '' : `/${locale}`;
   const name = customer?.name ?? 'Customer';
-  const themeColor = customer ? BRAND_COLOR_VALUES[customer.branding.brandColor] : '#0f7a5f';
+  const themeColor = customer ? BRAND_COLOR_VALUES[customer.branding.brandColor] : '#0562e6';
 
   return NextResponse.json(
     {

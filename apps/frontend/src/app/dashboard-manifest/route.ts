@@ -13,7 +13,7 @@ export async function GET() {
   const t = await getTranslations({ locale: routing.defaultLocale, namespace: 'common' });
 
   const name = branding?.displayName ?? t('appName');
-  const themeColor = branding ? BRAND_COLOR_VALUES[branding.brandColor] : '#0f7a5f';
+  const themeColor = branding ? BRAND_COLOR_VALUES[branding.brandColor] : '#0562e6';
 
   return NextResponse.json(
     {

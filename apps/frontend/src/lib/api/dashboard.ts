@@ -28,6 +28,8 @@ export interface DashboardResponse {
   recentPayments: DashboardPaymentSummary[];
   totalCustomers: number;
   activeContracts: number;
+  overdueBalance: number;
+  pendingPaymentClaims: number;
 }
 
 export function getDashboard(): Promise<DashboardResponse> {

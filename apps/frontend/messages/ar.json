@@ -216,6 +216,8 @@
     "noPayments": "لسه مفيش دفعات اتسجلت.",
     "activeContracts": "العقود النشطة",
     "totalCustomers": "إجمالي العملاء",
+    "overdueBalance": "الرصيد المتأخر",
+    "pendingPaymentClaims": "مطالبات الدفع المعلّقة",
     "loadError": "معرفناش نحمّل لوحة التحكم",
     "customer": "العميل",
     "product": "المنتج",

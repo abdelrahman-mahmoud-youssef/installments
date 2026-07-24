@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ContractStatus, InstallmentStatus, Prisma } from '@prisma/client';
+import { ContractStatus, InstallmentStatus, PaymentClaimStatus, Prisma } from '@prisma/client';
 import { addUtcDays, getUtcToday } from '../../common/date/utc-date';
 import { PrismaService } from '../../prisma/prisma.service';
 
@@ -34,6 +34,8 @@ export interface DashboardResponse {
   recentPayments: DashboardPaymentSummary[];
   totalCustomers: number;
   activeContracts: number;
+  overdueBalance: number;
+  pendingPaymentClaims: number;
 }
 
 @Injectable()
@@ -44,26 +46,34 @@ export class DashboardService {
     const today = getUtcToday();
     const next7Days = addUtcDays(today, UPCOMING_WINDOW_DAYS);
 
-    const [dueToday, overdue, dueNext7Days, recentPaymentRows, totalCustomers, activeContracts] =
-      await Promise.all([
-        this.findOutstandingInstallments(tenantId, today),
-        this.findOutstandingInstallments(tenantId, { lt: today }),
-        this.findOutstandingInstallments(tenantId, { gt: today, lte: next7Days }),
-        this.prisma.payment.findMany({
-          where: { tenantId },
-          orderBy: { paidAt: 'desc' },
-          take: RECENT_PAYMENTS_LIMIT,
-          select: {
-            id: true,
-            contractId: true,
-            amount: true,
-            paidAt: true,
-            contract: { select: { customer: { select: { name: true } } } },
-          },
-        }),
-        this.prisma.customer.count({ where: { tenantId } }),
-        this.prisma.contract.count({ where: { tenantId, status: ContractStatus.ACTIVE } }),
-      ]);
+    const [
+      dueToday,
+      overdue,
+      dueNext7Days,
+      recentPaymentRows,
+      totalCustomers,
+      activeContracts,
+      pendingPaymentClaims,
+    ] = await Promise.all([
+      this.findOutstandingInstallments(tenantId, today),
+      this.findOutstandingInstallments(tenantId, { lt: today }),
+      this.findOutstandingInstallments(tenantId, { gt: today, lte: next7Days }),
+      this.prisma.payment.findMany({
+        where: { tenantId },
+        orderBy: { paidAt: 'desc' },
+        take: RECENT_PAYMENTS_LIMIT,
+        select: {
+          id: true,
+          contractId: true,
+          amount: true,
+          paidAt: true,
+          contract: { select: { customer: { select: { name: true } } } },
+        },
+      }),
+      this.prisma.customer.count({ where: { tenantId } }),
+      this.prisma.contract.count({ where: { tenantId, status: ContractStatus.ACTIVE } }),
+      this.prisma.paymentClaim.count({ where: { tenantId, status: PaymentClaimStatus.PENDING } }),
+    ]);
 
     return {
       dueToday,
@@ -79,6 +89,8 @@ export class DashboardService {
       })),
       totalCustomers,
       activeContracts,
+      overdueBalance: overdue.reduce((total, item) => total + (item.amount - item.paidAmount), 0),
+      pendingPaymentClaims,
     };
   }
 

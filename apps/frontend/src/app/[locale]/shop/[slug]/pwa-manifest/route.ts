@@ -11,7 +11,7 @@ export async function GET(
   const shop = await getPublicShop(slug);
   const prefix = locale === routing.defaultLocale ? '' : `/${locale}`;
   const name = shop?.displayName ?? slug;
-  const themeColor = shop ? BRAND_COLOR_VALUES[shop.brandColor] : '#0f7a5f';
+  const themeColor = shop ? BRAND_COLOR_VALUES[shop.brandColor] : '#0562e6';
 
   return NextResponse.json(
     {

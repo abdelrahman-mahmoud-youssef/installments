@@ -6,6 +6,7 @@ import {
   CalendarClock,
   CalendarRange,
   FileText,
+  FileWarning,
   Plus,
   Users,
   Wallet,
@@ -112,7 +113,7 @@ export default function DashboardPage() {
     return (
       <div className="space-y-6">
         {header}
-        <MetricsSkeleton />
+        <MetricsSkeleton count={8} />
         <div className="grid gap-5 lg:grid-cols-3">
           <PanelSkeleton className="lg:col-span-2" />
           <PanelSkeleton />
@@ -173,6 +174,23 @@ export default function DashboardPage() {
         </StaggerItem>
         <StaggerItem>
           <MetricCard label={t('totalCustomers')} value={data.totalCustomers} icon={Users} tone="neutral" />
+        </StaggerItem>
+        <StaggerItem>
+          <MetricCard
+            label={t('overdueBalance')}
+            value={<Money minorUnits={data.overdueBalance} />}
+            icon={AlertTriangle}
+            tone={data.overdueBalance > 0 ? 'danger' : 'neutral'}
+            emphasis={data.overdueBalance > 0}
+          />
+        </StaggerItem>
+        <StaggerItem>
+          <MetricCard
+            label={t('pendingPaymentClaims')}
+            value={data.pendingPaymentClaims}
+            icon={FileWarning}
+            tone={data.pendingPaymentClaims > 0 ? 'warning' : 'neutral'}
+          />
         </StaggerItem>
       </Stagger>
 
