@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
-import { type ComponentType } from 'react';
+import { type ComponentType, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { FaWhatsapp } from 'react-icons/fa6';
 import { toast } from 'sonner';
@@ -64,6 +64,13 @@ export default function SettingsPage() {
   const disconnect = useDisconnectNotifications();
   const setLanguage = useSetNotificationLanguage();
   const isConnected = Boolean(data?.telegramConfigured);
+  const [language, setSelectedLanguage] = useState<NotificationLanguage>('AR');
+  const [syncedLanguage, setSyncedLanguage] = useState<NotificationLanguage | undefined>(undefined);
+
+  if (data && data.notificationLanguage !== syncedLanguage) {
+    setSyncedLanguage(data.notificationLanguage);
+    setSelectedLanguage(data.notificationLanguage);
+  }
 
   const form = useForm<NotificationSettingsInput>({
     resolver: zodResolver(notificationSettingsSchema),
@@ -105,7 +112,7 @@ export default function SettingsPage() {
     }
   }
 
-  async function handleLanguageChange(language: NotificationLanguage) {
+  async function handleSaveLanguage() {
     try {
       await setLanguage.mutateAsync(language);
       toast.success(t('languageSaved'));
@@ -255,11 +262,19 @@ export default function SettingsPage() {
                     <p className="text-sm font-medium text-foreground">{t('languageLabel')}</p>
                     <p className="text-xs text-muted-foreground">{t('languageHint')}</p>
                   </div>
-                  <NotificationLanguageToggle
-                    value={data.notificationLanguage}
-                    onChange={handleLanguageChange}
-                    disabled={setLanguage.isPending}
-                  />
+                  <div className="flex items-center gap-2">
+                    <NotificationLanguageToggle
+                      value={language}
+                      onChange={setSelectedLanguage}
+                      disabled={setLanguage.isPending}
+                    />
+                    {language !== data.notificationLanguage && (
+                      <Button size="sm" onClick={handleSaveLanguage} disabled={setLanguage.isPending}>
+                        {setLanguage.isPending && <Loader2 className="size-4 animate-spin" />}
+                        {t('saveBranding')}
+                      </Button>
+                    )}
+                  </div>
                 </div>
               )}
             </Section>

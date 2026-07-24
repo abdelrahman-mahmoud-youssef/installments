@@ -16,7 +16,7 @@ function createLocationId(): string {
   return typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2);
 }
 
-export function LocationsSection() {
+export function LocationsSection({ showHeading = true }: { showHeading?: boolean }) {
   const t = useTranslations('settings');
   const { data, isLoading } = useBranding();
   const updateBranding = useUpdateBranding();
@@ -49,12 +49,16 @@ export function LocationsSection() {
   }
 
   return (
-    <div className="border-t border-border pt-5">
-      <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-        <MapPin className="size-4" />
-        {t('locationsLabel')}
-      </div>
-      <p className="mt-1 text-xs text-muted-foreground">{t('locationsHint')}</p>
+    <div className={showHeading ? 'border-t border-border pt-5' : undefined}>
+      {showHeading && (
+        <>
+          <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+            <MapPin className="size-4" />
+            {t('locationsLabel')}
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">{t('locationsHint')}</p>
+        </>
+      )}
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSave)} className="mt-4 flex max-w-lg flex-col gap-4">

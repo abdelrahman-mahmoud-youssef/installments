@@ -23,7 +23,7 @@ import {
   toLocalPhoneNumber,
   toStoredPhoneNumber,
 } from '@/lib/phone';
-import { BrandColorPreset, BRAND_COLOR_PRESETS, BrandingInput, brandingSchema } from '@/lib/schemas/branding';
+import { BRAND_COLOR_PRESETS, BrandingInput, brandingSchema } from '@/lib/schemas/branding';
 import { cn } from '@/lib/utils';
 
 const MAX_LOGO_BYTES = 2 * 1024 * 1024;
@@ -39,7 +39,12 @@ export function BrandingSection() {
 
   const form = useForm<BrandingInput>({
     resolver: zodResolver(brandingSchema),
-    values: { displayName: data?.displayName ?? '', phone: toLocalPhoneNumber(data?.phone) },
+    values: {
+      displayName: data?.displayName ?? '',
+      phone: toLocalPhoneNumber(data?.phone),
+      brandColor: data?.brandColor ?? BRAND_COLOR_PRESETS[0],
+      showPublicPricing: data?.showPublicPricing ?? true,
+    },
   });
 
   async function handleSaveDetails(values: BrandingInput) {
@@ -47,19 +52,9 @@ export function BrandingSection() {
       await updateBranding.mutateAsync({
         displayName: values.displayName.trim(),
         phone: toStoredPhoneNumber(values.phone),
+        brandColor: values.brandColor,
+        showPublicPricing: values.showPublicPricing,
       });
-      toast.success(t('brandingSaved'));
-    } catch (error) {
-      toast.error(error instanceof ApiError ? error.message : t('genericError'));
-    }
-  }
-
-  async function handleColorSelect(brandColor: BrandColorPreset) {
-    if (brandColor === data?.brandColor) {
-      return;
-    }
-    try {
-      await updateBranding.mutateAsync({ brandColor });
       toast.success(t('brandingSaved'));
     } catch (error) {
       toast.error(error instanceof ApiError ? error.message : t('genericError'));
@@ -91,15 +86,6 @@ export function BrandingSection() {
   async function handleRemoveLogo() {
     try {
       await removeLogo.mutateAsync();
-      toast.success(t('brandingSaved'));
-    } catch (error) {
-      toast.error(error instanceof ApiError ? error.message : t('genericError'));
-    }
-  }
-
-  async function handleTogglePublicPricing(next: boolean) {
-    try {
-      await updateBranding.mutateAsync({ showPublicPricing: next });
       toast.success(t('brandingSaved'));
     } catch (error) {
       toast.error(error instanceof ApiError ? error.message : t('genericError'));
@@ -176,42 +162,44 @@ export function BrandingSection() {
           )}
         </div>
 
-        <div>
-          <p className="mb-1 text-sm font-medium text-foreground">{t('colorLabel')}</p>
-          <p className="mb-2.5 text-xs text-muted-foreground">{t('colorHint')}</p>
-          {isLoading ? (
-            <Skeleton className="h-8 w-full max-w-xs" />
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              {BRAND_COLOR_PRESETS.map((preset) => {
-                const isSelected = data?.brandColor === preset;
-                return (
-                  <button
-                    key={preset}
-                    type="button"
-                    aria-label={t(`brandColor_${preset}`)}
-                    aria-pressed={isSelected}
-                    disabled={updateBranding.isPending}
-                    onClick={() => handleColorSelect(preset)}
-                    className={cn(
-                      'grid size-8 place-items-center rounded-full ring-2 ring-offset-2 ring-offset-background transition-shadow',
-                      isSelected ? 'ring-foreground' : 'ring-transparent hover:ring-border',
-                    )}
-                    style={{ backgroundColor: BRAND_COLOR_VALUES[preset] }}
-                  >
-                    {isSelected && <Check className="size-4 text-white" strokeWidth={3} />}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
         {isLoading ? (
-          <Skeleton className="h-16 w-full max-w-sm" />
+          <Skeleton className="h-64 w-full max-w-sm" />
         ) : (
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSaveDetails)} className="flex flex-col gap-3">
+            <form onSubmit={form.handleSubmit(handleSaveDetails)} className="flex flex-col gap-5">
+              <FormField
+                control={form.control}
+                name="brandColor"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('colorLabel')}</FormLabel>
+                    <p className="-mt-1 text-xs text-muted-foreground">{t('colorHint')}</p>
+                    <FormControl>
+                      <div className="flex flex-wrap gap-2">
+                        {BRAND_COLOR_PRESETS.map((preset) => {
+                          const isSelected = field.value === preset;
+                          return (
+                            <button
+                              key={preset}
+                              type="button"
+                              aria-label={t(`brandColor_${preset}`)}
+                              aria-pressed={isSelected}
+                              onClick={() => field.onChange(preset)}
+                              className={cn(
+                                'grid size-8 place-items-center rounded-full ring-2 ring-offset-2 ring-offset-background transition-shadow',
+                                isSelected ? 'ring-foreground' : 'ring-transparent hover:ring-border',
+                              )}
+                              style={{ backgroundColor: BRAND_COLOR_VALUES[preset] }}
+                            >
+                              {isSelected && <Check className="size-4 text-white" strokeWidth={3} />}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name="displayName"
@@ -253,6 +241,21 @@ export function BrandingSection() {
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="showPublicPricing"
+                render={({ field }) => (
+                  <FormItem className="flex-row items-center justify-between gap-3 border-t border-border pt-5">
+                    <div className="min-w-0">
+                      <FormLabel>{t('publicPricingLabel')}</FormLabel>
+                      <p className="text-xs text-muted-foreground">{t('publicPricingHint')}</p>
+                    </div>
+                    <FormControl>
+                      <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
               <div>
                 <Button type="submit" size="sm" disabled={updateBranding.isPending}>
                   {updateBranding.isPending && <Loader2 className="size-4 animate-spin" />}
@@ -261,22 +264,6 @@ export function BrandingSection() {
               </div>
             </form>
           </Form>
-        )}
-
-        {isLoading ? (
-          <Skeleton className="h-9 w-full max-w-sm" />
-        ) : (
-          <div className="flex items-center justify-between gap-3 border-t border-border pt-5">
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-foreground">{t('publicPricingLabel')}</p>
-              <p className="text-xs text-muted-foreground">{t('publicPricingHint')}</p>
-            </div>
-            <Switch
-              checked={data?.showPublicPricing ?? true}
-              onCheckedChange={handleTogglePublicPricing}
-              disabled={updateBranding.isPending}
-            />
-          </div>
         )}
       </div>
 
