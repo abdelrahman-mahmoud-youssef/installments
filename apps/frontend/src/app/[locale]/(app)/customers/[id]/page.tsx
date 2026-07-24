@@ -109,12 +109,16 @@ export default function CustomerDetailPage() {
             <div className="min-w-0 space-y-1.5">
               <h1 className="font-heading text-xl font-semibold tracking-tight">{customer.name}</h1>
               <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1.5">
+                <a
+                  href={`tel:${customer.phone}`}
+                  title={t('call')}
+                  className="flex items-center gap-1.5 hover:text-foreground hover:underline"
+                >
                   <Phone className="size-3.5" />
                   <span dir="ltr" className="tabular-nums">
                     {customer.phone}
                   </span>
-                </span>
+                </a>
                 <a
                   href={`https://wa.me/20${normalizeLocalPhoneInput(customer.phone)}`}
                   target="_blank"
