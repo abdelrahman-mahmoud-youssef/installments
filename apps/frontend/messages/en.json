@@ -385,6 +385,7 @@
       "title": "Record payment",
       "description": "By default, payments apply to the oldest unpaid installment first, with any excess rolling into the next one.",
       "amount": "Amount",
+      "paidAt": "Payment date",
       "quickNext": "Next installment",
       "quickFull": "Full outstanding",
       "note": "Note (optional)",

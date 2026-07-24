@@ -50,3 +50,11 @@ export function formatWeekday(date: string | Date, locale = 'en'): string {
     numberingSystem: 'latn',
   }).format(new Date(date));
 }
+
+export function toIsoDate(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
+export function todayIso(): string {
+  return toIsoDate(new Date());
+}

@@ -14,6 +14,7 @@ function toCreatePaymentPayload(contractId: string, input: PaymentInput): Record
   return {
     contractId,
     amount: toMinorUnits(input.amount),
+    paidAt: input.paidAt,
     note: input.note || undefined,
     allocations: input.allocations?.length
       ? input.allocations.map((allocation) => ({

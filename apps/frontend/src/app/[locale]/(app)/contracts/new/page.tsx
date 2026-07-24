@@ -28,7 +28,7 @@ import { useCreateContract } from '@/hooks/use-contracts';
 import { useCreateCustomer, useCustomers } from '@/hooks/use-customers';
 import { ApiError } from '@/lib/api/client';
 import { CALCULATION_METHODS, type CalculationMethod, RECURRENCE_TYPES } from '@/lib/enums';
-import { formatMoney } from '@/lib/format';
+import { formatMoney, toIsoDate, todayIso } from '@/lib/format';
 import { routes } from '@/lib/routes';
 import { ContractInput, contractSchema } from '@/lib/schemas/contract';
 
@@ -91,14 +91,6 @@ function buildInstallmentPreview(
   const base = Math.floor(remainingMinor / count);
   const final = base + (remainingMinor - base * count);
   return { count, regular: base, final };
-}
-
-function toIsoDate(date: Date): string {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-}
-
-function todayIso(): string {
-  return toIsoDate(new Date());
 }
 
 function oneMonthLaterIso(): string {

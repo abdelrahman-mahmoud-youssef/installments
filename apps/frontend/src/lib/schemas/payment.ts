@@ -7,6 +7,7 @@ export const paymentAllocationSchema = z.object({
 
 export const paymentSchema = z.object({
   amount: z.number().positive('Enter a payment amount greater than zero.'),
+  paidAt: z.string().min(1, 'Payment date is required.'),
   note: z.string().max(500).optional(),
   allocations: z.array(paymentAllocationSchema).optional(),
 });

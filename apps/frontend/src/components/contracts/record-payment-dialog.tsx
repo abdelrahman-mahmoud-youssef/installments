@@ -23,7 +23,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { ApiError } from '@/lib/api/client';
 import { Installment } from '@/lib/api/contracts';
-import { toMinorUnits, toMajorUnits } from '@/lib/format';
+import { toMinorUnits, toMajorUnits, todayIso } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { PaymentInput, paymentSchema } from '@/lib/schemas/payment';
 
@@ -43,7 +43,7 @@ export function RecordPaymentDialog({
 
   const form = useForm<PaymentInput>({
     resolver: zodResolver(paymentSchema),
-    defaultValues: { amount: undefined, note: '' },
+    defaultValues: { amount: undefined, paidAt: todayIso(), note: '' },
   });
 
   const nextRemaining = outstandingInstallments[0]
@@ -66,7 +66,7 @@ export function RecordPaymentDialog({
       await onSubmit({ ...values, allocations });
       toast.success(t('recorded'));
       setOpen(false);
-      form.reset({ amount: undefined, note: '' });
+      form.reset({ amount: undefined, paidAt: todayIso(), note: '' });
       setManualAmounts({});
       setIsManual(false);
     } catch (error) {
@@ -123,6 +123,20 @@ export function RecordPaymentDialog({
                   )}
                 </div>
               )}
+
+              <FormField
+                control={form.control}
+                name="paidAt"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('paidAt')}</FormLabel>
+                    <FormControl>
+                      <Input type="date" max={todayIso()} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}
