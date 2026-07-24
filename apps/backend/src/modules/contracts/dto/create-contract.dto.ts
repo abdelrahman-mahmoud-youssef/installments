@@ -25,6 +25,11 @@ export class CreateContractDto {
   @IsPositive()
   productPrice!: number;
 
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  costPrice?: number;
+
   @IsInt()
   @Min(0)
   downPayment!: number;

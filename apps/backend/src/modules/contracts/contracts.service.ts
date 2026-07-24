@@ -65,6 +65,7 @@ export class ContractsService {
           customerId: createContractDto.customerId,
           productName: createContractDto.productName,
           productPrice: createContractDto.productPrice,
+          costPrice: createContractDto.costPrice,
           downPayment: createContractDto.downPayment,
           totalAmount: schedule.totalAmount,
           calculationMethod: createContractDto.calculationMethod,

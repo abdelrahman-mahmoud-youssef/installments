@@ -317,6 +317,19 @@ export default function ContractDetailPage() {
               <DetailRow label={t('productPrice')}>
                 <Money minorUnits={contract.productPrice} />
               </DetailRow>
+              {contract.costPrice !== null && (
+                <>
+                  <DetailRow label={t('costPrice')}>
+                    <Money minorUnits={contract.costPrice} />
+                  </DetailRow>
+                  <DetailRow label={t('profit')}>
+                    <Money
+                      minorUnits={contract.productPrice - contract.costPrice}
+                      className="text-success"
+                    />
+                  </DetailRow>
+                </>
+              )}
               {contract.downPayment > 0 && (
                 <DetailRow label={t('downPayment')}>
                   <Money minorUnits={contract.downPayment} />

@@ -131,8 +131,10 @@ export default function NewContractPage() {
       customerId: preselectedCustomerId,
       productName: '',
       productPrice: undefined,
+      costPrice: undefined,
       downPayment: undefined,
       calculationMethod: 'FIXED_COUNT',
+      installmentCount: 12,
       recurrenceType: 'MONTHLY',
       startDate: '',
       firstPaymentDate: '',
@@ -269,6 +271,20 @@ export default function NewContractPage() {
                           <FormControl>
                             <NumberInput step="1" min="0" {...field} />
                           </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="costPrice"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t('costPrice')}</FormLabel>
+                          <FormControl>
+                            <NumberInput step="1" min="0" {...field} />
+                          </FormControl>
+                          <p className="text-xs text-muted-foreground">{t('costPriceHint')}</p>
                           <FormMessage />
                         </FormItem>
                       )}

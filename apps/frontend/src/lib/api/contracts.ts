@@ -38,6 +38,7 @@ export interface ContractListItem {
   id: string;
   productName: string;
   productPrice: number;
+  costPrice: number | null;
   downPayment: number;
   totalAmount: number;
   calculationMethod: CalculationMethod;
@@ -68,6 +69,7 @@ async function toCreateContractPayload(input: ContractInput): Promise<Record<str
     customerId: input.customerId,
     productName: input.productName,
     productPrice: toMinorUnits(input.productPrice),
+    costPrice: input.costPrice !== undefined ? toMinorUnits(input.costPrice) : undefined,
     downPayment: toMinorUnits(input.downPayment ?? 0),
     calculationMethod: input.calculationMethod,
     markupPercent: input.markupPercent,
