@@ -12,7 +12,7 @@ export interface PaymentClaimEntry {
   createdAt: string;
   reviewedAt: string | null;
   contract: { productName: string; customer: { name: string } };
-  installment: { sequence: number; dueDate: string; status: string };
+  installment: { sequence: number; dueDate: string; status: string } | null;
   paymentMethod: { label: string; details: string };
 }
 
@@ -28,8 +28,8 @@ export function listPaymentClaims(
   return apiClient.get(`payment-claims${buildQuery(params)}`);
 }
 
-export function approvePaymentClaim(id: string): Promise<PaymentClaimEntry> {
-  return apiClient.patch(`payment-claims/${id}/approve`);
+export function approvePaymentClaim(id: string, amount?: number): Promise<PaymentClaimEntry> {
+  return apiClient.patch(`payment-claims/${id}/approve`, { amount });
 }
 
 export function declinePaymentClaim(id: string, reason?: string): Promise<PaymentClaimEntry> {

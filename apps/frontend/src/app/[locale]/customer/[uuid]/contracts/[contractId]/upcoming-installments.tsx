@@ -11,9 +11,11 @@ import { routes } from '@/lib/routes';
 export function UpcomingInstallments({
   installments,
   publicId,
+  contractId,
 }: {
   installments: PublicInstallment[];
   publicId: string;
+  contractId: string;
 }) {
   const t = useTranslations('publicCustomer');
 
@@ -28,7 +30,7 @@ export function UpcomingInstallments({
   return (
     <div className="space-y-3">
       <Link
-        href={routes.publicCustomerPay(publicId)}
+        href={routes.publicCustomerPay(publicId, contractId)}
         className="flex items-center justify-between gap-1 rounded-lg bg-primary px-3.5 py-2.5 text-sm font-medium text-primary-foreground"
       >
         {t('makePaymentLink')}

@@ -7,22 +7,26 @@ import { Money } from '@/components/shared/money';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { Badge } from '@/components/ui/badge';
 import { useRouter } from '@/i18n/navigation';
-import { PublicNextInstallment, PublicPaymentMethod } from '@/lib/api/public';
+import { PublicInstallmentClaim, PublicNextInstallment, PublicPaymentMethod } from '@/lib/api/public';
 import { routes } from '@/lib/routes';
 
 export function NextPaymentAction({
   nextInstallment,
+  latestClaim,
   paymentMethods,
   publicId,
+  contractPublicId,
 }: {
   nextInstallment: PublicNextInstallment;
+  latestClaim: PublicInstallmentClaim | null;
   paymentMethods: PublicPaymentMethod[];
   publicId: string;
+  contractPublicId: string;
 }) {
   const t = useTranslations('publicCustomer');
   const router = useRouter();
 
-  const isPending = nextInstallment.latestClaim?.status === 'PENDING';
+  const isPending = latestClaim?.status === 'PENDING';
   const isPayable = !isPending && paymentMethods.length > 0;
 
   const info = (
@@ -37,10 +41,10 @@ export function NextPaymentAction({
     </div>
   );
 
-  const declinedNote = nextInstallment.latestClaim?.status === 'DECLINED' && (
+  const declinedNote = latestClaim?.status === 'DECLINED' && (
     <p className="text-xs text-danger">
       {t('claimDeclined', {
-        reason: nextInstallment.latestClaim.declineReason || t('claimDeclinedNoReason'),
+        reason: latestClaim.declineReason || t('claimDeclinedNoReason'),
       })}
     </p>
   );
@@ -71,7 +75,7 @@ export function NextPaymentAction({
       onClick={(event) => {
         event.preventDefault();
         event.stopPropagation();
-        router.push(routes.publicCustomerPay(publicId));
+        router.push(routes.publicCustomerPay(publicId, contractPublicId));
       }}
       className="block w-full space-y-2.5 border-t border-border pt-4 text-start text-sm"
     >

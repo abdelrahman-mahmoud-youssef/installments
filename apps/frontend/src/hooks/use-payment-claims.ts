@@ -23,7 +23,7 @@ export function usePaymentClaims(params: PaymentClaimQueryParams, options?: { re
 export function useApprovePaymentClaim() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => approvePaymentClaim(id),
+    mutationFn: ({ id, amount }: { id: string; amount?: number }) => approvePaymentClaim(id, amount),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: paymentClaimKeys.all }),
   });
 }

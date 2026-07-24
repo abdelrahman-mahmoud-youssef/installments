@@ -65,7 +65,7 @@ export default function PaymentClaimsPage() {
       header: t('columnContract'),
       cell: (claim) => (
         <span className="text-muted-foreground">
-          {claim.contract.productName} · #{claim.installment.sequence}
+          {claim.installment ? `${claim.contract.productName} · #${claim.installment.sequence}` : claim.contract.productName}
         </span>
       ),
     },

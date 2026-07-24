@@ -17,9 +17,12 @@ export class PublicController {
     return this.publicService.getCustomerByPublicId(publicId);
   }
 
-  @Get(':publicId/outstanding-installments')
-  getOutstandingInstallments(@Param('publicId') publicId: string) {
-    return this.publicService.getOutstandingInstallments(publicId);
+  @Get(':publicId/contracts/:contractPublicId/pay-info')
+  getContractPayInfo(
+    @Param('publicId') publicId: string,
+    @Param('contractPublicId') contractPublicId: string,
+  ) {
+    return this.publicService.getContractPayInfo(publicId, contractPublicId);
   }
 
   @Get(':publicId/contracts/:contractPublicId')

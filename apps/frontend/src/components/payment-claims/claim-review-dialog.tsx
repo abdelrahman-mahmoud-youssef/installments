@@ -2,10 +2,11 @@
 
 import { Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { DateText } from '@/components/shared/date-text';
 import { Money } from '@/components/shared/money';
+import { NumberInput } from '@/components/shared/number-input';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -20,6 +21,7 @@ import { useApprovePaymentClaim, useDeclinePaymentClaim } from '@/hooks/use-paym
 import { ApiError } from '@/lib/api/client';
 import { PaymentClaimEntry } from '@/lib/api/payment-claims';
 import { resolveAssetUrl } from '@/lib/assets';
+import { toMajorUnits, toMinorUnits } from '@/lib/format';
 
 export function ClaimReviewDialog({
   claim,
@@ -34,13 +36,20 @@ export function ClaimReviewDialog({
   const decline = useDeclinePaymentClaim();
   const [declining, setDeclining] = useState(false);
   const [reason, setReason] = useState('');
+  const [amount, setAmount] = useState<number | undefined>(undefined);
+
+  useEffect(() => {
+    if (claim) {
+      setAmount(toMajorUnits(claim.amount));
+    }
+  }, [claim]);
 
   async function handleApprove() {
-    if (!claim) {
+    if (!claim || amount === undefined) {
       return;
     }
     try {
-      await approve.mutateAsync(claim.id);
+      await approve.mutateAsync({ id: claim.id, amount: toMinorUnits(amount) });
       toast.success(t('approved'));
       onOpenChange(false);
     } catch (error) {
@@ -78,15 +87,30 @@ export function ClaimReviewDialog({
             <DialogHeader>
               <DialogTitle>{claim.contract.customer.name}</DialogTitle>
               <DialogDescription>
-                {claim.contract.productName} · #{claim.installment.sequence}
+                {claim.installment
+                  ? `${claim.contract.productName} · #${claim.installment.sequence}`
+                  : claim.contract.productName}
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-3">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">{t('amount')}</span>
-                <Money minorUnits={claim.amount} className="font-semibold" />
-              </div>
+              {claim.status === 'PENDING' ? (
+                <div className="flex items-center justify-between gap-3 text-sm">
+                  <span className="text-muted-foreground">{t('amount')}</span>
+                  <NumberInput
+                    step="0.01"
+                    min="0"
+                    className="h-8 w-32 text-end"
+                    value={amount}
+                    onChange={setAmount}
+                  />
+                </div>
+              ) : (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">{t('amount')}</span>
+                  <Money minorUnits={claim.amount} className="font-semibold" />
+                </div>
+              )}
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">{t('method')}</span>
                 <span className="font-medium">{claim.paymentMethod.label}</span>
@@ -142,7 +166,11 @@ export function ClaimReviewDialog({
                     >
                       {t('decline')}
                     </Button>
-                    <Button type="button" disabled={approve.isPending} onClick={handleApprove}>
+                    <Button
+                      type="button"
+                      disabled={approve.isPending || !amount || amount <= 0}
+                      onClick={handleApprove}
+                    >
                       {approve.isPending && <Loader2 className="size-4 animate-spin" />}
                       {t('approve')}
                     </Button>

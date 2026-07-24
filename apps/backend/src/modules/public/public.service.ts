@@ -25,7 +25,6 @@ export interface PublicNextInstallment {
   dueDate: Date;
   amount: number;
   isOverdue: boolean;
-  latestClaim: PublicInstallmentClaim | null;
 }
 
 export interface PublicPayment {
@@ -60,22 +59,12 @@ export interface PublicContractSummary {
   paidAmount: number;
   remainingAmount: number;
   nextInstallment: PublicNextInstallment | null;
-}
-
-export interface PublicOutstandingInstallment {
-  id: string;
-  contractPublicId: string;
-  productName: string;
-  sequence: number;
-  dueDate: Date;
-  amount: number;
-  paidAmount: number;
-  isOverdue: boolean;
   latestClaim: PublicInstallmentClaim | null;
 }
 
-export interface PublicOutstandingResponse {
-  installments: PublicOutstandingInstallment[];
+export interface PublicContractPayInfo {
+  amountDue: number;
+  hasPendingClaim: boolean;
   paymentMethods: PublicPaymentMethod[];
   branding: TenantBranding;
 }
@@ -157,12 +146,12 @@ export class PublicService {
                 amount: true,
                 paidAmount: true,
                 status: true,
-                paymentClaims: {
-                  orderBy: { createdAt: 'desc' },
-                  take: 1,
-                  select: { status: true, declineReason: true },
-                },
               },
+            },
+            paymentClaims: {
+              orderBy: { createdAt: 'desc' },
+              take: 1,
+              select: { status: true, declineReason: true },
             },
           },
         },
@@ -197,45 +186,63 @@ export class PublicService {
     };
   }
 
-  async getOutstandingInstallments(publicId: string): Promise<PublicOutstandingResponse> {
-    const customer = await this.prisma.customer.findUnique({
-      where: { publicId },
-      select: { id: true, tenant: { select: { id: true, ...TENANT_BRANDING_SELECT } } },
-    });
-
-    if (!customer) {
-      throw new NotFoundException('Customer not found.');
-    }
-
-    const today = getUtcToday();
+  private async computeContractAmountDue(
+    contractId: string,
+    today: Date,
+  ): Promise<{ amount: number } | null> {
     const outstandingWhere = {
       status: { in: [InstallmentStatus.PENDING, InstallmentStatus.PARTIALLY_PAID] },
-      contract: { customerId: customer.id, status: ContractStatus.ACTIVE },
-    };
-    const installmentSelect = {
-      id: true,
-      sequence: true,
-      dueDate: true,
-      amount: true,
-      paidAmount: true,
-      contract: { select: { publicId: true, productName: true } },
-      paymentClaims: {
-        orderBy: { createdAt: 'desc' as const },
-        take: 1,
-        select: { status: true, declineReason: true },
-      },
+      contractId,
     };
 
-    const [overdueInstallments, nextUpcomingInstallment, paymentMethods] = await Promise.all([
+    const [overdueInstallments, nextUpcomingInstallment] = await Promise.all([
       this.prisma.installment.findMany({
         where: { ...outstandingWhere, dueDate: { lt: today } },
-        orderBy: { dueDate: 'asc' },
-        select: installmentSelect,
+        select: { amount: true, paidAmount: true },
       }),
       this.prisma.installment.findFirst({
         where: { ...outstandingWhere, dueDate: { gte: today } },
         orderBy: { dueDate: 'asc' },
-        select: installmentSelect,
+        select: { amount: true, paidAmount: true },
+      }),
+    ]);
+
+    if (overdueInstallments.length > 0) {
+      const amount = overdueInstallments.reduce(
+        (total, installment) => total + (installment.amount - installment.paidAmount),
+        0,
+      );
+      return { amount };
+    }
+    if (nextUpcomingInstallment) {
+      return { amount: nextUpcomingInstallment.amount - nextUpcomingInstallment.paidAmount };
+    }
+    return null;
+  }
+
+  async getContractPayInfo(
+    customerPublicId: string,
+    contractPublicId: string,
+  ): Promise<PublicContractPayInfo> {
+    const customer = await this.prisma.customer.findUnique({
+      where: { publicId: customerPublicId },
+      select: {
+        tenant: { select: { id: true, ...TENANT_BRANDING_SELECT } },
+        contracts: { where: { publicId: contractPublicId }, select: { id: true } },
+      },
+    });
+
+    const contract = customer?.contracts[0];
+    if (!customer || !contract) {
+      throw new NotFoundException('Contract not found.');
+    }
+
+    const today = getUtcToday();
+    const [due, pendingClaim, paymentMethods] = await Promise.all([
+      this.computeContractAmountDue(contract.id, today),
+      this.prisma.paymentClaim.findFirst({
+        where: { contractId: contract.id, status: PaymentClaimStatus.PENDING },
+        select: { id: true },
       }),
       this.prisma.paymentMethod.findMany({
         where: { tenantId: customer.tenant.id, isActive: true },
@@ -244,27 +251,12 @@ export class PublicService {
       }),
     ]);
 
-    const toPublicInstallment = (
-      installment: (typeof overdueInstallments)[number],
-      isOverdue: boolean,
-    ) => ({
-      id: installment.id,
-      contractPublicId: installment.contract.publicId,
-      productName: installment.contract.productName,
-      sequence: installment.sequence,
-      dueDate: installment.dueDate,
-      amount: installment.amount,
-      paidAmount: installment.paidAmount,
-      isOverdue,
-      latestClaim: installment.paymentClaims[0] ?? null,
-    });
-
-    const installments = [
-      ...overdueInstallments.map((installment) => toPublicInstallment(installment, true)),
-      ...(nextUpcomingInstallment ? [toPublicInstallment(nextUpcomingInstallment, false)] : []),
-    ];
-
-    return { installments, paymentMethods, branding: toTenantBranding(customer.tenant) };
+    return {
+      amountDue: due?.amount ?? 0,
+      hasPendingClaim: Boolean(pendingClaim),
+      paymentMethods,
+      branding: toTenantBranding(customer.tenant),
+    };
   }
 
   async getShopBySlug(slug: string): Promise<TenantBranding> {
@@ -507,32 +499,23 @@ export class PublicService {
         tenant: { select: { id: true, telegramBotToken: true, telegramChatId: true } },
         contracts: {
           where: { publicId: contractPublicId },
-          select: {
-            id: true,
-            productName: true,
-            status: true,
-            installments: {
-              where: { id: dto.installmentId },
-              select: { id: true, amount: true, paidAmount: true, status: true },
-            },
-          },
+          select: { id: true, productName: true, status: true },
         },
       },
     });
 
     const contract = customer?.contracts[0];
-    const installment = contract?.installments[0];
-    if (!customer || !contract || !installment) {
-      throw new NotFoundException('Contract or installment not found.');
+    if (!customer || !contract) {
+      throw new NotFoundException('Contract not found.');
     }
     if (contract.status !== ContractStatus.ACTIVE) {
       throw new BadRequestException('This contract is not active.');
     }
-    if (
-      installment.status !== InstallmentStatus.PENDING &&
-      installment.status !== InstallmentStatus.PARTIALLY_PAID
-    ) {
-      throw new BadRequestException('This installment is already settled.');
+
+    const today = getUtcToday();
+    const due = await this.computeContractAmountDue(contract.id, today);
+    if (!due) {
+      throw new BadRequestException('This contract has nothing outstanding.');
     }
 
     const paymentMethod = await this.prisma.paymentMethod.findFirst({
@@ -543,10 +526,10 @@ export class PublicService {
     }
 
     const existingPendingClaim = await this.prisma.paymentClaim.findFirst({
-      where: { installmentId: installment.id, status: PaymentClaimStatus.PENDING },
+      where: { contractId: contract.id, status: PaymentClaimStatus.PENDING },
     });
     if (existingPendingClaim) {
-      throw new BadRequestException('There is already a payment claim under review for this installment.');
+      throw new BadRequestException('There is already a payment claim under review for this contract.');
     }
 
     const rawBuffer = Buffer.from(dto.screenshot, 'base64');
@@ -558,7 +541,6 @@ export class PublicService {
       throw new BadRequestException('Screenshot must be a PNG or JPEG image.');
     }
 
-    const amount = installment.amount - installment.paidAmount;
     const screenshotUrl = await this.storage.saveKeyedImage(
       `payment-claims/${customer.tenant.id}/${randomUUID()}.${extension}`,
       rawBuffer,
@@ -568,14 +550,13 @@ export class PublicService {
       data: {
         tenantId: customer.tenant.id,
         contractId: contract.id,
-        installmentId: installment.id,
         paymentMethodId: paymentMethod.id,
-        amount,
+        amount: due.amount,
         screenshotUrl,
       },
     });
 
-    await this.notifyAdminOfClaim(customer.tenant, customer.name, contract.productName, amount, rawBuffer);
+    await this.notifyAdminOfClaim(customer.tenant, customer.name, contract.productName, due.amount, rawBuffer);
 
     return { status: PaymentClaimStatus.PENDING };
   }
@@ -611,8 +592,8 @@ export class PublicService {
         amount: number;
         paidAmount: number;
         status: InstallmentStatus;
-        paymentClaims: PublicInstallmentClaim[];
       }[];
+      paymentClaims: PublicInstallmentClaim[];
     },
     pricingVisible: boolean,
   ): PublicContractSummary {
@@ -640,9 +621,9 @@ export class PublicService {
             dueDate: nextOutstanding.dueDate,
             amount: nextOutstanding.amount - nextOutstanding.paidAmount,
             isOverdue: nextOutstanding.dueDate < today,
-            latestClaim: nextOutstanding.paymentClaims[0] ?? null,
           }
         : null,
+      latestClaim: contract.paymentClaims[0] ?? null,
     };
   }
 }

@@ -37,7 +37,6 @@ export function SubmitPaymentDialog({
   onOpenChange,
   publicId,
   contractPublicId,
-  installmentId,
   amount,
   paymentMethods,
   onSubmitted,
@@ -46,7 +45,6 @@ export function SubmitPaymentDialog({
   onOpenChange: (open: boolean) => void;
   publicId: string;
   contractPublicId: string;
-  installmentId: string;
   amount: number;
   paymentMethods: PublicPaymentMethod[];
   onSubmitted: () => void;
@@ -63,7 +61,6 @@ export function SubmitPaymentDialog({
     try {
       const screenshot = await readFileAsBase64(values.screenshot);
       await submitPaymentClaim(publicId, contractPublicId, {
-        installmentId,
         paymentMethodId: values.paymentMethodId,
         screenshot,
       });

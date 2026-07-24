@@ -4,10 +4,6 @@ import { MAX_PAYMENT_PROOF_UPLOAD_BYTES } from '../../../common/constants';
 export class SubmitPaymentClaimDto {
   @IsString()
   @IsNotEmpty()
-  installmentId!: string;
-
-  @IsString()
-  @IsNotEmpty()
   paymentMethodId!: string;
 
   @IsString()

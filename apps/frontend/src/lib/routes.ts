@@ -15,7 +15,8 @@ export const routes = {
   paymentClaims: '/payment-claims',
   settings: '/settings',
   publicCustomer: (publicId: string) => `/customer/${publicId}`,
-  publicCustomerPay: (publicId: string) => `/customer/${publicId}/pay`,
+  publicCustomerPay: (publicId: string, contractPublicId: string) =>
+    `/customer/${publicId}/contracts/${contractPublicId}/pay`,
   publicContract: (publicId: string, contractPublicId: string) =>
     `/customer/${publicId}/contracts/${contractPublicId}`,
   publicShop: (publicId: string) => `/shop/${publicId}`,

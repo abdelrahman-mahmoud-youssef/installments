@@ -160,8 +160,10 @@ export default async function PublicCustomerPage({
                 {contract.nextInstallment && (
                   <NextPaymentAction
                     nextInstallment={contract.nextInstallment}
+                    latestClaim={contract.latestClaim}
                     paymentMethods={customer.paymentMethods}
                     publicId={uuid}
+                    contractPublicId={contract.publicId}
                   />
                 )}
 

@@ -14,7 +14,6 @@ export interface PublicNextInstallment {
   dueDate: string;
   amount: number;
   isOverdue: boolean;
-  latestClaim: PublicInstallmentClaim | null;
 }
 
 export interface PublicPayment {
@@ -40,20 +39,9 @@ export interface PublicPaymentMethod {
   presetKey: string | null;
 }
 
-export interface PublicOutstandingInstallment {
-  id: string;
-  contractPublicId: string;
-  productName: string;
-  sequence: number;
-  dueDate: string;
-  amount: number;
-  paidAmount: number;
-  isOverdue: boolean;
-  latestClaim: PublicInstallmentClaim | null;
-}
-
-export interface PublicOutstandingResponse {
-  installments: PublicOutstandingInstallment[];
+export interface PublicContractPayInfo {
+  amountDue: number;
+  hasPendingClaim: boolean;
   paymentMethods: PublicPaymentMethod[];
   branding: TenantBranding;
 }
@@ -67,6 +55,7 @@ export interface PublicContractSummary {
   paidAmount: number;
   remainingAmount: number;
   nextInstallment: PublicNextInstallment | null;
+  latestClaim: PublicInstallmentClaim | null;
 }
 
 export interface PublicContractDetail {
@@ -135,18 +124,22 @@ export async function getPublicContractDetail(
   return response.json() as Promise<PublicContractDetail>;
 }
 
-export async function getPublicOutstanding(publicId: string): Promise<PublicOutstandingResponse | null> {
-  const response = await fetch(`${config.backendUrl}/public/customers/${publicId}/outstanding-installments`, {
-    cache: 'no-store',
-  });
+export async function getContractPayInfo(
+  publicId: string,
+  contractPublicId: string,
+): Promise<PublicContractPayInfo | null> {
+  const response = await fetch(
+    `${config.backendUrl}/public/customers/${publicId}/contracts/${contractPublicId}/pay-info`,
+    { cache: 'no-store' },
+  );
 
   if (response.status === 404) {
     return null;
   }
   if (!response.ok) {
-    throw new Error('Failed to load outstanding installments.');
+    throw new Error('Failed to load payment info.');
   }
-  return response.json() as Promise<PublicOutstandingResponse>;
+  return response.json() as Promise<PublicContractPayInfo>;
 }
 
 export async function getPublicShop(publicId: string): Promise<TenantBranding | null> {
@@ -212,7 +205,6 @@ export function setPublicTelegramBroadcasts(
 }
 
 export interface SubmitPaymentClaimInput {
-  installmentId: string;
   paymentMethodId: string;
   screenshot: string;
 }

@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Patch, Query } from '@nestjs/common';
 import { Audit } from '../../common/decorators/audit.decorator';
 import { AuthenticatedUser, CurrentUser } from '../../common/decorators/current-user.decorator';
+import { ApproveClaimDto } from './dto/approve-claim.dto';
 import { DeclineClaimDto } from './dto/decline-claim.dto';
 import { PaymentClaimQueryDto } from './dto/payment-claim-query.dto';
 import { PaymentClaimsService } from './payment-claims.service';
@@ -16,8 +17,12 @@ export class PaymentClaimsController {
 
   @Patch(':id/approve')
   @Audit('paymentClaim.approve', 'PaymentClaim')
-  approve(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
-    return this.paymentClaimsService.approve(user.tenantId, user.userId, id);
+  approve(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() dto: ApproveClaimDto,
+  ) {
+    return this.paymentClaimsService.approve(user.tenantId, user.userId, id, dto);
   }
 
   @Patch(':id/decline')

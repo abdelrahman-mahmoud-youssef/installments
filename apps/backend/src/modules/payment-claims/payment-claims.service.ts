@@ -3,6 +3,7 @@ import { InstallmentStatus, Prisma, PaymentClaimStatus } from '@prisma/client';
 import { buildPaginatedResult, PaginatedResult } from '../../common/pagination/paginated-result.interface';
 import { PrismaService } from '../../prisma/prisma.service';
 import { PaymentsService } from '../payments/payments.service';
+import { ApproveClaimDto } from './dto/approve-claim.dto';
 import { DeclineClaimDto } from './dto/decline-claim.dto';
 import { PaymentClaimQueryDto } from './dto/payment-claim-query.dto';
 
@@ -41,28 +42,39 @@ export class PaymentClaimsService {
     return buildPaginatedResult(data, total, query.page, query.limit);
   }
 
-  async approve(tenantId: string, reviewerUserId: string, id: string): Promise<PaymentClaimDetail> {
+  async approve(
+    tenantId: string,
+    reviewerUserId: string,
+    id: string,
+    dto: ApproveClaimDto,
+  ): Promise<PaymentClaimDetail> {
     const claim = await this.findOwned(tenantId, id);
     if (claim.status !== PaymentClaimStatus.PENDING) {
       throw new BadRequestException('This claim has already been reviewed.');
     }
     if (
+      claim.installment &&
       claim.installment.status !== InstallmentStatus.PENDING &&
       claim.installment.status !== InstallmentStatus.PARTIALLY_PAID
     ) {
       throw new BadRequestException('This installment has already been settled through another payment.');
     }
 
+    const finalAmount = dto.amount ?? claim.amount;
+
     await this.paymentsService.create(tenantId, {
       contractId: claim.contractId,
-      amount: claim.amount,
-      allocations: [{ installmentId: claim.installmentId, amount: claim.amount }],
+      amount: finalAmount,
       note: `Approved payment claim #${claim.id}`,
+      ...(claim.installmentId && {
+        allocations: [{ installmentId: claim.installmentId, amount: finalAmount }],
+      }),
     });
 
     await this.prisma.paymentClaim.update({
       where: { id: claim.id },
       data: {
+        amount: finalAmount,
         status: PaymentClaimStatus.APPROVED,
         reviewedByUserId: reviewerUserId,
         reviewedAt: new Date(),

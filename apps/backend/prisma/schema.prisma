@@ -343,7 +343,7 @@ model PaymentClaim {
   id               String             @id @default(cuid())
   tenantId         String
   contractId       String
-  installmentId    String
+  installmentId    String?
   paymentMethodId  String
   amount           Int
   screenshotUrl    String
@@ -354,7 +354,7 @@ model PaymentClaim {
   createdAt        DateTime           @default(now())
   tenant           Tenant             @relation(fields: [tenantId], references: [id])
   contract         Contract           @relation(fields: [contractId], references: [id])
-  installment      Installment        @relation(fields: [installmentId], references: [id])
+  installment      Installment?       @relation(fields: [installmentId], references: [id])
   paymentMethod    PaymentMethod      @relation(fields: [paymentMethodId], references: [id])
   reviewedBy       User?              @relation(fields: [reviewedByUserId], references: [id], onDelete: SetNull)
 
