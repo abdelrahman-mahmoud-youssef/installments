@@ -353,16 +353,19 @@ model PaymentMethod {
 }
 
 model PaymentMethodTransaction {
-  id              String           @id @default(cuid())
-  tenantId        String
-  paymentMethodId String
-  direction       PaymentDirection
-  amount          Int
-  note            String?
-  occurredAt      DateTime         @default(now())
-  createdAt       DateTime         @default(now())
-  tenant          Tenant           @relation(fields: [tenantId], references: [id])
-  paymentMethod   PaymentMethod    @relation(fields: [paymentMethodId], references: [id], onDelete: Restrict)
+  id                String           @id @default(cuid())
+  tenantId          String
+  paymentMethodId   String
+  direction         PaymentDirection
+  amount            Int
+  counterpartyName  String?
+  counterpartyPhone String?
+  receiptUrl        String?
+  note              String?
+  occurredAt        DateTime         @default(now())
+  createdAt         DateTime         @default(now())
+  tenant            Tenant           @relation(fields: [tenantId], references: [id])
+  paymentMethod     PaymentMethod    @relation(fields: [paymentMethodId], references: [id], onDelete: Restrict)
 
   @@index([tenantId, paymentMethodId, occurredAt])
 }

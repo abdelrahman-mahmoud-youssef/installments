@@ -11,7 +11,6 @@ import {
   Smartphone,
   Store,
   Trash2,
-  Wallet,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
@@ -28,7 +27,6 @@ import { PageHeader } from '@/components/shared/page-header';
 import { Section } from '@/components/shared/section';
 import { BrandingSection } from '@/components/settings/branding-section';
 import { InstallAppDialog } from '@/components/settings/install-app-dialog';
-import { PaymentMethodsSection } from '@/components/settings/payment-methods-section';
 import { ShopPageSection } from '@/components/settings/shop-page-section';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -53,7 +51,7 @@ const comingSoonChannels: { key: string; icon: ComponentType<{ className?: strin
   { key: 'channelSms', icon: Smartphone },
 ];
 
-const VALID_TABS = ['branding', 'shopPage', 'paymentMethods', 'notifications'] as const;
+const VALID_TABS = ['branding', 'shopPage', 'notifications'] as const;
 
 export default function SettingsPage() {
   const t = useTranslations('settings');
@@ -133,10 +131,6 @@ export default function SettingsPage() {
               <Store className="size-4" />
               {t('tabShopPage')}
             </TabsTrigger>
-            <TabsTrigger value="paymentMethods" className="gap-2 text-sm">
-              <Wallet className="size-4" />
-              {t('tabPaymentMethods')}
-            </TabsTrigger>
             <TabsTrigger value="notifications" className="gap-2 text-sm">
               <Bell className="size-4" />
               {t('tabNotifications')}
@@ -149,10 +143,6 @@ export default function SettingsPage() {
 
           <TabsContent value="shopPage">
             <ShopPageSection />
-          </TabsContent>
-
-          <TabsContent value="paymentMethods">
-            <PaymentMethodsSection />
           </TabsContent>
 
           <TabsContent value="notifications" className="space-y-6">

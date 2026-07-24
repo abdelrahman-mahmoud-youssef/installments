@@ -5,6 +5,7 @@ import { getUtcToday, startOfUtcMonth } from '../../common/date/utc-date';
 import { PrismaService } from '../../prisma/prisma.service';
 import { WhatsappService } from '../whatsapp/whatsapp.service';
 import { buildPaymentMethodLimitAlertParams } from './payment-method-limit-message';
+import { getPaymentMethodMonthlyUsage } from './payment-method-usage.util';
 
 const LIMIT_ALERT_THRESHOLD_RATIO = 0.8;
 
@@ -49,7 +50,9 @@ export class PaymentMethodLimitService {
       return;
     }
 
-    const used = await this.getMonthToDateUsage(tenantId, paymentMethodId);
+    const monthStart = startOfUtcMonth(getUtcToday());
+    const usage = await getPaymentMethodMonthlyUsage(this.prisma, tenantId, paymentMethodId, monthStart);
+    const used = usage.total;
     if (used / method.monthlyLimit < LIMIT_ALERT_THRESHOLD_RATIO) {
       return;
     }
@@ -93,24 +96,6 @@ export class PaymentMethodLimitService {
       });
       throw error;
     }
-  }
-
-  private async getMonthToDateUsage(tenantId: string, paymentMethodId: string): Promise<number> {
-    const monthStart = startOfUtcMonth(getUtcToday());
-    const monthEnd = startOfUtcMonth(monthStart, 1);
-
-    const [paymentSum, transactionSum] = await Promise.all([
-      this.prisma.payment.aggregate({
-        where: { tenantId, paymentMethodId, paidAt: { gte: monthStart, lt: monthEnd } },
-        _sum: { amount: true },
-      }),
-      this.prisma.paymentMethodTransaction.aggregate({
-        where: { tenantId, paymentMethodId, occurredAt: { gte: monthStart, lt: monthEnd } },
-        _sum: { amount: true },
-      }),
-    ]);
-
-    return (paymentSum._sum.amount ?? 0) + (transactionSum._sum.amount ?? 0);
   }
 
   private getMonthKey(date: Date): string {

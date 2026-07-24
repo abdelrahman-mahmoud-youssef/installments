@@ -58,3 +58,24 @@ export function toIsoDate(date: Date): string {
 export function todayIso(): string {
   return toIsoDate(new Date());
 }
+
+export function currentMonthKey(): string {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+}
+
+export function shiftMonthKey(monthKey: string, delta: number): string {
+  const [year, month] = monthKey.split('-').map(Number);
+  const date = new Date(Date.UTC(year, month - 1 + delta, 1));
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`;
+}
+
+export function formatMonthYear(monthKey: string, locale = 'en'): string {
+  const [year, month] = monthKey.split('-').map(Number);
+  return new Intl.DateTimeFormat(locale, {
+    year: 'numeric',
+    month: 'long',
+    timeZone: 'UTC',
+    numberingSystem: 'latn',
+  }).format(new Date(Date.UTC(year, month - 1, 1)));
+}

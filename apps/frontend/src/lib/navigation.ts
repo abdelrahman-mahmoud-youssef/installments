@@ -8,6 +8,7 @@ import {
   History,
   UserCog,
   ReceiptText,
+  Wallet,
 } from 'lucide-react';
 import { routes } from './routes';
 
@@ -18,6 +19,7 @@ export const navigationItems = [
   { labelKey: 'paymentClaims', href: routes.paymentClaims, icon: ReceiptText, adminOnly: false },
   { labelKey: 'reports', href: routes.reports, icon: BarChart3, adminOnly: false },
   { labelKey: 'announcements', href: routes.announcements, icon: Megaphone, adminOnly: false },
+  { labelKey: 'paymentMethods', href: routes.paymentMethods, icon: Wallet, adminOnly: true },
   { labelKey: 'staff', href: routes.staff, icon: UserCog, adminOnly: true },
   { labelKey: 'activity', href: routes.activity, icon: History, adminOnly: true },
   { labelKey: 'settings', href: routes.settings, icon: Settings, adminOnly: true },

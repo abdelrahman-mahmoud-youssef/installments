@@ -13,6 +13,8 @@ export const routes = {
   staff: '/staff',
   activity: '/activity',
   paymentClaims: '/payment-claims',
+  paymentMethods: '/payment-methods',
+  paymentMethod: (id: string) => `/payment-methods/${id}`,
   settings: '/settings',
   publicCustomer: (publicId: string) => `/customer/${publicId}`,
   publicCustomerPay: (publicId: string, contractPublicId: string) =>

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   createPaymentMethodTransaction,
+  getPaymentMethodMonthlySummary,
   listPaymentMethodTransactions,
   PaymentMethodTransactionListParams,
 } from '@/lib/api/payment-method-transactions';
@@ -11,6 +12,8 @@ export const paymentMethodTransactionKeys = {
   all: ['payment-method-transactions'] as const,
   list: (paymentMethodId: string, params: PaymentMethodTransactionListParams) =>
     [...paymentMethodTransactionKeys.all, paymentMethodId, params] as const,
+  summary: (paymentMethodId: string, month?: string) =>
+    [...paymentMethodTransactionKeys.all, paymentMethodId, 'summary', month] as const,
 };
 
 export function usePaymentMethodTransactions(
@@ -20,6 +23,13 @@ export function usePaymentMethodTransactions(
   return useQuery({
     queryKey: paymentMethodTransactionKeys.list(paymentMethodId, params),
     queryFn: () => listPaymentMethodTransactions(paymentMethodId, params),
+  });
+}
+
+export function usePaymentMethodMonthlySummary(paymentMethodId: string, month?: string) {
+  return useQuery({
+    queryKey: paymentMethodTransactionKeys.summary(paymentMethodId, month),
+    queryFn: () => getPaymentMethodMonthlySummary(paymentMethodId, month),
   });
 }
 

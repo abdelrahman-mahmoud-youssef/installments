@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ContractStatus, InstallmentStatus } from '@prisma/client';
-import { addUtcDays, getUtcToday, startOfUtcMonth } from '../../common/date/utc-date';
+import { addUtcDays, getUtcToday, resolveMonthStart, startOfUtcMonth } from '../../common/date/utc-date';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ReportQueryDto } from './dto/report-query.dto';
 
@@ -36,7 +36,7 @@ export class ReportsService {
   async getReports(tenantId: string, query: ReportQueryDto): Promise<ReportsResponse> {
     const today = getUtcToday();
     const tomorrow = addUtcDays(today, 1);
-    const monthStart = this.resolveMonthStart(query.month, today);
+    const monthStart = resolveMonthStart(query.month, today);
     const monthEnd = startOfUtcMonth(monthStart, 1);
 
     const [
@@ -86,14 +86,6 @@ export class ReportsService {
       totalCustomers,
       installmentsThisMonth,
     };
-  }
-
-  private resolveMonthStart(month: string | undefined, today: Date): Date {
-    if (!month) {
-      return startOfUtcMonth(today);
-    }
-    const [year, monthNumber] = month.split('-').map(Number);
-    return new Date(Date.UTC(year, monthNumber - 1, 1));
   }
 
   private groupOverdueByCustomer(overdueInstallments: OverdueInstallmentRow[]): OverdueCustomerSummary[] {

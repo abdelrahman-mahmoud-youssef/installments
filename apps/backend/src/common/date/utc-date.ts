@@ -19,3 +19,11 @@ export function startOfUtcMonth(date: Date, monthsToAdd = 0): Date {
 export function daysInUtcMonth(monthStart: Date): number {
   return new Date(Date.UTC(monthStart.getUTCFullYear(), monthStart.getUTCMonth() + 1, 0)).getUTCDate();
 }
+
+export function resolveMonthStart(month: string | undefined, today: Date): Date {
+  if (!month) {
+    return startOfUtcMonth(today);
+  }
+  const [year, monthNumber] = month.split('-').map(Number);
+  return new Date(Date.UTC(year, monthNumber - 1, 1));
+}
