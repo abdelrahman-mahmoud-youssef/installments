@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 import { PaymentMethod, Role } from '@prisma/client';
 import { Audit } from '../../common/decorators/audit.decorator';
 import { AuthenticatedUser, CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -37,6 +37,7 @@ export class PaymentMethodsController {
   }
 
   @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Audit('paymentMethod.delete', 'PaymentMethod')
   deletePaymentMethod(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string): Promise<void> {
     return this.paymentMethodsService.deletePaymentMethod(user.tenantId, id);
