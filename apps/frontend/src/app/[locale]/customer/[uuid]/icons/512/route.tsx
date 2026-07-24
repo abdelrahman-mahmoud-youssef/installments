@@ -7,5 +7,5 @@ export async function GET(_request: Request, { params }: { params: Promise<{ uui
   const customer = await getPublicCustomer(uuid);
   const logoUrl = customer ? resolveAssetUrl(customer.branding.logoUrl) : null;
 
-  return renderIconResponse(logoUrl, { width: 512, height: 512 }, 112, { size: 320, strokeWidth: 1.8 });
+  return renderIconResponse(logoUrl, { width: 512, height: 512 }, 112);
 }

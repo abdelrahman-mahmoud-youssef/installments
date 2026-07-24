@@ -10,5 +10,5 @@ export default async function Icon({ params }: { params: Promise<{ uuid: string 
   const customer = await getPublicCustomer(uuid);
   const logoUrl = customer ? resolveAssetUrl(customer.branding.logoUrl) : null;
 
-  return renderIconResponse(logoUrl, size, 7, { size: 21, strokeWidth: 2.2 });
+  return renderIconResponse(logoUrl, size, 7);
 }

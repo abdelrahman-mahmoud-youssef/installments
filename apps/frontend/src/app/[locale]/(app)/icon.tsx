@@ -13,5 +13,5 @@ export default async function Icon() {
   const branding = token ? await getBrandingServer(token) : null;
   const logoUrl = branding ? resolveAssetUrl(branding.logoUrl) : null;
 
-  return renderIconResponse(logoUrl, size, 7, { size: 21, strokeWidth: 2.2 });
+  return renderIconResponse(logoUrl, size, 7);
 }

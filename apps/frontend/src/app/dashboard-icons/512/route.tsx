@@ -10,5 +10,5 @@ export async function GET() {
   const branding = token ? await getBrandingServer(token) : null;
   const logoUrl = branding ? resolveAssetUrl(branding.logoUrl) : null;
 
-  return renderIconResponse(logoUrl, { width: 512, height: 512 }, 112, { size: 320, strokeWidth: 1.8 });
+  return renderIconResponse(logoUrl, { width: 512, height: 512 }, 112);
 }

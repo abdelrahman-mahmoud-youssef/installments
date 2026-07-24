@@ -15,9 +15,8 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
     background_color: '#ffffff',
     theme_color: '#0f7a5f',
     icons: [
-      { src: '/icons/192', sizes: '192x192', type: 'image/png', purpose: 'any' },
-      { src: '/icons/512', sizes: '512x512', type: 'image/png', purpose: 'any' },
-      { src: '/icons/512-maskable', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+      { src: '/qistak-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+      { src: '/qistak-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
     ],
   };
 }

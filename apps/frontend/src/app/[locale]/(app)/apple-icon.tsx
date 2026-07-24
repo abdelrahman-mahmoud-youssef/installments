@@ -13,5 +13,5 @@ export default async function AppleIcon() {
   const branding = token ? await getBrandingServer(token) : null;
   const logoUrl = branding ? resolveAssetUrl(branding.logoUrl) : null;
 
-  return renderIconResponse(logoUrl, size, 0, { size: 112, strokeWidth: 1.6 });
+  return renderIconResponse(logoUrl, size, 0);
 }

@@ -10,5 +10,5 @@ export default async function AppleIcon({ params }: { params: Promise<{ uuid: st
   const customer = await getPublicCustomer(uuid);
   const logoUrl = customer ? resolveAssetUrl(customer.branding.logoUrl) : null;
 
-  return renderIconResponse(logoUrl, size, 0, { size: 112, strokeWidth: 1.6 });
+  return renderIconResponse(logoUrl, size, 0);
 }
