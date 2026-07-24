@@ -15,8 +15,8 @@ interface WhatsappTemplate {
 }
 
 const PAYMENT_METHOD_LIMIT_ALERT_TEMPLATE: Record<NotificationLanguage, WhatsappTemplate> = {
-  [NotificationLanguage.AR]: { name: 'admin_payment_limit_alert_ar', languageCode: 'ar' },
-  [NotificationLanguage.EN]: { name: 'admin_payment_limit_alert_en', languageCode: 'en' },
+  [NotificationLanguage.AR]: { name: 'admin_wallet_limit_alert_ar', languageCode: 'ar' },
+  [NotificationLanguage.EN]: { name: 'admin_wallet_limit_alert_en', languageCode: 'en' },
 };
 
 @Injectable()
@@ -71,6 +71,7 @@ export class PaymentMethodLimitService {
       {
         businessName: tenant.name,
         methodLabel: method.label,
+        accountDetails: method.details,
         used,
         limit: method.monthlyLimit,
         remaining: Math.max(method.monthlyLimit - used, 0),
