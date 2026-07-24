@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowDownLeft, ArrowUpRight, Loader2, Upload } from 'lucide-react';
+import { ArrowDownCircle, ArrowUpCircle, Loader2, Upload } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -92,15 +92,15 @@ export function LogTransactionDialog({
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <RadioGroup value={field.value} onValueChange={field.onChange} className="flex gap-2">
-                        <label className="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-border py-2 text-sm has-[[data-checked]]:border-primary has-[[data-checked]]:bg-primary/5">
-                          <RadioGroupItem value="OUT" className="sr-only" />
-                          <ArrowUpRight className="size-3.5" />
+                      <RadioGroup value={field.value} onValueChange={field.onChange} className="grid grid-cols-2 gap-2">
+                        <label className="relative flex cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-border py-2.5 text-center text-sm font-medium text-muted-foreground transition-colors has-[[data-checked]]:border-primary has-[[data-checked]]:bg-primary/5 has-[[data-checked]]:text-primary">
+                          <RadioGroupItem value="OUT" className="absolute inset-0 size-full rounded-lg border-none opacity-0" />
+                          <ArrowUpCircle className="size-4" />
                           {t('transactionDirectionOut')}
                         </label>
-                        <label className="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-border py-2 text-sm has-[[data-checked]]:border-primary has-[[data-checked]]:bg-primary/5">
-                          <RadioGroupItem value="IN" className="sr-only" />
-                          <ArrowDownLeft className="size-3.5" />
+                        <label className="relative flex cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-border py-2.5 text-center text-sm font-medium text-muted-foreground transition-colors has-[[data-checked]]:border-primary has-[[data-checked]]:bg-primary/5 has-[[data-checked]]:text-primary">
+                          <RadioGroupItem value="IN" className="absolute inset-0 size-full rounded-lg border-none opacity-0" />
+                          <ArrowDownCircle className="size-4" />
                           {t('transactionDirectionIn')}
                         </label>
                       </RadioGroup>

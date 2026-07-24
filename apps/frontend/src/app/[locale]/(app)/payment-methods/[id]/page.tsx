@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowDownLeft, ArrowUpRight, FileWarning, Pencil, Plus, Receipt, Trash2, Wallet } from 'lucide-react';
+import { ArrowDownCircle, ArrowUpCircle, FileWarning, Pencil, Plus, Receipt, Trash2, Wallet } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useState } from 'react';
@@ -149,11 +149,11 @@ export default function PaymentMethodDetailPage() {
         </div>
       ) : summary ? (
         <FadeIn delay={0.1} className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          <MetricCard label={t('received')} value={<Money minorUnits={summary.paymentTotal + summary.receivedTotal} />} icon={ArrowDownLeft} tone="success" />
-          <MetricCard label={t('sent')} value={<Money minorUnits={summary.sentTotal} />} icon={ArrowUpRight} tone="danger" />
+          <MetricCard label={t('received')} value={<Money minorUnits={summary.paymentTotal + summary.receivedTotal} />} icon={ArrowDownCircle} tone="success" />
+          <MetricCard label={t('sent')} value={<Money minorUnits={summary.sentTotal} />} icon={ArrowUpCircle} tone="danger" />
           {summary.monthlyLimit != null ? (
             <>
-              <MetricCard label={t('paymentMethodMonthlyLimit')} value={<Money minorUnits={summary.monthlyLimit} />} icon={Wallet} tone="neutral" />
+              <MetricCard label={t('monthlyLimitLabel')} value={<Money minorUnits={summary.monthlyLimit} />} icon={Wallet} tone="neutral" />
               <MetricCard
                 label={t('remaining')}
                 value={<Money minorUnits={Math.max(summary.monthlyLimit - summary.total, 0)} />}
@@ -201,9 +201,9 @@ export default function PaymentMethodDetailPage() {
                     }
                   >
                     {transaction.direction === 'OUT' ? (
-                      <ArrowUpRight className="size-4" />
+                      <ArrowUpCircle className="size-4" />
                     ) : (
-                      <ArrowDownLeft className="size-4" />
+                      <ArrowDownCircle className="size-4" />
                     )}
                   </span>
                   <div className="min-w-0 flex-1">
@@ -228,9 +228,14 @@ export default function PaymentMethodDetailPage() {
                       trigger={
                         <button
                           type="button"
-                          className="text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+                          title={t('viewReceipt')}
+                          className="size-9 shrink-0 overflow-hidden rounded-lg border border-border transition-transform hover:scale-105 hover:border-primary"
                         >
-                          {t('viewReceipt')}
+                          <img
+                            src={resolveAssetUrl(transaction.receiptUrl) ?? ''}
+                            alt={t('transactionReceipt')}
+                            className="size-full object-cover"
+                          />
                         </button>
                       }
                     />

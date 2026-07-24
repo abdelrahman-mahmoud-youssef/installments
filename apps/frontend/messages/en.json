@@ -678,6 +678,7 @@
     "noPaymentMethods": "No payment methods yet.",
     "paymentMethodMonthlyLimit": "Monthly limit (optional)",
     "paymentMethodMonthlyLimitHint": "Get a WhatsApp alert when this month's usage nears the limit.",
+    "monthlyLimitLabel": "Monthly limit",
     "thisMonth": "this month",
     "noLimitSet": "No monthly limit set",
     "viewDetails": "View details",

@@ -678,6 +678,7 @@
     "noPaymentMethods": "لسه مفيش وسائل دفع.",
     "paymentMethodMonthlyLimit": "الحد الشهري (اختياري)",
     "paymentMethodMonthlyLimitHint": "هتوصلك رسالة واتساب لما استخدام الشهر ده يقرب من الحد.",
+    "monthlyLimitLabel": "الحد الشهري",
     "thisMonth": "الشهر ده",
     "noLimitSet": "مفيش حد شهري متحدد",
     "viewDetails": "التفاصيل",
