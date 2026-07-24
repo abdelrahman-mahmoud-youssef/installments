@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const MAX_ID_IMAGE_BYTES = 4 * 1024 * 1024;
+const MAX_ID_IMAGE_BYTES = 5 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = ['image/png', 'image/jpeg'];
 
 export const customerSchema = z.object({
@@ -11,7 +11,7 @@ export const customerSchema = z.object({
   idImage: z
     .instanceof(File)
     .optional()
-    .refine((file) => !file || file.size <= MAX_ID_IMAGE_BYTES, 'ID image must be under 4 MB.')
+    .refine((file) => !file || file.size <= MAX_ID_IMAGE_BYTES, 'ID image must be under 5 MB.')
     .refine(
       (file) => !file || ACCEPTED_IMAGE_TYPES.includes(file.type),
       'ID image must be a PNG or JPEG image.',

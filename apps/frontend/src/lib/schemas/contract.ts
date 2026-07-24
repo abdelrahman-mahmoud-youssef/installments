@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { CALCULATION_METHODS, RECURRENCE_TYPES } from '@/lib/enums';
 
-const MAX_CONTRACT_IMAGE_BYTES = 4 * 1024 * 1024;
+const MAX_CONTRACT_IMAGE_BYTES = 5 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = ['image/png', 'image/jpeg'];
 
 export const contractSchema = z
@@ -22,7 +22,7 @@ export const contractSchema = z
     image: z
       .instanceof(File)
       .optional()
-      .refine((file) => !file || file.size <= MAX_CONTRACT_IMAGE_BYTES, 'Image must be under 4 MB.')
+      .refine((file) => !file || file.size <= MAX_CONTRACT_IMAGE_BYTES, 'Image must be under 5 MB.')
       .refine(
         (file) => !file || ACCEPTED_IMAGE_TYPES.includes(file.type),
         'Image must be a PNG or JPEG image.',
