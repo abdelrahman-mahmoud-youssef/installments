@@ -386,7 +386,7 @@ model PaymentClaim {
   tenant           Tenant             @relation(fields: [tenantId], references: [id])
   contract         Contract           @relation(fields: [contractId], references: [id])
   installment      Installment?       @relation(fields: [installmentId], references: [id])
-  paymentMethod    PaymentMethod      @relation(fields: [paymentMethodId], references: [id])
+  paymentMethod    PaymentMethod      @relation(fields: [paymentMethodId], references: [id], onDelete: Restrict)
   reviewedBy       User?              @relation(fields: [reviewedByUserId], references: [id], onDelete: SetNull)
 
   @@index([tenantId, status, createdAt])

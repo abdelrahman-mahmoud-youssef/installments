@@ -6,6 +6,8 @@ import { CreatePaymentMethodDto } from './dto/create-payment-method.dto';
 import { UpdatePaymentMethodDto } from './dto/update-payment-method.dto';
 
 const PRESET_ALREADY_ADDED_ERROR = 'This payment method has already been added.';
+const IN_USE_ERROR =
+  'This payment method has payment or transaction history and can’t be deleted — deactivate it instead.';
 
 export type PaymentMethodWithUsage = PaymentMethod & { monthToDateUsage: number };
 
@@ -95,7 +97,14 @@ export class PaymentMethodsService {
 
   async deletePaymentMethod(tenantId: string, id: string): Promise<void> {
     await this.findOwned(tenantId, id);
-    await this.prisma.paymentMethod.delete({ where: { id } });
+    try {
+      await this.prisma.paymentMethod.delete({ where: { id } });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2003') {
+        throw new BadRequestException(IN_USE_ERROR);
+      }
+      throw error;
+    }
   }
 
   private async findOwned(tenantId: string, id: string): Promise<PaymentMethod> {
