@@ -18,7 +18,7 @@ import { TableSkeleton } from '@/components/shared/skeletons';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Link } from '@/i18n/navigation';
-import type { Customer } from '@/lib/api/customers';
+import type { CustomerListItem } from '@/lib/api/customers';
 import { useCreateCustomer, useCustomers, useDeleteCustomer } from '@/hooks/use-customers';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { ApiError } from '@/lib/api/client';
@@ -41,7 +41,7 @@ export default function CustomersPage() {
   const createCustomer = useCreateCustomer();
   const deleteCustomer = useDeleteCustomer();
 
-  const columns: Column<Customer>[] = [
+  const columns: Column<CustomerListItem>[] = [
     {
       id: 'name',
       header: t('name'),
@@ -50,6 +50,9 @@ export default function CustomersPage() {
         <Link href={routes.customer(customer.id)} className="group flex items-center gap-3">
           <InitialAvatar name={customer.name} className="size-9 text-xs" />
           <span className="truncate font-medium group-hover:underline">{customer.name}</span>
+          {customer.hasOverdue && (
+            <span className="size-2 shrink-0 rounded-full bg-destructive" title={tCommon('delayedOnly')} />
+          )}
         </Link>
       ),
     },

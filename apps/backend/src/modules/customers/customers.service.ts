@@ -13,6 +13,8 @@ import { CustomerNotificationQueryDto } from './dto/customer-notification-query.
 import { CustomerQueryDto } from './dto/customer-query.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 
+export type CustomerListItem = Customer & { hasOverdue: boolean };
+
 export type CustomerNotificationType = 'REMINDER' | 'BROADCAST';
 
 export interface CustomerNotificationHistoryItem {
@@ -41,7 +43,8 @@ export class CustomersService {
     return this.prisma.customer.create({ data: { ...rest, tenantId, idImageFrontUrl, idImageBackUrl } });
   }
 
-  async findAll(tenantId: string, query: CustomerQueryDto): Promise<PaginatedResult<Customer>> {
+  async findAll(tenantId: string, query: CustomerQueryDto): Promise<PaginatedResult<CustomerListItem>> {
+    const today = getUtcToday();
     const where: Prisma.CustomerWhereInput = {
       tenantId,
       ...(query.q && {
@@ -51,19 +54,24 @@ export class CustomersService {
         ],
       }),
       ...(query.delayedOnly && {
-        contracts: { some: { installments: { some: overdueInstallmentWhere(getUtcToday()) } } },
+        contracts: { some: { installments: { some: overdueInstallmentWhere(today) } } },
       }),
     };
 
-    const [data, total] = await Promise.all([
+    const [rawData, total] = await Promise.all([
       this.prisma.customer.findMany({
         where,
         orderBy: { createdAt: 'desc' },
         skip: (query.page - 1) * query.limit,
         take: query.limit,
+        include: {
+          contracts: { where: { installments: { some: overdueInstallmentWhere(today) } }, select: { id: true }, take: 1 },
+        },
       }),
       this.prisma.customer.count({ where }),
     ]);
+
+    const data = rawData.map(({ contracts, ...rest }) => ({ ...rest, hasOverdue: contracts.length > 0 }));
 
     return buildPaginatedResult(data, total, query.page, query.limit);
   }

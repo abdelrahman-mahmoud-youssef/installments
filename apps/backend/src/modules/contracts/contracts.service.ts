@@ -17,7 +17,7 @@ import { calculateInstallmentSchedule } from './installments/schedule';
 
 type ContractListItem = Prisma.ContractGetPayload<{
   include: { customer: { select: { id: true; name: true; phone: true } } };
-}>;
+}> & { hasOverdue: boolean };
 
 type ContractDetail = Prisma.ContractGetPayload<{
   include: {
@@ -117,12 +117,17 @@ export class ContractsService {
         orderBy: { createdAt: 'desc' },
         skip: (query.page - 1) * query.limit,
         take: query.limit,
-        include: { customer: { select: { id: true, name: true, phone: true } } },
+        include: {
+          customer: { select: { id: true, name: true, phone: true } },
+          installments: { where: overdueInstallmentWhere(getUtcToday()), select: { id: true }, take: 1 },
+        },
       }),
       this.prisma.contract.count({ where }),
     ]);
 
-    return buildPaginatedResult(data, total, query.page, query.limit);
+    const items = data.map(({ installments, ...rest }) => ({ ...rest, hasOverdue: installments.length > 0 }));
+
+    return buildPaginatedResult(items, total, query.page, query.limit);
   }
 
   async findOne(tenantId: string, id: string): Promise<ContractDetail> {

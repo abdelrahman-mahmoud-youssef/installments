@@ -28,6 +28,10 @@ export interface CustomerDetail extends Customer {
   contracts: CustomerContractSummary[];
 }
 
+export interface CustomerListItem extends Customer {
+  hasOverdue: boolean;
+}
+
 export interface CustomerListParams {
   q?: string;
   delayedOnly?: boolean;
@@ -35,7 +39,7 @@ export interface CustomerListParams {
   limit?: number;
 }
 
-export function listCustomers(params: CustomerListParams): Promise<PaginatedResult<Customer>> {
+export function listCustomers(params: CustomerListParams): Promise<PaginatedResult<CustomerListItem>> {
   return apiClient.get(`customers${buildQuery(params)}`);
 }
 

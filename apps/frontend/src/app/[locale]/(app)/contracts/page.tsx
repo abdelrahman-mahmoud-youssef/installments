@@ -43,7 +43,10 @@ export default function ContractsPage() {
       header: t('product'),
       role: 'primary',
       cell: (contract) => (
-        <Link href={routes.contract(contract.id)} className="font-medium hover:underline">
+        <Link href={routes.contract(contract.id)} className="flex items-center gap-2 font-medium hover:underline">
+          {contract.hasOverdue && (
+            <span className="size-2 shrink-0 rounded-full bg-destructive" title={tCommon('delayedOnly')} />
+          )}
           {contract.productName}
         </Link>
       ),

@@ -48,6 +48,7 @@ export interface ContractListItem {
   createdAt: string;
   imageUrl: string | null;
   customer: ContractCustomer;
+  hasOverdue: boolean;
 }
 
 export interface ContractDetail extends Omit<ContractListItem, 'customer'> {
