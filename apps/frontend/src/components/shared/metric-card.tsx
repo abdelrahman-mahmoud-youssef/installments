@@ -39,7 +39,7 @@ export function MetricCard({
         <p
           className={cn(
             'font-heading font-semibold tracking-tight tabular-nums',
-            emphasis ? 'text-3xl' : 'text-[1.75rem]',
+            emphasis ? 'text-2xl sm:text-3xl' : 'text-xl sm:text-2xl lg:text-[1.75rem]',
             tone === 'danger' && emphasis && 'text-danger',
           )}
         >

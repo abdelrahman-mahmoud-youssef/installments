@@ -147,13 +147,13 @@ export default function PaymentMethodDetailPage() {
       </FadeIn>
 
       {isLoadingSummary ? (
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, index) => (
             <Skeleton key={index} className="h-28 w-full" />
           ))}
         </div>
       ) : summary ? (
-        <FadeIn delay={0.1} className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <FadeIn delay={0.1} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <MetricCard label={t('received')} value={<Money minorUnits={summary.paymentTotal + summary.receivedTotal} />} icon={ArrowDownCircle} tone="success" />
           <MetricCard label={t('sent')} value={<Money minorUnits={summary.sentTotal} />} icon={ArrowUpCircle} tone="danger" />
           {summary.monthlyLimit != null ? (
