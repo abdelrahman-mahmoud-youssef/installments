@@ -7,15 +7,7 @@ import { FaTelegram, FaWhatsapp } from 'react-icons/fa6';
 import { EmptyState } from '@/components/shared/empty-state';
 import { PaginationControls } from '@/components/shared/pagination-controls';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useCustomerNotifications } from '@/hooks/use-customers';
 import type { CustomerNotificationChannel, CustomerNotificationHistoryItem } from '@/lib/api/customers';
 import { formatDateTime } from '@/lib/format';
@@ -63,12 +55,15 @@ function NotificationRow({ item }: { item: CustomerNotificationHistoryItem }) {
 export function CustomerNotificationHistoryDialog({
   customerId,
   customerName,
+  open,
+  onOpenChange,
 }: {
   customerId: string;
   customerName: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }) {
   const t = useTranslations('customers.detail');
-  const [open, setOpen] = useState(false);
   const [page, setPage] = useState(1);
 
   const { data, isLoading, isError } = useCustomerNotifications(customerId, { page, limit: 10 }, open);
@@ -77,20 +72,12 @@ export function CustomerNotificationHistoryDialog({
     <Dialog
       open={open}
       onOpenChange={(next) => {
-        setOpen(next);
+        onOpenChange(next);
         if (!next) {
           setPage(1);
         }
       }}
     >
-      <DialogTrigger
-        render={
-          <Button variant="outline" size="sm">
-            <History className="size-4" />
-            {t('history')}
-          </Button>
-        }
-      />
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{t('historyTitle')}</DialogTitle>

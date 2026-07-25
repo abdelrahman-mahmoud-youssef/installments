@@ -1,6 +1,18 @@
 'use client';
 
-import { Copy, IdCard, MapPin, Pencil, Phone, Plus, QrCode, Share2, StickyNote, UserRoundX } from 'lucide-react';
+import {
+  Copy,
+  History,
+  IdCard,
+  MapPin,
+  MoreVertical,
+  Pencil,
+  Phone,
+  Plus,
+  QrCode,
+  StickyNote,
+  UserRoundX,
+} from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useState } from 'react';
@@ -44,6 +56,7 @@ export default function CustomerDetailPage() {
   const { data: branding } = useBranding();
   const updateCustomer = useUpdateCustomer(id);
   const [qrOpen, setQrOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -107,130 +120,134 @@ export default function CustomerDetailPage() {
       </FadeIn>
 
       <FadeIn delay={0.05}>
-        <div className="flex flex-col gap-5 rounded-xl border border-border bg-card p-5 shadow-xs sm:flex-row sm:items-center sm:justify-between sm:p-6">
-          <div className="flex items-center gap-4">
-            <InitialAvatar name={customer.name} className="size-14 text-lg" />
-            <div className="min-w-0 space-y-1.5">
-              <h1 className="font-heading text-xl font-semibold tracking-tight">{customer.name}</h1>
-              <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                <a
-                  href={`tel:${customer.phone}`}
-                  title={t('call')}
-                  className="flex items-center gap-1.5 hover:text-foreground hover:underline"
-                >
-                  <Phone className="size-3.5" />
-                  <span dir="ltr" className="tabular-nums">
-                    {customer.phone}
-                  </span>
-                </a>
-                <a
-                  href={`https://wa.me/20${normalizeLocalPhoneInput(customer.phone)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title={t('openWhatsapp')}
-                  className="flex items-center gap-1.5 hover:text-foreground hover:underline"
-                >
-                  <FaWhatsapp className="size-3.5" />
-                  {t('openWhatsapp')}
-                </a>
-                {customer.address && (
-                  <span className="flex items-center gap-1.5">
-                    <MapPin className="size-3.5" />
-                    {customer.address}
-                  </span>
-                )}
-              </div>
-              {(customer.idImageFrontUrl || customer.idImageBackUrl) && (
-                <div className="flex items-center gap-2 pt-0.5">
-                  <IdCard className="size-3.5 shrink-0 text-muted-foreground" />
-                  {customer.idImageFrontUrl && (
-                    <ImagePreviewDialog
-                      src={resolveAssetUrl(customer.idImageFrontUrl) ?? ''}
-                      alt={t('viewIdImageFront')}
-                      trigger={
-                        <button
-                          type="button"
-                          title={t('viewIdImageFront')}
-                          className="overflow-hidden rounded-md border border-border transition-opacity hover:opacity-80"
-                        >
-                          <img
-                            src={resolveAssetUrl(customer.idImageFrontUrl) ?? undefined}
-                            alt=""
-                            className="h-9 w-12 object-cover"
-                          />
-                        </button>
-                      }
-                    />
-                  )}
-                  {customer.idImageBackUrl && (
-                    <ImagePreviewDialog
-                      src={resolveAssetUrl(customer.idImageBackUrl) ?? ''}
-                      alt={t('viewIdImageBack')}
-                      trigger={
-                        <button
-                          type="button"
-                          title={t('viewIdImageBack')}
-                          className="overflow-hidden rounded-md border border-border transition-opacity hover:opacity-80"
-                        >
-                          <img
-                            src={resolveAssetUrl(customer.idImageBackUrl) ?? undefined}
-                            alt=""
-                            className="h-9 w-12 object-cover"
-                          />
-                        </button>
-                      }
-                    />
-                  )}
-                </div>
-              )}
+        <div className="rounded-xl border border-border bg-card p-5 shadow-xs sm:p-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="flex min-w-0 items-center gap-4">
+              <InitialAvatar name={customer.name} className="size-14 shrink-0 text-lg" />
+              <h1 className="truncate font-heading text-xl font-semibold tracking-tight">{customer.name}</h1>
             </div>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                render={
+            <div className="flex shrink-0 flex-wrap items-center gap-2">
+              <CustomerFormDialog
+                trigger={
                   <Button variant="outline" size="sm">
-                    <Share2 className="size-4" />
-                    {t('share')}
+                    <Pencil className="size-4" />
+                    {t('edit')}
                   </Button>
                 }
+                customer={customer}
+                onSubmit={(input) => updateCustomer.mutateAsync(input)}
               />
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  onClick={() => {
-                    navigator.clipboard.writeText(publicUrl);
-                    toast.success(t('linkCopied'));
-                  }}
-                >
-                  <Copy className="size-4" />
-                  {t('copyLink')}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setQrOpen(true)}>
-                  <QrCode className="size-4" />
-                  {t('qrCode')}
-                </DropdownMenuItem>
-                <DropdownMenuItem render={<a href={whatsappUrl} target="_blank" rel="noopener noreferrer" />}>
-                  <FaWhatsapp className="size-4" />
-                  {t('sendWhatsapp')}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <CustomerNotificationHistoryDialog customerId={customer.id} customerName={customer.name} />
-            <CustomerFormDialog
-              trigger={
-                <Button variant="outline" size="sm">
-                  <Pencil className="size-4" />
-                  {t('edit')}
-                </Button>
-              }
-              customer={customer}
-              onSubmit={(input) => updateCustomer.mutateAsync(input)}
-            />
-            <Button size="sm" render={<Link href={`${routes.newContract}?customerId=${customer.id}`} />}>
-              <Plus className="size-4" />
-              {t('newContract')}
-            </Button>
+              <Button size="sm" render={<Link href={`${routes.newContract}?customerId=${customer.id}`} />}>
+                <Plus className="size-4" />
+                {t('newContract')}
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  render={
+                    <Button variant="outline" size="icon-sm" aria-label={t('moreActions')}>
+                      <MoreVertical className="size-4" />
+                    </Button>
+                  }
+                />
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={() => {
+                      navigator.clipboard.writeText(publicUrl);
+                      toast.success(t('linkCopied'));
+                    }}
+                  >
+                    <Copy className="size-4" />
+                    {t('copyLink')}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setQrOpen(true)}>
+                    <QrCode className="size-4" />
+                    {t('qrCode')}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem render={<a href={whatsappUrl} target="_blank" rel="noopener noreferrer" />}>
+                    <FaWhatsapp className="size-4" />
+                    {t('sendWhatsapp')}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setHistoryOpen(true)}>
+                    <History className="size-4" />
+                    {t('history')}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
+
+          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-border pt-4 text-sm text-muted-foreground">
+            <a
+              href={`tel:${customer.phone}`}
+              title={t('call')}
+              className="flex items-center gap-1.5 hover:text-foreground hover:underline"
+            >
+              <Phone className="size-3.5" />
+              <span dir="ltr" className="tabular-nums">
+                {customer.phone}
+              </span>
+            </a>
+            <a
+              href={`https://wa.me/20${normalizeLocalPhoneInput(customer.phone)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={t('openWhatsapp')}
+              className="flex items-center gap-1.5 hover:text-foreground hover:underline"
+            >
+              <FaWhatsapp className="size-3.5" />
+              {t('openWhatsapp')}
+            </a>
+            {customer.address && (
+              <span className="flex items-center gap-1.5">
+                <MapPin className="size-3.5" />
+                {customer.address}
+              </span>
+            )}
+          </div>
+
+          {(customer.idImageFrontUrl || customer.idImageBackUrl) && (
+            <div className="mt-3 flex items-center gap-2 border-t border-border pt-3">
+              <IdCard className="size-3.5 shrink-0 text-muted-foreground" />
+              {customer.idImageFrontUrl && (
+                <ImagePreviewDialog
+                  src={resolveAssetUrl(customer.idImageFrontUrl) ?? ''}
+                  alt={t('viewIdImageFront')}
+                  trigger={
+                    <button
+                      type="button"
+                      title={t('viewIdImageFront')}
+                      className="overflow-hidden rounded-md border border-border transition-opacity hover:opacity-80"
+                    >
+                      <img
+                        src={resolveAssetUrl(customer.idImageFrontUrl) ?? undefined}
+                        alt=""
+                        className="h-9 w-12 object-cover"
+                      />
+                    </button>
+                  }
+                />
+              )}
+              {customer.idImageBackUrl && (
+                <ImagePreviewDialog
+                  src={resolveAssetUrl(customer.idImageBackUrl) ?? ''}
+                  alt={t('viewIdImageBack')}
+                  trigger={
+                    <button
+                      type="button"
+                      title={t('viewIdImageBack')}
+                      className="overflow-hidden rounded-md border border-border transition-opacity hover:opacity-80"
+                    >
+                      <img
+                        src={resolveAssetUrl(customer.idImageBackUrl) ?? undefined}
+                        alt=""
+                        className="h-9 w-12 object-cover"
+                      />
+                    </button>
+                  }
+                />
+              )}
+            </div>
+          )}
         </div>
       </FadeIn>
 
@@ -277,6 +294,12 @@ export default function CustomerDetailPage() {
         onOpenChange={setQrOpen}
         customerName={customer.name}
         publicUrl={publicUrl}
+      />
+      <CustomerNotificationHistoryDialog
+        customerId={customer.id}
+        customerName={customer.name}
+        open={historyOpen}
+        onOpenChange={setHistoryOpen}
       />
     </div>
   );
