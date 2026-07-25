@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CalendarClock, Camera, ListOrdered, Loader2, Percent, Upload, UserPlus } from 'lucide-react';
+import { CalendarClock, ListOrdered, Loader2, Percent, Upload, UserPlus } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -289,40 +289,22 @@ export default function NewContractPage() {
                       <FormItem>
                         <FormLabel>{t('image')}</FormLabel>
                         <FormControl>
-                          <div className="flex gap-2">
-                            <label className="flex min-w-0 flex-1 cursor-pointer items-center justify-center gap-1.5 overflow-hidden rounded-lg border border-dashed border-border p-2.5 text-sm text-muted-foreground transition-colors hover:bg-accent">
-                              <Camera className="size-4 shrink-0" />
-                              <span className="truncate">{t('takePhoto')}</span>
-                              <input
-                                {...field}
-                                type="file"
-                                accept="image/*"
-                                capture="environment"
-                                className="hidden"
-                                value={undefined}
-                                onChange={(event) => {
-                                  const file = event.target.files?.[0] ?? null;
-                                  onChange(file ?? undefined);
-                                  setImageName(file?.name ?? null);
-                                }}
-                              />
-                            </label>
-                            <label className="flex min-w-0 flex-1 cursor-pointer items-center justify-center gap-1.5 overflow-hidden rounded-lg border border-dashed border-border p-2.5 text-sm text-muted-foreground transition-colors hover:bg-accent">
-                              <Upload className="size-4 shrink-0" />
-                              <span className="truncate">{t('chooseFile')}</span>
-                              <input
-                                type="file"
-                                accept="image/png,image/jpeg"
-                                className="hidden"
-                                value={undefined}
-                                onChange={(event) => {
-                                  const file = event.target.files?.[0] ?? null;
-                                  onChange(file ?? undefined);
-                                  setImageName(file?.name ?? null);
-                                }}
-                              />
-                            </label>
-                          </div>
+                          <label className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-dashed border-border p-3.5 text-sm text-muted-foreground transition-colors hover:bg-accent">
+                            <Upload className="size-4 shrink-0" />
+                            <span className="truncate">{t('uploadImage')}</span>
+                            <input
+                              {...field}
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              value={undefined}
+                              onChange={(event) => {
+                                const file = event.target.files?.[0] ?? null;
+                                onChange(file ?? undefined);
+                                setImageName(file?.name ?? null);
+                              }}
+                            />
+                          </label>
                         </FormControl>
                         {imageName && <p className="truncate text-xs text-muted-foreground">{imageName}</p>}
                         <FormMessage />
