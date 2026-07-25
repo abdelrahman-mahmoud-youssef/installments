@@ -171,7 +171,29 @@
       "twoFactorTitle": "التحقق بخطوتين",
       "twoFactorDescription": "اكتب الكود المكوّن من 6 أرقام من تطبيق المصادقة، أو أي كود من أكواد النسخ الاحتياطي بتاعتك.",
       "twoFactorCodeLabel": "الكود",
-      "twoFactorSubmit": "تحقق"
+      "twoFactorSubmit": "تحقق",
+      "forgotPassword": "نسيت كلمة المرور؟"
+    },
+    "forgotPassword": {
+      "title": "استرجاع كلمة المرور",
+      "description": "اكتب بريدك الإلكتروني وهنبعتلك لينك تقدر تغيّر بيه كلمة المرور.",
+      "email": "البريد الإلكتروني",
+      "submit": "ابعت لينك الاسترجاع",
+      "submitting": "بيتبعت…",
+      "checkYourEmail": "لو البريد ده متسجل عندنا، يبقى بعتنالك لينك الاسترجاع — راجع بريدك.",
+      "backToLogin": "ارجع لتسجيل الدخول",
+      "genericError": "حصل خطأ ما. جرّب تاني."
+    },
+    "resetPassword": {
+      "title": "اختار كلمة مرور جديدة",
+      "description": "اكتب كلمة مرور جديدة لحسابك.",
+      "newPassword": "كلمة المرور الجديدة",
+      "confirmPassword": "تأكيد كلمة المرور الجديدة",
+      "submit": "غيّر كلمة المرور",
+      "submitting": "بيتغيّر…",
+      "missingToken": "لينك الاسترجاع ده ناقصه الكود. اطلب لينك جديد تحت.",
+      "requestNewLink": "اطلب لينك جديد",
+      "genericError": "لينك الاسترجاع ده مش صحيح أو انتهت صلاحيته."
     },
     "register": {
       "title": "اعمل مساحة شغلك",
@@ -338,7 +360,7 @@
       "youOwe": "عليك ليهم",
       "settled": "الحساب مضبوط",
       "received": "استلمت",
-      "sent": "بعتت",
+      "sent": "حولت",
       "history": "السجل",
       "noHistoryYet": "لسه مفيش سجل",
       "noHistoryFound": "مفيش سجل مطابق",
@@ -706,6 +728,9 @@
     "languageLabel": "لغة الرسائل",
     "languageHint": "لغة تذكيرات تيليجرام بتاعتك.",
     "languageSaved": "اتحدّثت اللغة.",
+    "telegramPublicVisibilityLabel": "إظهار تيليجرام في صفحات العملاء",
+    "telegramPublicVisibilityHint": "خلّي العملاء يقدروا يربطوا تيليجرام من صفحتهم العامة.",
+    "telegramPublicVisibilitySaved": "اتحدّث الإعداد.",
     "genericError": "حصل خطأ.",
     "stepsTitle": "طريقة الربط",
     "step1": "في تيليجرام، افتح ‎@BotFather‎ وابعت ‎/newbot‎ وامشي مع التعليمات.",
@@ -804,7 +829,10 @@
     "submit": "ابعت الرسالة",
     "sending": "بيتم الإرسال…",
     "sent": "اتبعتت الرسالة — هنرد عليك قريب.",
-    "genericError": "حصل خطأ ما."
+    "genericError": "حصل خطأ ما.",
+    "previousSubmissions": "الرسايل اللي بعتها قبل كده",
+    "replied": "اترد عليها",
+    "replyLabel": "الرد"
   },
   "account": {
     "changePassword": "تغيير كلمة المرور",

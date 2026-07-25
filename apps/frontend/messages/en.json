@@ -171,7 +171,29 @@
       "twoFactorTitle": "Two-factor authentication",
       "twoFactorDescription": "Enter the 6-digit code from your authenticator app, or one of your backup codes.",
       "twoFactorCodeLabel": "Code",
-      "twoFactorSubmit": "Verify"
+      "twoFactorSubmit": "Verify",
+      "forgotPassword": "Forgot your password?"
+    },
+    "forgotPassword": {
+      "title": "Reset your password",
+      "description": "Enter your email and we'll send you a link to reset your password.",
+      "email": "Email",
+      "submit": "Send reset link",
+      "submitting": "Sending…",
+      "checkYourEmail": "If that email is registered, we've sent a reset link — check your inbox.",
+      "backToLogin": "Back to sign in",
+      "genericError": "Something went wrong. Please try again."
+    },
+    "resetPassword": {
+      "title": "Choose a new password",
+      "description": "Enter a new password for your account.",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm new password",
+      "submit": "Reset password",
+      "submitting": "Resetting…",
+      "missingToken": "This reset link is missing its token. Request a new one below.",
+      "requestNewLink": "Request a new link",
+      "genericError": "This reset link is invalid or has expired."
     },
     "register": {
       "title": "Create your workspace",
@@ -706,6 +728,9 @@
     "languageLabel": "Message language",
     "languageHint": "Language of your Telegram reminders.",
     "languageSaved": "Language updated.",
+    "telegramPublicVisibilityLabel": "Show Telegram on customer pages",
+    "telegramPublicVisibilityHint": "Let customers connect to Telegram from their public page.",
+    "telegramPublicVisibilitySaved": "Setting updated.",
     "genericError": "Something went wrong.",
     "stepsTitle": "How to connect",
     "step1": "In Telegram, open @BotFather, send /newbot, and follow the prompts.",
@@ -804,7 +829,10 @@
     "submit": "Send message",
     "sending": "Sending…",
     "sent": "Message sent — we'll get back to you soon.",
-    "genericError": "Something went wrong."
+    "genericError": "Something went wrong.",
+    "previousSubmissions": "Previous submissions",
+    "replied": "Replied",
+    "replyLabel": "Reply"
   },
   "account": {
     "changePassword": "Change password",
