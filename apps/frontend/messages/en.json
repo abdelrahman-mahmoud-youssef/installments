@@ -593,7 +593,15 @@
     "ogTagline": "Shop online and pay in easy installments",
     "ogDescription": "Browse {name}'s products and installment plans.",
     "locationsTitle": "Locations",
-    "getDirections": "Get directions"
+    "getDirections": "Get directions",
+    "offers": {
+      "title": "Our Latest Offers",
+      "subtitle": "Fresh picks available on easy installments",
+      "showMore": "Show more offers",
+      "viewGallery": "View gallery",
+      "imageCounter": "{current} / {total}",
+      "backToShop": "Back to shop"
+    }
   },
   "announcements": {
     "title": "Announcements",

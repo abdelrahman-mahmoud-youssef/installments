@@ -593,7 +593,15 @@
     "ogTagline": "تسوق أونلاين وادفع بالتقسيط بسهولة",
     "ogDescription": "تصفح منتجات وخطط تقسيط {name}.",
     "locationsTitle": "الفروع",
-    "getDirections": "اعرف الاتجاهات"
+    "getDirections": "اعرف الاتجاهات",
+    "offers": {
+      "title": "آخر عروضنا",
+      "subtitle": "أحدث المنتجات المتاحة بالتقسيط المريح",
+      "showMore": "عرض المزيد من العروض",
+      "viewGallery": "عرض الصور",
+      "imageCounter": "{current} / {total}",
+      "backToShop": "الرجوع للمتجر"
+    }
   },
   "announcements": {
     "title": "الإعلانات",
