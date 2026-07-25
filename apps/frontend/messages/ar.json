@@ -266,7 +266,7 @@
     },
     "detail": {
       "notFound": "العميل مش موجود",
-      "share": "مشاركة",
+      "moreActions": "المزيد من الإجراءات",
       "copyLink": "انسخ الرابط العام",
       "linkCopied": "اتنسخ الرابط العام.",
       "qrCode": "كود QR",
@@ -339,7 +339,8 @@
       "costPriceHint": "اللي انت دفعته فيه. مش بيتشاف للعميل خالص.",
       "downPayment": "الدفعة المقدمة",
       "image": "صورة العقد (اختياري)",
-      "imageHint": "ارفع صورة للمنتج أو العقد الموقّع",
+      "takePhoto": "صوّر بالكاميرا",
+      "chooseFile": "اختار ملف",
       "calculationMethod": "طريقة حساب الأقساط",
       "markupPercent": "نسبة الهامش",
       "installmentCount": "عدد الأقساط",

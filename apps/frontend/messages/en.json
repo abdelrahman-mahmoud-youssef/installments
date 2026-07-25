@@ -266,7 +266,7 @@
     },
     "detail": {
       "notFound": "Customer not found",
-      "share": "Share",
+      "moreActions": "More actions",
       "copyLink": "Copy public link",
       "linkCopied": "Public link copied.",
       "qrCode": "QR code",
@@ -339,7 +339,8 @@
       "costPriceHint": "What you paid for it. Never shown to the customer.",
       "downPayment": "Down payment",
       "image": "Contract image (optional)",
-      "imageHint": "Attach a photo of the product or signed contract",
+      "takePhoto": "Take photo",
+      "chooseFile": "Choose file",
       "calculationMethod": "Installment calculation",
       "markupPercent": "Markup percentage",
       "installmentCount": "Number of installments",
