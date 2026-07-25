@@ -15,6 +15,7 @@ import { PaginationControls } from '@/components/shared/pagination-controls';
 import { SearchInput } from '@/components/shared/search-input';
 import { Section } from '@/components/shared/section';
 import { TableSkeleton } from '@/components/shared/skeletons';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Link } from '@/i18n/navigation';
@@ -51,7 +52,9 @@ export default function CustomersPage() {
           <InitialAvatar name={customer.name} className="size-9 text-xs" />
           <span className="truncate font-medium group-hover:underline">{customer.name}</span>
           {customer.hasOverdue && (
-            <span className="size-2 shrink-0 rounded-full bg-destructive" title={tCommon('delayedOnly')} />
+            <Badge variant="destructive" className="shrink-0">
+              {tCommon('delayed')}
+            </Badge>
           )}
         </Link>
       ),

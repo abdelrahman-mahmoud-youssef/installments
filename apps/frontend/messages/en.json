@@ -15,6 +15,7 @@
     "install": "Install",
     "dismiss": "Dismiss",
     "installBannerMessage": "Install this app for quick access from your home screen.",
+    "delayed": "Delayed",
     "delayedOnly": "Delayed only",
     "delayedOnlyHint": "Only show those with an overdue payment."
   },

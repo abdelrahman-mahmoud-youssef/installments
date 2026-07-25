@@ -13,6 +13,7 @@ import { PaginationControls } from '@/components/shared/pagination-controls';
 import { Section } from '@/components/shared/section';
 import { TableSkeleton } from '@/components/shared/skeletons';
 import { StatusBadge } from '@/components/shared/status-badge';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -44,10 +45,12 @@ export default function ContractsPage() {
       role: 'primary',
       cell: (contract) => (
         <Link href={routes.contract(contract.id)} className="flex items-center gap-2 font-medium hover:underline">
-          {contract.hasOverdue && (
-            <span className="size-2 shrink-0 rounded-full bg-destructive" title={tCommon('delayedOnly')} />
-          )}
           {contract.productName}
+          {contract.hasOverdue && (
+            <Badge variant="destructive" className="shrink-0">
+              {tCommon('delayed')}
+            </Badge>
+          )}
         </Link>
       ),
     },
