@@ -1,36 +1,11 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Mono, IBM_Plex_Sans, IBM_Plex_Sans_Arabic } from "next/font/google";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Toaster } from "@/components/ui/sonner";
 import { AppProviders } from "@/components/providers/app-providers";
 import { config } from "@/lib/config";
-import { fontSizeInitScript } from "@/lib/font-size";
 import { routing } from "@/i18n/routing";
-import { themeInitScript } from "@/lib/theme";
-import "../globals.css";
-
-const plexSans = IBM_Plex_Sans({
-  variable: "--font-plex",
-  weight: ["400", "500", "600", "700"],
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const plexArabic = IBM_Plex_Sans_Arabic({
-  variable: "--font-plex-ar",
-  weight: ["400", "500", "600", "700"],
-  subsets: ["arabic"],
-  display: "swap",
-});
-
-const plexMono = IBM_Plex_Mono({
-  variable: "--font-plex-mono",
-  weight: ["400", "500", "600"],
-  subsets: ["latin"],
-  display: "swap",
-});
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -71,26 +46,11 @@ export default async function LocaleLayout({
   const direction = locale === "ar" ? "rtl" : "ltr";
 
   return (
-    <html
-      lang={locale}
-      dir={direction}
-      suppressHydrationWarning
-      className={`${plexSans.variable} ${plexArabic.variable} ${plexMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full">
-        <script id="theme-init" suppressHydrationWarning dangerouslySetInnerHTML={{ __html: themeInitScript }} />
-        <script
-          id="font-size-init"
-          suppressHydrationWarning
-          dangerouslySetInnerHTML={{ __html: fontSizeInitScript }}
-        />
-        <NextIntlClientProvider>
-          <AppProviders direction={direction}>
-            {children}
-            <Toaster />
-          </AppProviders>
-        </NextIntlClientProvider>
-      </body>
-    </html>
+    <NextIntlClientProvider>
+      <AppProviders locale={locale} direction={direction}>
+        {children}
+        <Toaster />
+      </AppProviders>
+    </NextIntlClientProvider>
   );
 }
