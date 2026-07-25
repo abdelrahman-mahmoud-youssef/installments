@@ -178,7 +178,8 @@ model Customer {
   phone     String
   address   String?
   notes     String?
-  idImageUrl String?
+  idImageFrontUrl String?
+  idImageBackUrl  String?
   telegramChatId               String?
   telegramNotificationsEnabled Boolean @default(true)
   telegramBroadcastsEnabled    Boolean @default(true)

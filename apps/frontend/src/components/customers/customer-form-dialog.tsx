@@ -1,10 +1,10 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2, Upload } from 'lucide-react';
+import { Camera, Loader2, Upload } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, type UseFormReturn } from 'react-hook-form';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
@@ -25,6 +25,89 @@ import { Customer } from '@/lib/api/customers';
 import { resolveAssetUrl } from '@/lib/assets';
 import { CustomerInput, customerSchema } from '@/lib/schemas/customer';
 
+function IdImageSlot({
+  form,
+  name,
+  label,
+  existingUrl,
+  pickedName,
+  onPickedNameChange,
+}: {
+  form: UseFormReturn<CustomerInput>;
+  name: 'idImageFront' | 'idImageBack';
+  label: string;
+  existingUrl: string | null | undefined;
+  pickedName: string | null;
+  onPickedNameChange: (name: string | null) => void;
+}) {
+  const t = useTranslations('customers.form');
+
+  return (
+    <FormField
+      control={form.control}
+      name={name}
+      render={({ field: { value, onChange, ...field } }) => (
+        <FormItem>
+          <FormLabel>{label}</FormLabel>
+          {existingUrl && !pickedName && (
+            <ImagePreviewDialog
+              src={resolveAssetUrl(existingUrl) ?? ''}
+              alt={label}
+              trigger={
+                <button type="button" className="block">
+                  <img
+                    src={resolveAssetUrl(existingUrl) ?? undefined}
+                    alt={label}
+                    className="h-20 rounded-lg border border-border object-cover"
+                  />
+                </button>
+              }
+            />
+          )}
+          <FormControl>
+            <div className="flex gap-2">
+              <label className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-border p-2.5 text-sm text-muted-foreground transition-colors hover:bg-accent">
+                <Camera className="size-4 shrink-0" />
+                <span className="truncate">{t('takePhoto')}</span>
+                <input
+                  {...field}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  className="hidden"
+                  value={undefined}
+                  onChange={(event) => {
+                    const file = event.target.files?.[0] ?? null;
+                    onChange(file ?? undefined);
+                    onPickedNameChange(file?.name ?? null);
+                  }}
+                />
+              </label>
+              <label className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-border p-2.5 text-sm text-muted-foreground transition-colors hover:bg-accent">
+                <Upload className="size-4 shrink-0" />
+                <span className="truncate">{t('chooseFile')}</span>
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg"
+                  className="hidden"
+                  value={undefined}
+                  onChange={(event) => {
+                    const file = event.target.files?.[0] ?? null;
+                    onChange(file ?? undefined);
+                    onPickedNameChange(file?.name ?? null);
+                  }}
+                />
+              </label>
+            </div>
+          </FormControl>
+          {pickedName && <p className="truncate text-xs text-muted-foreground">{pickedName}</p>}
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+}
+
 export function CustomerFormDialog({
   trigger,
   customer,
@@ -36,7 +119,8 @@ export function CustomerFormDialog({
 }) {
   const t = useTranslations('customers.form');
   const [open, setOpen] = useState(false);
-  const [idImageName, setIdImageName] = useState<string | null>(null);
+  const [idImageFrontName, setIdImageFrontName] = useState<string | null>(null);
+  const [idImageBackName, setIdImageBackName] = useState<string | null>(null);
 
   const form = useForm<CustomerInput>({
     resolver: zodResolver(customerSchema),
@@ -48,13 +132,18 @@ export function CustomerFormDialog({
     },
   });
 
+  function resetPickedImages() {
+    setIdImageFrontName(null);
+    setIdImageBackName(null);
+  }
+
   async function handleSubmit(values: CustomerInput) {
     try {
       await onSubmit(values);
       toast.success(customer ? t('updated') : t('created'));
       setOpen(false);
       form.reset();
-      setIdImageName(null);
+      resetPickedImages();
     } catch (error) {
       toast.error(error instanceof ApiError ? error.message : t('genericError'));
     }
@@ -72,7 +161,7 @@ export function CustomerFormDialog({
             address: customer?.address ?? '',
             notes: customer?.notes ?? '',
           });
-          setIdImageName(null);
+          resetPickedImages();
         }
       }}
     >
@@ -136,50 +225,24 @@ export function CustomerFormDialog({
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="idImage"
-              render={({ field: { value, onChange, ...field } }) => (
-                <FormItem>
-                  <FormLabel>{t('idImage')}</FormLabel>
-                  {customer?.idImageUrl && !idImageName && (
-                    <ImagePreviewDialog
-                      src={resolveAssetUrl(customer.idImageUrl) ?? ''}
-                      alt={t('idImage')}
-                      trigger={
-                        <button type="button" className="block">
-                          <img
-                            src={resolveAssetUrl(customer.idImageUrl) ?? undefined}
-                            alt={t('idImage')}
-                            className="h-20 rounded-lg border border-border object-cover"
-                          />
-                        </button>
-                      }
-                    />
-                  )}
-                  <FormControl>
-                    <label className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-dashed border-border p-3.5 text-sm text-muted-foreground transition-colors hover:bg-accent">
-                      <Upload className="size-4 shrink-0" />
-                      <span className="truncate">{idImageName ?? t('idImageHint')}</span>
-                      <input
-                        {...field}
-                        type="file"
-                        accept="image/png,image/jpeg"
-                        capture="environment"
-                        className="hidden"
-                        value={undefined}
-                        onChange={(event) => {
-                          const file = event.target.files?.[0] ?? null;
-                          onChange(file ?? undefined);
-                          setIdImageName(file?.name ?? null);
-                        }}
-                      />
-                    </label>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <IdImageSlot
+                form={form}
+                name="idImageFront"
+                label={t('idImageFront')}
+                existingUrl={customer?.idImageFrontUrl}
+                pickedName={idImageFrontName}
+                onPickedNameChange={setIdImageFrontName}
+              />
+              <IdImageSlot
+                form={form}
+                name="idImageBack"
+                label={t('idImageBack')}
+                existingUrl={customer?.idImageBackUrl}
+                pickedName={idImageBackName}
+                onPickedNameChange={setIdImageBackName}
+              />
+            </div>
             <DialogFooter>
               <Button type="submit" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting && <Loader2 className="size-4 animate-spin" />}

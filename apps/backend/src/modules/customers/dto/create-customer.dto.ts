@@ -25,5 +25,10 @@ export class CreateCustomerDto {
   @IsOptional()
   @IsString()
   @MaxLength(Math.ceil((MAX_CUSTOMER_ID_UPLOAD_BYTES * 4) / 3))
-  idImage?: string;
+  idImageFront?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(Math.ceil((MAX_CUSTOMER_ID_UPLOAD_BYTES * 4) / 3))
+  idImageBack?: string;
 }

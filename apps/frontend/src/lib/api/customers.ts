@@ -10,7 +10,8 @@ export interface Customer {
   phone: string;
   address: string | null;
   notes: string | null;
-  idImageUrl: string | null;
+  idImageFrontUrl: string | null;
+  idImageBackUrl: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -42,8 +43,12 @@ export function getCustomer(id: string): Promise<CustomerDetail> {
 }
 
 async function toCustomerPayload(input: Partial<CustomerInput>): Promise<Record<string, unknown>> {
-  const { idImage, ...rest } = input;
-  return { ...rest, idImage: idImage ? await fileToBase64(idImage) : undefined };
+  const { idImageFront, idImageBack, ...rest } = input;
+  const [encodedFront, encodedBack] = await Promise.all([
+    idImageFront ? fileToBase64(idImageFront) : undefined,
+    idImageBack ? fileToBase64(idImageBack) : undefined,
+  ]);
+  return { ...rest, idImageFront: encodedFront, idImageBack: encodedBack };
 }
 
 export async function createCustomer(input: CustomerInput): Promise<Customer> {

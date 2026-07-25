@@ -31,9 +31,12 @@ export class CustomersService {
   ) {}
 
   async create(tenantId: string, createCustomerDto: CreateCustomerDto): Promise<Customer> {
-    const { idImage, ...rest } = createCustomerDto;
-    const idImageUrl = idImage ? await this.saveIdImage(tenantId, idImage) : undefined;
-    return this.prisma.customer.create({ data: { ...rest, tenantId, idImageUrl } });
+    const { idImageFront, idImageBack, ...rest } = createCustomerDto;
+    const [idImageFrontUrl, idImageBackUrl] = await Promise.all([
+      idImageFront ? this.saveIdImage(tenantId, idImageFront) : undefined,
+      idImageBack ? this.saveIdImage(tenantId, idImageBack) : undefined,
+    ]);
+    return this.prisma.customer.create({ data: { ...rest, tenantId, idImageFrontUrl, idImageBackUrl } });
   }
 
   async findAll(tenantId: string, query: CustomerQueryDto): Promise<PaginatedResult<Customer>> {
@@ -76,11 +79,18 @@ export class CustomersService {
 
   async update(tenantId: string, id: string, updateCustomerDto: UpdateCustomerDto): Promise<Customer> {
     await this.ensureExists(tenantId, id);
-    const { idImage, ...rest } = updateCustomerDto;
-    const idImageUrl = idImage ? await this.saveIdImage(tenantId, idImage) : undefined;
+    const { idImageFront, idImageBack, ...rest } = updateCustomerDto;
+    const [idImageFrontUrl, idImageBackUrl] = await Promise.all([
+      idImageFront ? this.saveIdImage(tenantId, idImageFront) : undefined,
+      idImageBack ? this.saveIdImage(tenantId, idImageBack) : undefined,
+    ]);
     return this.prisma.customer.update({
       where: { id },
-      data: { ...rest, ...(idImageUrl && { idImageUrl }) },
+      data: {
+        ...rest,
+        ...(idImageFrontUrl && { idImageFrontUrl }),
+        ...(idImageBackUrl && { idImageBackUrl }),
+      },
     });
   }
 
