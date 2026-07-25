@@ -823,6 +823,7 @@
     "setupTitle": "تفعيل التحقق بخطوتين",
     "setupDescription": "امسح الكود ده بتطبيق مصادقة (زي Google Authenticator أو Authy)، وبعدين اكتب الكود المكوّن من 6 أرقام اللي هيظهرلك.",
     "manualEntryHint": "مش قادر تمسح الكود؟ اكتب الكود ده يدويًا:",
+    "openInAuthenticatorApp": "افتح في تطبيق المصادقة",
     "codePlaceholder": "123456",
     "confirmButton": "تأكيد وتفعيل",
     "backupCodesTitle": "احفظ أكواد النسخ الاحتياطي",

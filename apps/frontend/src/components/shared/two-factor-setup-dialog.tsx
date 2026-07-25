@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Check, Copy, Loader2, ShieldCheck } from 'lucide-react';
+import { Check, Copy, Loader2, ShieldCheck, Smartphone } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { QRCodeSVG } from 'qrcode.react';
 import { useEffect, useState } from 'react';
@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { useMediaQuery } from '@/hooks/use-media-query';
 import { useDisableTwoFactor, useEnableTwoFactor, useSetupTwoFactor } from '@/hooks/use-two-factor';
 import { ApiError } from '@/lib/api/client';
 import { TwoFactorCodeInput, twoFactorCodeSchema } from '@/lib/schemas/auth';
@@ -39,6 +40,7 @@ export function TwoFactorSetupDialog({
   const disableTwoFactor = useDisableTwoFactor();
   const [backupCodes, setBackupCodes] = useState<string[]>([]);
   const [wasOpen, setWasOpen] = useState(open);
+  const isTouchDevice = useMediaQuery('(pointer: coarse)');
 
   const form = useForm<TwoFactorCodeInput>({
     resolver: zodResolver(twoFactorCodeSchema),
@@ -122,6 +124,12 @@ export function TwoFactorSetupDialog({
                     {setupTwoFactor.data.secret}
                   </span>
                 </p>
+                {isTouchDevice && (
+                  <Button variant="outline" render={<a href={setupTwoFactor.data.otpauthUrl} target="_blank" rel="noopener noreferrer" />}>
+                    <Smartphone className="size-4" />
+                    {t('openInAuthenticatorApp')}
+                  </Button>
+                )}
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(handleEnable)} className="flex flex-col gap-4">
                     <FormField

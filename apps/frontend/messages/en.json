@@ -823,6 +823,7 @@
     "setupTitle": "Set up two-factor authentication",
     "setupDescription": "Scan the QR code with an authenticator app (like Google Authenticator or Authy), then enter the 6-digit code it shows.",
     "manualEntryHint": "Can't scan it? Enter this code manually:",
+    "openInAuthenticatorApp": "Open in Authenticator App",
     "codePlaceholder": "123456",
     "confirmButton": "Confirm & enable",
     "backupCodesTitle": "Save your backup codes",
