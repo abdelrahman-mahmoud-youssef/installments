@@ -1,13 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+import { notFound } from 'next/navigation';
 import { config } from '@/lib/config';
 import { getSubdomainUrl } from '@/lib/root-domain';
 
-export async function GET(request: NextRequest, { params }: { params: Promise<{ code: string }> }) {
+export async function GET(_request: Request, { params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
 
   const response = await fetch(`${config.backendUrl}/public/share-links/${code}`, { cache: 'no-store' });
   if (!response.ok) {
-    return NextResponse.redirect(new URL('/', request.url));
+    notFound();
   }
 
   const { tenantSlug, targetPath } = (await response.json()) as { tenantSlug: string; targetPath: string };
