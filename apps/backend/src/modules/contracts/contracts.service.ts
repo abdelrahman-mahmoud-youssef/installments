@@ -7,9 +7,10 @@ import { MAX_CONTRACT_IMAGE_UPLOAD_BYTES } from '../../common/constants';
 import { decodeImageUpload } from '../../common/decode-image-upload';
 import { overdueInstallmentWhere } from '../../common/installments/overdue-where';
 import { buildPaginatedResult, PaginatedResult } from '../../common/pagination/paginated-result.interface';
+import { TenantLocation } from '../../common/tenant-branding';
 import { PrismaService } from '../../prisma/prisma.service';
-import { formatCustomerReminderMessage } from '../reminders/customer-reminder-message';
 import { StorageService } from '../storage/storage.service';
+import { formatContractReminderMessage } from './contract-reminder-message';
 import { ContractQueryDto } from './dto/contract-query.dto';
 import { CreateContractDto } from './dto/create-contract.dto';
 import { generateDueDates } from './installments/recurrence';
@@ -137,7 +138,7 @@ export class ContractsService {
         customer: true,
         installments: { orderBy: { sequence: 'asc' } },
         payments: { orderBy: { paidAt: 'desc' }, include: { allocations: true } },
-        tenant: { select: { name: true } },
+        tenant: { select: { name: true, slug: true, locations: true } },
       },
     });
     if (!contract) {
@@ -173,11 +174,15 @@ export class ContractsService {
 
   private buildReminderMessage(
     contract: Prisma.ContractGetPayload<{
-      include: { customer: true; installments: true; tenant: { select: { name: true } } };
+      include: {
+        customer: true;
+        installments: true;
+        tenant: { select: { name: true; slug: true; locations: true } };
+      };
     }>,
   ): string | null {
     const today = getUtcToday();
-    const overdue = contract.installments
+    const overdueInstallments = contract.installments
       .filter(
         (installment) =>
           (installment.status === InstallmentStatus.PENDING ||
@@ -185,23 +190,49 @@ export class ContractsService {
           installment.dueDate < today,
       )
       .map((installment) => ({
-        productName: contract.productName,
+        sequence: installment.sequence,
         remainingAmount: installment.amount - installment.paidAmount,
         dueDate: installment.dueDate,
       }));
 
+    const paidInstallments = contract.installments.filter(
+      (installment) => installment.status === InstallmentStatus.PAID,
+    ).length;
+    const totalRemainingAmount = contract.installments.reduce(
+      (sum, installment) => sum + (installment.amount - installment.paidAmount),
+      0,
+    );
+
+    const locations = (contract.tenant.locations as TenantLocation[] | null) ?? [];
+    const location = locations[0] ? { name: locations[0].name, address: locations[0].address, mapUrl: locations[0].mapUrl } : null;
+
+    const localePrefix = contract.customer.notificationLanguage === NotificationLanguage.EN ? '/en' : '';
+    const payPath = `${localePrefix}/customer/${contract.customer.publicId}/contracts/${contract.publicId}/pay`;
+
+    const rootDomain = this.config.get<string>('ROOT_DOMAIN');
     const frontendUrl = this.config
       .get<string>('FRONTEND_URL')
       ?.split(',')
       .map((url) => url.trim())
       .filter(Boolean)[0];
-    const localePrefix = contract.customer.notificationLanguage === NotificationLanguage.EN ? '/en' : '';
-    const payUrl = frontendUrl
-      ? `${frontendUrl}${localePrefix}/customer/${contract.customer.publicId}/contracts/${contract.publicId}/pay`
-      : null;
+    const payUrl = rootDomain
+      ? `https://${contract.tenant.slug}.${rootDomain}${payPath}`
+      : frontendUrl
+        ? `${frontendUrl}${payPath}`
+        : null;
 
-    return formatCustomerReminderMessage(
-      { businessName: contract.tenant.name, dueToday: [], overdue, payUrl },
+    return formatContractReminderMessage(
+      {
+        customerName: contract.customer.name,
+        businessName: contract.tenant.name,
+        productName: contract.productName,
+        paidInstallments,
+        totalInstallments: contract.installments.length,
+        totalRemainingAmount,
+        overdueInstallments,
+        location,
+        payUrl,
+      },
       contract.customer.notificationLanguage,
     );
   }

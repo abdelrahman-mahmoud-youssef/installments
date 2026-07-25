@@ -200,10 +200,11 @@ export default function ContractDetailPage() {
               />
             )}
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
             {contract.reminderMessage && (
               <Button
                 variant="outline"
+                className="w-full sm:w-auto"
                 render={
                   <a
                     href={`https://wa.me/${toWhatsappNumber(contract.customer.phone)}?text=${encodeURIComponent(contract.reminderMessage)}`}
@@ -219,7 +220,7 @@ export default function ContractDetailPage() {
             <DropdownMenu>
               <DropdownMenuTrigger
                 render={
-                  <Button variant="outline">
+                  <Button variant="outline" className="w-full sm:w-auto">
                     <Share2 className="size-4" />
                     {tShare('share')}
                   </Button>
@@ -249,7 +250,7 @@ export default function ContractDetailPage() {
               <>
                 <RecordPaymentDialog
                   trigger={
-                    <Button>
+                    <Button className="w-full sm:w-auto">
                       <Receipt className="size-4" />
                       {t('recordPayment')}
                     </Button>
@@ -260,7 +261,7 @@ export default function ContractDetailPage() {
                 {canCancel && (
                   <ConfirmDialog
                     trigger={
-                      <Button variant="outline">
+                      <Button variant="outline" className="w-full sm:w-auto">
                         <XCircle className="size-4" />
                         {t('cancelContract')}
                       </Button>
