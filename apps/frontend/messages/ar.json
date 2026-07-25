@@ -591,6 +591,7 @@
     "shopLinkSectionTitle": "رابط المحل",
     "shopLinkLabel": "صفحة محلك",
     "shopLinkCopied": "اتنسخ رابط المحل.",
+    "shopLinkLegacyHint": "الرابط القديم لسه شغال برضو: {path}",
     "copyLink": "انسخ الرابط",
     "aboutSectionTitle": "نبذة وروابط السوشيال ميديا",
     "aboutLabel": "نبذة عن محلك",

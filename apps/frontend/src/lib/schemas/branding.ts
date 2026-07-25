@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { RESERVED_SUBDOMAINS } from '@/lib/reserved-subdomains';
 
 export const BRAND_COLOR_PRESETS = [
   'emerald',
@@ -58,7 +59,8 @@ export const slugSchema = z.object({
     .string()
     .min(3, 'Must be at least 3 characters.')
     .max(60)
-    .regex(SLUG_PATTERN, 'Only lowercase letters, numbers, and single hyphens.'),
+    .regex(SLUG_PATTERN, 'Only lowercase letters, numbers, and single hyphens.')
+    .refine((value) => !RESERVED_SUBDOMAINS.has(value), 'This link is reserved and cannot be used.'),
 });
 
 export type SlugInput = z.infer<typeof slugSchema>;

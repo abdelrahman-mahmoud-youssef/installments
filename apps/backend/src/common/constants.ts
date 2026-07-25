@@ -17,3 +17,5 @@ export const MAX_CONTRACT_IMAGE_UPLOAD_BYTES = 5 * 1024 * 1024;
 export const MAX_PAYMENT_METHOD_TRANSACTION_IMAGE_UPLOAD_BYTES = 5 * 1024 * 1024;
 
 export const ABOUT_MAX_LENGTH = 20_000;
+
+export const RESERVED_SUBDOMAINS = ['www', 'app', 'api', 'admin'];

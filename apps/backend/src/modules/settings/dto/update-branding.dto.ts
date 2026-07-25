@@ -6,6 +6,7 @@ import {
   IsIn,
   IsInt,
   IsNotEmpty,
+  IsNotIn,
   IsNumber,
   IsOptional,
   IsString,
@@ -17,7 +18,7 @@ import {
   MinLength,
   ValidateNested,
 } from 'class-validator';
-import { ABOUT_MAX_LENGTH, BRAND_COLOR_PRESETS, BrandColorPreset } from '../../../common/constants';
+import { ABOUT_MAX_LENGTH, BRAND_COLOR_PRESETS, BrandColorPreset, RESERVED_SUBDOMAINS } from '../../../common/constants';
 
 const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
@@ -67,6 +68,7 @@ export class UpdateBrandingDto {
   @Matches(SLUG_PATTERN, {
     message: 'Link can only contain lowercase letters, numbers, and single hyphens between them.',
   })
+  @IsNotIn(RESERVED_SUBDOMAINS, { message: 'This link is reserved and cannot be used.' })
   slug?: string;
 
   @IsOptional()

@@ -1,16 +1,9 @@
-import { CalendarCheck2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export function LogoMark({ className }: { className?: string }) {
   return (
-    <span
-      className={cn(
-        'grid place-items-center rounded-[0.6rem] bg-primary text-primary-foreground shadow-sm ring-1 ring-inset ring-white/15',
-        className,
-      )}
-    >
-      <CalendarCheck2 className="size-[58%]" strokeWidth={2.4} />
-    </span>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src="/qistak-192.png" alt="" className={cn('rounded-[0.6rem] object-cover', className)} />
   );
 }
 

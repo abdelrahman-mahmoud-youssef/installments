@@ -19,6 +19,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import { useBranding, useUpdateBranding } from '@/hooks/use-branding';
 import { ApiError } from '@/lib/api/client';
+import { getRootDomain } from '@/lib/root-domain';
 import { routes } from '@/lib/routes';
 import {
   INSTALLMENT_PLAN_MONTHS,
@@ -33,7 +34,7 @@ export function ShopPageSection() {
   const { data, isLoading } = useBranding();
   const updateBranding = useUpdateBranding();
 
-  const shopOrigin = typeof window !== 'undefined' ? window.location.origin : '';
+  const rootDomain = getRootDomain();
 
   const slugForm = useForm<SlugInput>({
     resolver: zodResolver(slugSchema),
@@ -55,7 +56,7 @@ export function ShopPageSection() {
 
   function handleCopyLink() {
     const slug = data?.slug ?? '';
-    navigator.clipboard.writeText(`${shopOrigin}${routes.publicShop(slug)}`);
+    navigator.clipboard.writeText(`https://${slug}.${rootDomain}`);
     toast.success(t('shopLinkCopied'));
   }
 
@@ -157,17 +158,22 @@ export function ShopPageSection() {
                           className="flex items-stretch overflow-hidden rounded-lg border border-input bg-card shadow-xs"
                           dir="ltr"
                         >
-                          <span className="flex max-w-[50%] shrink-0 items-center truncate border-r border-border bg-muted px-3 text-sm text-muted-foreground">
-                            {shopOrigin}
-                            {routes.publicShop('')}
+                          <span className="flex shrink-0 items-center border-r border-border bg-muted px-3 text-sm text-muted-foreground">
+                            https://
                           </span>
                           <Input
                             dir="ltr"
                             className="min-w-0 flex-1 rounded-none border-0 bg-transparent shadow-none focus-visible:ring-0"
                             {...field}
                           />
+                          <span className="flex shrink-0 items-center truncate border-l border-border bg-muted px-3 text-sm text-muted-foreground">
+                            .{rootDomain}
+                          </span>
                         </div>
                       </FormControl>
+                      <p className="text-xs text-muted-foreground">
+                        {t('shopLinkLegacyHint', { path: routes.publicShop(field.value || data?.slug || '') })}
+                      </p>
                       <FormMessage />
                     </FormItem>
                   )}

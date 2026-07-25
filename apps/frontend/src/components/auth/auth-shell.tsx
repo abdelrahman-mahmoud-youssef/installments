@@ -1,8 +1,9 @@
 'use client';
 
-import { CalendarCheck2, ShieldCheck, TrendingUp, Wallet } from 'lucide-react';
+import { ShieldCheck, TrendingUp, Wallet } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { LanguageSwitcher } from '@/components/shared/language-switcher';
+import { LogoMark } from '@/components/shared/logo';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { formatMoney } from '@/lib/format';
 
@@ -18,12 +19,12 @@ function BrandPanel() {
   ];
 
   return (
-    <div className="relative hidden overflow-hidden bg-[oklch(0.42_0.1_166)] lg:flex lg:w-[46%] lg:max-w-2xl">
+    <div className="relative hidden overflow-hidden bg-[oklch(0.28_0.1_260)] lg:flex lg:w-[46%] lg:max-w-2xl">
       <div
         className="absolute inset-0 opacity-70"
         style={{
           background:
-            'radial-gradient(120% 90% at 15% 0%, oklch(0.6 0.13 160 / 0.55), transparent 55%), radial-gradient(90% 80% at 100% 100%, oklch(0.35 0.09 200 / 0.7), transparent 60%)',
+            'radial-gradient(120% 90% at 15% 0%, oklch(0.6 0.18 260 / 0.5), transparent 55%), radial-gradient(90% 80% at 100% 100%, oklch(0.55 0.12 203 / 0.6), transparent 60%)',
         }}
       />
       <div
@@ -37,9 +38,7 @@ function BrandPanel() {
 
       <div className="relative z-10 flex h-full flex-col justify-between gap-10 p-12 text-white">
         <div className="flex items-center gap-2.5">
-          <span className="grid size-8 place-items-center rounded-[0.6rem] bg-white/15 ring-1 ring-inset ring-white/25">
-            <CalendarCheck2 className="size-[58%]" strokeWidth={2.4} />
-          </span>
+          <LogoMark className="size-8 ring-1 ring-inset ring-white/25" />
           <span className="text-[0.95rem] font-semibold tracking-tight">{tCommon('appName')}</span>
         </div>
 

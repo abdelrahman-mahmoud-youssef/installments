@@ -591,6 +591,7 @@
     "shopLinkSectionTitle": "Shop link",
     "shopLinkLabel": "Your shop page",
     "shopLinkCopied": "Shop link copied.",
+    "shopLinkLegacyHint": "The old link still works too: {path}",
     "copyLink": "Copy link",
     "aboutSectionTitle": "About & social links",
     "aboutLabel": "About your shop",
