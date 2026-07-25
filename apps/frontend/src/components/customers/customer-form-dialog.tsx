@@ -66,7 +66,7 @@ function IdImageSlot({
           )}
           <FormControl>
             <div className="flex gap-2">
-              <label className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-border p-2.5 text-sm text-muted-foreground transition-colors hover:bg-accent">
+              <label className="flex min-w-0 flex-1 cursor-pointer items-center justify-center gap-1.5 overflow-hidden rounded-lg border border-dashed border-border p-2.5 text-sm text-muted-foreground transition-colors hover:bg-accent">
                 <Camera className="size-4 shrink-0" />
                 <span className="truncate">{t('takePhoto')}</span>
                 <input
@@ -83,7 +83,7 @@ function IdImageSlot({
                   }}
                 />
               </label>
-              <label className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-border p-2.5 text-sm text-muted-foreground transition-colors hover:bg-accent">
+              <label className="flex min-w-0 flex-1 cursor-pointer items-center justify-center gap-1.5 overflow-hidden rounded-lg border border-dashed border-border p-2.5 text-sm text-muted-foreground transition-colors hover:bg-accent">
                 <Upload className="size-4 shrink-0" />
                 <span className="truncate">{t('chooseFile')}</span>
                 <input
@@ -166,7 +166,7 @@ export function CustomerFormDialog({
       }}
     >
       <DialogTrigger render={trigger} />
-      <DialogContent>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{customer ? t('editTitle') : t('newTitle')}</DialogTitle>
           <DialogDescription>{customer ? t('editDescription') : t('newDescription')}</DialogDescription>
@@ -225,7 +225,7 @@ export function CustomerFormDialog({
                 </FormItem>
               )}
             />
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-4">
               <IdImageSlot
                 form={form}
                 name="idImageFront"
