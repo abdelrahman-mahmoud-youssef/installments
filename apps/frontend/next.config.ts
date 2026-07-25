@@ -15,9 +15,6 @@ const withSerwist = withSerwistInit({
 });
 
 const nextConfig: NextConfig = {
-  experimental: {
-    trustHostHeader: true,
-  },
 };
 
 export default withSerwist(withNextIntl(nextConfig));
