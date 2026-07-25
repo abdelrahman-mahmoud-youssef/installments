@@ -149,7 +149,7 @@ export default function CustomerDetailPage() {
                     </Button>
                   }
                 />
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuItem
                     onClick={() => {
                       navigator.clipboard.writeText(publicUrl);
