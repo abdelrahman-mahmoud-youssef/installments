@@ -15,6 +15,9 @@ const withSerwist = withSerwistInit({
 });
 
 const nextConfig: NextConfig = {
+  outputFileTracingIncludes: {
+    "/**": ["./assets/fonts/**"],
+  },
 };
 
 export default withSerwist(withNextIntl(nextConfig));
