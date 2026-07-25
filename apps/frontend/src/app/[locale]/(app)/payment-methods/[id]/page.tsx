@@ -194,7 +194,7 @@ export default function PaymentMethodDetailPage() {
             setPage(1);
           }}
           placeholder={t('transactionSearchPlaceholder')}
-          className="max-w-sm"
+          className="w-full sm:max-w-sm"
         />
 
         {debouncedSearch && transactions && (
