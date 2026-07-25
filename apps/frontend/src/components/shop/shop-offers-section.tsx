@@ -1,23 +1,24 @@
 import { Sparkles } from 'lucide-react';
 import { OfferCard } from '@/components/shop/offer-card';
 import { Link } from '@/i18n/navigation';
-import { demoOffers } from '@/lib/demo-offers';
-import { routes } from '@/lib/routes';
+import type { PublicOffer } from '@/lib/api/public';
+
+const PREVIEW_COUNT = 2;
 
 export function ShopOffersSection({
-  slug,
-  locale,
+  offers,
+  showMoreHref,
   title,
   subtitle,
   showMoreLabel,
 }: {
-  slug: string;
-  locale: string;
+  offers: PublicOffer[];
+  showMoreHref: string;
   title: string;
   subtitle: string;
   showMoreLabel: string;
 }) {
-  const previewOffers = demoOffers.slice(0, 2);
+  const previewOffers = offers.slice(0, PREVIEW_COUNT);
 
   return (
     <div className="space-y-3">
@@ -31,13 +32,13 @@ export function ShopOffersSection({
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {previewOffers.map((offer) => (
-          <OfferCard key={offer.id} offer={offer} locale={locale} />
+          <OfferCard key={offer.id} offer={offer} />
         ))}
       </div>
 
-      {demoOffers.length > previewOffers.length && (
+      {offers.length > previewOffers.length && (
         <Link
-          href={routes.shopOffers(slug)}
+          href={showMoreHref}
           className="flex w-full items-center justify-center rounded-xl border border-dashed border-border bg-card py-3 text-sm font-medium text-primary transition-colors hover:bg-accent"
         >
           {showMoreLabel}

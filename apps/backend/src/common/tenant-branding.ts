@@ -25,6 +25,7 @@ export interface TenantBrandingSource {
   showInstallmentCalculator: boolean;
   calculatorPlans: unknown;
   locations: unknown;
+  showOffersOnPublicPage: boolean;
 }
 
 export interface TenantBranding {
@@ -41,6 +42,7 @@ export interface TenantBranding {
   showInstallmentCalculator: boolean;
   calculatorPlans: CalculatorPlan[];
   locations: TenantLocation[];
+  showOffersOnPublicPage: boolean;
 }
 
 export const TENANT_BRANDING_SELECT = {
@@ -58,6 +60,7 @@ export const TENANT_BRANDING_SELECT = {
   showInstallmentCalculator: true,
   calculatorPlans: true,
   locations: true,
+  showOffersOnPublicPage: true,
 } as const;
 
 export function toTenantBranding(tenant: TenantBrandingSource): TenantBranding {
@@ -75,5 +78,6 @@ export function toTenantBranding(tenant: TenantBrandingSource): TenantBranding {
     showInstallmentCalculator: tenant.showInstallmentCalculator,
     calculatorPlans: (tenant.calculatorPlans as CalculatorPlan[] | null) ?? [],
     locations: (tenant.locations as TenantLocation[] | null) ?? [],
+    showOffersOnPublicPage: tenant.showOffersOnPublicPage,
   };
 }

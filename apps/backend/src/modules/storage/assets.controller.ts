@@ -12,7 +12,7 @@ export function cacheControlFor(key: string): string | null {
   if (key.startsWith('logos/')) {
     return LOGO_CACHE_CONTROL;
   }
-  if (key.startsWith('about-images/')) {
+  if (key.startsWith('about-images/') || key.startsWith('offer-images/')) {
     return ABOUT_IMAGE_CACHE_CONTROL;
   }
   return null;

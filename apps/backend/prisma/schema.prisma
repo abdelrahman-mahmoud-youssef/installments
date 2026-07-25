@@ -107,6 +107,7 @@ model Tenant {
   telegramBotUsername       String?
   telegramChatId            String?
   showTelegramOnPublicPage  Boolean                    @default(true)
+  showOffersOnPublicPage    Boolean                    @default(true)
   notificationLanguage      NotificationLanguage       @default(AR)
   createdAt                 DateTime                   @default(now())
   users                     User[]
@@ -125,6 +126,7 @@ model Tenant {
   counterparties            Counterparty[]
   counterpartyAdjustments   CounterpartyAdjustment[]
   supportMessages           SupportMessage[]
+  offers                    Offer[]
 }
 
 model User {
@@ -411,6 +413,22 @@ model PaymentMethodTransaction {
 
   @@index([tenantId, paymentMethodId, occurredAt])
   @@index([tenantId, counterpartyId, occurredAt])
+}
+
+model Offer {
+  id          String   @id @default(cuid())
+  tenantId    String
+  title       String
+  description String?
+  tag         String?
+  images      String[]
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, sortOrder])
 }
 
 model Counterparty {

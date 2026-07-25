@@ -154,6 +154,23 @@ export async function getPublicShop(publicId: string): Promise<TenantBranding | 
   return response.json() as Promise<TenantBranding>;
 }
 
+export interface PublicOffer {
+  id: string;
+  title: string;
+  description: string | null;
+  tag: string | null;
+  images: string[];
+}
+
+export async function getPublicOffers(publicId: string): Promise<PublicOffer[]> {
+  const response = await fetch(`${config.backendUrl}/public/shops/${publicId}/offers`, { cache: 'no-store' });
+
+  if (!response.ok) {
+    throw new Error('Failed to load offers.');
+  }
+  return response.json() as Promise<PublicOffer[]>;
+}
+
 async function requestPublic<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`/api/public/${path}`, {
     ...init,

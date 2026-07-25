@@ -15,6 +15,7 @@ export const routes = {
   staff: '/staff',
   activity: '/activity',
   paymentClaims: '/payment-claims',
+  offers: '/offers',
   paymentMethods: '/payment-methods',
   paymentMethod: (id: string) => `/payment-methods/${id}`,
   contacts: '/payment-methods/contacts',

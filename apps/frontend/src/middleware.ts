@@ -2,8 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import createMiddleware from 'next-intl/middleware';
 import { routing } from './i18n/routing';
-import { RESERVED_SUBDOMAINS } from './lib/reserved-subdomains';
-import { getRootDomain } from './lib/root-domain';
+import { extractTenantSlug, getRootDomain } from './lib/root-domain';
 
 const intlMiddleware = createMiddleware(routing);
 
@@ -18,21 +17,6 @@ const PWA_PATHS = [
   /^\/dashboard-manifest$/,
   /^\/dashboard-icons\//,
 ];
-
-function extractTenantSlug(host: string, rootDomain: string): string | null {
-  const hostname = host.split(':')[0];
-  if (hostname === rootDomain || hostname === `www.${rootDomain}`) {
-    return null;
-  }
-  if (!hostname.endsWith(`.${rootDomain}`)) {
-    return null;
-  }
-  const subdomain = hostname.slice(0, -(rootDomain.length + 1));
-  if (subdomain.includes('.') || RESERVED_SUBDOMAINS.has(subdomain)) {
-    return null;
-  }
-  return subdomain;
-}
 
 function handleTenantSubdomain(request: NextRequest): NextResponse | null {
   const slug = extractTenantSlug(request.headers.get('host') ?? '', getRootDomain());

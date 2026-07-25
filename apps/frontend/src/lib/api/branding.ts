@@ -28,6 +28,7 @@ export interface TenantBranding {
   showInstallmentCalculator: boolean;
   calculatorPlans: CalculatorPlan[];
   locations: TenantLocation[];
+  showOffersOnPublicPage: boolean;
 }
 
 export async function getBrandingServer(token: string): Promise<TenantBranding | null> {

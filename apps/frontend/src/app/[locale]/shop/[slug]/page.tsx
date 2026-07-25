@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { getLocale, getTranslations } from 'next-intl/server';
+import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { FaFacebookF, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa6';
 import { FontSizeToggle } from '@/components/shared/font-size-toggle';
@@ -12,9 +13,11 @@ import { InstallmentCalculator } from '@/components/shop/installment-calculator'
 import { ShopLocations } from '@/components/shop/shop-locations';
 import { ShopOffersSection } from '@/components/shop/shop-offers-section';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { getPublicShop } from '@/lib/api/public';
+import { getPublicOffers, getPublicShop } from '@/lib/api/public';
 import { resolveAssetUrl } from '@/lib/assets';
 import { brandColorCssVars } from '@/lib/brand-colors';
+import { extractTenantSlug, getRootDomain } from '@/lib/root-domain';
+import { routes } from '@/lib/routes';
 
 function withScheme(url: string): string {
   return /^https?:\/\//i.test(url) ? url : `https://${url}`;
@@ -52,11 +55,13 @@ export default async function PublicShopPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const [shop, t, tCommon, locale] = await Promise.all([
+  const [shop, offers, t, tCommon, locale, host] = await Promise.all([
     getPublicShop(slug),
+    getPublicOffers(slug),
     getTranslations('publicShop'),
     getTranslations('common'),
     getLocale(),
+    headers().then((list) => list.get('host') ?? ''),
   ]);
 
   if (!shop) {
@@ -66,6 +71,12 @@ export default async function PublicShopPage({
   const logoUrl = resolveAssetUrl(shop.logoUrl);
   const whatsappPhone = shop.phone?.replace(/\D/g, '') || null;
   const showCalculator = shop.showInstallmentCalculator && shop.calculatorPlans.length > 0;
+  const onTenantSubdomain = extractTenantSlug(host, getRootDomain()) === slug;
+  const shopBase = onTenantSubdomain ? '' : routes.publicShop(slug);
+  const resolvedOffers = offers.map((offer) => ({
+    ...offer,
+    images: offer.images.map((image) => resolveAssetUrl(image) ?? image),
+  }));
 
   const socialLinks = [
     shop.instagramUrl && {
@@ -166,13 +177,15 @@ export default async function PublicShopPage({
 
         <ShopLocations locations={shop.locations} title={t('locationsTitle')} directionsLabel={t('getDirections')} />
 
-        <ShopOffersSection
-          slug={slug}
-          locale={locale}
-          title={t('offers.title')}
-          subtitle={t('offers.subtitle')}
-          showMoreLabel={t('offers.showMore')}
-        />
+        {shop.showOffersOnPublicPage && resolvedOffers.length > 0 && (
+          <ShopOffersSection
+            offers={resolvedOffers}
+            showMoreHref={`${shopBase}/offers`}
+            title={t('offers.title')}
+            subtitle={t('offers.subtitle')}
+            showMoreLabel={t('offers.showMore')}
+          />
+        )}
       </main>
 
       <footer className="pb-10 text-center text-xs text-muted-foreground">{shop.displayName}</footer>

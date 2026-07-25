@@ -8,6 +8,7 @@ import {
   History,
   UserCog,
   ReceiptText,
+  Sparkles,
   Wallet,
   LifeBuoy,
 } from 'lucide-react';
@@ -20,6 +21,7 @@ export const navigationItems = [
   { labelKey: 'paymentClaims', href: routes.paymentClaims, icon: ReceiptText, adminOnly: false },
   { labelKey: 'reports', href: routes.reports, icon: BarChart3, adminOnly: false },
   { labelKey: 'announcements', href: routes.announcements, icon: Megaphone, adminOnly: false },
+  { labelKey: 'offers', href: routes.offers, icon: Sparkles, adminOnly: true },
   { labelKey: 'paymentMethods', href: routes.paymentMethods, icon: Wallet, adminOnly: true },
   { labelKey: 'staff', href: routes.staff, icon: UserCog, adminOnly: true },
   { labelKey: 'activity', href: routes.activity, icon: History, adminOnly: true },
