@@ -5,6 +5,7 @@ import { apiClient } from './client';
 export interface NotificationSettings {
   telegramConfigured: boolean;
   telegramChatId: string | null;
+  showTelegramOnPublicPage: boolean;
   notificationLanguage: NotificationLanguage;
 }
 
@@ -28,4 +29,8 @@ export function disconnectNotifications(): Promise<NotificationSettings> {
 
 export function setNotificationLanguage(language: NotificationLanguage): Promise<NotificationSettings> {
   return apiClient.patch('settings/notifications/language', { language });
+}
+
+export function setTelegramPublicVisibility(showTelegramOnPublicPage: boolean): Promise<NotificationSettings> {
+  return apiClient.patch('settings/notifications/public-page-visibility', { showTelegramOnPublicPage });
 }

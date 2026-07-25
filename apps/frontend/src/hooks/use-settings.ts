@@ -6,6 +6,7 @@ import {
   NotificationSettings,
   sendTestNotification,
   setNotificationLanguage,
+  setTelegramPublicVisibility,
   updateNotificationSettings,
 } from '@/lib/api/settings';
 import { NotificationSettingsInput } from '@/lib/schemas/settings';
@@ -49,6 +50,14 @@ export function useSetNotificationLanguage() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (language: NotificationLanguage) => setNotificationLanguage(language),
+    onSuccess: (data) => queryClient.setQueryData(settingsKeys.notifications, data),
+  });
+}
+
+export function useSetTelegramPublicVisibility() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (showTelegramOnPublicPage: boolean) => setTelegramPublicVisibility(showTelegramOnPublicPage),
     onSuccess: (data) => queryClient.setQueryData(settingsKeys.notifications, data),
   });
 }

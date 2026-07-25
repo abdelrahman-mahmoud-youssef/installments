@@ -23,6 +23,7 @@ import {
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { usePaymentClaims } from '@/hooks/use-payment-claims';
+import { useSupportMessages } from '@/hooks/use-support';
 import { Link, usePathname, useRouter } from '@/i18n/navigation';
 import { logout } from '@/lib/api/auth';
 import { navigationItems } from '@/lib/navigation';
@@ -40,6 +41,8 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
     { status: 'PENDING', page: 1, limit: 1 },
     { refetchInterval: PENDING_CLAIMS_POLL_INTERVAL_MS },
   );
+  const { data: supportMessages } = useSupportMessages({ refetchInterval: PENDING_CLAIMS_POLL_INTERVAL_MS });
+  const unseenReplyCount = (supportMessages ?? []).filter((message) => message.adminReply && !message.seenAt).length;
   const visibleItems = navigationItems.filter((item) => !item.adminOnly || currentUser?.role === 'ADMIN');
 
   return (
@@ -47,7 +50,12 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
       {visibleItems.map((item) => {
         const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
         const Icon = item.icon;
-        const pendingCount = item.href === routes.paymentClaims ? pendingClaims?.total : undefined;
+        const pendingCount =
+          item.href === routes.paymentClaims
+            ? pendingClaims?.total
+            : item.href === routes.support
+              ? unseenReplyCount
+              : undefined;
         return (
           <Link
             key={item.href}

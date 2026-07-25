@@ -33,12 +33,14 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   useDisconnectNotifications,
   useNotificationSettings,
   useSendTestNotification,
   useSetNotificationLanguage,
+  useSetTelegramPublicVisibility,
   useUpdateNotificationSettings,
 } from '@/hooks/use-settings';
 import { ApiError } from '@/lib/api/client';
@@ -62,6 +64,7 @@ export default function SettingsPage() {
   const sendTest = useSendTestNotification();
   const disconnect = useDisconnectNotifications();
   const setLanguage = useSetNotificationLanguage();
+  const setTelegramPublicVisibility = useSetTelegramPublicVisibility();
   const isConnected = Boolean(data?.telegramConfigured);
   const [language, setSelectedLanguage] = useState<NotificationLanguage>('AR');
   const [syncedLanguage, setSyncedLanguage] = useState<NotificationLanguage | undefined>(undefined);
@@ -115,6 +118,15 @@ export default function SettingsPage() {
     try {
       await setLanguage.mutateAsync(language);
       toast.success(t('languageSaved'));
+    } catch (error) {
+      toast.error(error instanceof ApiError ? error.message : t('genericError'));
+    }
+  }
+
+  async function handleToggleTelegramPublicVisibility(next: boolean) {
+    try {
+      await setTelegramPublicVisibility.mutateAsync(next);
+      toast.success(t('telegramPublicVisibilitySaved'));
     } catch (error) {
       toast.error(error instanceof ApiError ? error.message : t('genericError'));
     }
@@ -278,6 +290,21 @@ export default function SettingsPage() {
                       </Button>
                     )}
                   </div>
+                </div>
+              )}
+
+              {!isLoading && data && (
+                <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground">{t('telegramPublicVisibilityLabel')}</p>
+                    <p className="text-xs text-muted-foreground">{t('telegramPublicVisibilityHint')}</p>
+                  </div>
+                  <Switch
+                    checked={data.showTelegramOnPublicPage}
+                    onCheckedChange={handleToggleTelegramPublicVisibility}
+                    disabled={setTelegramPublicVisibility.isPending}
+                    aria-label={t('telegramPublicVisibilityLabel')}
+                  />
                 </div>
               )}
             </Section>
