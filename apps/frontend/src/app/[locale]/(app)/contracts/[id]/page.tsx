@@ -47,7 +47,7 @@ import { useCreatePayment } from '@/hooks/use-payments';
 import { ApiError } from '@/lib/api/client';
 import { resolveAssetUrl } from '@/lib/assets';
 import { getDisplayInstallmentStatus } from '@/lib/enums';
-import { normalizeLocalPhoneInput } from '@/lib/phone';
+import { toWhatsappNumber } from '@/lib/phone';
 import { getSubdomainUrl } from '@/lib/root-domain';
 import { routes } from '@/lib/routes';
 
@@ -114,7 +114,7 @@ export default function ContractDetailPage() {
   const isActive = contract.status === 'ACTIVE';
   const contractPath = routes.publicContract(contract.customer.publicId, contract.publicId);
   const publicUrl = branding ? getSubdomainUrl(branding.slug, contractPath) : `${window.location.origin}${contractPath}`;
-  const whatsappUrl = `https://wa.me/20${normalizeLocalPhoneInput(contract.customer.phone)}?text=${encodeURIComponent(publicUrl)}`;
+  const whatsappUrl = `https://wa.me/${toWhatsappNumber(contract.customer.phone)}?text=${encodeURIComponent(publicUrl)}`;
 
   const scheduleColumns: Column<Installment>[] = [
     {
@@ -206,7 +206,7 @@ export default function ContractDetailPage() {
                 variant="outline"
                 render={
                   <a
-                    href={`https://wa.me/20${normalizeLocalPhoneInput(contract.customer.phone)}?text=${encodeURIComponent(contract.reminderMessage)}`}
+                    href={`https://wa.me/${toWhatsappNumber(contract.customer.phone)}?text=${encodeURIComponent(contract.reminderMessage)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   />

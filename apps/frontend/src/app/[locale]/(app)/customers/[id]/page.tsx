@@ -45,7 +45,7 @@ import type { CustomerContractSummary } from '@/lib/api/customers';
 import { useBranding } from '@/hooks/use-branding';
 import { useCustomer, useUpdateCustomer } from '@/hooks/use-customers';
 import { resolveAssetUrl } from '@/lib/assets';
-import { normalizeLocalPhoneInput } from '@/lib/phone';
+import { toWhatsappNumber } from '@/lib/phone';
 import { getSubdomainUrl } from '@/lib/root-domain';
 import { routes } from '@/lib/routes';
 
@@ -79,7 +79,7 @@ export default function CustomerDetailPage() {
 
   const customerPath = routes.publicCustomer(customer.publicId);
   const publicUrl = branding ? getSubdomainUrl(branding.slug, customerPath) : `${window.location.origin}${customerPath}`;
-  const whatsappUrl = `https://wa.me/20${normalizeLocalPhoneInput(customer.phone)}?text=${encodeURIComponent(publicUrl)}`;
+  const whatsappUrl = `https://wa.me/${toWhatsappNumber(customer.phone)}?text=${encodeURIComponent(publicUrl)}`;
 
   const columns: Column<CustomerContractSummary>[] = [
     {
@@ -190,7 +190,7 @@ export default function CustomerDetailPage() {
               <ExternalLink className="size-3" />
             </a>
             <a
-              href={`https://wa.me/20${normalizeLocalPhoneInput(customer.phone)}`}
+              href={`https://wa.me/${toWhatsappNumber(customer.phone)}`}
               target="_blank"
               rel="noopener noreferrer"
               title={t('openWhatsapp')}

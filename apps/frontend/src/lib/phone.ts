@@ -21,3 +21,9 @@ export function toStoredPhoneNumber(localNumber: string): string {
   const digits = normalizeLocalPhoneInput(localNumber);
   return digits ? `${DEFAULT_COUNTRY_CODE}${digits}` : '';
 }
+
+export function toWhatsappNumber(phone: string): string {
+  const digits = phone.replace(/\D/g, '');
+  const countryCode = DEFAULT_COUNTRY_CODE.slice(1);
+  return digits.startsWith(countryCode) ? digits : `${countryCode}${stripLeadingZero(digits)}`;
+}
