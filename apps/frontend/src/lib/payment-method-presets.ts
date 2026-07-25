@@ -5,18 +5,54 @@ export interface PaymentMethodPreset {
   label: string;
   color: string;
   icon: LucideIcon;
+  iconSrc?: string;
   suggestedMonthlyLimit?: number;
 }
 
 export const PAYMENT_METHOD_PRESETS: PaymentMethodPreset[] = [
-  { key: 'vodafone_cash', label: 'Vodafone Cash', color: '#e60000', icon: Smartphone, suggestedMonthlyLimit: 200000 },
-  { key: 'instapay', label: 'InstaPay', color: '#6c2eb5', icon: Wallet, suggestedMonthlyLimit: 400000 },
-  { key: 'fawry', label: 'Fawry', color: '#fbbf24', icon: Banknote },
+  {
+    key: 'vodafone_cash',
+    label: 'Vodafone Cash',
+    color: '#e60000',
+    icon: Smartphone,
+    iconSrc: '/payment-methods/vodafone_cash.png',
+    suggestedMonthlyLimit: 200000,
+  },
+  {
+    key: 'instapay',
+    label: 'InstaPay',
+    color: '#6c2eb5',
+    icon: Wallet,
+    iconSrc: '/payment-methods/instapay.png',
+    suggestedMonthlyLimit: 400000,
+  },
+  { key: 'fawry', label: 'Fawry', color: '#fbbf24', icon: Banknote, iconSrc: '/payment-methods/fawry.png' },
   { key: 'bank_transfer', label: 'Bank transfer', color: '#475569', icon: Landmark },
-  { key: 'orange_cash', label: 'Orange Cash', color: '#ff7900', icon: Smartphone, suggestedMonthlyLimit: 200000 },
-  { key: 'etisalat_cash', label: 'Etisalat Cash', color: '#00a651', icon: Smartphone, suggestedMonthlyLimit: 200000 },
-  { key: 'we_pay', label: 'WE Pay', color: '#4b2e83', icon: Smartphone, suggestedMonthlyLimit: 200000 },
-  { key: 'aman', label: 'Aman', color: '#ef5a28', icon: Banknote },
+  {
+    key: 'orange_cash',
+    label: 'Orange Cash',
+    color: '#ff7900',
+    icon: Smartphone,
+    iconSrc: '/payment-methods/orange_cash.png',
+    suggestedMonthlyLimit: 200000,
+  },
+  {
+    key: 'etisalat_cash',
+    label: 'Etisalat Cash',
+    color: '#00a651',
+    icon: Smartphone,
+    iconSrc: '/payment-methods/etisalat_cash.png',
+    suggestedMonthlyLimit: 200000,
+  },
+  {
+    key: 'we_pay',
+    label: 'WE Pay',
+    color: '#4b2e83',
+    icon: Smartphone,
+    iconSrc: '/payment-methods/we_pay.png',
+    suggestedMonthlyLimit: 200000,
+  },
+  { key: 'aman', label: 'Aman', color: '#ef5a28', icon: Banknote, iconSrc: '/payment-methods/aman.png' },
 ];
 
 const PRESET_BY_KEY = new Map(PAYMENT_METHOD_PRESETS.map((preset) => [preset.key, preset]));
