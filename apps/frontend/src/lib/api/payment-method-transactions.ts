@@ -20,6 +20,12 @@ export interface PaymentMethodTransactionListParams {
   month?: string;
   page?: number;
   limit?: number;
+  q?: string;
+}
+
+export interface PaymentMethodTransactionListResult extends PaginatedResult<PaymentMethodTransaction> {
+  totalIn: number;
+  totalOut: number;
 }
 
 export interface PaymentMethodMonthlySummary {
@@ -33,7 +39,7 @@ export interface PaymentMethodMonthlySummary {
 export function listPaymentMethodTransactions(
   paymentMethodId: string,
   params: PaymentMethodTransactionListParams,
-): Promise<PaginatedResult<PaymentMethodTransaction>> {
+): Promise<PaymentMethodTransactionListResult> {
   return apiClient.get(`settings/payment-methods/${paymentMethodId}/transactions${buildQuery(params)}`);
 }
 

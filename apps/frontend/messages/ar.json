@@ -694,6 +694,8 @@
     "logTransaction": "سجّل عملية",
     "logTransactionDescription": "سجّل فلوس اتحركت من خلال المحفظة دي من غير ما تكون دفعة عميل.",
     "noTransactionsYet": "لسه مفيش عمليات مسجلة",
+    "noTransactionsFound": "مفيش عمليات مطابقة لبحثك",
+    "transactionSearchPlaceholder": "دوّر بالاسم أو رقم التليفون",
     "counterpartyNameTo": "دفعت لـ",
     "counterpartyNameFrom": "استلمت من",
     "counterpartyPhone": "رقمهم (اختياري)",

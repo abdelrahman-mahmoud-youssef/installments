@@ -12,6 +12,11 @@ import { CreatePaymentMethodTransactionDto } from './dto/create-payment-method-t
 import { PaymentMethodTransactionQueryDto } from './dto/payment-method-transaction-query.dto';
 import { getPaymentMethodMonthlyUsage, PaymentMethodMonthlyUsage } from './payment-method-usage.util';
 
+export interface PaymentMethodTransactionListResult extends PaginatedResult<PaymentMethodTransaction> {
+  totalIn: number;
+  totalOut: number;
+}
+
 @Injectable()
 export class PaymentMethodTransactionsService {
   constructor(
@@ -52,16 +57,25 @@ export class PaymentMethodTransactionsService {
     tenantId: string,
     paymentMethodId: string,
     query: PaymentMethodTransactionQueryDto,
-  ): Promise<PaginatedResult<PaymentMethodTransaction>> {
+  ): Promise<PaymentMethodTransactionListResult> {
     await this.findOwnedMethod(tenantId, paymentMethodId);
 
-    const where: Prisma.PaymentMethodTransactionWhereInput = { tenantId, paymentMethodId };
+    const where: Prisma.PaymentMethodTransactionWhereInput = {
+      tenantId,
+      paymentMethodId,
+      ...(query.q && {
+        OR: [
+          { counterpartyName: { contains: query.q, mode: 'insensitive' } },
+          { counterpartyPhone: { contains: query.q } },
+        ],
+      }),
+    };
     if (query.month) {
       const monthStart = resolveMonthStart(query.month, getUtcToday());
       where.occurredAt = { gte: monthStart, lt: startOfUtcMonth(monthStart, 1) };
     }
 
-    const [data, total] = await Promise.all([
+    const [data, total, sums] = await Promise.all([
       this.prisma.paymentMethodTransaction.findMany({
         where,
         orderBy: { occurredAt: 'desc' },
@@ -69,9 +83,14 @@ export class PaymentMethodTransactionsService {
         take: query.limit,
       }),
       this.prisma.paymentMethodTransaction.count({ where }),
+      this.prisma.paymentMethodTransaction.groupBy({ by: ['direction'], where, _sum: { amount: true } }),
     ]);
 
-    return buildPaginatedResult(data, total, query.page, query.limit);
+    return {
+      ...buildPaginatedResult(data, total, query.page, query.limit),
+      totalIn: sums.find((sum) => sum.direction === 'IN')?._sum.amount ?? 0,
+      totalOut: sums.find((sum) => sum.direction === 'OUT')?._sum.amount ?? 0,
+    };
   }
 
   async getMonthlySummary(

@@ -694,6 +694,8 @@
     "logTransaction": "Log a transaction",
     "logTransactionDescription": "Record money moved through this wallet outside of a customer payment.",
     "noTransactionsYet": "No transactions logged yet",
+    "noTransactionsFound": "No transactions match your search",
+    "transactionSearchPlaceholder": "Search by name or phone",
     "counterpartyNameTo": "Paid to",
     "counterpartyNameFrom": "Received from",
     "counterpartyPhone": "Their phone (optional)",

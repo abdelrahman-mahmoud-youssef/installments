@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowDownCircle, ArrowUpCircle, FileWarning, Pencil, Plus, Receipt, Trash2, Wallet } from 'lucide-react';
+import { ArrowDownCircle, ArrowUpCircle, FileWarning, Pencil, Plus, Receipt, SearchX, Trash2, Wallet } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useState } from 'react';
@@ -19,10 +19,12 @@ import { MonthSwitcher } from '@/components/shared/month-switcher';
 import { PageHeader } from '@/components/shared/page-header';
 import { PaginationControls } from '@/components/shared/pagination-controls';
 import { PaymentMethodIcon } from '@/components/shared/payment-method-icon';
+import { SearchInput } from '@/components/shared/search-input';
 import { Section } from '@/components/shared/section';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { usePaymentMethodMonthlySummary, usePaymentMethodTransactions } from '@/hooks/use-payment-method-transactions';
 import { useDeletePaymentMethod, usePaymentMethods, useUpdatePaymentMethod } from '@/hooks/use-payment-methods';
 import { useRouter } from '@/i18n/navigation';
@@ -37,6 +39,8 @@ export default function PaymentMethodDetailPage() {
   const router = useRouter();
   const [month, setMonth] = useState(currentMonthKey());
   const [page, setPage] = useState(1);
+  const [search, setSearch] = useState('');
+  const debouncedSearch = useDebouncedValue(search, 300);
 
   const { data: paymentMethods, isLoading: isLoadingMethods } = usePaymentMethods();
   const method = paymentMethods?.find((item) => item.id === id);
@@ -45,6 +49,7 @@ export default function PaymentMethodDetailPage() {
     month,
     page,
     limit: 20,
+    q: debouncedSearch || undefined,
   });
 
   const updatePaymentMethod = useUpdatePaymentMethod();
@@ -169,7 +174,7 @@ export default function PaymentMethodDetailPage() {
       ) : null}
 
       <FadeIn delay={0.14} className="space-y-3">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="font-heading text-sm font-semibold">{t('transactionHistory')}</h2>
           <LogTransactionDialog
             paymentMethodId={id}
@@ -182,11 +187,40 @@ export default function PaymentMethodDetailPage() {
           />
         </div>
 
+        <SearchInput
+          value={search}
+          onChange={(value) => {
+            setSearch(value);
+            setPage(1);
+          }}
+          placeholder={t('transactionSearchPlaceholder')}
+          className="max-w-sm"
+        />
+
+        {debouncedSearch && transactions && (
+          <div className="flex flex-wrap items-center gap-4 rounded-lg border border-border bg-muted/30 px-4 py-2.5 text-sm">
+            <span className="flex items-center gap-1.5 text-success">
+              <ArrowDownCircle className="size-4" />
+              {t('received')}
+              <Money minorUnits={transactions.totalIn} className="font-semibold" />
+            </span>
+            <span className="flex items-center gap-1.5 text-danger">
+              <ArrowUpCircle className="size-4" />
+              {t('sent')}
+              <Money minorUnits={transactions.totalOut} className="font-semibold" />
+            </span>
+          </div>
+        )}
+
         {isLoadingTransactions ? (
           <Skeleton className="h-40 w-full" />
         ) : !transactions || transactions.data.length === 0 ? (
           <Section>
-            <EmptyState icon={Receipt} title={t('noTransactionsYet')} compact />
+            <EmptyState
+              icon={debouncedSearch ? SearchX : Receipt}
+              title={debouncedSearch ? t('noTransactionsFound') : t('noTransactionsYet')}
+              compact
+            />
           </Section>
         ) : (
           <Section>
