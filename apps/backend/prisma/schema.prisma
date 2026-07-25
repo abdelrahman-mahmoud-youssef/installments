@@ -106,6 +106,7 @@ model Tenant {
   telegramBotToken          String?
   telegramBotUsername       String?
   telegramChatId            String?
+  showTelegramOnPublicPage  Boolean                    @default(true)
   notificationLanguage      NotificationLanguage       @default(AR)
   createdAt                 DateTime                   @default(now())
   users                     User[]
@@ -123,6 +124,7 @@ model Tenant {
   customerNotificationLogs  CustomerNotificationLog[]
   counterparties            Counterparty[]
   counterpartyAdjustments   CounterpartyAdjustment[]
+  supportMessages           SupportMessage[]
 }
 
 model User {
@@ -135,11 +137,15 @@ model User {
   isActive              Boolean               @default(true)
   twoFactorSecret       String?
   twoFactorEnabled      Boolean               @default(false)
+  failedLoginAttempts   Int                   @default(0)
+  lockedUntil           DateTime?
   createdAt             DateTime              @default(now())
   tenant                Tenant                @relation(fields: [tenantId], references: [id])
   auditLogs             AuditLog[]
   reviewedPaymentClaims PaymentClaim[]
   twoFactorBackupCodes  TwoFactorBackupCode[]
+  passwordResetTokens   PasswordResetToken[]
+  supportMessages       SupportMessage[]
 
   @@index([tenantId, role])
 }
@@ -148,6 +154,18 @@ model TwoFactorBackupCode {
   id        String    @id @default(cuid())
   userId    String
   codeHash  String
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, usedAt])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
   usedAt    DateTime?
   createdAt DateTime  @default(now())
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -170,6 +188,25 @@ model AuditLog {
   user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([tenantId, createdAt])
+}
+
+model SupportMessage {
+  id         String    @id @default(cuid())
+  tenantId   String
+  userId     String?
+  userName   String
+  userEmail  String
+  subject    String
+  message    String
+  adminReply String?
+  repliedAt  DateTime?
+  seenAt     DateTime?
+  createdAt  DateTime  @default(now())
+  tenant     Tenant    @relation(fields: [tenantId], references: [id])
+  user       User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, createdAt])
+  @@index([tenantId, userId])
 }
 
 model Customer {

@@ -8,13 +8,16 @@ import {
   AuthService,
   EnableTwoFactorResult,
   LoginResult,
+  LoginSuccess,
   SetupTwoFactorResult,
 } from './auth.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { DisableTwoFactorDto } from './dto/disable-two-factor.dto';
 import { EnableTwoFactorDto } from './dto/enable-two-factor.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyTwoFactorDto } from './dto/verify-two-factor.dto';
 
 export interface CurrentUserResponse {
@@ -43,6 +46,22 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   register(@Body() registerDto: RegisterDto): Promise<LoginResult> {
     return this.authService.register(registerDto);
+  }
+
+  @Public()
+  @Throttle({ default: { limit: 3, ttl: 60_000 } })
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  forgotPassword(@Body() dto: ForgotPasswordDto): Promise<void> {
+    return this.authService.forgotPassword(dto);
+  }
+
+  @Public()
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  resetPassword(@Body() dto: ResetPasswordDto): Promise<LoginSuccess> {
+    return this.authService.resetPassword(dto);
   }
 
   @Get('me')

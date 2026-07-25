@@ -21,6 +21,8 @@ export const envValidationSchema = Joi.object({
   REDIS_URL: Joi.string().uri().optional(),
   REDIS_HOST: Joi.string().default('localhost'),
   REDIS_PORT: Joi.number().port().default(6379),
+  RESEND_API_KEY: Joi.string().allow('').optional(),
+  RESEND_FROM_EMAIL: Joi.string().allow('').optional(),
   TELEGRAM_BOT_TOKEN: Joi.string().allow('').optional(),
   WHATSAPP_PHONE_NUMBER_ID: Joi.string().allow('').optional(),
   WHATSAPP_ACCESS_TOKEN: Joi.string().allow('').optional(),

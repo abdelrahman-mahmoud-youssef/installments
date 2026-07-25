@@ -19,3 +19,13 @@ export const MAX_PAYMENT_METHOD_TRANSACTION_IMAGE_UPLOAD_BYTES = 5 * 1024 * 1024
 export const ABOUT_MAX_LENGTH = 20_000;
 
 export const RESERVED_SUBDOMAINS = ['www', 'app', 'api', 'admin'];
+
+export const APP_NAME = 'Qistak';
+
+export const LOGIN_LOCKOUT_THRESHOLD = 3;
+
+export const LOGIN_LOCKOUT_BASE_SECONDS = 60;
+
+export const LOGIN_LOCKOUT_MAX_SECONDS = 1800;
+
+export const PASSWORD_RESET_TOKEN_TTL_MINUTES = 30;

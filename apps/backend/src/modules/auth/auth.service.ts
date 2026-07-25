@@ -1,16 +1,36 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { createHash, randomBytes } from 'node:crypto';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
+import {
+  APP_NAME,
+  LOGIN_LOCKOUT_THRESHOLD,
+  PASSWORD_RESET_TOKEN_TTL_MINUTES,
+} from '../../common/constants';
 import { decrypt, encrypt } from '../../common/crypto';
+import { getFrontendOrigin } from '../../common/frontend-url';
+import { computeLockoutSeconds, formatLockoutMessage } from '../../common/login-lockout';
 import { hashPassword, verifyPassword } from '../../common/password';
 import { slugify } from '../../common/slugify';
 import { PrismaService } from '../../prisma/prisma.service';
+import { MailService } from '../mail/mail.service';
+import { buildPasswordChangedEmail } from '../mail/templates/password-changed-email';
+import { buildPasswordResetEmail } from '../mail/templates/password-reset-email';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { DisableTwoFactorDto } from './dto/disable-two-factor.dto';
 import { EnableTwoFactorDto } from './dto/enable-two-factor.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyTwoFactorDto } from './dto/verify-two-factor.dto';
 import { JwtPayload, TwoFactorChallengePayload } from './jwt-payload.interface';
 import {
@@ -45,10 +65,13 @@ export interface EnableTwoFactorResult {
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly config: ConfigService,
+    private readonly mail: MailService,
   ) {}
 
   async getCurrentUser(user: {
@@ -85,9 +108,22 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password.');
     }
 
+    if (user.lockedUntil && user.lockedUntil > new Date()) {
+      const secondsRemaining = Math.ceil((user.lockedUntil.getTime() - Date.now()) / 1000);
+      throw new HttpException(formatLockoutMessage(secondsRemaining), HttpStatus.TOO_MANY_REQUESTS);
+    }
+
     const isPasswordValid = await verifyPassword(loginDto.password, user.passwordHash);
     if (!isPasswordValid) {
+      await this.registerFailedLogin(user);
       throw new UnauthorizedException('Invalid email or password.');
+    }
+
+    if (user.failedLoginAttempts > 0 || user.lockedUntil) {
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { failedLoginAttempts: 0, lockedUntil: null },
+      });
     }
 
     if (!user.isActive) {
@@ -154,6 +190,61 @@ export class AuthService {
 
     const passwordHash = await hashPassword(dto.newPassword);
     await this.prisma.user.update({ where: { id: userId }, data: { passwordHash } });
+  }
+
+  async forgotPassword(dto: ForgotPasswordDto): Promise<void> {
+    const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
+    if (!user) {
+      return;
+    }
+
+    await this.prisma.passwordResetToken.deleteMany({ where: { userId: user.id, usedAt: null } });
+    const rawToken = randomBytes(32).toString('hex');
+    await this.prisma.passwordResetToken.create({
+      data: {
+        userId: user.id,
+        tokenHash: this.hashResetToken(rawToken),
+        expiresAt: new Date(Date.now() + PASSWORD_RESET_TOKEN_TTL_MINUTES * 60_000),
+      },
+    });
+
+    const email = buildPasswordResetEmail({
+      name: user.name,
+      resetUrl: `${getFrontendOrigin(this.config)}/reset-password?token=${rawToken}`,
+      logoUrl: this.logoUrl(),
+      appName: APP_NAME,
+      expiryMinutes: PASSWORD_RESET_TOKEN_TTL_MINUTES,
+    });
+    await this.sendEmailQuietly(user.email, email);
+  }
+
+  async resetPassword(dto: ResetPasswordDto): Promise<LoginSuccess> {
+    const resetToken = await this.prisma.passwordResetToken.findUnique({
+      where: { tokenHash: this.hashResetToken(dto.token) },
+    });
+    if (!resetToken || resetToken.usedAt || resetToken.expiresAt < new Date()) {
+      throw new BadRequestException('This reset link is invalid or has expired.');
+    }
+
+    const passwordHash = await hashPassword(dto.newPassword);
+    const [, , user] = await this.prisma.$transaction([
+      this.prisma.passwordResetToken.update({
+        where: { id: resetToken.id },
+        data: { usedAt: new Date() },
+      }),
+      this.prisma.passwordResetToken.deleteMany({
+        where: { userId: resetToken.userId, usedAt: null },
+      }),
+      this.prisma.user.update({
+        where: { id: resetToken.userId },
+        data: { passwordHash, failedLoginAttempts: 0, lockedUntil: null },
+      }),
+    ]);
+
+    const email = buildPasswordChangedEmail({ name: user.name, logoUrl: this.logoUrl(), appName: APP_NAME });
+    await this.sendEmailQuietly(user.email, email);
+
+    return this.issueToken(user);
   }
 
   async setupTwoFactor(userId: string, email: string): Promise<SetupTwoFactorResult> {
@@ -234,6 +325,36 @@ export class AuthService {
       data: { usedAt: new Date() },
     });
     return { valid: true };
+  }
+
+  private async registerFailedLogin(user: User): Promise<void> {
+    const failedLoginAttempts = user.failedLoginAttempts + 1;
+    const lockedUntil =
+      failedLoginAttempts >= LOGIN_LOCKOUT_THRESHOLD
+        ? new Date(Date.now() + computeLockoutSeconds(failedLoginAttempts) * 1000)
+        : null;
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { failedLoginAttempts, lockedUntil },
+    });
+  }
+
+  private hashResetToken(rawToken: string): string {
+    return createHash('sha256').update(rawToken).digest('hex');
+  }
+
+  private logoUrl(): string {
+    return `${getFrontendOrigin(this.config)}/qistak-512.png`;
+  }
+
+  private async sendEmailQuietly(to: string, email: { subject: string; html: string }): Promise<void> {
+    try {
+      await this.mail.sendEmail({ to, subject: email.subject, html: email.html });
+    } catch (error) {
+      this.logger.error(
+        `Failed to send email to ${to}: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
   }
 
   private twoFactorEncryptionKey(): string {
