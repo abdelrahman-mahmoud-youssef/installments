@@ -14,6 +14,7 @@ import { resolveAssetUrl } from '@/lib/assets';
 import { brandColorCssVars } from '@/lib/brand-colors';
 import { getPublicCustomer } from '@/lib/api/public';
 import { formatMoney } from '@/lib/format';
+import { getShopUrl } from '@/lib/root-domain';
 import { routes } from '@/lib/routes';
 import { TelegramCard } from './telegram-card';
 
@@ -59,9 +60,9 @@ export default async function PublicCustomerPage({
       <style>{`:root{${brandColorCssVars(customer.branding.brandColor)}}`}</style>
       <header className="border-b border-border bg-background/80 backdrop-blur-md">
         <div className="mx-auto flex h-20 max-w-2xl items-center justify-between px-4">
-          <Link href={routes.publicShop(customer.branding.slug)}>
+          <a href={getShopUrl(customer.branding.slug)}>
             <BrandLogo logoUrl={logoUrl} label={customer.branding.displayName} size="lg" />
-          </Link>
+          </a>
           <div className="flex items-center gap-1">
             <FontSizeToggle />
             <ThemeToggle />
@@ -178,13 +179,13 @@ export default async function PublicCustomerPage({
       </main>
 
       <footer className="flex justify-center pb-10">
-        <Link
-          href={routes.publicShop(customer.branding.slug)}
+        <a
+          href={getShopUrl(customer.branding.slug)}
           className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-4 py-2 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
         >
           <Store className="size-3.5" />
           {t('visitStore', { name: customer.branding.displayName })}
-        </Link>
+        </a>
       </footer>
 
       {whatsappPhone && (

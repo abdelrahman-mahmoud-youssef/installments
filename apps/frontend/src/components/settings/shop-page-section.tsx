@@ -19,7 +19,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import { useBranding, useUpdateBranding } from '@/hooks/use-branding';
 import { ApiError } from '@/lib/api/client';
-import { getRootDomain } from '@/lib/root-domain';
+import { getRootDomain, getShopUrl } from '@/lib/root-domain';
 import { routes } from '@/lib/routes';
 import {
   INSTALLMENT_PLAN_MONTHS,
@@ -55,8 +55,7 @@ export function ShopPageSection() {
   }
 
   function handleCopyLink() {
-    const slug = data?.slug ?? '';
-    navigator.clipboard.writeText(`https://${slug}.${rootDomain}`);
+    navigator.clipboard.writeText(getShopUrl(data?.slug ?? ''));
     toast.success(t('shopLinkCopied'));
   }
 

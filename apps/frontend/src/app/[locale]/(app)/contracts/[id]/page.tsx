@@ -40,6 +40,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { Link } from '@/i18n/navigation';
 import type { Installment } from '@/lib/api/contracts';
+import { useBranding } from '@/hooks/use-branding';
 import { useCancelContract, useContract } from '@/hooks/use-contracts';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useCreatePayment } from '@/hooks/use-payments';
@@ -47,6 +48,7 @@ import { ApiError } from '@/lib/api/client';
 import { resolveAssetUrl } from '@/lib/assets';
 import { getDisplayInstallmentStatus } from '@/lib/enums';
 import { normalizeLocalPhoneInput } from '@/lib/phone';
+import { getSubdomainUrl } from '@/lib/root-domain';
 import { routes } from '@/lib/routes';
 
 function HeroStat({ label, children }: { label: string; children: React.ReactNode }) {
@@ -75,6 +77,7 @@ export default function ContractDetailPage() {
   const tRecurrenceType = useTranslations('recurrenceType');
   const { id } = useParams<{ id: string }>();
   const { data: contract, isLoading, isError } = useContract(id);
+  const { data: branding } = useBranding();
   const createPayment = useCreatePayment(id);
   const cancelContract = useCancelContract(id);
   const [qrOpen, setQrOpen] = useState(false);
@@ -109,7 +112,8 @@ export default function ContractDetailPage() {
   const upcomingInstallment = outstandingInstallments[0];
   const ratio = installmentsTotal > 0 ? paidAmount / installmentsTotal : 0;
   const isActive = contract.status === 'ACTIVE';
-  const publicUrl = `${window.location.origin}${routes.publicContract(contract.customer.publicId, contract.publicId)}`;
+  const contractPath = routes.publicContract(contract.customer.publicId, contract.publicId);
+  const publicUrl = branding ? getSubdomainUrl(branding.slug, contractPath) : `${window.location.origin}${contractPath}`;
   const whatsappUrl = `https://wa.me/20${normalizeLocalPhoneInput(contract.customer.phone)}?text=${encodeURIComponent(publicUrl)}`;
 
   const scheduleColumns: Column<Installment>[] = [

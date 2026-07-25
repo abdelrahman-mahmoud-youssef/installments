@@ -26,6 +26,7 @@ import { usePaymentClaims } from '@/hooks/use-payment-claims';
 import { Link, usePathname, useRouter } from '@/i18n/navigation';
 import { logout } from '@/lib/api/auth';
 import { navigationItems } from '@/lib/navigation';
+import { getShopUrl } from '@/lib/root-domain';
 import { routes } from '@/lib/routes';
 import { cn } from '@/lib/utils';
 
@@ -135,8 +136,8 @@ export interface AppShellBranding {
 function ViewShopPageLink({ slug, className }: { slug: string; className?: string }) {
   const t = useTranslations('common');
   return (
-    <Link
-      href={routes.publicShop(slug)}
+    <a
+      href={getShopUrl(slug)}
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
@@ -147,7 +148,7 @@ function ViewShopPageLink({ slug, className }: { slug: string; className?: strin
       <Store className="size-3.5" />
       {t('viewShopPage')}
       <ArrowUpRight className="size-3.5" />
-    </Link>
+    </a>
   );
 }
 

@@ -9,11 +9,11 @@ import { BrandLogo } from '@/components/shared/logo';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Link } from '@/i18n/navigation';
 import { getPublicContractDetail } from '@/lib/api/public';
 import { resolveAssetUrl } from '@/lib/assets';
 import { brandColorCssVars } from '@/lib/brand-colors';
 import { formatDate, formatMoney } from '@/lib/format';
+import { getShopUrl } from '@/lib/root-domain';
 import { routes } from '@/lib/routes';
 import { UpcomingInstallments } from './upcoming-installments';
 
@@ -60,9 +60,9 @@ export default async function PublicContractDetailPage({
       <style>{`:root{${brandColorCssVars(contract.branding.brandColor)}}`}</style>
       <header className="border-b border-border bg-background/80 backdrop-blur-md">
         <div className="mx-auto flex h-20 max-w-2xl items-center justify-between px-4">
-          <Link href={routes.publicShop(contract.branding.slug)}>
+          <a href={getShopUrl(contract.branding.slug)}>
             <BrandLogo logoUrl={logoUrl} label={contract.branding.displayName} size="lg" />
-          </Link>
+          </a>
           <div className="flex items-center gap-1">
             <FontSizeToggle />
             <ThemeToggle />
@@ -148,13 +148,13 @@ export default async function PublicContractDetailPage({
       </main>
 
       <footer className="flex justify-center pb-10">
-        <Link
-          href={routes.publicShop(contract.branding.slug)}
+        <a
+          href={getShopUrl(contract.branding.slug)}
           className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-4 py-2 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
         >
           <Store className="size-3.5" />
           {t('visitStore', { name: contract.branding.displayName })}
-        </Link>
+        </a>
       </footer>
     </div>
   );

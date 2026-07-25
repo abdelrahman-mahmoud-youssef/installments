@@ -29,9 +29,11 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { Link } from '@/i18n/navigation';
 import type { CustomerContractSummary } from '@/lib/api/customers';
+import { useBranding } from '@/hooks/use-branding';
 import { useCustomer, useUpdateCustomer } from '@/hooks/use-customers';
 import { resolveAssetUrl } from '@/lib/assets';
 import { normalizeLocalPhoneInput } from '@/lib/phone';
+import { getSubdomainUrl } from '@/lib/root-domain';
 import { routes } from '@/lib/routes';
 
 export default function CustomerDetailPage() {
@@ -39,6 +41,7 @@ export default function CustomerDetailPage() {
   const tNav = useTranslations('nav');
   const { id } = useParams<{ id: string }>();
   const { data: customer, isLoading, isError } = useCustomer(id);
+  const { data: branding } = useBranding();
   const updateCustomer = useUpdateCustomer(id);
   const [qrOpen, setQrOpen] = useState(false);
 
@@ -60,7 +63,8 @@ export default function CustomerDetailPage() {
     );
   }
 
-  const publicUrl = `${window.location.origin}${routes.publicCustomer(customer.publicId)}`;
+  const customerPath = routes.publicCustomer(customer.publicId);
+  const publicUrl = branding ? getSubdomainUrl(branding.slug, customerPath) : `${window.location.origin}${customerPath}`;
   const whatsappUrl = `https://wa.me/20${normalizeLocalPhoneInput(customer.phone)}?text=${encodeURIComponent(publicUrl)}`;
 
   const columns: Column<CustomerContractSummary>[] = [
