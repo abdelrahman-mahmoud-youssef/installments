@@ -201,6 +201,21 @@ export default function ContractDetailPage() {
             )}
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            {contract.reminderMessage && (
+              <Button
+                variant="outline"
+                render={
+                  <a
+                    href={`https://wa.me/20${normalizeLocalPhoneInput(contract.customer.phone)}?text=${encodeURIComponent(contract.reminderMessage)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  />
+                }
+              >
+                <FaWhatsapp className="size-4" />
+                {t('sendReminder')}
+              </Button>
+            )}
             <DropdownMenu>
               <DropdownMenuTrigger
                 render={

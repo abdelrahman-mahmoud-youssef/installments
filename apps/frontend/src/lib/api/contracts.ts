@@ -55,6 +55,7 @@ export interface ContractDetail extends Omit<ContractListItem, 'customer'> {
   customer: ContractCustomer & { publicId: string; address: string | null; notes: string | null };
   installments: Installment[];
   payments: ContractPayment[];
+  reminderMessage: string | null;
 }
 
 export interface ContractListParams {

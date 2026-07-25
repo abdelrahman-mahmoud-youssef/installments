@@ -486,6 +486,7 @@
     "detail": {
       "notFound": "Contract not found",
       "viewImage": "View attachment",
+      "sendReminder": "Send reminder",
       "recordPayment": "Record payment",
       "cancelContract": "Cancel contract",
       "cancelTitle": "Cancel this contract?",

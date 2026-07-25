@@ -486,6 +486,7 @@
     "detail": {
       "notFound": "العقد مش موجود",
       "viewImage": "شوف المرفق",
+      "sendReminder": "ابعت تذكير",
       "recordPayment": "سجّل دفعة",
       "cancelContract": "إلغاء العقد",
       "cancelTitle": "عايز تلغي العقد ده؟",

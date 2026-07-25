@@ -1,12 +1,14 @@
 import { randomUUID } from 'node:crypto';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InstallmentStatus, Prisma } from '@prisma/client';
+import { ConfigService } from '@nestjs/config';
+import { InstallmentStatus, NotificationLanguage, Prisma } from '@prisma/client';
 import { getUtcToday } from '../../common/date/utc-date';
 import { MAX_CONTRACT_IMAGE_UPLOAD_BYTES } from '../../common/constants';
 import { decodeImageUpload } from '../../common/decode-image-upload';
 import { overdueInstallmentWhere } from '../../common/installments/overdue-where';
 import { buildPaginatedResult, PaginatedResult } from '../../common/pagination/paginated-result.interface';
 import { PrismaService } from '../../prisma/prisma.service';
+import { formatCustomerReminderMessage } from '../reminders/customer-reminder-message';
 import { StorageService } from '../storage/storage.service';
 import { ContractQueryDto } from './dto/contract-query.dto';
 import { CreateContractDto } from './dto/create-contract.dto';
@@ -23,13 +25,14 @@ type ContractDetail = Prisma.ContractGetPayload<{
     installments: true;
     payments: { include: { allocations: true } };
   };
-}>;
+}> & { reminderMessage: string | null };
 
 @Injectable()
 export class ContractsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
+    private readonly config: ConfigService,
   ) {}
 
   async create(tenantId: string, createContractDto: CreateContractDto): Promise<ContractDetail> {
@@ -129,12 +132,13 @@ export class ContractsService {
         customer: true,
         installments: { orderBy: { sequence: 'asc' } },
         payments: { orderBy: { paidAt: 'desc' }, include: { allocations: true } },
+        tenant: { select: { name: true } },
       },
     });
     if (!contract) {
       throw new NotFoundException('Contract not found.');
     }
-    return contract;
+    return { ...contract, reminderMessage: this.buildReminderMessage(contract) };
   }
 
   async cancel(tenantId: string, id: string): Promise<ContractDetail> {
@@ -160,5 +164,40 @@ export class ContractsService {
   private async saveContractImage(tenantId: string, image: string): Promise<string> {
     const { buffer, extension } = decodeImageUpload(image, MAX_CONTRACT_IMAGE_UPLOAD_BYTES);
     return this.storage.saveKeyedImage(`contracts/${tenantId}/${randomUUID()}.${extension}`, buffer);
+  }
+
+  private buildReminderMessage(
+    contract: Prisma.ContractGetPayload<{
+      include: { customer: true; installments: true; tenant: { select: { name: true } } };
+    }>,
+  ): string | null {
+    const today = getUtcToday();
+    const overdue = contract.installments
+      .filter(
+        (installment) =>
+          (installment.status === InstallmentStatus.PENDING ||
+            installment.status === InstallmentStatus.PARTIALLY_PAID) &&
+          installment.dueDate < today,
+      )
+      .map((installment) => ({
+        productName: contract.productName,
+        remainingAmount: installment.amount - installment.paidAmount,
+        dueDate: installment.dueDate,
+      }));
+
+    const frontendUrl = this.config
+      .get<string>('FRONTEND_URL')
+      ?.split(',')
+      .map((url) => url.trim())
+      .filter(Boolean)[0];
+    const localePrefix = contract.customer.notificationLanguage === NotificationLanguage.EN ? '/en' : '';
+    const payUrl = frontendUrl
+      ? `${frontendUrl}${localePrefix}/customer/${contract.customer.publicId}/contracts/${contract.publicId}/pay`
+      : null;
+
+    return formatCustomerReminderMessage(
+      { businessName: contract.tenant.name, dueToday: [], overdue, payUrl },
+      contract.customer.notificationLanguage,
+    );
   }
 }
