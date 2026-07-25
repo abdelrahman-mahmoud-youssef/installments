@@ -28,6 +28,11 @@ export interface ChangePasswordPayload {
   newPassword: string;
 }
 
+export interface ResetPasswordPayload {
+  token: string;
+  newPassword: string;
+}
+
 export type LoginResponse = { success: true } | { requiresTwoFactor: true; challengeToken: string };
 
 async function postAuth(path: string, payload: unknown): Promise<LoginResponse> {
@@ -66,4 +71,22 @@ export function getMe(): Promise<CurrentUser> {
 
 export function changePassword(payload: ChangePasswordPayload): Promise<void> {
   return apiClient.patch('auth/password', payload);
+}
+
+export async function forgotPassword(email: string): Promise<void> {
+  const response = await fetch('/api/auth/forgot-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+  if (!response.ok) {
+    const body = (await response.json().catch(() => null)) as ApiErrorBody | null;
+    throw new ApiError(
+      body ?? { statusCode: response.status, message: 'Something went wrong.', error: 'Error' },
+    );
+  }
+}
+
+export function resetPassword(payload: ResetPasswordPayload): Promise<LoginResponse> {
+  return postAuth('reset-password', payload);
 }

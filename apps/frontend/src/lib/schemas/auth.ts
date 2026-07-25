@@ -28,3 +28,21 @@ export const twoFactorCodeSchema = z.object({
 });
 
 export type TwoFactorCodeInput = z.infer<typeof twoFactorCodeSchema>;
+
+export const forgotPasswordSchema = z.object({
+  email: z.email('Enter a valid email address.'),
+});
+
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+
+export const resetPasswordSchema = z
+  .object({
+    newPassword: z.string().min(8, 'Password must be at least 8 characters.'),
+    confirmPassword: z.string().min(1, 'Confirm your new password.'),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match.",
+    path: ['confirmPassword'],
+  });
+
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;

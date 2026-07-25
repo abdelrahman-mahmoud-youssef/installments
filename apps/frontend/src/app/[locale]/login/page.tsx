@@ -143,7 +143,15 @@ export default function LoginPage() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t('password')}</FormLabel>
+                    <div className="flex items-center justify-between gap-2">
+                      <FormLabel>{t('password')}</FormLabel>
+                      <Link
+                        href={routes.forgotPassword}
+                        className="text-sm font-medium text-muted-foreground hover:text-foreground hover:underline"
+                      >
+                        {t('forgotPassword')}
+                      </Link>
+                    </div>
                     <FormControl>
                       <Input type="password" autoComplete="current-password" placeholder="••••••••" {...field} />
                     </FormControl>
