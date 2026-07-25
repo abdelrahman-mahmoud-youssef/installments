@@ -196,8 +196,7 @@ export function LogTransactionDialog({
                         <input
                           {...field}
                           type="file"
-                          accept="image/png,image/jpeg"
-                          capture="environment"
+                          accept="image/*"
                           className="hidden"
                           value={undefined}
                           onChange={(event) => {
