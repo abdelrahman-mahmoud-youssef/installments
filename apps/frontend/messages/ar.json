@@ -264,6 +264,7 @@
     "detail": {
       "notFound": "العميل مش موجود",
       "moreActions": "المزيد من الإجراءات",
+      "share": "مشاركة",
       "copyLink": "انسخ الرابط العام",
       "linkCopied": "اتنسخ الرابط العام.",
       "qrCode": "كود QR",

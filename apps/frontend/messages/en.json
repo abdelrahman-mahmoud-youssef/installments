@@ -264,6 +264,7 @@
     "detail": {
       "notFound": "Customer not found",
       "moreActions": "More actions",
+      "share": "Share",
       "copyLink": "Copy public link",
       "linkCopied": "Public link copied.",
       "qrCode": "QR code",
