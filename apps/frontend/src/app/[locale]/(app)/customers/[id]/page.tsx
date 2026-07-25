@@ -139,37 +139,50 @@ export default function CustomerDetailPage() {
                     {customer.address}
                   </span>
                 )}
-                {customer.idImageFrontUrl && (
-                  <ImagePreviewDialog
-                    src={resolveAssetUrl(customer.idImageFrontUrl) ?? ''}
-                    alt={t('viewIdImageFront')}
-                    trigger={
-                      <button
-                        type="button"
-                        className="flex items-center gap-1.5 hover:text-foreground hover:underline"
-                      >
-                        <IdCard className="size-3.5" />
-                        {t('viewIdImageFront')}
-                      </button>
-                    }
-                  />
-                )}
-                {customer.idImageBackUrl && (
-                  <ImagePreviewDialog
-                    src={resolveAssetUrl(customer.idImageBackUrl) ?? ''}
-                    alt={t('viewIdImageBack')}
-                    trigger={
-                      <button
-                        type="button"
-                        className="flex items-center gap-1.5 hover:text-foreground hover:underline"
-                      >
-                        <IdCard className="size-3.5" />
-                        {t('viewIdImageBack')}
-                      </button>
-                    }
-                  />
-                )}
               </div>
+              {(customer.idImageFrontUrl || customer.idImageBackUrl) && (
+                <div className="flex items-center gap-2 pt-0.5">
+                  <IdCard className="size-3.5 shrink-0 text-muted-foreground" />
+                  {customer.idImageFrontUrl && (
+                    <ImagePreviewDialog
+                      src={resolveAssetUrl(customer.idImageFrontUrl) ?? ''}
+                      alt={t('viewIdImageFront')}
+                      trigger={
+                        <button
+                          type="button"
+                          title={t('viewIdImageFront')}
+                          className="overflow-hidden rounded-md border border-border transition-opacity hover:opacity-80"
+                        >
+                          <img
+                            src={resolveAssetUrl(customer.idImageFrontUrl) ?? undefined}
+                            alt=""
+                            className="h-9 w-12 object-cover"
+                          />
+                        </button>
+                      }
+                    />
+                  )}
+                  {customer.idImageBackUrl && (
+                    <ImagePreviewDialog
+                      src={resolveAssetUrl(customer.idImageBackUrl) ?? ''}
+                      alt={t('viewIdImageBack')}
+                      trigger={
+                        <button
+                          type="button"
+                          title={t('viewIdImageBack')}
+                          className="overflow-hidden rounded-md border border-border transition-opacity hover:opacity-80"
+                        >
+                          <img
+                            src={resolveAssetUrl(customer.idImageBackUrl) ?? undefined}
+                            alt=""
+                            className="h-9 w-12 object-cover"
+                          />
+                        </button>
+                      }
+                    />
+                  )}
+                </div>
+              )}
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
