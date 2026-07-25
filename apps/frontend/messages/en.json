@@ -660,6 +660,7 @@
     "addPaymentMethod": "Add method",
     "addCustomPaymentMethod": "Add custom method",
     "paymentMethodPresetsLabel": "Quick add",
+    "showMore": "More",
     "addPaymentMethodTitle": "Add a payment method",
     "addPaymentMethodDescription": "Customers will see this name and these details when submitting a payment.",
     "editPaymentMethod": "Edit",

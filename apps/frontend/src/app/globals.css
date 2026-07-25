@@ -208,6 +208,16 @@
     background-color: color-mix(in oklch, var(--muted-foreground) 45%, transparent);
   }
 
+  input[type="date"]::-webkit-date-and-time-value {
+    text-align: start;
+    margin: 0;
+  }
+
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    margin-inline-start: 0.5rem;
+    padding: 0;
+  }
+
   @media (prefers-reduced-motion: no-preference) {
     :where(
       body,
