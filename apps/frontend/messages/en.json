@@ -17,9 +17,7 @@
     "installBannerMessage": "Install this app for quick access from your home screen."
   },
   "theme": {
-    "toggle": "Toggle theme",
-    "light": "Light",
-    "dark": "Dark"
+    "toggle": "Toggle theme"
   },
   "fontSize": {
     "toggle": "Text size",
