@@ -32,6 +32,10 @@ export class PaymentMethodTransactionsService {
   ): Promise<PaymentMethodTransaction> {
     await this.findOwnedMethod(tenantId, paymentMethodId);
 
+    const counterparty = dto.counterpartyId
+      ? await this.findOwnedCounterparty(tenantId, dto.counterpartyId)
+      : undefined;
+
     const receiptUrl = dto.image ? await this.saveReceiptImage(tenantId, dto.image) : undefined;
 
     const transaction = await this.prisma.paymentMethodTransaction.create({
@@ -40,8 +44,9 @@ export class PaymentMethodTransactionsService {
         paymentMethodId,
         direction: dto.direction,
         amount: dto.amount,
-        counterpartyName: dto.counterpartyName,
-        counterpartyPhone: dto.counterpartyPhone,
+        counterpartyId: counterparty?.id,
+        counterpartyName: counterparty?.name ?? dto.counterpartyName,
+        counterpartyPhone: counterparty?.phone ?? dto.counterpartyPhone,
         note: dto.note,
         receiptUrl,
         occurredAt: dto.occurredAt ? new Date(dto.occurredAt) : undefined,
@@ -115,5 +120,13 @@ export class PaymentMethodTransactionsService {
       throw new NotFoundException('Payment method not found.');
     }
     return method;
+  }
+
+  private async findOwnedCounterparty(tenantId: string, counterpartyId: string) {
+    const counterparty = await this.prisma.counterparty.findFirst({ where: { id: counterpartyId, tenantId } });
+    if (!counterparty) {
+      throw new NotFoundException('Contact not found.');
+    }
+    return counterparty;
   }
 }

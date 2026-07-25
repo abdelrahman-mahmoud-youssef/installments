@@ -16,6 +16,10 @@ export class CreatePaymentMethodTransactionDto {
 
   @IsOptional()
   @IsString()
+  counterpartyId?: string;
+
+  @IsOptional()
+  @IsString()
   @MaxLength(100)
   counterpartyName?: string;
 

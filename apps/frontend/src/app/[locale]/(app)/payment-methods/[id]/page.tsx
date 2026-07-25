@@ -44,13 +44,12 @@ export default function PaymentMethodDetailPage() {
 
   const { data: paymentMethods, isLoading: isLoadingMethods } = usePaymentMethods();
   const method = paymentMethods?.find((item) => item.id === id);
-  const { data: summary, isLoading: isLoadingSummary } = usePaymentMethodMonthlySummary(id, month);
-  const { data: transactions, isLoading: isLoadingTransactions } = usePaymentMethodTransactions(id, {
-    month,
-    page,
-    limit: 20,
-    q: debouncedSearch || undefined,
-  });
+  const { data: summary, isLoading: isLoadingSummary } = usePaymentMethodMonthlySummary(id, month, Boolean(method));
+  const { data: transactions, isLoading: isLoadingTransactions } = usePaymentMethodTransactions(
+    id,
+    { month, page, limit: 20, q: debouncedSearch || undefined },
+    Boolean(method),
+  );
 
   const updatePaymentMethod = useUpdatePaymentMethod();
   const deletePaymentMethod = useDeletePaymentMethod();

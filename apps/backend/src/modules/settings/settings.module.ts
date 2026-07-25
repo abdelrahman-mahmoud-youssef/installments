@@ -4,6 +4,8 @@ import { TelegramModule } from '../telegram/telegram.module';
 import { WhatsappModule } from '../whatsapp/whatsapp.module';
 import { BrandingController } from './branding.controller';
 import { BrandingService } from './branding.service';
+import { CounterpartiesController } from './counterparties.controller';
+import { CounterpartiesService } from './counterparties.service';
 import { PaymentMethodLimitService } from './payment-method-limit.service';
 import { PaymentMethodTransactionsController } from './payment-method-transactions.controller';
 import { PaymentMethodTransactionsService } from './payment-method-transactions.service';
@@ -19,6 +21,7 @@ import { SettingsService } from './settings.service';
     BrandingController,
     PaymentMethodsController,
     PaymentMethodTransactionsController,
+    CounterpartiesController,
   ],
   providers: [
     SettingsService,
@@ -26,6 +29,7 @@ import { SettingsService } from './settings.service';
     PaymentMethodsService,
     PaymentMethodTransactionsService,
     PaymentMethodLimitService,
+    CounterpartiesService,
   ],
   exports: [PaymentMethodLimitService],
 })

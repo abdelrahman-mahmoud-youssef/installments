@@ -67,13 +67,28 @@ interface PaymentMethodSeed {
   isActive?: boolean;
 }
 
+interface CounterpartySeed {
+  name: string;
+  phone?: string;
+  notes?: string;
+}
+
 interface PaymentMethodTransactionSeed {
   paymentMethodIndex: number;
   direction: PaymentDirection;
   amount: number;
+  counterpartyIndex?: number;
   counterpartyName?: string;
   counterpartyPhone?: string;
   receiptUrl?: string;
+  note?: string;
+  occurredAtOffsetDays: number;
+}
+
+interface CounterpartyAdjustmentSeed {
+  counterpartyIndex: number;
+  direction: PaymentDirection;
+  amount: number;
   note?: string;
   occurredAtOffsetDays: number;
 }
@@ -173,13 +188,17 @@ const CONTRACT_SEEDS: ContractSeed[] = [
   },
 ];
 
+const COUNTERPARTY_SEEDS: CounterpartySeed[] = [
+  { name: 'Cairo Electronics Wholesale', phone: '01234567890', notes: 'Main appliance supplier' },
+  { name: 'Khaled Supplies', phone: '01055598765' },
+];
+
 const PAYMENT_METHOD_TRANSACTION_SEEDS: PaymentMethodTransactionSeed[] = [
   {
     paymentMethodIndex: 0,
     direction: 'OUT',
     amount: 15_000_00,
-    counterpartyName: 'Cairo Electronics Wholesale',
-    counterpartyPhone: '01234567890',
+    counterpartyIndex: 0,
     note: 'Restocking payment',
     occurredAtOffsetDays: -5,
   },
@@ -191,6 +210,32 @@ const PAYMENT_METHOD_TRANSACTION_SEEDS: PaymentMethodTransactionSeed[] = [
     receiptUrl: 'https://picsum.photos/seed/pm-transaction-1/400/300',
     note: 'Manual transfer outside contract',
     occurredAtOffsetDays: -2,
+  },
+  {
+    paymentMethodIndex: 0,
+    direction: 'OUT',
+    amount: 50_000_00,
+    counterpartyIndex: 1,
+    note: 'Advance for stock',
+    occurredAtOffsetDays: -20,
+  },
+  {
+    paymentMethodIndex: 1,
+    direction: 'IN',
+    amount: 20_000_00,
+    counterpartyIndex: 1,
+    note: 'Partial repayment',
+    occurredAtOffsetDays: -10,
+  },
+];
+
+const COUNTERPARTY_ADJUSTMENT_SEEDS: CounterpartyAdjustmentSeed[] = [
+  {
+    counterpartyIndex: 1,
+    direction: 'IN',
+    amount: 5_000_00,
+    note: 'Paid extra in cash, outside the wallet',
+    occurredAtOffsetDays: -3,
   },
 ];
 
@@ -389,18 +434,47 @@ async function seed(): Promise<void> {
     );
   }
 
+  const counterparties = await Promise.all(
+    COUNTERPARTY_SEEDS.map((counterpartySeed) =>
+      prisma.counterparty.create({
+        data: {
+          tenantId: tenant.id,
+          name: counterpartySeed.name,
+          phone: counterpartySeed.phone,
+          notes: counterpartySeed.notes,
+        },
+      }),
+    ),
+  );
+
   for (const transactionSeed of PAYMENT_METHOD_TRANSACTION_SEEDS) {
+    const counterparty =
+      transactionSeed.counterpartyIndex !== undefined ? counterparties[transactionSeed.counterpartyIndex] : undefined;
     await prisma.paymentMethodTransaction.create({
       data: {
         tenantId: tenant.id,
         paymentMethodId: paymentMethods[transactionSeed.paymentMethodIndex].id,
         direction: transactionSeed.direction,
         amount: transactionSeed.amount,
-        counterpartyName: transactionSeed.counterpartyName,
-        counterpartyPhone: transactionSeed.counterpartyPhone,
+        counterpartyId: counterparty?.id,
+        counterpartyName: counterparty?.name ?? transactionSeed.counterpartyName,
+        counterpartyPhone: counterparty?.phone ?? transactionSeed.counterpartyPhone,
         receiptUrl: transactionSeed.receiptUrl,
         note: transactionSeed.note,
         occurredAt: addUtcDays(today, transactionSeed.occurredAtOffsetDays),
+      },
+    });
+  }
+
+  for (const adjustmentSeed of COUNTERPARTY_ADJUSTMENT_SEEDS) {
+    await prisma.counterpartyAdjustment.create({
+      data: {
+        tenantId: tenant.id,
+        counterpartyId: counterparties[adjustmentSeed.counterpartyIndex].id,
+        direction: adjustmentSeed.direction,
+        amount: adjustmentSeed.amount,
+        note: adjustmentSeed.note,
+        occurredAt: addUtcDays(today, adjustmentSeed.occurredAtOffsetDays),
       },
     });
   }
@@ -425,6 +499,7 @@ async function seed(): Promise<void> {
   console.log(`Seeded staff account ${SEED_STAFF_EMAIL} / ${SEED_PASSWORD}`);
   console.log(`Seeded ${customers.length} customers and ${CONTRACT_SEEDS.length} contracts.`);
   console.log(`Seeded ${paymentMethods.length} payment methods, ${PAYMENT_METHOD_TRANSACTION_SEEDS.length} transactions, ${PAYMENT_CLAIM_SEEDS.length} payment claims.`);
+  console.log(`Seeded ${counterparties.length} contacts and ${COUNTERPARTY_ADJUSTMENT_SEEDS.length} adjustments.`);
 }
 
 seed()

@@ -7,6 +7,7 @@ export const paymentMethodTransactionSchema = z.object({
   direction: z.enum(['IN', 'OUT']),
   amount: z.number().positive('Enter an amount greater than zero.'),
   occurredAt: z.string().min(1, 'Date is required.'),
+  counterpartyId: z.string().optional(),
   counterpartyName: z.string().max(100).optional(),
   counterpartyPhone: z.string().max(30).optional(),
   note: z.string().max(500).optional(),

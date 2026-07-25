@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { PaymentMethodCard } from '@/components/payment-methods/payment-method-card';
 import { PaymentMethodFormDialog } from '@/components/payment-methods/payment-method-form-dialog';
 import { PaymentMethodPresetPicker } from '@/components/payment-methods/payment-method-preset-picker';
+import { PaymentMethodsTabs } from '@/components/payment-methods/payment-methods-tabs';
 import { usePaymentMethods } from '@/hooks/use-payment-methods';
 
 export default function PaymentMethodsPage() {
@@ -38,6 +39,10 @@ export default function PaymentMethodsPage() {
       </FadeIn>
 
       <FadeIn delay={0.05}>
+        <PaymentMethodsTabs />
+      </FadeIn>
+
+      <FadeIn delay={0.1}>
         <PaymentMethodPresetPicker />
       </FadeIn>
 

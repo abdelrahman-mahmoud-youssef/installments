@@ -88,56 +88,58 @@ enum BrandColor {
 }
 
 model Tenant {
-  id                 String             @id @default(cuid())
-  name               String
-  slug               String             @unique
-  displayName        String?
-  logoUrl            String?
-  brandColor         BrandColor         @default(emerald)
-  showPublicPricing  Boolean            @default(true)
-  phone              String?
-  about              String?
-  instagramUrl       String?
-  facebookUrl        String?
-  tiktokUrl          String?
-  showInstallmentCalculator Boolean     @default(false)
-  calculatorPlans    Json               @default("[]")
-  locations          Json               @default("[]")
-  telegramBotToken   String?
-  telegramBotUsername String?
-  telegramChatId     String?
-  notificationLanguage NotificationLanguage @default(AR)
-  createdAt          DateTime           @default(now())
-  users              User[]
-  customers          Customer[]
-  contracts          Contract[]
-  installments       Installment[]
-  payments           Payment[]
-  reminderLogs       ReminderLog[]
-  broadcasts         Broadcast[]
-  broadcastRecipients BroadcastRecipient[]
-  auditLogs          AuditLog[]
-  paymentMethods     PaymentMethod[]
+  id                        String                     @id @default(cuid())
+  name                      String
+  slug                      String                     @unique
+  displayName               String?
+  logoUrl                   String?
+  brandColor                BrandColor                 @default(emerald)
+  showPublicPricing         Boolean                    @default(true)
+  phone                     String?
+  about                     String?
+  instagramUrl              String?
+  facebookUrl               String?
+  tiktokUrl                 String?
+  showInstallmentCalculator Boolean                    @default(false)
+  calculatorPlans           Json                       @default("[]")
+  locations                 Json                       @default("[]")
+  telegramBotToken          String?
+  telegramBotUsername       String?
+  telegramChatId            String?
+  notificationLanguage      NotificationLanguage       @default(AR)
+  createdAt                 DateTime                   @default(now())
+  users                     User[]
+  customers                 Customer[]
+  contracts                 Contract[]
+  installments              Installment[]
+  payments                  Payment[]
+  reminderLogs              ReminderLog[]
+  broadcasts                Broadcast[]
+  broadcastRecipients       BroadcastRecipient[]
+  auditLogs                 AuditLog[]
+  paymentMethods            PaymentMethod[]
   paymentMethodTransactions PaymentMethodTransaction[]
-  paymentClaims      PaymentClaim[]
-  customerNotificationLogs CustomerNotificationLog[]
+  paymentClaims             PaymentClaim[]
+  customerNotificationLogs  CustomerNotificationLog[]
+  counterparties            Counterparty[]
+  counterpartyAdjustments   CounterpartyAdjustment[]
 }
 
 model User {
-  id                        String     @id @default(cuid())
-  tenantId                  String
-  name                      String
-  email                     String     @unique
-  passwordHash              String
-  role                      Role       @default(ADMIN)
-  isActive                  Boolean    @default(true)
-  twoFactorSecret           String?
-  twoFactorEnabled          Boolean    @default(false)
-  createdAt                 DateTime   @default(now())
-  tenant                    Tenant     @relation(fields: [tenantId], references: [id])
-  auditLogs                 AuditLog[]
-  reviewedPaymentClaims     PaymentClaim[]
-  twoFactorBackupCodes      TwoFactorBackupCode[]
+  id                    String                @id @default(cuid())
+  tenantId              String
+  name                  String
+  email                 String                @unique
+  passwordHash          String
+  role                  Role                  @default(ADMIN)
+  isActive              Boolean               @default(true)
+  twoFactorSecret       String?
+  twoFactorEnabled      Boolean               @default(false)
+  createdAt             DateTime              @default(now())
+  tenant                Tenant                @relation(fields: [tenantId], references: [id])
+  auditLogs             AuditLog[]
+  reviewedPaymentClaims PaymentClaim[]
+  twoFactorBackupCodes  TwoFactorBackupCode[]
 
   @@index([tenantId, role])
 }
@@ -171,25 +173,25 @@ model AuditLog {
 }
 
 model Customer {
-  id        String     @id @default(cuid())
-  tenantId  String
-  publicId  String     @unique @default(uuid())
-  name      String
-  phone     String
-  address   String?
-  notes     String?
-  idImageFrontUrl String?
-  idImageBackUrl  String?
+  id                           String                    @id @default(cuid())
+  tenantId                     String
+  publicId                     String                    @unique @default(uuid())
+  name                         String
+  phone                        String
+  address                      String?
+  notes                        String?
+  idImageFrontUrl              String?
+  idImageBackUrl               String?
   telegramChatId               String?
-  telegramNotificationsEnabled Boolean @default(true)
-  telegramBroadcastsEnabled    Boolean @default(true)
-  notificationLanguage         NotificationLanguage @default(AR)
+  telegramNotificationsEnabled Boolean                   @default(true)
+  telegramBroadcastsEnabled    Boolean                   @default(true)
+  notificationLanguage         NotificationLanguage      @default(AR)
   broadcastRecipients          BroadcastRecipient[]
   notificationLogs             CustomerNotificationLog[]
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  tenant    Tenant     @relation(fields: [tenantId], references: [id])
-  contracts Contract[]
+  createdAt                    DateTime                  @default(now())
+  updatedAt                    DateTime                  @updatedAt
+  tenant                       Tenant                    @relation(fields: [tenantId], references: [id])
+  contracts                    Contract[]
 
   @@index([tenantId, name])
   @@index([tenantId, phone])
@@ -203,7 +205,7 @@ model Contract {
   productName       String
   productPrice      Int
   costPrice         Int?
-  downPayment      Int
+  downPayment       Int
   totalAmount       Int
   calculationMethod CalculationMethod
   markupPercent     Float?
@@ -226,17 +228,17 @@ model Contract {
 }
 
 model Installment {
-  id          String              @id @default(cuid())
-  tenantId    String
-  contractId  String
-  sequence    Int
-  dueDate     DateTime            @db.Date
-  amount      Int
-  paidAmount  Int                 @default(0)
-  status      InstallmentStatus   @default(PENDING)
-  tenant      Tenant              @relation(fields: [tenantId], references: [id])
-  contract    Contract            @relation(fields: [contractId], references: [id])
-  allocations PaymentAllocation[]
+  id            String              @id @default(cuid())
+  tenantId      String
+  contractId    String
+  sequence      Int
+  dueDate       DateTime            @db.Date
+  amount        Int
+  paidAmount    Int                 @default(0)
+  status        InstallmentStatus   @default(PENDING)
+  tenant        Tenant              @relation(fields: [tenantId], references: [id])
+  contract      Contract            @relation(fields: [contractId], references: [id])
+  allocations   PaymentAllocation[]
   paymentClaims PaymentClaim[]
 
   @@unique([contractId, sequence])
@@ -303,14 +305,14 @@ model CustomerNotificationLog {
 }
 
 model Broadcast {
-  id         String              @id @default(cuid())
+  id         String               @id @default(cuid())
   tenantId   String
   body       String
-  hasImage   Boolean             @default(false)
+  hasImage   Boolean              @default(false)
   audience   BroadcastAudience
-  status     BroadcastStatus     @default(QUEUED)
-  createdAt  DateTime            @default(now())
-  tenant     Tenant              @relation(fields: [tenantId], references: [id])
+  status     BroadcastStatus      @default(QUEUED)
+  createdAt  DateTime             @default(now())
+  tenant     Tenant               @relation(fields: [tenantId], references: [id])
   recipients BroadcastRecipient[]
 
   @@index([tenantId, createdAt])
@@ -357,6 +359,7 @@ model PaymentMethodTransaction {
   id                String           @id @default(cuid())
   tenantId          String
   paymentMethodId   String
+  counterpartyId    String?
   direction         PaymentDirection
   amount            Int
   counterpartyName  String?
@@ -367,8 +370,39 @@ model PaymentMethodTransaction {
   createdAt         DateTime         @default(now())
   tenant            Tenant           @relation(fields: [tenantId], references: [id])
   paymentMethod     PaymentMethod    @relation(fields: [paymentMethodId], references: [id], onDelete: Restrict)
+  counterparty      Counterparty?    @relation(fields: [counterpartyId], references: [id], onDelete: Restrict)
 
   @@index([tenantId, paymentMethodId, occurredAt])
+  @@index([tenantId, counterpartyId, occurredAt])
+}
+
+model Counterparty {
+  id           String                     @id @default(cuid())
+  tenantId     String
+  name         String
+  phone        String?
+  notes        String?
+  createdAt    DateTime                   @default(now())
+  tenant       Tenant                     @relation(fields: [tenantId], references: [id])
+  transactions PaymentMethodTransaction[]
+  adjustments  CounterpartyAdjustment[]
+
+  @@index([tenantId, name])
+}
+
+model CounterpartyAdjustment {
+  id             String           @id @default(cuid())
+  tenantId       String
+  counterpartyId String
+  direction      PaymentDirection
+  amount         Int
+  note           String?
+  occurredAt     DateTime         @default(now())
+  createdAt      DateTime         @default(now())
+  tenant         Tenant           @relation(fields: [tenantId], references: [id])
+  counterparty   Counterparty     @relation(fields: [counterpartyId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, counterpartyId, occurredAt])
 }
 
 model PaymentClaim {

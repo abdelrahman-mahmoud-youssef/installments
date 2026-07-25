@@ -8,6 +8,7 @@ export interface PaymentMethodTransaction {
   id: string;
   direction: 'IN' | 'OUT';
   amount: number;
+  counterpartyId: string | null;
   counterpartyName: string | null;
   counterpartyPhone: string | null;
   receiptUrl: string | null;
@@ -58,6 +59,7 @@ export async function createPaymentMethodTransaction(
     direction: input.direction,
     amount: toMinorUnits(input.amount),
     occurredAt: input.occurredAt,
+    counterpartyId: input.counterpartyId || undefined,
     counterpartyName: input.counterpartyName || undefined,
     counterpartyPhone: input.counterpartyPhone || undefined,
     note: input.note || undefined,
