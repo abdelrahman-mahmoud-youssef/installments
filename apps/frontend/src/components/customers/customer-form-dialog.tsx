@@ -207,7 +207,7 @@ export function CustomerFormDialog({
                 </FormItem>
               )}
             />
-            <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
               <IdImageSlot
                 form={form}
                 name="idImageFront"

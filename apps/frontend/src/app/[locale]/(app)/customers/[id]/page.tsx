@@ -2,6 +2,7 @@
 
 import {
   Copy,
+  ExternalLink,
   History,
   IdCard,
   MapPin,
@@ -186,6 +187,7 @@ export default function CustomerDetailPage() {
               <span dir="ltr" className="tabular-nums">
                 {customer.phone}
               </span>
+              <ExternalLink className="size-3" />
             </a>
             <a
               href={`https://wa.me/20${normalizeLocalPhoneInput(customer.phone)}`}
@@ -196,6 +198,7 @@ export default function CustomerDetailPage() {
             >
               <FaWhatsapp className="size-3.5" />
               {t('openWhatsapp')}
+              <ExternalLink className="size-3" />
             </a>
             {customer.address && (
               <span className="flex items-center gap-1.5">
