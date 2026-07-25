@@ -173,7 +173,12 @@ export function LogTransactionDialog({
                   <Label>{t('paymentMethodPickerLabel')}</Label>
                   <Select value={selectedPaymentMethodId} onValueChange={(value) => setSelectedPaymentMethodId(value ?? '')}>
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder={t('paymentMethodPickerPlaceholder')} />
+                      <SelectValue placeholder={t('paymentMethodPickerPlaceholder')}>
+                        {(value: string | null) =>
+                          activePaymentMethods.find((method) => method.id === value)?.label ??
+                          t('paymentMethodPickerPlaceholder')
+                        }
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {activePaymentMethods.map((method) => (

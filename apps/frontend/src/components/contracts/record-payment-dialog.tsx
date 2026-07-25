@@ -138,7 +138,11 @@ export function RecordPaymentDialog({
                     <Select value={field.value} onValueChange={field.onChange}>
                       <FormControl>
                         <SelectTrigger className="w-full">
-                          <SelectValue />
+                          <SelectValue>
+                            {(value: string | null) =>
+                              activePaymentMethods.find((method) => method.id === value)?.label ?? t('cash')
+                            }
+                          </SelectValue>
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>

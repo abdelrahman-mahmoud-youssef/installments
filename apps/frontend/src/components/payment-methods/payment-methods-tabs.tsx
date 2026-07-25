@@ -17,13 +17,13 @@ export function PaymentMethodsTabs() {
   ];
 
   return (
-    <div className="inline-flex w-fit items-center gap-1 rounded-lg bg-muted p-1">
+    <div className="flex w-full items-center gap-1 rounded-lg bg-muted p-1">
       {tabs.map((tab) => (
         <Link
           key={tab.href}
           href={tab.href}
           className={cn(
-            'flex items-center gap-1.5 rounded-md px-3 py-1 text-sm font-medium transition-colors',
+            'flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1 text-sm font-medium transition-colors',
             tab.active
               ? 'bg-primary text-primary-foreground shadow-sm'
               : 'text-foreground/60 hover:text-foreground',

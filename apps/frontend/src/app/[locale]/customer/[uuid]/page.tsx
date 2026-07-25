@@ -1,4 +1,4 @@
-import { ChevronRight, Store } from 'lucide-react';
+import { ChevronRight, ExternalLink, Store } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa6';
 import type { Metadata } from 'next';
 import { getLocale, getTranslations } from 'next-intl/server';
@@ -60,8 +60,9 @@ export default async function PublicCustomerPage({
       <style>{`:root{${brandColorCssVars(customer.branding.brandColor)}}`}</style>
       <header className="border-b border-border bg-background/80 backdrop-blur-md">
         <div className="mx-auto flex h-20 max-w-2xl items-center justify-between px-4">
-          <a href={getShopUrl(customer.branding.slug)}>
+          <a href={getShopUrl(customer.branding.slug)} className="group flex items-center gap-1.5">
             <BrandLogo logoUrl={logoUrl} label={customer.branding.displayName} size="lg" />
+            <ExternalLink className="size-3.5 text-muted-foreground transition-colors group-hover:text-foreground" />
           </a>
           <div className="flex items-center gap-1">
             <FontSizeToggle />
