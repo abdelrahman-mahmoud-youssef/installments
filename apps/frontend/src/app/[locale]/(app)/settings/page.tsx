@@ -42,7 +42,9 @@ import {
   useSetNotificationLanguage,
   useSetTelegramPublicVisibility,
   useUpdateNotificationSettings,
+  useUpdateReminderMessageSettings,
 } from '@/hooks/use-settings';
+import type { ReminderMessageToggles } from '@/lib/api/settings';
 import { ApiError } from '@/lib/api/client';
 import { NotificationSettingsInput, notificationSettingsSchema } from '@/lib/schemas/settings';
 
@@ -65,6 +67,7 @@ export default function SettingsPage() {
   const disconnect = useDisconnectNotifications();
   const setLanguage = useSetNotificationLanguage();
   const setTelegramPublicVisibility = useSetTelegramPublicVisibility();
+  const updateReminderMessageSettings = useUpdateReminderMessageSettings();
   const isConnected = Boolean(data?.telegramConfigured);
   const [language, setSelectedLanguage] = useState<NotificationLanguage>('AR');
   const [syncedLanguage, setSyncedLanguage] = useState<NotificationLanguage | undefined>(undefined);
@@ -127,6 +130,15 @@ export default function SettingsPage() {
     try {
       await setTelegramPublicVisibility.mutateAsync(next);
       toast.success(t('telegramPublicVisibilitySaved'));
+    } catch (error) {
+      toast.error(error instanceof ApiError ? error.message : t('genericError'));
+    }
+  }
+
+  async function handleToggleReminderSetting(key: keyof ReminderMessageToggles, next: boolean) {
+    try {
+      await updateReminderMessageSettings.mutateAsync({ [key]: next });
+      toast.success(t('reminderMessageSettingsSaved'));
     } catch (error) {
       toast.error(error instanceof ApiError ? error.message : t('genericError'));
     }
@@ -307,6 +319,29 @@ export default function SettingsPage() {
                   />
                 </div>
               )}
+            </Section>
+
+            <Section title={t('reminderMessageTitle')} description={t('reminderMessageDescription')}>
+              <div className="divide-y divide-border">
+                {(
+                  [
+                    ['showProgress', 'reminderMessageShowProgress'],
+                    ['showRemaining', 'reminderMessageShowRemaining'],
+                    ['showLocation', 'reminderMessageShowLocation'],
+                    ['showPayLink', 'reminderMessageShowPayLink'],
+                  ] as const
+                ).map(([key, labelKey]) => (
+                  <div key={key} className="flex items-center justify-between gap-3 py-3.5 first:pt-0 last:pb-0">
+                    <p className="text-sm font-medium text-foreground">{t(labelKey)}</p>
+                    <Switch
+                      checked={data?.reminderMessage[key] ?? true}
+                      onCheckedChange={(next) => handleToggleReminderSetting(key, next)}
+                      disabled={isLoading || updateReminderMessageSettings.isPending}
+                      aria-label={t(labelKey)}
+                    />
+                  </div>
+                ))}
+              </div>
             </Section>
 
             <Section title={t('moreChannelsTitle')} description={t('moreChannelsDescription')}>

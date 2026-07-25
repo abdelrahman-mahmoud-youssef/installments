@@ -1,23 +1,54 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { NotificationLanguage, Tenant } from '@prisma/client';
+import { NotificationLanguage, ReminderMessageSettings, Tenant } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TelegramService } from '../telegram/telegram.service';
 import { SetTelegramPublicVisibilityDto } from './dto/set-telegram-public-visibility.dto';
 import { UpdateNotificationSettingsDto } from './dto/update-notification-settings.dto';
+import { UpdateReminderMessageSettingsDto } from './dto/update-reminder-message-settings.dto';
+
+export interface ReminderMessageToggles {
+  showProgress: boolean;
+  showRemaining: boolean;
+  showLocation: boolean;
+  showPayLink: boolean;
+}
 
 export interface NotificationSettings {
   telegramConfigured: boolean;
   telegramChatId: string | null;
   showTelegramOnPublicPage: boolean;
   notificationLanguage: NotificationLanguage;
+  reminderMessage: ReminderMessageToggles;
 }
 
-function toSettings(tenant: Tenant): NotificationSettings {
+export const DEFAULT_REMINDER_MESSAGE_TOGGLES: ReminderMessageToggles = {
+  showProgress: true,
+  showRemaining: true,
+  showLocation: true,
+  showPayLink: true,
+};
+
+function toReminderMessageToggles(settings: ReminderMessageSettings | null): ReminderMessageToggles {
+  if (!settings) {
+    return DEFAULT_REMINDER_MESSAGE_TOGGLES;
+  }
+  return {
+    showProgress: settings.showProgress,
+    showRemaining: settings.showRemaining,
+    showLocation: settings.showLocation,
+    showPayLink: settings.showPayLink,
+  };
+}
+
+const WITH_REMINDER_MESSAGE_SETTINGS = { include: { reminderMessageSettings: true } } as const;
+
+function toSettings(tenant: Tenant & { reminderMessageSettings: ReminderMessageSettings | null }): NotificationSettings {
   return {
     telegramConfigured: Boolean(tenant.telegramBotToken),
     telegramChatId: tenant.telegramChatId,
     showTelegramOnPublicPage: tenant.showTelegramOnPublicPage,
     notificationLanguage: tenant.notificationLanguage,
+    reminderMessage: toReminderMessageToggles(tenant.reminderMessageSettings),
   };
 }
 
@@ -29,7 +60,10 @@ export class SettingsService {
   ) {}
 
   async getNotifications(tenantId: string): Promise<NotificationSettings> {
-    const tenant = await this.prisma.tenant.findUniqueOrThrow({ where: { id: tenantId } });
+    const tenant = await this.prisma.tenant.findUniqueOrThrow({
+      where: { id: tenantId },
+      ...WITH_REMINDER_MESSAGE_SETTINGS,
+    });
     return toSettings(tenant);
   }
 
@@ -40,6 +74,7 @@ export class SettingsService {
     const tenant = await this.prisma.tenant.update({
       where: { id: tenantId },
       data: { telegramBotToken: dto.telegramBotToken, telegramChatId: null, telegramBotUsername: null },
+      ...WITH_REMINDER_MESSAGE_SETTINGS,
     });
     return toSettings(tenant);
   }
@@ -48,6 +83,7 @@ export class SettingsService {
     const tenant = await this.prisma.tenant.update({
       where: { id: tenantId },
       data: { notificationLanguage: language },
+      ...WITH_REMINDER_MESSAGE_SETTINGS,
     });
     return toSettings(tenant);
   }
@@ -59,6 +95,23 @@ export class SettingsService {
     const tenant = await this.prisma.tenant.update({
       where: { id: tenantId },
       data: { showTelegramOnPublicPage: dto.showTelegramOnPublicPage },
+      ...WITH_REMINDER_MESSAGE_SETTINGS,
+    });
+    return toSettings(tenant);
+  }
+
+  async updateReminderMessageSettings(
+    tenantId: string,
+    dto: UpdateReminderMessageSettingsDto,
+  ): Promise<NotificationSettings> {
+    await this.prisma.reminderMessageSettings.upsert({
+      where: { tenantId },
+      create: { tenantId, ...DEFAULT_REMINDER_MESSAGE_TOGGLES, ...dto },
+      update: { ...dto },
+    });
+    const tenant = await this.prisma.tenant.findUniqueOrThrow({
+      where: { id: tenantId },
+      ...WITH_REMINDER_MESSAGE_SETTINGS,
     });
     return toSettings(tenant);
   }
@@ -67,6 +120,7 @@ export class SettingsService {
     const tenant = await this.prisma.tenant.update({
       where: { id: tenantId },
       data: { telegramBotToken: null, telegramChatId: null, telegramBotUsername: null },
+      ...WITH_REMINDER_MESSAGE_SETTINGS,
     });
     return toSettings(tenant);
   }

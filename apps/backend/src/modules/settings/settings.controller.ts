@@ -6,6 +6,7 @@ import { Roles } from '../../common/decorators/roles.decorator';
 import { SetNotificationLanguageDto } from './dto/set-notification-language.dto';
 import { SetTelegramPublicVisibilityDto } from './dto/set-telegram-public-visibility.dto';
 import { UpdateNotificationSettingsDto } from './dto/update-notification-settings.dto';
+import { UpdateReminderMessageSettingsDto } from './dto/update-reminder-message-settings.dto';
 import { NotificationSettings, SettingsService } from './settings.service';
 
 @Controller('settings/notifications')
@@ -43,6 +44,15 @@ export class SettingsController {
     @Body() dto: SetTelegramPublicVisibilityDto,
   ): Promise<NotificationSettings> {
     return this.settingsService.setTelegramPublicVisibility(user.tenantId, dto);
+  }
+
+  @Patch('reminder-message')
+  @Audit('settings.notifications.update_reminder_message', 'Tenant')
+  updateReminderMessageSettings(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: UpdateReminderMessageSettingsDto,
+  ): Promise<NotificationSettings> {
+    return this.settingsService.updateReminderMessageSettings(user.tenantId, dto);
   }
 
   @Post('test')

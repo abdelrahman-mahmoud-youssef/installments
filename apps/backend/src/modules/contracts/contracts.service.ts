@@ -10,6 +10,7 @@ import { buildPaginatedResult, PaginatedResult } from '../../common/pagination/p
 import { TenantLocation } from '../../common/tenant-branding';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ShareLinksService } from '../share-links/share-links.service';
+import { DEFAULT_REMINDER_MESSAGE_TOGGLES } from '../settings/settings.service';
 import { StorageService } from '../storage/storage.service';
 import { formatContractReminderMessage } from './contract-reminder-message';
 import { ContractQueryDto } from './dto/contract-query.dto';
@@ -140,7 +141,9 @@ export class ContractsService {
         customer: true,
         installments: { orderBy: { sequence: 'asc' } },
         payments: { orderBy: { paidAt: 'desc' }, include: { allocations: true } },
-        tenant: { select: { name: true, slug: true, locations: true } },
+        tenant: {
+          select: { name: true, slug: true, locations: true, reminderMessageSettings: true },
+        },
       },
     });
     if (!contract) {
@@ -179,7 +182,14 @@ export class ContractsService {
       include: {
         customer: true;
         installments: true;
-        tenant: { select: { name: true; slug: true; locations: true } };
+        tenant: {
+          select: {
+            name: true;
+            slug: true;
+            locations: true;
+            reminderMessageSettings: true;
+          };
+        };
       };
     }>,
   ): Promise<string | null> {
@@ -197,33 +207,51 @@ export class ContractsService {
         dueDate: installment.dueDate,
       }));
 
-    const paidInstallments = contract.installments.filter(
-      (installment) => installment.status === InstallmentStatus.PAID,
-    ).length;
-    const totalRemainingAmount = contract.installments.reduce(
-      (sum, installment) => sum + (installment.amount - installment.paidAmount),
-      0,
-    );
+    if (overdueInstallments.length === 0) {
+      return null;
+    }
 
-    const locations = (contract.tenant.locations as TenantLocation[] | null) ?? [];
-    const location = locations[0] ? { name: locations[0].name, address: locations[0].address, mapUrl: locations[0].mapUrl } : null;
+    const toggles = contract.tenant.reminderMessageSettings ?? DEFAULT_REMINDER_MESSAGE_TOGGLES;
 
-    const localePrefix = contract.customer.notificationLanguage === NotificationLanguage.EN ? '/en' : '';
-    const payPath = `${localePrefix}/customer/${contract.customer.publicId}/contracts/${contract.publicId}/pay`;
+    const progress = toggles.showProgress
+      ? {
+          paidInstallments: contract.installments.filter(
+            (installment) => installment.status === InstallmentStatus.PAID,
+          ).length,
+          totalInstallments: contract.installments.length,
+        }
+      : null;
 
-    const rootDomain = this.config.get<string>('ROOT_DOMAIN');
-    const frontendUrl = this.config
-      .get<string>('FRONTEND_URL')
-      ?.split(',')
-      .map((url) => url.trim())
-      .filter(Boolean)[0];
+    const totalRemainingAmount = toggles.showRemaining
+      ? contract.installments.reduce((sum, installment) => sum + (installment.amount - installment.paidAmount), 0)
+      : null;
+
+    let location: { name: string; address: string; mapUrl?: string } | null = null;
+    if (toggles.showLocation) {
+      const locations = (contract.tenant.locations as TenantLocation[] | null) ?? [];
+      location = locations[0]
+        ? { name: locations[0].name, address: locations[0].address, mapUrl: locations[0].mapUrl }
+        : null;
+    }
 
     let payUrl: string | null = null;
-    if (rootDomain) {
-      const { code } = await this.shareLinks.getOrCreate(contract.tenantId, payPath);
-      payUrl = `https://${contract.tenant.slug}.${rootDomain}/p/${code}`;
-    } else if (frontendUrl) {
-      payUrl = `${frontendUrl}${payPath}`;
+    if (toggles.showPayLink) {
+      const localePrefix = contract.customer.notificationLanguage === NotificationLanguage.EN ? '/en' : '';
+      const payPath = `${localePrefix}/customer/${contract.customer.publicId}/contracts/${contract.publicId}/pay`;
+
+      const rootDomain = this.config.get<string>('ROOT_DOMAIN');
+      const frontendUrl = this.config
+        .get<string>('FRONTEND_URL')
+        ?.split(',')
+        .map((url) => url.trim())
+        .filter(Boolean)[0];
+
+      if (rootDomain) {
+        const { code } = await this.shareLinks.getOrCreate(contract.tenantId, payPath);
+        payUrl = `https://${contract.tenant.slug}.${rootDomain}/p/${code}`;
+      } else if (frontendUrl) {
+        payUrl = `${frontendUrl}${payPath}`;
+      }
     }
 
     return formatContractReminderMessage(
@@ -231,8 +259,7 @@ export class ContractsService {
         customerName: contract.customer.name,
         businessName: contract.tenant.name,
         productName: contract.productName,
-        paidInstallments,
-        totalInstallments: contract.installments.length,
+        progress,
         totalRemainingAmount,
         overdueInstallments,
         location,

@@ -128,6 +128,7 @@ model Tenant {
   supportMessages           SupportMessage[]
   offers                    Offer[]
   shareLinks                ShareLink[]
+  reminderMessageSettings   ReminderMessageSettings?
 }
 
 model User {
@@ -210,6 +211,15 @@ model SupportMessage {
 
   @@index([tenantId, createdAt])
   @@index([tenantId, userId])
+}
+
+model ReminderMessageSettings {
+  tenantId      String  @id
+  showProgress  Boolean @default(true)
+  showRemaining Boolean @default(true)
+  showLocation  Boolean @default(true)
+  showPayLink   Boolean @default(true)
+  tenant        Tenant  @relation(fields: [tenantId], references: [id])
 }
 
 model Customer {

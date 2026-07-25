@@ -13,13 +13,17 @@ export interface ContractReminderLocation {
   mapUrl?: string;
 }
 
+export interface ContractReminderProgress {
+  paidInstallments: number;
+  totalInstallments: number;
+}
+
 export interface ContractReminderData {
   customerName: string;
   businessName: string;
   productName: string;
-  paidInstallments: number;
-  totalInstallments: number;
-  totalRemainingAmount: number;
+  progress: ContractReminderProgress | null;
+  totalRemainingAmount: number | null;
   overdueInstallments: ContractReminderOverdueItem[];
   location: ContractReminderLocation | null;
   payUrl: string | null;
@@ -61,20 +65,28 @@ export function formatContractReminderMessage(
   }
 
   const copy = MESSAGE_COPY[language];
-  const remainingInstallments = data.totalInstallments - data.paidInstallments;
 
-  const lines = [
-    copy.greeting(data.customerName),
-    copy.intro(data.businessName, data.productName),
-    '',
-    copy.progress(data.paidInstallments, data.totalInstallments, remainingInstallments),
-    copy.totalRemaining(formatMoney(data.totalRemainingAmount, language)),
+  const lines = [copy.greeting(data.customerName), copy.intro(data.businessName, data.productName)];
+
+  const statusLines: string[] = [];
+  if (data.progress) {
+    const remainingInstallments = data.progress.totalInstallments - data.progress.paidInstallments;
+    statusLines.push(copy.progress(data.progress.paidInstallments, data.progress.totalInstallments, remainingInstallments));
+  }
+  if (data.totalRemainingAmount !== null) {
+    statusLines.push(copy.totalRemaining(formatMoney(data.totalRemainingAmount, language)));
+  }
+  if (statusLines.length > 0) {
+    lines.push('', ...statusLines);
+  }
+
+  lines.push(
     '',
     copy.overdueHeader,
     ...data.overdueInstallments.map((item) =>
       copy.overdueItem(item.sequence, formatMoney(item.remainingAmount, language), formatDate(item.dueDate, language)),
     ),
-  ];
+  );
 
   if (data.location) {
     lines.push('', copy.locationHeader, `${data.location.name} — ${data.location.address}`);

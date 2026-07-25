@@ -4,10 +4,12 @@ import {
   disconnectNotifications,
   getNotificationSettings,
   NotificationSettings,
+  ReminderMessageToggles,
   sendTestNotification,
   setNotificationLanguage,
   setTelegramPublicVisibility,
   updateNotificationSettings,
+  updateReminderMessageSettings,
 } from '@/lib/api/settings';
 import { NotificationSettingsInput } from '@/lib/schemas/settings';
 
@@ -62,4 +64,12 @@ export function useSetTelegramPublicVisibility() {
   });
 }
 
-export type { NotificationSettings };
+export function useUpdateReminderMessageSettings() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: Partial<ReminderMessageToggles>) => updateReminderMessageSettings(input),
+    onSuccess: (data) => queryClient.setQueryData(settingsKeys.notifications, data),
+  });
+}
+
+export type { NotificationSettings, ReminderMessageToggles };

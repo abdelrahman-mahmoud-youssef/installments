@@ -2,11 +2,19 @@ import { NotificationSettingsInput } from '@/lib/schemas/settings';
 import type { NotificationLanguage } from '@/components/shared/notification-language-toggle';
 import { apiClient } from './client';
 
+export interface ReminderMessageToggles {
+  showProgress: boolean;
+  showRemaining: boolean;
+  showLocation: boolean;
+  showPayLink: boolean;
+}
+
 export interface NotificationSettings {
   telegramConfigured: boolean;
   telegramChatId: string | null;
   showTelegramOnPublicPage: boolean;
   notificationLanguage: NotificationLanguage;
+  reminderMessage: ReminderMessageToggles;
 }
 
 export function getNotificationSettings(): Promise<NotificationSettings> {
@@ -33,4 +41,10 @@ export function setNotificationLanguage(language: NotificationLanguage): Promise
 
 export function setTelegramPublicVisibility(showTelegramOnPublicPage: boolean): Promise<NotificationSettings> {
   return apiClient.patch('settings/notifications/public-page-visibility', { showTelegramOnPublicPage });
+}
+
+export function updateReminderMessageSettings(
+  input: Partial<ReminderMessageToggles>,
+): Promise<NotificationSettings> {
+  return apiClient.patch('settings/notifications/reminder-message', input);
 }
