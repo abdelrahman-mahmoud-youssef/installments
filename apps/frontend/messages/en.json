@@ -648,10 +648,9 @@
     "step3": "Open your new bot and press Start so it can message you.",
     "step4": "Click Connect & send test — we'll find your chat and send a test message.",
     "moreChannelsTitle": "More channels",
-    "moreChannelsDescription": "Email, WhatsApp, and SMS reminders are on the way.",
+    "moreChannelsDescription": "Email and SMS reminders are on the way.",
     "comingSoon": "Coming soon",
     "channelEmail": "Email",
-    "channelWhatsapp": "WhatsApp",
     "channelSms": "SMS"
   },
   "paymentMethods": {

@@ -16,7 +16,6 @@ import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { type ComponentType, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { FaWhatsapp } from 'react-icons/fa6';
 import { toast } from 'sonner';
 import { FadeIn } from '@/components/shared/motion';
 import {
@@ -25,6 +24,7 @@ import {
 } from '@/components/shared/notification-language-toggle';
 import { PageHeader } from '@/components/shared/page-header';
 import { Section } from '@/components/shared/section';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { BrandingSection } from '@/components/settings/branding-section';
 import { InstallAppDialog } from '@/components/settings/install-app-dialog';
 import { ShopPageSection } from '@/components/settings/shop-page-section';
@@ -47,7 +47,6 @@ import { NotificationSettingsInput, notificationSettingsSchema } from '@/lib/sch
 const setupSteps = ['step1', 'step2', 'step3', 'step4'] as const;
 const comingSoonChannels: { key: string; icon: ComponentType<{ className?: string }> }[] = [
   { key: 'channelEmail', icon: Mail },
-  { key: 'channelWhatsapp', icon: FaWhatsapp },
   { key: 'channelSms', icon: Smartphone },
 ];
 
@@ -240,19 +239,23 @@ export default function SettingsPage() {
                     </form>
                   </Form>
 
-                  <div className="mt-6 border-t border-border pt-5">
-                    <h3 className="mb-3 text-sm font-medium text-foreground">{t('stepsTitle')}</h3>
-                    <ol className="space-y-3">
-                      {setupSteps.map((step, index) => (
-                        <li key={step} className="flex gap-3 text-sm text-muted-foreground">
-                          <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-foreground tabular-nums">
-                            {index + 1}
-                          </span>
-                          <span>{t(step)}</span>
-                        </li>
-                      ))}
-                    </ol>
-                  </div>
+                  <Accordion multiple defaultValue={['steps']} className="mt-6 border-t border-border pt-2">
+                    <AccordionItem value="steps">
+                      <AccordionTrigger>{t('stepsTitle')}</AccordionTrigger>
+                      <AccordionContent>
+                        <ol className="space-y-3">
+                          {setupSteps.map((step, index) => (
+                            <li key={step} className="flex gap-3 text-sm text-muted-foreground">
+                              <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-foreground tabular-nums">
+                                {index + 1}
+                              </span>
+                              <span>{t(step)}</span>
+                            </li>
+                          ))}
+                        </ol>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
                 </>
               )}
 

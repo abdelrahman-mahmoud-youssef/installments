@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Calculator, Copy, Loader2, MapPin } from 'lucide-react';
+import { Calculator, Copy, Link2, Loader2, MapPin, Share2 } from 'lucide-react';
 import { FaFacebookF, FaInstagram, FaTiktok } from 'react-icons/fa6';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
@@ -135,13 +135,14 @@ export function ShopPageSection() {
 
   return (
     <Section title={t('shopPageTitle')} description={t('shopPageDescription')}>
-      <Accordion
-        multiple
-        defaultValue={['shopLink', 'aboutSocial', 'calculator', 'locations']}
-        className="flex flex-col gap-1"
-      >
+      <Accordion multiple defaultValue={['shopLink']} className="flex flex-col gap-1">
         <AccordionItem value="shopLink">
-          <AccordionTrigger>{t('shopLinkSectionTitle')}</AccordionTrigger>
+          <AccordionTrigger>
+            <span className="flex items-center gap-2">
+              <Link2 className="size-4" />
+              {t('shopLinkSectionTitle')}
+            </span>
+          </AccordionTrigger>
           <AccordionContent>
             <Form {...slugForm}>
               <form onSubmit={slugForm.handleSubmit(handleSaveSlug)} className="flex flex-col gap-2">
@@ -149,15 +150,22 @@ export function ShopPageSection() {
                   control={slugForm.control}
                   name="slug"
                   render={({ field }) => (
-                    <FormItem className="max-w-sm">
+                    <FormItem>
                       <FormLabel>{t('shopLinkLabel')}</FormLabel>
                       <FormControl>
-                        <div className="flex items-center gap-1.5" dir="ltr">
-                          <span className="shrink-0 text-sm text-muted-foreground">
+                        <div
+                          className="flex items-stretch overflow-hidden rounded-lg border border-input bg-card shadow-xs"
+                          dir="ltr"
+                        >
+                          <span className="flex max-w-[50%] shrink-0 items-center truncate border-r border-border bg-muted px-3 text-sm text-muted-foreground">
                             {shopOrigin}
                             {routes.publicShop('')}
                           </span>
-                          <Input dir="ltr" {...field} />
+                          <Input
+                            dir="ltr"
+                            className="min-w-0 flex-1 rounded-none border-0 bg-transparent shadow-none focus-visible:ring-0"
+                            {...field}
+                          />
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -180,7 +188,12 @@ export function ShopPageSection() {
         </AccordionItem>
 
         <AccordionItem value="aboutSocial">
-          <AccordionTrigger>{t('aboutSectionTitle')}</AccordionTrigger>
+          <AccordionTrigger>
+            <span className="flex items-center gap-2">
+              <Share2 className="size-4" />
+              {t('aboutSectionTitle')}
+            </span>
+          </AccordionTrigger>
           <AccordionContent>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleSave)} className="flex flex-col gap-4">
@@ -327,7 +340,7 @@ export function ShopPageSection() {
             </span>
           </AccordionTrigger>
           <AccordionContent>
-            <p className="-mt-2 mb-3 text-xs text-muted-foreground">{t('locationsHint')}</p>
+            <p className="mb-3 text-xs text-muted-foreground">{t('locationsHint')}</p>
             <LocationsSection showHeading={false} />
           </AccordionContent>
         </AccordionItem>
