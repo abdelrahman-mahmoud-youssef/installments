@@ -132,6 +132,7 @@
     "staff": "الموظفين",
     "activity": "سجل النشاط",
     "settings": "الإعدادات",
+    "support": "الدعم",
     "logout": "تسجيل الخروج",
     "account": "الحساب"
   },
@@ -792,6 +793,17 @@
     "noStaffYet": "لسه مفيش حسابات موظفين",
     "statusUpdated": "اتحدّث حساب الموظف.",
     "saving": "بيتم الحفظ…",
+    "genericError": "حصل خطأ ما."
+  },
+  "support": {
+    "title": "الدعم",
+    "subtitle": "محتاج مساعدة؟ ابعتلنا رسالة وهنرد عليك.",
+    "subjectLabel": "الموضوع",
+    "messageLabel": "الرسالة",
+    "sendingAs": "بترسل باسم {name} ({email})",
+    "submit": "ابعت الرسالة",
+    "sending": "بيتم الإرسال…",
+    "sent": "اتبعتت الرسالة — هنرد عليك قريب.",
     "genericError": "حصل خطأ ما."
   },
   "account": {

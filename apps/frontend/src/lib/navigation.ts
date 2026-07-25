@@ -9,6 +9,7 @@ import {
   UserCog,
   ReceiptText,
   Wallet,
+  LifeBuoy,
 } from 'lucide-react';
 import { routes } from './routes';
 
@@ -23,4 +24,5 @@ export const navigationItems = [
   { labelKey: 'staff', href: routes.staff, icon: UserCog, adminOnly: true },
   { labelKey: 'activity', href: routes.activity, icon: History, adminOnly: true },
   { labelKey: 'settings', href: routes.settings, icon: Settings, adminOnly: true },
+  { labelKey: 'support', href: routes.support, icon: LifeBuoy, adminOnly: false },
 ] as const;

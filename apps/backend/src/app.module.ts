@@ -23,6 +23,7 @@ import { PublicModule } from './modules/public/public.module';
 import { RemindersModule } from './modules/reminders/reminders.module';
 import { ReportsModule } from './modules/reports/reports.module';
 import { SettingsModule } from './modules/settings/settings.module';
+import { SupportModule } from './modules/support/support.module';
 import { UsersModule } from './modules/users/users.module';
 import { PrismaModule } from './prisma/prisma.module';
 
@@ -59,6 +60,7 @@ import { PrismaModule } from './prisma/prisma.module';
     BroadcastsModule,
     AuditModule,
     UsersModule,
+    SupportModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },

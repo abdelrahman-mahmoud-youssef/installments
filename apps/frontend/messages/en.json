@@ -132,6 +132,7 @@
     "staff": "Staff",
     "activity": "Activity log",
     "settings": "Settings",
+    "support": "Support",
     "logout": "Log out",
     "account": "Account"
   },
@@ -792,6 +793,17 @@
     "noStaffYet": "No staff accounts yet",
     "statusUpdated": "Staff account updated.",
     "saving": "Saving…",
+    "genericError": "Something went wrong."
+  },
+  "support": {
+    "title": "Support",
+    "subtitle": "Need help? Send us a message and we'll get back to you.",
+    "subjectLabel": "Subject",
+    "messageLabel": "Message",
+    "sendingAs": "Sending as {name} ({email})",
+    "submit": "Send message",
+    "sending": "Sending…",
+    "sent": "Message sent — we'll get back to you soon.",
     "genericError": "Something went wrong."
   },
   "account": {
