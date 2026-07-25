@@ -128,6 +128,7 @@ export class PublicService {
             id: true,
             telegramBotToken: true,
             telegramBotUsername: true,
+            showTelegramOnPublicPage: true,
             ...TENANT_BRANDING_SELECT,
           },
         },
@@ -175,7 +176,11 @@ export class PublicService {
       ),
       paymentMethods,
       telegram: {
-        available: Boolean(customer.tenant.telegramBotToken && customer.tenant.telegramBotUsername),
+        available: Boolean(
+          customer.tenant.telegramBotToken &&
+            customer.tenant.telegramBotUsername &&
+            customer.tenant.showTelegramOnPublicPage,
+        ),
         botUsername: customer.tenant.telegramBotUsername,
         connected: Boolean(customer.telegramChatId),
         enabled: customer.telegramNotificationsEnabled,

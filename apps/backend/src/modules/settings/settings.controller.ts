@@ -4,6 +4,7 @@ import { Audit } from '../../common/decorators/audit.decorator';
 import { AuthenticatedUser, CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { SetNotificationLanguageDto } from './dto/set-notification-language.dto';
+import { SetTelegramPublicVisibilityDto } from './dto/set-telegram-public-visibility.dto';
 import { UpdateNotificationSettingsDto } from './dto/update-notification-settings.dto';
 import { NotificationSettings, SettingsService } from './settings.service';
 
@@ -33,6 +34,15 @@ export class SettingsController {
     @Body() dto: SetNotificationLanguageDto,
   ): Promise<NotificationSettings> {
     return this.settingsService.setLanguage(user.tenantId, dto.language);
+  }
+
+  @Patch('public-page-visibility')
+  @Audit('settings.notifications.set_telegram_public_visibility', 'Tenant')
+  setTelegramPublicVisibility(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: SetTelegramPublicVisibilityDto,
+  ): Promise<NotificationSettings> {
+    return this.settingsService.setTelegramPublicVisibility(user.tenantId, dto);
   }
 
   @Post('test')

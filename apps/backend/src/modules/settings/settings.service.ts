@@ -2,11 +2,13 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { NotificationLanguage, Tenant } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TelegramService } from '../telegram/telegram.service';
+import { SetTelegramPublicVisibilityDto } from './dto/set-telegram-public-visibility.dto';
 import { UpdateNotificationSettingsDto } from './dto/update-notification-settings.dto';
 
 export interface NotificationSettings {
   telegramConfigured: boolean;
   telegramChatId: string | null;
+  showTelegramOnPublicPage: boolean;
   notificationLanguage: NotificationLanguage;
 }
 
@@ -14,6 +16,7 @@ function toSettings(tenant: Tenant): NotificationSettings {
   return {
     telegramConfigured: Boolean(tenant.telegramBotToken),
     telegramChatId: tenant.telegramChatId,
+    showTelegramOnPublicPage: tenant.showTelegramOnPublicPage,
     notificationLanguage: tenant.notificationLanguage,
   };
 }
@@ -45,6 +48,17 @@ export class SettingsService {
     const tenant = await this.prisma.tenant.update({
       where: { id: tenantId },
       data: { notificationLanguage: language },
+    });
+    return toSettings(tenant);
+  }
+
+  async setTelegramPublicVisibility(
+    tenantId: string,
+    dto: SetTelegramPublicVisibilityDto,
+  ): Promise<NotificationSettings> {
+    const tenant = await this.prisma.tenant.update({
+      where: { id: tenantId },
+      data: { showTelegramOnPublicPage: dto.showTelegramOnPublicPage },
     });
     return toSettings(tenant);
   }
