@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import createMiddleware from 'next-intl/middleware';
 import { routing } from './i18n/routing';
+import { config as appConfig } from './lib/config';
 import { RESERVED_SUBDOMAINS } from './lib/reserved-subdomains';
 import { getRootDomain } from './lib/root-domain';
 
@@ -49,10 +50,10 @@ function handleTenantSubdomain(request: NextRequest): NextResponse | null {
     return null;
   }
   if (rest === '/') {
-    const target = `${locale ? `/${locale}` : ''}/shop/${slug}`;
+    const target = `/${locale ?? routing.defaultLocale}/shop/${slug}`;
     return NextResponse.rewrite(new URL(target, request.url));
   }
-  return NextResponse.redirect(new URL(`${pathname}${search}`, `https://${getRootDomain()}`), 307);
+  return NextResponse.redirect(`${appConfig.siteUrl}${pathname}${search}`, 307);
 }
 
 export default function middleware(request: NextRequest) {
