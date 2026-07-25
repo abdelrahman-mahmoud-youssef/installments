@@ -60,6 +60,7 @@ export interface ContractDetail extends Omit<ContractListItem, 'customer'> {
 export interface ContractListParams {
   status?: ContractStatus;
   customerId?: string;
+  delayedOnly?: boolean;
   page?: number;
   limit?: number;
 }

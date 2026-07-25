@@ -1,8 +1,10 @@
 import { randomUUID } from 'node:crypto';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InstallmentStatus, Prisma } from '@prisma/client';
+import { getUtcToday } from '../../common/date/utc-date';
 import { MAX_CONTRACT_IMAGE_UPLOAD_BYTES } from '../../common/constants';
 import { decodeImageUpload } from '../../common/decode-image-upload';
+import { overdueInstallmentWhere } from '../../common/installments/overdue-where';
 import { buildPaginatedResult, PaginatedResult } from '../../common/pagination/paginated-result.interface';
 import { PrismaService } from '../../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
@@ -103,6 +105,7 @@ export class ContractsService {
       tenantId,
       ...(query.status && { status: query.status }),
       ...(query.customerId && { customerId: query.customerId }),
+      ...(query.delayedOnly && { installments: { some: overdueInstallmentWhere(getUtcToday()) } }),
     };
 
     const [data, total] = await Promise.all([

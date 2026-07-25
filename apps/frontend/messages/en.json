@@ -14,7 +14,9 @@
     "viewShopPage": "View shop page",
     "install": "Install",
     "dismiss": "Dismiss",
-    "installBannerMessage": "Install this app for quick access from your home screen."
+    "installBannerMessage": "Install this app for quick access from your home screen.",
+    "delayedOnly": "Delayed only",
+    "delayedOnlyHint": "Only show those with an overdue payment."
   },
   "theme": {
     "toggle": "Toggle theme"
@@ -386,7 +388,6 @@
     "title": "Contracts",
     "subtitle": "Every installment plan in one place.",
     "newContract": "New contract",
-    "allStatuses": "All statuses",
     "loadError": "Couldn't load contracts",
     "noContractsYet": "No contracts yet",
     "createPrompt": "Create a contract to get started.",

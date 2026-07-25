@@ -14,30 +14,25 @@ import { Section } from '@/components/shared/section';
 import { TableSkeleton } from '@/components/shared/skeletons';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Link } from '@/i18n/navigation';
 import type { ContractListItem } from '@/lib/api/contracts';
 import { useContracts } from '@/hooks/use-contracts';
 import { ContractStatus, CONTRACT_STATUSES } from '@/lib/enums';
 import { routes } from '@/lib/routes';
 
-const STATUS_FILTER_ALL = 'ALL';
-
 export default function ContractsPage() {
   const t = useTranslations('contracts');
   const tCommon = useTranslations('common');
   const tStatus = useTranslations('status');
-  const [status, setStatus] = useState<string>(STATUS_FILTER_ALL);
+  const [status, setStatus] = useState<ContractStatus>('ACTIVE');
+  const [delayedOnly, setDelayedOnly] = useState(false);
   const [page, setPage] = useState(1);
 
   const { data, isLoading, isError } = useContracts({
-    status: status === STATUS_FILTER_ALL ? undefined : (status as ContractStatus),
+    status,
+    delayedOnly: delayedOnly || undefined,
     page,
     limit: 20,
   });
@@ -96,29 +91,36 @@ export default function ContractsPage() {
       </FadeIn>
 
       <FadeIn delay={0.05} className="space-y-4">
-        <Select
-          value={status}
-          onValueChange={(value) => {
-            setStatus(value ?? STATUS_FILTER_ALL);
-            setPage(1);
-          }}
-          items={{
-            [STATUS_FILTER_ALL]: t('allStatuses'),
-            ...Object.fromEntries(CONTRACT_STATUSES.map((value) => [value, tStatus(value)])),
-          }}
-        >
-          <SelectTrigger className="w-48">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={STATUS_FILTER_ALL}>{t('allStatuses')}</SelectItem>
-            {CONTRACT_STATUSES.map((value) => (
-              <SelectItem key={value} value={value}>
-                {tStatus(value)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <Tabs
+            value={status}
+            onValueChange={(value) => {
+              setStatus(value as ContractStatus);
+              setPage(1);
+            }}
+          >
+            <div className="-mx-1 overflow-x-auto px-1">
+              <TabsList className="min-w-fit">
+                {CONTRACT_STATUSES.map((value) => (
+                  <TabsTrigger key={value} value={value} className="shrink-0">
+                    {tStatus(value)}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
+          </Tabs>
+
+          <label className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Switch
+              checked={delayedOnly}
+              onCheckedChange={(next) => {
+                setDelayedOnly(next);
+                setPage(1);
+              }}
+            />
+            {tCommon('delayedOnly')}
+          </label>
+        </div>
 
         {isLoading ? (
           <TableSkeleton />

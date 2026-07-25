@@ -16,6 +16,7 @@ import { SearchInput } from '@/components/shared/search-input';
 import { Section } from '@/components/shared/section';
 import { TableSkeleton } from '@/components/shared/skeletons';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { Link } from '@/i18n/navigation';
 import type { Customer } from '@/lib/api/customers';
 import { useCreateCustomer, useCustomers, useDeleteCustomer } from '@/hooks/use-customers';
@@ -27,10 +28,16 @@ export default function CustomersPage() {
   const t = useTranslations('customers');
   const tCommon = useTranslations('common');
   const [search, setSearch] = useState('');
+  const [delayedOnly, setDelayedOnly] = useState(false);
   const [page, setPage] = useState(1);
   const debouncedSearch = useDebouncedValue(search, 300);
 
-  const { data, isLoading, isError } = useCustomers({ q: debouncedSearch || undefined, page, limit: 20 });
+  const { data, isLoading, isError } = useCustomers({
+    q: debouncedSearch || undefined,
+    delayedOnly: delayedOnly || undefined,
+    page,
+    limit: 20,
+  });
   const createCustomer = useCreateCustomer();
   const deleteCustomer = useDeleteCustomer();
 
@@ -114,15 +121,28 @@ export default function CustomersPage() {
       </FadeIn>
 
       <FadeIn delay={0.05} className="space-y-4">
-        <SearchInput
-          value={search}
-          onChange={(value) => {
-            setSearch(value);
-            setPage(1);
-          }}
-          placeholder={t('searchPlaceholder')}
-          className="max-w-sm"
-        />
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <SearchInput
+            value={search}
+            onChange={(value) => {
+              setSearch(value);
+              setPage(1);
+            }}
+            placeholder={t('searchPlaceholder')}
+            className="max-w-sm"
+          />
+
+          <label className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Switch
+              checked={delayedOnly}
+              onCheckedChange={(next) => {
+                setDelayedOnly(next);
+                setPage(1);
+              }}
+            />
+            {tCommon('delayedOnly')}
+          </label>
+        </div>
 
         {isLoading ? (
           <TableSkeleton />

@@ -1,8 +1,10 @@
 import { randomUUID } from 'node:crypto';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { BroadcastRecipientStatus, Customer, Prisma, ReminderChannel } from '@prisma/client';
+import { getUtcToday } from '../../common/date/utc-date';
 import { MAX_CUSTOMER_ID_UPLOAD_BYTES } from '../../common/constants';
 import { decodeImageUpload } from '../../common/decode-image-upload';
+import { overdueInstallmentWhere } from '../../common/installments/overdue-where';
 import { buildPaginatedResult, PaginatedResult } from '../../common/pagination/paginated-result.interface';
 import { PrismaService } from '../../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
@@ -47,6 +49,9 @@ export class CustomersService {
           { name: { contains: query.q, mode: 'insensitive' } },
           { phone: { contains: query.q } },
         ],
+      }),
+      ...(query.delayedOnly && {
+        contracts: { some: { installments: { some: overdueInstallmentWhere(getUtcToday()) } } },
       }),
     };
 

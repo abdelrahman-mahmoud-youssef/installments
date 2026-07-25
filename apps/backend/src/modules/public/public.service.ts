@@ -133,6 +133,7 @@ export class PublicService {
           },
         },
         contracts: {
+          where: { status: { not: ContractStatus.CANCELLED } },
           select: {
             publicId: true,
             productName: true,

@@ -14,7 +14,9 @@
     "viewShopPage": "شوف صفحة المحل",
     "install": "تثبيت",
     "dismiss": "إغلاق",
-    "installBannerMessage": "ثبّت التطبيق ده عشان توصله بسرعة من شاشة موبايلك."
+    "installBannerMessage": "ثبّت التطبيق ده عشان توصله بسرعة من شاشة موبايلك.",
+    "delayedOnly": "المتأخرين بس",
+    "delayedOnlyHint": "اعرض بس اللي عندهم دفعة متأخرة."
   },
   "theme": {
     "toggle": "تغيير الشكل"
@@ -386,7 +388,6 @@
     "title": "العقود",
     "subtitle": "كل خطط التقسيط في مكان واحد.",
     "newContract": "عقد جديد",
-    "allStatuses": "كل الحالات",
     "loadError": "معرفناش نحمّل العقود",
     "noContractsYet": "لسه مفيش عقود",
     "createPrompt": "اعمل عقد عشان تبدأ.",

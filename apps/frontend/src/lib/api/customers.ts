@@ -30,6 +30,7 @@ export interface CustomerDetail extends Customer {
 
 export interface CustomerListParams {
   q?: string;
+  delayedOnly?: boolean;
   page?: number;
   limit?: number;
 }
