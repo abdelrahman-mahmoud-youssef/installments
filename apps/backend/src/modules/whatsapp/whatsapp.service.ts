@@ -33,6 +33,30 @@ export class WhatsappService {
       });
     }
 
+    await this.postMessage(phoneNumberId, accessToken, {
+      to,
+      type: 'template',
+      template: {
+        name: templateName,
+        language: { code: languageCode },
+        ...(components.length > 0 && { components }),
+      },
+    });
+  }
+
+  async sendTextMessage(phoneNumberId: string, accessToken: string, to: string, body: string): Promise<void> {
+    await this.postMessage(phoneNumberId, accessToken, {
+      to,
+      type: 'text',
+      text: { body },
+    });
+  }
+
+  private async postMessage(
+    phoneNumberId: string,
+    accessToken: string,
+    payload: Record<string, unknown>,
+  ): Promise<void> {
     const response = await fetch(
       `https://graph.facebook.com/${GRAPH_API_VERSION}/${phoneNumberId}/messages`,
       {
@@ -41,16 +65,7 @@ export class WhatsappService {
           Authorization: `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          messaging_product: 'whatsapp',
-          to,
-          type: 'template',
-          template: {
-            name: templateName,
-            language: { code: languageCode },
-            ...(components.length > 0 && { components }),
-          },
-        }),
+        body: JSON.stringify({ messaging_product: 'whatsapp', ...payload }),
       },
     );
 

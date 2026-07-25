@@ -395,3 +395,14 @@ model PaymentClaim {
   @@index([tenantId, contractId])
   @@index([paymentMethodId])
 }
+
+model WhatsappMessage {
+  id         String   @id @default(cuid())
+  fromPhone  String
+  type       String
+  body       String?
+  messageId  String   @unique
+  receivedAt DateTime @default(now())
+
+  @@index([fromPhone, receivedAt])
+}
