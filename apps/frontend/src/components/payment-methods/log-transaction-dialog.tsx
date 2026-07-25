@@ -220,7 +220,7 @@ export function LogTransactionDialog({
                   control={form.control}
                   name="amount"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="min-w-0">
                       <FormLabel>{t('transactionAmount')}</FormLabel>
                       <FormControl>
                         <NumberInput step="1" min="0" {...field} />
@@ -233,7 +233,7 @@ export function LogTransactionDialog({
                   control={form.control}
                   name="occurredAt"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="min-w-0">
                       <FormLabel>{t('transactionDate')}</FormLabel>
                       <FormControl>
                         <Input type="date" max={todayIso()} {...field} />

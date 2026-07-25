@@ -98,7 +98,7 @@ export function AddAdjustmentDialog({ counterpartyId, trigger }: { counterpartyI
                 control={form.control}
                 name="amount"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel>{t('adjustmentAmount')}</FormLabel>
                     <FormControl>
                       <NumberInput step="1" min="0" {...field} />
@@ -111,7 +111,7 @@ export function AddAdjustmentDialog({ counterpartyId, trigger }: { counterpartyI
                 control={form.control}
                 name="occurredAt"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel>{t('adjustmentDate')}</FormLabel>
                     <FormControl>
                       <Input type="date" max={todayIso()} {...field} />

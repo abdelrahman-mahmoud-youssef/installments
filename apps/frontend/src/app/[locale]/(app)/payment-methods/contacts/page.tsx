@@ -133,7 +133,7 @@ export default function ContactsPage() {
             setPage(1);
           }}
           placeholder={t('searchPlaceholder')}
-          className="max-w-sm"
+          className="w-full"
         />
 
         {isLoading ? (
