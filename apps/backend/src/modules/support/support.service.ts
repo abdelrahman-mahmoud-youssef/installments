@@ -20,4 +20,18 @@ export class SupportService {
       },
     });
   }
+
+  async findMine(user: AuthenticatedUser): Promise<SupportMessage[]> {
+    return this.prisma.supportMessage.findMany({
+      where: { tenantId: user.tenantId, userId: user.userId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async markSeen(user: AuthenticatedUser): Promise<void> {
+    await this.prisma.supportMessage.updateMany({
+      where: { tenantId: user.tenantId, userId: user.userId, adminReply: { not: null }, seenAt: null },
+      data: { seenAt: new Date() },
+    });
+  }
 }
