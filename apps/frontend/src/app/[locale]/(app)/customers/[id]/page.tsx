@@ -44,6 +44,7 @@ import { Link } from '@/i18n/navigation';
 import type { CustomerContractSummary } from '@/lib/api/customers';
 import { useBranding } from '@/hooks/use-branding';
 import { useCustomer, useUpdateCustomer } from '@/hooks/use-customers';
+import { useCreateShareLink } from '@/hooks/use-share-links';
 import { resolveAssetUrl } from '@/lib/assets';
 import { toWhatsappNumber } from '@/lib/phone';
 import { getSubdomainUrl } from '@/lib/root-domain';
@@ -56,8 +57,10 @@ export default function CustomerDetailPage() {
   const { data: customer, isLoading, isError } = useCustomer(id);
   const { data: branding } = useBranding();
   const updateCustomer = useUpdateCustomer(id);
+  const createShareLink = useCreateShareLink();
   const [qrOpen, setQrOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
 
   if (isLoading) {
     return (
@@ -78,8 +81,19 @@ export default function CustomerDetailPage() {
   }
 
   const customerPath = routes.publicCustomer(customer.publicId);
-  const publicUrl = branding ? getSubdomainUrl(branding.slug, customerPath) : `${window.location.origin}${customerPath}`;
-  const whatsappUrl = `https://wa.me/${toWhatsappNumber(customer.phone)}?text=${encodeURIComponent(publicUrl)}`;
+
+  async function resolveShareUrl(): Promise<string> {
+    if (shareUrl) {
+      return shareUrl;
+    }
+    if (!branding) {
+      return `${window.location.origin}${customerPath}`;
+    }
+    const { code } = await createShareLink.mutateAsync(customerPath);
+    const url = getSubdomainUrl(branding.slug, `/p/${code}`);
+    setShareUrl(url);
+    return url;
+  }
 
   const columns: Column<CustomerContractSummary>[] = [
     {
@@ -152,19 +166,34 @@ export default function CustomerDetailPage() {
                 />
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuItem
-                    onClick={() => {
-                      navigator.clipboard.writeText(publicUrl);
+                    onClick={async () => {
+                      const url = await resolveShareUrl();
+                      navigator.clipboard.writeText(url);
                       toast.success(t('linkCopied'));
                     }}
                   >
                     <Copy className="size-4" />
                     {t('copyLink')}
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setQrOpen(true)}>
+                  <DropdownMenuItem
+                    onClick={async () => {
+                      await resolveShareUrl();
+                      setQrOpen(true);
+                    }}
+                  >
                     <QrCode className="size-4" />
                     {t('qrCode')}
                   </DropdownMenuItem>
-                  <DropdownMenuItem render={<a href={whatsappUrl} target="_blank" rel="noopener noreferrer" />}>
+                  <DropdownMenuItem
+                    onClick={async () => {
+                      const url = await resolveShareUrl();
+                      window.open(
+                        `https://wa.me/${toWhatsappNumber(customer.phone)}?text=${encodeURIComponent(url)}`,
+                        '_blank',
+                        'noopener,noreferrer',
+                      );
+                    }}
+                  >
                     <FaWhatsapp className="size-4" />
                     {t('sendWhatsapp')}
                   </DropdownMenuItem>
@@ -296,7 +325,7 @@ export default function CustomerDetailPage() {
         open={qrOpen}
         onOpenChange={setQrOpen}
         customerName={customer.name}
-        publicUrl={publicUrl}
+        publicUrl={shareUrl ?? ''}
       />
       <CustomerNotificationHistoryDialog
         customerId={customer.id}

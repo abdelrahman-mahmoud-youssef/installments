@@ -5,6 +5,7 @@ import { InstallmentStatus, NotificationLanguage, ReminderChannel } from '@prism
 import { Queue } from 'bullmq';
 import { addUtcDays, getUtcToday } from '../../common/date/utc-date';
 import { PrismaService } from '../../prisma/prisma.service';
+import { ShareLinksService } from '../share-links/share-links.service';
 import { TelegramService } from '../telegram/telegram.service';
 import { WhatsappService } from '../whatsapp/whatsapp.service';
 import { CustomerReminderItem, formatCustomerReminderMessage } from './customer-reminder-message';
@@ -65,6 +66,7 @@ export class RemindersService implements OnModuleInit {
     private readonly config: ConfigService,
     private readonly telegram: TelegramService,
     private readonly whatsapp: WhatsappService,
+    private readonly shareLinks: ShareLinksService,
   ) {}
 
   onModuleInit(): void {
@@ -217,7 +219,7 @@ export class RemindersService implements OnModuleInit {
       where: whatsappCredentials
         ? undefined
         : { telegramBotToken: { not: null }, telegramBotUsername: { not: null } },
-      select: { id: true, name: true, telegramBotToken: true, telegramBotUsername: true },
+      select: { id: true, name: true, slug: true, telegramBotToken: true, telegramBotUsername: true },
     });
 
     for (const tenant of tenants) {
@@ -230,6 +232,7 @@ export class RemindersService implements OnModuleInit {
 
         await this.sendCustomerRemindersForTenant(
           tenant.id,
+          tenant.slug,
           tenant.name,
           telegramBotToken,
           whatsappCredentials,
@@ -246,6 +249,7 @@ export class RemindersService implements OnModuleInit {
 
   private async sendCustomerRemindersForTenant(
     tenantId: string,
+    tenantSlug: string,
     businessName: string,
     telegramBotToken: string | null,
     whatsappCredentials: { phoneNumberId: string; accessToken: string } | null,
@@ -291,8 +295,9 @@ export class RemindersService implements OnModuleInit {
       }
 
       if (telegramBotToken && customer.telegramChatId && customer.telegramNotificationsEnabled) {
+        const payUrl = await this.buildPayUrl(tenantId, tenantSlug, customer.publicId, customer.notificationLanguage);
         const message = formatCustomerReminderMessage(
-          { businessName, dueToday, overdue, payUrl: this.buildPayUrl(customer.publicId, customer.notificationLanguage) },
+          { businessName, dueToday, overdue, payUrl },
           customer.notificationLanguage,
         );
         if (message) {
@@ -337,17 +342,27 @@ export class RemindersService implements OnModuleInit {
     }
   }
 
-  private buildPayUrl(customerPublicId: string, language: NotificationLanguage): string | null {
+  private async buildPayUrl(
+    tenantId: string,
+    tenantSlug: string,
+    customerPublicId: string,
+    language: NotificationLanguage,
+  ): Promise<string | null> {
+    const localePrefix = language === NotificationLanguage.AR ? '/ar' : '';
+    const targetPath = `${localePrefix}/customer/${customerPublicId}`;
+
+    const rootDomain = this.config.get<string>('ROOT_DOMAIN');
+    if (rootDomain) {
+      const { code } = await this.shareLinks.getOrCreate(tenantId, targetPath);
+      return `https://${tenantSlug}.${rootDomain}/p/${code}`;
+    }
+
     const frontendUrl = this.config
       .get<string>('FRONTEND_URL')
       ?.split(',')
       .map((url) => url.trim())
       .filter(Boolean)[0];
-    if (!frontendUrl) {
-      return null;
-    }
-    const localePrefix = language === NotificationLanguage.AR ? '/ar' : '';
-    return `${frontendUrl}${localePrefix}/customer/${customerPublicId}/pay`;
+    return frontendUrl ? `${frontendUrl}${targetPath}` : null;
   }
 
   private async sendCustomerWhatsappReminder(

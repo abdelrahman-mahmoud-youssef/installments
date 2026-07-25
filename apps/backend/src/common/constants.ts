@@ -35,3 +35,5 @@ export const LOGIN_LOCKOUT_BASE_SECONDS = 60;
 export const LOGIN_LOCKOUT_MAX_SECONDS = 1800;
 
 export const PASSWORD_RESET_TOKEN_TTL_MINUTES = 30;
+
+export const SHARE_LINK_TARGET_PATH_PATTERN = /^(\/(en|ar))?\/customer\/[^/]+(\/contracts\/[^/]+(\/pay)?)?$/;

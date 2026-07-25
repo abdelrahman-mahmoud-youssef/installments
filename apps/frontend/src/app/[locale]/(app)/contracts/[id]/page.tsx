@@ -44,6 +44,7 @@ import { useBranding } from '@/hooks/use-branding';
 import { useCancelContract, useContract } from '@/hooks/use-contracts';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useCreatePayment } from '@/hooks/use-payments';
+import { useCreateShareLink } from '@/hooks/use-share-links';
 import { ApiError } from '@/lib/api/client';
 import { resolveAssetUrl } from '@/lib/assets';
 import { getDisplayInstallmentStatus } from '@/lib/enums';
@@ -80,7 +81,9 @@ export default function ContractDetailPage() {
   const { data: branding } = useBranding();
   const createPayment = useCreatePayment(id);
   const cancelContract = useCancelContract(id);
+  const createShareLink = useCreateShareLink();
   const [qrOpen, setQrOpen] = useState(false);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
   const { data: currentUser } = useCurrentUser();
   const canCancel = currentUser?.role === 'ADMIN';
 
@@ -113,8 +116,19 @@ export default function ContractDetailPage() {
   const ratio = installmentsTotal > 0 ? paidAmount / installmentsTotal : 0;
   const isActive = contract.status === 'ACTIVE';
   const contractPath = routes.publicContract(contract.customer.publicId, contract.publicId);
-  const publicUrl = branding ? getSubdomainUrl(branding.slug, contractPath) : `${window.location.origin}${contractPath}`;
-  const whatsappUrl = `https://wa.me/${toWhatsappNumber(contract.customer.phone)}?text=${encodeURIComponent(publicUrl)}`;
+
+  async function resolveShareUrl(): Promise<string> {
+    if (shareUrl) {
+      return shareUrl;
+    }
+    if (!branding) {
+      return `${window.location.origin}${contractPath}`;
+    }
+    const { code } = await createShareLink.mutateAsync(contractPath);
+    const url = getSubdomainUrl(branding.slug, `/p/${code}`);
+    setShareUrl(url);
+    return url;
+  }
 
   const scheduleColumns: Column<Installment>[] = [
     {
@@ -200,11 +214,11 @@ export default function ContractDetailPage() {
               />
             )}
           </div>
-          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+          <div className="-mx-1 flex items-center gap-2 overflow-x-auto px-1">
             {contract.reminderMessage && (
               <Button
                 variant="outline"
-                className="w-full sm:w-auto"
+                className="shrink-0"
                 render={
                   <a
                     href={`https://wa.me/${toWhatsappNumber(contract.customer.phone)}?text=${encodeURIComponent(contract.reminderMessage)}`}
@@ -220,7 +234,7 @@ export default function ContractDetailPage() {
             <DropdownMenu>
               <DropdownMenuTrigger
                 render={
-                  <Button variant="outline" className="w-full sm:w-auto">
+                  <Button variant="outline" className="shrink-0">
                     <Share2 className="size-4" />
                     {tShare('share')}
                   </Button>
@@ -228,19 +242,34 @@ export default function ContractDetailPage() {
               />
               <DropdownMenuContent align="end">
                 <DropdownMenuItem
-                  onClick={() => {
-                    navigator.clipboard.writeText(publicUrl);
+                  onClick={async () => {
+                    const url = await resolveShareUrl();
+                    navigator.clipboard.writeText(url);
                     toast.success(tShare('linkCopied'));
                   }}
                 >
                   <Copy className="size-4" />
                   {tShare('copyLink')}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setQrOpen(true)}>
+                <DropdownMenuItem
+                  onClick={async () => {
+                    await resolveShareUrl();
+                    setQrOpen(true);
+                  }}
+                >
                   <QrCode className="size-4" />
                   {tShare('qrCode')}
                 </DropdownMenuItem>
-                <DropdownMenuItem render={<a href={whatsappUrl} target="_blank" rel="noopener noreferrer" />}>
+                <DropdownMenuItem
+                  onClick={async () => {
+                    const url = await resolveShareUrl();
+                    window.open(
+                      `https://wa.me/${toWhatsappNumber(contract.customer.phone)}?text=${encodeURIComponent(url)}`,
+                      '_blank',
+                      'noopener,noreferrer',
+                    );
+                  }}
+                >
                   <FaWhatsapp className="size-4" />
                   {tShare('sendWhatsapp')}
                 </DropdownMenuItem>
@@ -250,7 +279,7 @@ export default function ContractDetailPage() {
               <>
                 <RecordPaymentDialog
                   trigger={
-                    <Button className="w-full sm:w-auto">
+                    <Button className="shrink-0">
                       <Receipt className="size-4" />
                       {t('recordPayment')}
                     </Button>
@@ -261,7 +290,7 @@ export default function ContractDetailPage() {
                 {canCancel && (
                   <ConfirmDialog
                     trigger={
-                      <Button variant="outline" className="w-full sm:w-auto">
+                      <Button variant="outline" className="shrink-0">
                         <XCircle className="size-4" />
                         {t('cancelContract')}
                       </Button>
@@ -290,7 +319,7 @@ export default function ContractDetailPage() {
         open={qrOpen}
         onOpenChange={setQrOpen}
         customerName={contract.productName}
-        publicUrl={publicUrl}
+        publicUrl={shareUrl ?? ''}
       />
 
       <FadeIn delay={0.08}>

@@ -6,16 +6,18 @@ import { extractTenantSlug, getRootDomain } from './lib/root-domain';
 
 const intlMiddleware = createMiddleware(routing);
 
-// PWA assets (manifest, icons, service worker) must be reachable at fixed,
-// locale-independent URLs — the browser/OS fetches them directly, with no
-// locale context. Bypass i18n routing for these instead of relying on the
-// matcher regex to exclude them.
-const PWA_PATHS = [
+// PWA assets (manifest, icons, service worker) and the shortlink redirect
+// must be reachable at fixed, locale-independent URLs — the browser/OS or a
+// clicked link hits them directly, with no locale context and no page to
+// render. Bypass both i18n routing and the tenant-subdomain rewrite for
+// these instead of relying on the matcher regex to exclude them.
+const LOCALE_INDEPENDENT_PATHS = [
   /^\/icons\//,
   /^\/manifest\.webmanifest$/,
   /^\/sw\.js$/,
   /^\/dashboard-manifest$/,
   /^\/dashboard-icons\//,
+  /^\/p\//,
 ];
 
 function handleTenantSubdomain(request: NextRequest): NextResponse | null {
@@ -38,7 +40,7 @@ function handleTenantSubdomain(request: NextRequest): NextResponse | null {
 }
 
 export default function middleware(request: NextRequest) {
-  if (PWA_PATHS.some((pattern) => pattern.test(request.nextUrl.pathname))) {
+  if (LOCALE_INDEPENDENT_PATHS.some((pattern) => pattern.test(request.nextUrl.pathname))) {
     return NextResponse.next();
   }
   const subdomainResponse = handleTenantSubdomain(request);
@@ -56,5 +58,6 @@ export const config = {
     '/sw.js',
     '/dashboard-manifest',
     '/dashboard-icons/:path*',
+    '/p/:path*',
   ],
 };

@@ -9,6 +9,7 @@ import { overdueInstallmentWhere } from '../../common/installments/overdue-where
 import { buildPaginatedResult, PaginatedResult } from '../../common/pagination/paginated-result.interface';
 import { TenantLocation } from '../../common/tenant-branding';
 import { PrismaService } from '../../prisma/prisma.service';
+import { ShareLinksService } from '../share-links/share-links.service';
 import { StorageService } from '../storage/storage.service';
 import { formatContractReminderMessage } from './contract-reminder-message';
 import { ContractQueryDto } from './dto/contract-query.dto';
@@ -34,6 +35,7 @@ export class ContractsService {
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
     private readonly config: ConfigService,
+    private readonly shareLinks: ShareLinksService,
   ) {}
 
   async create(tenantId: string, createContractDto: CreateContractDto): Promise<ContractDetail> {
@@ -144,7 +146,7 @@ export class ContractsService {
     if (!contract) {
       throw new NotFoundException('Contract not found.');
     }
-    return { ...contract, reminderMessage: this.buildReminderMessage(contract) };
+    return { ...contract, reminderMessage: await this.buildReminderMessage(contract) };
   }
 
   async cancel(tenantId: string, id: string): Promise<ContractDetail> {
@@ -172,7 +174,7 @@ export class ContractsService {
     return this.storage.saveKeyedImage(`contracts/${tenantId}/${randomUUID()}.${extension}`, buffer);
   }
 
-  private buildReminderMessage(
+  private async buildReminderMessage(
     contract: Prisma.ContractGetPayload<{
       include: {
         customer: true;
@@ -180,7 +182,7 @@ export class ContractsService {
         tenant: { select: { name: true; slug: true; locations: true } };
       };
     }>,
-  ): string | null {
+  ): Promise<string | null> {
     const today = getUtcToday();
     const overdueInstallments = contract.installments
       .filter(
@@ -215,11 +217,14 @@ export class ContractsService {
       ?.split(',')
       .map((url) => url.trim())
       .filter(Boolean)[0];
-    const payUrl = rootDomain
-      ? `https://${contract.tenant.slug}.${rootDomain}${payPath}`
-      : frontendUrl
-        ? `${frontendUrl}${payPath}`
-        : null;
+
+    let payUrl: string | null = null;
+    if (rootDomain) {
+      const { code } = await this.shareLinks.getOrCreate(contract.tenantId, payPath);
+      payUrl = `https://${contract.tenant.slug}.${rootDomain}/p/${code}`;
+    } else if (frontendUrl) {
+      payUrl = `${frontendUrl}${payPath}`;
+    }
 
     return formatContractReminderMessage(
       {

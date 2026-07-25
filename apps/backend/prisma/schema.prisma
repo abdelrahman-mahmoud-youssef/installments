@@ -127,6 +127,7 @@ model Tenant {
   counterpartyAdjustments   CounterpartyAdjustment[]
   supportMessages           SupportMessage[]
   offers                    Offer[]
+  shareLinks                ShareLink[]
 }
 
 model User {
@@ -429,6 +430,17 @@ model Offer {
   tenant      Tenant   @relation(fields: [tenantId], references: [id])
 
   @@index([tenantId, sortOrder])
+}
+
+model ShareLink {
+  id         String   @id @default(cuid())
+  tenantId   String
+  targetPath String
+  code       String   @unique
+  createdAt  DateTime @default(now())
+  tenant     Tenant   @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, targetPath])
 }
 
 model Counterparty {

@@ -24,6 +24,7 @@ import { PublicModule } from './modules/public/public.module';
 import { RemindersModule } from './modules/reminders/reminders.module';
 import { ReportsModule } from './modules/reports/reports.module';
 import { SettingsModule } from './modules/settings/settings.module';
+import { ShareLinksModule } from './modules/share-links/share-links.module';
 import { SupportModule } from './modules/support/support.module';
 import { UsersModule } from './modules/users/users.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -63,6 +64,7 @@ import { PrismaModule } from './prisma/prisma.module';
     UsersModule,
     SupportModule,
     OffersModule,
+    ShareLinksModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },
