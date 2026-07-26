@@ -1,9 +1,19 @@
 import { FileQuestion } from 'lucide-react';
 import Link from 'next/link';
+import { BrandLogo } from '@/components/shared/logo';
+import { resolveAssetUrl } from '@/lib/assets';
+import { brandColorCssVars } from '@/lib/brand-colors';
+import { getTenantBrandingFromHost } from '@/lib/tenant-branding-from-host';
 
-export default function NotFound() {
+export default async function NotFound() {
+  const branding = await getTenantBrandingFromHost();
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-5 bg-background px-6 py-10 text-center">
+      {branding && <style>{`:root{${brandColorCssVars(branding.brandColor)}}`}</style>}
+      {branding && (
+        <BrandLogo logoUrl={resolveAssetUrl(branding.logoUrl)} label={branding.displayName} size="lg" />
+      )}
       <div className="grid size-16 place-items-center rounded-full bg-muted text-muted-foreground">
         <FileQuestion className="size-7" strokeWidth={1.8} />
       </div>
