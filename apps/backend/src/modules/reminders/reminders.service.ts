@@ -151,7 +151,7 @@ export class RemindersService implements OnModuleInit {
           await this.sendWhatsappReminder(
             tenant.id,
             tenant.name,
-            tenant.phone,
+            this.toWhatsappRecipient(tenant.phone),
             whatsappCredentials,
             tenant.notificationLanguage,
             totals,
@@ -174,12 +174,15 @@ export class RemindersService implements OnModuleInit {
     const tenants = await this.prisma.tenant.findMany({ where: { phone: { not: null } } });
 
     for (const tenant of tenants) {
+      if (!tenant.phone) {
+        continue;
+      }
       try {
         const totals = await this.computeEveningTotals(tenant.id);
         await this.sendWhatsappEveningSummary(
           tenant.id,
           tenant.name,
-          tenant.phone as string,
+          this.toWhatsappRecipient(tenant.phone),
           whatsappCredentials,
           tenant.notificationLanguage,
           totals,
