@@ -19,6 +19,7 @@ import { useParams } from 'next/navigation';
 import { useState } from 'react';
 import { FaWhatsapp } from 'react-icons/fa6';
 import { toast } from 'sonner';
+import { CustomerAvatar } from '@/components/customers/customer-avatar';
 import { CustomerFormDialog } from '@/components/customers/customer-form-dialog';
 import { CustomerNotificationHistoryDialog } from '@/components/customers/customer-notification-history-dialog';
 import { CustomerQrDialog } from '@/components/customers/customer-qr-dialog';
@@ -27,7 +28,6 @@ import { DataTable, type Column } from '@/components/shared/data-table';
 import { DateText } from '@/components/shared/date-text';
 import { EmptyState } from '@/components/shared/empty-state';
 import { ImagePreviewDialog } from '@/components/shared/image-preview-dialog';
-import { InitialAvatar } from '@/components/shared/initial-avatar';
 import { Money } from '@/components/shared/money';
 import { FadeIn } from '@/components/shared/motion';
 import { Section } from '@/components/shared/section';
@@ -138,7 +138,7 @@ export default function CustomerDetailPage() {
         <div className="rounded-xl border border-border bg-card p-5 shadow-xs sm:p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex min-w-0 items-center gap-4">
-              <InitialAvatar name={customer.name} className="size-14 shrink-0 text-lg" />
+              <CustomerAvatar name={customer.name} photoUrl={customer.photoUrl} className="size-14 shrink-0 text-lg" />
               <h1 className="truncate font-heading text-xl font-semibold tracking-tight">{customer.name}</h1>
             </div>
             <div className="flex shrink-0 flex-wrap items-center gap-2">

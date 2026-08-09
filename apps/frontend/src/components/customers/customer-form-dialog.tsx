@@ -25,7 +25,7 @@ import { Customer } from '@/lib/api/customers';
 import { resolveAssetUrl } from '@/lib/assets';
 import { CustomerInput, customerSchema } from '@/lib/schemas/customer';
 
-function IdImageSlot({
+function ImageUploadSlot({
   form,
   name,
   label,
@@ -34,7 +34,7 @@ function IdImageSlot({
   onPickedNameChange,
 }: {
   form: UseFormReturn<CustomerInput>;
-  name: 'idImageFront' | 'idImageBack';
+  name: 'photo' | 'idImageFront' | 'idImageBack';
   label: string;
   existingUrl: string | null | undefined;
   pickedName: string | null;
@@ -101,6 +101,7 @@ export function CustomerFormDialog({
 }) {
   const t = useTranslations('customers.form');
   const [open, setOpen] = useState(false);
+  const [photoName, setPhotoName] = useState<string | null>(null);
   const [idImageFrontName, setIdImageFrontName] = useState<string | null>(null);
   const [idImageBackName, setIdImageBackName] = useState<string | null>(null);
 
@@ -115,6 +116,7 @@ export function CustomerFormDialog({
   });
 
   function resetPickedImages() {
+    setPhotoName(null);
     setIdImageFrontName(null);
     setIdImageBackName(null);
   }
@@ -207,8 +209,16 @@ export function CustomerFormDialog({
                 </FormItem>
               )}
             />
+            <ImageUploadSlot
+              form={form}
+              name="photo"
+              label={t('photo')}
+              existingUrl={customer?.photoUrl}
+              pickedName={photoName}
+              onPickedNameChange={setPhotoName}
+            />
             <div className="grid grid-cols-2 gap-4">
-              <IdImageSlot
+              <ImageUploadSlot
                 form={form}
                 name="idImageFront"
                 label={t('idImageFront')}
@@ -216,7 +226,7 @@ export function CustomerFormDialog({
                 pickedName={idImageFrontName}
                 onPickedNameChange={setIdImageFrontName}
               />
-              <IdImageSlot
+              <ImageUploadSlot
                 form={form}
                 name="idImageBack"
                 label={t('idImageBack')}

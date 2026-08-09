@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { BroadcastRecipientStatus, Customer, Prisma, ReminderChannel } from '@prisma/client';
 import { getUtcToday } from '../../common/date/utc-date';
-import { MAX_CUSTOMER_ID_UPLOAD_BYTES } from '../../common/constants';
+import { MAX_CUSTOMER_ID_UPLOAD_BYTES, MAX_CUSTOMER_PHOTO_UPLOAD_BYTES } from '../../common/constants';
 import { decodeImageUpload } from '../../common/decode-image-upload';
 import { overdueInstallmentWhere } from '../../common/installments/overdue-where';
 import { buildPaginatedResult, PaginatedResult } from '../../common/pagination/paginated-result.interface';
@@ -35,12 +35,13 @@ export class CustomersService {
   ) {}
 
   async create(tenantId: string, createCustomerDto: CreateCustomerDto): Promise<Customer> {
-    const { idImageFront, idImageBack, ...rest } = createCustomerDto;
-    const [idImageFrontUrl, idImageBackUrl] = await Promise.all([
+    const { photo, idImageFront, idImageBack, ...rest } = createCustomerDto;
+    const [photoUrl, idImageFrontUrl, idImageBackUrl] = await Promise.all([
+      photo ? this.savePhoto(tenantId, photo) : undefined,
       idImageFront ? this.saveIdImage(tenantId, idImageFront) : undefined,
       idImageBack ? this.saveIdImage(tenantId, idImageBack) : undefined,
     ]);
-    return this.prisma.customer.create({ data: { ...rest, tenantId, idImageFrontUrl, idImageBackUrl } });
+    return this.prisma.customer.create({ data: { ...rest, tenantId, photoUrl, idImageFrontUrl, idImageBackUrl } });
   }
 
   async findAll(tenantId: string, query: CustomerQueryDto): Promise<PaginatedResult<CustomerListItem>> {
@@ -92,8 +93,9 @@ export class CustomersService {
 
   async update(tenantId: string, id: string, updateCustomerDto: UpdateCustomerDto): Promise<Customer> {
     await this.ensureExists(tenantId, id);
-    const { idImageFront, idImageBack, ...rest } = updateCustomerDto;
-    const [idImageFrontUrl, idImageBackUrl] = await Promise.all([
+    const { photo, idImageFront, idImageBack, ...rest } = updateCustomerDto;
+    const [photoUrl, idImageFrontUrl, idImageBackUrl] = await Promise.all([
+      photo ? this.savePhoto(tenantId, photo) : undefined,
       idImageFront ? this.saveIdImage(tenantId, idImageFront) : undefined,
       idImageBack ? this.saveIdImage(tenantId, idImageBack) : undefined,
     ]);
@@ -101,6 +103,7 @@ export class CustomersService {
       where: { id },
       data: {
         ...rest,
+        ...(photoUrl && { photoUrl }),
         ...(idImageFrontUrl && { idImageFrontUrl }),
         ...(idImageBackUrl && { idImageBackUrl }),
       },
@@ -186,5 +189,10 @@ export class CustomersService {
   private async saveIdImage(tenantId: string, idImage: string): Promise<string> {
     const { buffer, extension } = decodeImageUpload(idImage, MAX_CUSTOMER_ID_UPLOAD_BYTES);
     return this.storage.saveKeyedImage(`customer-ids/${tenantId}/${randomUUID()}.${extension}`, buffer);
+  }
+
+  private async savePhoto(tenantId: string, photo: string): Promise<string> {
+    const { buffer, extension } = decodeImageUpload(photo, MAX_CUSTOMER_PHOTO_UPLOAD_BYTES);
+    return this.storage.saveKeyedImage(`customer-photos/${tenantId}/${randomUUID()}.${extension}`, buffer);
   }
 }

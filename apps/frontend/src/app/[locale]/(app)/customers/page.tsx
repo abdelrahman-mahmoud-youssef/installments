@@ -4,11 +4,11 @@ import { Plus, Trash2, Users, UserRoundX } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { CustomerAvatar } from '@/components/customers/customer-avatar';
 import { CustomerFormDialog } from '@/components/customers/customer-form-dialog';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import { DataTable, type Column } from '@/components/shared/data-table';
 import { EmptyState } from '@/components/shared/empty-state';
-import { InitialAvatar } from '@/components/shared/initial-avatar';
 import { FadeIn } from '@/components/shared/motion';
 import { PageHeader } from '@/components/shared/page-header';
 import { PaginationControls } from '@/components/shared/pagination-controls';
@@ -49,7 +49,7 @@ export default function CustomersPage() {
       role: 'primary',
       cell: (customer) => (
         <Link href={routes.customer(customer.id)} className="group flex items-center gap-3">
-          <InitialAvatar name={customer.name} className="size-9 text-xs" />
+          <CustomerAvatar name={customer.name} photoUrl={customer.photoUrl} className="size-9 text-xs" />
           <span className="truncate font-medium group-hover:underline">{customer.name}</span>
           {customer.hasOverdue && (
             <Badge variant="destructive" className="shrink-0">

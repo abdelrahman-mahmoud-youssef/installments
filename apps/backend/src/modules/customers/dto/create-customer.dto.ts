@@ -1,5 +1,5 @@
 import { IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
-import { MAX_CUSTOMER_ID_UPLOAD_BYTES } from '../../../common/constants';
+import { MAX_CUSTOMER_ID_UPLOAD_BYTES, MAX_CUSTOMER_PHOTO_UPLOAD_BYTES } from '../../../common/constants';
 
 export class CreateCustomerDto {
   @IsString()
@@ -21,6 +21,11 @@ export class CreateCustomerDto {
   @IsString()
   @MaxLength(2000)
   notes?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(Math.ceil((MAX_CUSTOMER_PHOTO_UPLOAD_BYTES * 4) / 3))
+  photo?: string;
 
   @IsOptional()
   @IsString()

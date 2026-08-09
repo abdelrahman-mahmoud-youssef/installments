@@ -279,6 +279,7 @@
       "phone": "Phone number",
       "address": "Address (optional)",
       "notes": "Notes (optional)",
+      "photo": "Photo (optional)",
       "idImageFront": "National ID front (optional)",
       "idImageBack": "National ID back (optional)",
       "uploadImage": "Upload image",

@@ -230,6 +230,7 @@ model Customer {
   phone                        String
   address                      String?
   notes                        String?
+  photoUrl                     String?
   idImageFrontUrl              String?
   idImageBackUrl               String?
   telegramChatId               String?
