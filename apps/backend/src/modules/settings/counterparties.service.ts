@@ -1,8 +1,12 @@
+import { randomUUID } from 'node:crypto';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Counterparty, CounterpartyAdjustment, PaymentDirection, Prisma } from '@prisma/client';
+import { MAX_CONTACT_PHOTO_UPLOAD_BYTES } from '../../common/constants';
 import { getUtcToday, resolveMonthStart, startOfUtcMonth } from '../../common/date/utc-date';
+import { decodeImageUpload } from '../../common/decode-image-upload';
 import { buildPaginatedResult, PaginatedResult } from '../../common/pagination/paginated-result.interface';
 import { PrismaService } from '../../prisma/prisma.service';
+import { StorageService } from '../storage/storage.service';
 import { CounterpartyHistoryQueryDto } from './dto/counterparty-history-query.dto';
 import { CounterpartyQueryDto } from './dto/counterparty-query.dto';
 import { CreateCounterpartyAdjustmentDto } from './dto/create-counterparty-adjustment.dto';
@@ -31,11 +35,15 @@ export type CounterpartyHistoryResult = PaginatedResult<CounterpartyHistoryItem>
 
 @Injectable()
 export class CounterpartiesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storage: StorageService,
+  ) {}
 
   async create(tenantId: string, dto: CreateCounterpartyDto): Promise<Counterparty> {
+    const photoUrl = dto.photo ? await this.savePhoto(tenantId, dto.photo) : undefined;
     return this.prisma.counterparty.create({
-      data: { tenantId, name: dto.name, phone: dto.phone, notes: dto.notes },
+      data: { tenantId, name: dto.name, phone: dto.phone, notes: dto.notes, photoUrl },
     });
   }
 
@@ -80,9 +88,10 @@ export class CounterpartiesService {
 
   async update(tenantId: string, id: string, dto: UpdateCounterpartyDto): Promise<Counterparty> {
     await this.findOwned(tenantId, id);
+    const photoUrl = dto.photo ? await this.savePhoto(tenantId, dto.photo) : undefined;
     return this.prisma.counterparty.update({
       where: { id },
-      data: { name: dto.name, phone: dto.phone, notes: dto.notes },
+      data: { name: dto.name, phone: dto.phone, notes: dto.notes, ...(photoUrl && { photoUrl }) },
     });
   }
 
@@ -211,6 +220,11 @@ export class CounterpartiesService {
       throw new NotFoundException('Contact not found.');
     }
     return counterparty;
+  }
+
+  private async savePhoto(tenantId: string, photo: string): Promise<string> {
+    const { buffer, extension } = decodeImageUpload(photo, MAX_CONTACT_PHOTO_UPLOAD_BYTES);
+    return this.storage.saveKeyedImage(`contact-photos/${tenantId}/${randomUUID()}.${extension}`, buffer);
   }
 
   private isForeignKeyRestrictionError(error: unknown): boolean {

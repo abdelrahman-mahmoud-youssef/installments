@@ -2,7 +2,7 @@ import { InitialAvatar } from '@/components/shared/initial-avatar';
 import { resolveAssetUrl } from '@/lib/assets';
 import { cn } from '@/lib/utils';
 
-export function CustomerAvatar({
+export function EntityAvatar({
   name,
   photoUrl,
   className,

@@ -19,6 +19,7 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { ImageUploadSlot } from '@/components/shared/image-upload-slot';
 import { ApiError } from '@/lib/api/client';
 import { Counterparty } from '@/lib/api/counterparties';
 import { CounterpartyInput, counterpartySchema } from '@/lib/schemas/counterparty';
@@ -34,6 +35,7 @@ export function ContactFormDialog({
 }) {
   const t = useTranslations('contacts.form');
   const [open, setOpen] = useState(false);
+  const [photoName, setPhotoName] = useState<string | null>(null);
 
   const defaultValues: CounterpartyInput = {
     name: contact?.name ?? '',
@@ -52,6 +54,7 @@ export function ContactFormDialog({
       toast.success(contact ? t('updated') : t('created'));
       setOpen(false);
       form.reset();
+      setPhotoName(null);
     } catch (error) {
       toast.error(error instanceof ApiError ? error.message : t('genericError'));
     }
@@ -62,7 +65,10 @@ export function ContactFormDialog({
       open={open}
       onOpenChange={(nextOpen) => {
         setOpen(nextOpen);
-        if (nextOpen) form.reset(defaultValues);
+        if (nextOpen) {
+          form.reset(defaultValues);
+          setPhotoName(null);
+        }
       }}
     >
       <DialogTrigger render={trigger} />
@@ -111,6 +117,15 @@ export function ContactFormDialog({
                   <FormMessage />
                 </FormItem>
               )}
+            />
+            <ImageUploadSlot
+              form={form}
+              name="photo"
+              label={t('photo')}
+              uploadLabel={t('uploadImage')}
+              existingUrl={contact?.photoUrl}
+              pickedName={photoName}
+              onPickedNameChange={setPhotoName}
             />
             <DialogFooter>
               <Button type="submit" disabled={form.formState.isSubmitting}>

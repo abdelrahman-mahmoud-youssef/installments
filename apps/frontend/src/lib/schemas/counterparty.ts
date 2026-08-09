@@ -1,9 +1,13 @@
 import { z } from 'zod';
+import { imageFileSchema } from './image-file';
+
+const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
 
 export const counterpartySchema = z.object({
   name: z.string().min(1, 'Name is required.').max(100),
   phone: z.string().max(30).optional(),
   notes: z.string().max(500).optional(),
+  photo: imageFileSchema(MAX_PHOTO_BYTES, 'Photo'),
 });
 
 export type CounterpartyInput = z.infer<typeof counterpartySchema>;

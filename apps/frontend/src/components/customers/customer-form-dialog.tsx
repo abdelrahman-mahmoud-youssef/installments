@@ -1,10 +1,10 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2, Upload } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
-import { useForm, type UseFormReturn } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
@@ -19,76 +19,10 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { ImagePreviewDialog } from '@/components/shared/image-preview-dialog';
+import { ImageUploadSlot } from '@/components/shared/image-upload-slot';
 import { ApiError } from '@/lib/api/client';
 import { Customer } from '@/lib/api/customers';
-import { resolveAssetUrl } from '@/lib/assets';
 import { CustomerInput, customerSchema } from '@/lib/schemas/customer';
-
-function ImageUploadSlot({
-  form,
-  name,
-  label,
-  existingUrl,
-  pickedName,
-  onPickedNameChange,
-}: {
-  form: UseFormReturn<CustomerInput>;
-  name: 'photo' | 'idImageFront' | 'idImageBack';
-  label: string;
-  existingUrl: string | null | undefined;
-  pickedName: string | null;
-  onPickedNameChange: (name: string | null) => void;
-}) {
-  const t = useTranslations('customers.form');
-
-  return (
-    <FormField
-      control={form.control}
-      name={name}
-      render={({ field: { value, onChange, ...field } }) => (
-        <FormItem>
-          <FormLabel>{label}</FormLabel>
-          {existingUrl && !pickedName && (
-            <ImagePreviewDialog
-              src={resolveAssetUrl(existingUrl) ?? ''}
-              alt={label}
-              trigger={
-                <button type="button" className="block">
-                  <img
-                    src={resolveAssetUrl(existingUrl) ?? undefined}
-                    alt={label}
-                    className="h-20 rounded-lg border border-border object-cover"
-                  />
-                </button>
-              }
-            />
-          )}
-          <FormControl>
-            <label className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-dashed border-border p-3.5 text-sm text-muted-foreground transition-colors hover:bg-accent">
-              <Upload className="size-4 shrink-0" />
-              <span className="truncate">{t('uploadImage')}</span>
-              <input
-                {...field}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                value={undefined}
-                onChange={(event) => {
-                  const file = event.target.files?.[0] ?? null;
-                  onChange(file ?? undefined);
-                  onPickedNameChange(file?.name ?? null);
-                }}
-              />
-            </label>
-          </FormControl>
-          {pickedName && <p className="truncate text-xs text-muted-foreground">{pickedName}</p>}
-          <FormMessage />
-        </FormItem>
-      )}
-    />
-  );
-}
 
 export function CustomerFormDialog({
   trigger,
@@ -213,6 +147,7 @@ export function CustomerFormDialog({
               form={form}
               name="photo"
               label={t('photo')}
+              uploadLabel={t('uploadImage')}
               existingUrl={customer?.photoUrl}
               pickedName={photoName}
               onPickedNameChange={setPhotoName}
@@ -222,6 +157,7 @@ export function CustomerFormDialog({
                 form={form}
                 name="idImageFront"
                 label={t('idImageFront')}
+                uploadLabel={t('uploadImage')}
                 existingUrl={customer?.idImageFrontUrl}
                 pickedName={idImageFrontName}
                 onPickedNameChange={setIdImageFrontName}
@@ -230,6 +166,7 @@ export function CustomerFormDialog({
                 form={form}
                 name="idImageBack"
                 label={t('idImageBack')}
+                uploadLabel={t('uploadImage')}
                 existingUrl={customer?.idImageBackUrl}
                 pickedName={idImageBackName}
                 onPickedNameChange={setIdImageBackName}

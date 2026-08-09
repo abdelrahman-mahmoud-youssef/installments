@@ -1,3 +1,4 @@
+import { fileToBase64 } from '@/lib/file';
 import { CounterpartyAdjustmentInput, CounterpartyInput } from '@/lib/schemas/counterparty';
 import { toMinorUnits } from '@/lib/format';
 import { apiClient } from './client';
@@ -8,6 +9,7 @@ export interface Counterparty {
   name: string;
   phone: string | null;
   notes: string | null;
+  photoUrl: string | null;
   balance: number;
   createdAt: string;
 }
@@ -50,12 +52,17 @@ export function getCounterparty(id: string): Promise<Counterparty> {
   return apiClient.get(`settings/counterparties/${id}`);
 }
 
-export function createCounterparty(input: CounterpartyInput): Promise<Counterparty> {
-  return apiClient.post('settings/counterparties', input);
+async function toCounterpartyPayload(input: Partial<CounterpartyInput>): Promise<Record<string, unknown>> {
+  const { photo, ...rest } = input;
+  return { ...rest, photo: photo ? await fileToBase64(photo) : undefined };
 }
 
-export function updateCounterparty(id: string, input: Partial<CounterpartyInput>): Promise<Counterparty> {
-  return apiClient.patch(`settings/counterparties/${id}`, input);
+export async function createCounterparty(input: CounterpartyInput): Promise<Counterparty> {
+  return apiClient.post('settings/counterparties', await toCounterpartyPayload(input));
+}
+
+export async function updateCounterparty(id: string, input: Partial<CounterpartyInput>): Promise<Counterparty> {
+  return apiClient.patch(`settings/counterparties/${id}`, await toCounterpartyPayload(input));
 }
 
 export function deleteCounterparty(id: string): Promise<void> {

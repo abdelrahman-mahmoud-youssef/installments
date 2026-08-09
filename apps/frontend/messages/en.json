@@ -351,6 +351,8 @@
       "name": "Name",
       "phone": "Phone number (optional)",
       "notes": "Notes (optional)",
+      "photo": "Photo (optional)",
+      "uploadImage": "Upload image",
       "saving": "Saving…",
       "saveChanges": "Save changes",
       "create": "Create contact",

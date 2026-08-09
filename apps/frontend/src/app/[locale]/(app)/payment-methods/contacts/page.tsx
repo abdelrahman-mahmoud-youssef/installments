@@ -9,7 +9,7 @@ import { PaymentMethodsTabs } from '@/components/payment-methods/payment-methods
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import { DataTable, type Column } from '@/components/shared/data-table';
 import { EmptyState } from '@/components/shared/empty-state';
-import { InitialAvatar } from '@/components/shared/initial-avatar';
+import { EntityAvatar } from '@/components/shared/entity-avatar';
 import { Money } from '@/components/shared/money';
 import { FadeIn } from '@/components/shared/motion';
 import { PageHeader } from '@/components/shared/page-header';
@@ -43,7 +43,7 @@ export default function ContactsPage() {
       role: 'primary',
       cell: (contact) => (
         <Link href={routes.contact(contact.id)} className="group flex items-center gap-3">
-          <InitialAvatar name={contact.name} className="size-9 text-xs" />
+          <EntityAvatar name={contact.name} photoUrl={contact.photoUrl} className="size-9 text-xs" />
           <span className="truncate font-medium group-hover:underline">{contact.name}</span>
         </Link>
       ),

@@ -460,6 +460,7 @@ model Counterparty {
   name         String
   phone        String?
   notes        String?
+  photoUrl     String?
   createdAt    DateTime                   @default(now())
   tenant       Tenant                     @relation(fields: [tenantId], references: [id])
   transactions PaymentMethodTransaction[]
