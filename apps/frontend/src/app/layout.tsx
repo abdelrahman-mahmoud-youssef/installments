@@ -1,4 +1,5 @@
 import { IBM_Plex_Mono, IBM_Plex_Sans, IBM_Plex_Sans_Arabic } from "next/font/google";
+import Script from "next/script";
 import { fontSizeInitScript } from "@/lib/font-size";
 import { themeInitScript } from "@/lib/theme";
 import "./globals.css";
@@ -33,11 +34,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       className={`${plexSans.variable} ${plexArabic.variable} ${plexMono.variable} h-full antialiased`}
     >
       <body className="min-h-full">
-        <script id="locale-init" suppressHydrationWarning dangerouslySetInnerHTML={{ __html: localeInitScript }} />
-        <script id="theme-init" suppressHydrationWarning dangerouslySetInnerHTML={{ __html: themeInitScript }} />
-        <script
+        <Script id="locale-init" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: localeInitScript }} />
+        <Script id="theme-init" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        <Script
           id="font-size-init"
-          suppressHydrationWarning
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{ __html: fontSizeInitScript }}
         />
         {children}
