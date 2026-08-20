@@ -381,13 +381,24 @@
       "adjustmentDirectionDecrease": "قلّل اللي عليهم",
       "adjustmentAmount": "المبلغ",
       "adjustmentDate": "التاريخ",
+      "newBalanceLabel": "الرصيد بعد التسوية",
       "adjustmentNote": "ملاحظة (اختياري)",
       "adjustmentSaved": "اتضافت التسوية.",
       "save": "حفظ",
       "saving": "بيتم الحفظ…",
       "genericError": "حصل خطأ ما.",
       "adjustmentTag": "تسوية",
-      "viewReceipt": "عرض الإيصال"
+      "viewReceipt": "عرض الإيصال",
+      "share": "مشاركة",
+      "shareViaWhatsapp": "مشاركة على واتساب",
+      "downloadPdf": "تحميل PDF",
+      "shareError": "معرفناش نجهز كشف الحساب.",
+      "shareFallbackMessage": "اتحمّل كشف حساب الرصيد بصيغة PDF — ارفقه هنا.",
+      "pdfDocumentLabel": "كشف حساب",
+      "pdfTitle": "كشف حساب الرصيد",
+      "pdfGeneratedOnLabel": "تاريخ الإصدار",
+      "pdfContactLabel": "جهة الاتصال",
+      "pdfFooter": "تم إصداره بواسطة {tenant}"
     }
   },
   "offers": {

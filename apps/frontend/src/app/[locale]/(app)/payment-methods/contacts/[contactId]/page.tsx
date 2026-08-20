@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { AddAdjustmentDialog } from '@/components/payment-methods/add-adjustment-dialog';
 import { ContactFormDialog } from '@/components/payment-methods/contact-form-dialog';
+import { ContactStatementShareButton } from '@/components/payment-methods/contact-statement-share-button';
 import { LogTransactionDialog } from '@/components/payment-methods/log-transaction-dialog';
 import { BackLink } from '@/components/shared/back-link';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
@@ -85,6 +86,7 @@ export default function ContactDetailPage() {
           description={contact.phone ?? undefined}
           actions={
             <>
+              <ContactStatementShareButton contact={contact} />
               <ContactFormDialog
                 contact={contact}
                 trigger={
@@ -129,6 +131,7 @@ export default function ContactDetailPage() {
           <div className="flex items-center gap-2">
             <AddAdjustmentDialog
               counterpartyId={contactId}
+              currentBalance={contact.balance}
               trigger={
                 <Button size="sm" variant="outline">
                   <Scale className="size-4" />

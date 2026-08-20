@@ -4,8 +4,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, TrendingDown, TrendingUp } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { toast } from 'sonner';
+import { Money } from '@/components/shared/money';
 import { NumberInput } from '@/components/shared/number-input';
 import { Button } from '@/components/ui/button';
 import {
@@ -23,8 +24,9 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
 import { useCreateCounterpartyAdjustment } from '@/hooks/use-counterparties';
 import { ApiError } from '@/lib/api/client';
-import { todayIso } from '@/lib/format';
+import { todayIso, toMinorUnits } from '@/lib/format';
 import { CounterpartyAdjustmentInput, counterpartyAdjustmentSchema } from '@/lib/schemas/counterparty';
+import { cn } from '@/lib/utils';
 
 const DEFAULT_VALUES: CounterpartyAdjustmentInput = {
   direction: 'OUT',
@@ -33,7 +35,15 @@ const DEFAULT_VALUES: CounterpartyAdjustmentInput = {
   note: '',
 };
 
-export function AddAdjustmentDialog({ counterpartyId, trigger }: { counterpartyId: string; trigger: React.ReactElement }) {
+export function AddAdjustmentDialog({
+  counterpartyId,
+  currentBalance,
+  trigger,
+}: {
+  counterpartyId: string;
+  currentBalance: number;
+  trigger: React.ReactElement;
+}) {
   const t = useTranslations('contacts.detail');
   const [open, setOpen] = useState(false);
   const createAdjustment = useCreateCounterpartyAdjustment(counterpartyId);
@@ -42,6 +52,13 @@ export function AddAdjustmentDialog({ counterpartyId, trigger }: { counterpartyI
     resolver: zodResolver(counterpartyAdjustmentSchema),
     defaultValues: { ...DEFAULT_VALUES, occurredAt: todayIso() },
   });
+
+  const [watchedDirection, watchedAmount] = useWatch({ control: form.control, name: ['direction', 'amount'] });
+  const hasEnteredAmount = typeof watchedAmount === 'number' && !Number.isNaN(watchedAmount) && watchedAmount > 0;
+  const previewBalance = hasEnteredAmount
+    ? currentBalance + toMinorUnits(watchedAmount) * (watchedDirection === 'OUT' ? 1 : -1)
+    : currentBalance;
+  const previewHint = previewBalance > 0 ? t('theyOwe') : previewBalance < 0 ? t('youOwe') : t('settled');
 
   async function handleSubmit(values: CounterpartyAdjustmentInput) {
     try {
@@ -120,6 +137,21 @@ export function AddAdjustmentDialog({ counterpartyId, trigger }: { counterpartyI
                   </FormItem>
                 )}
               />
+            </div>
+
+            <div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 px-3 py-2.5">
+              <span className="text-sm text-muted-foreground">{t('newBalanceLabel')}</span>
+              <div className="flex items-center gap-1.5">
+                <Money
+                  minorUnits={Math.abs(previewBalance)}
+                  className={cn(
+                    'text-sm font-semibold',
+                    previewBalance > 0 && 'text-danger',
+                    previewBalance < 0 && 'text-success',
+                  )}
+                />
+                <span className="text-xs text-muted-foreground">{previewHint}</span>
+              </div>
             </div>
 
             <FormField
