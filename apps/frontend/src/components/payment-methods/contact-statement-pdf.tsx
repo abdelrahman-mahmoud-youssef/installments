@@ -61,6 +61,9 @@ export interface ContactStatementPdfProps {
   };
 }
 
+const ARABIC_SCRIPT_PATTERN = /[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿]/;
+const containsArabicScript = (text: string) => ARABIC_SCRIPT_PATTERN.test(text);
+
 export function ContactStatementPdf({ locale, copy, tenant, contact }: ContactStatementPdfProps) {
   const isRtl = locale === 'ar';
   const fontFamily = isRtl ? 'Noto Naskh Arabic' : 'IBM Plex Sans';
@@ -68,9 +71,9 @@ export function ContactStatementPdf({ locale, copy, tenant, contact }: ContactSt
   const align = isRtl ? 'right' : 'left';
   const rowDirection = isRtl ? 'row-reverse' : 'row';
   const LEFT_TO_RIGHT_OVERRIDE = String.fromCharCode(0x202d);
-  const POP_DIRECTIONAL_FORMATTING = String.fromCharCode(0x202c);
   const s = (text: string) =>
-    isRtl ? `${LEFT_TO_RIGHT_OVERRIDE}${shapeBidiText(text)}${POP_DIRECTIONAL_FORMATTING}` : text;
+    isRtl && containsArabicScript(text) ? `${LEFT_TO_RIGHT_OVERRIDE}${shapeBidiText(text)}` : text;
+  const fontFamilyFor = (text: string) => (isRtl && containsArabicScript(text) ? 'Noto Naskh Arabic' : 'IBM Plex Sans');
 
   const balanceTone = contact.balance > 0 ? 'danger' : contact.balance < 0 ? 'success' : 'neutral';
   const balanceHint = contact.balance > 0 ? copy.theyOwe : contact.balance < 0 ? copy.youOwe : copy.settled;
@@ -152,8 +155,14 @@ export function ContactStatementPdf({ locale, copy, tenant, contact }: ContactSt
           <View style={styles.headerBrand}>
             {tenant.logoUrl && <Image src={tenant.logoUrl} style={styles.logo} />}
             <View>
-              <Text style={styles.tenantName}>{s(tenant.displayName)}</Text>
-              {tenant.phone && <Text style={styles.tenantPhone}>{s(tenant.phone)}</Text>}
+              <Text style={[styles.tenantName, { fontFamily: fontFamilyFor(tenant.displayName) }]}>
+                {s(tenant.displayName)}
+              </Text>
+              {tenant.phone && (
+                <Text style={[styles.tenantPhone, { fontFamily: fontFamilyFor(tenant.phone) }]}>
+                  {s(tenant.phone)}
+                </Text>
+              )}
             </View>
           </View>
           <Text style={styles.docLabel}>{s(copy.documentLabel)}</Text>
@@ -165,12 +174,12 @@ export function ContactStatementPdf({ locale, copy, tenant, contact }: ContactSt
         <View style={styles.metaPanel}>
           <View style={styles.metaRow}>
             <Text style={styles.metaLabel}>{s(copy.contactLabel)}</Text>
-            <Text style={styles.metaValue}>{s(contact.name)}</Text>
+            <Text style={[styles.metaValue, { fontFamily: fontFamilyFor(contact.name) }]}>{s(contact.name)}</Text>
           </View>
           {contact.phone && (
             <View style={styles.metaRow}>
               <Text style={styles.metaLabel}>{s(copy.phoneLabel)}</Text>
-              <Text style={styles.metaValue}>{s(contact.phone)}</Text>
+              <Text style={[styles.metaValue, { fontFamily: fontFamilyFor(contact.phone) }]}>{s(contact.phone)}</Text>
             </View>
           )}
         </View>
