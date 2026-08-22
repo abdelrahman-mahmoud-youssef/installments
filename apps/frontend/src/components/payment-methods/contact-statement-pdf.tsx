@@ -1,4 +1,5 @@
 import { Document, Font, Image, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
+import { render as shapeBidiText } from 'bidi-shaper';
 import { BRAND_COLOR_VALUES } from '@/lib/brand-colors';
 import { formatMoney } from '@/lib/format';
 import { BrandColorPreset } from '@/lib/schemas/branding';
@@ -13,11 +14,11 @@ Font.register({
 });
 
 Font.register({
-  family: 'Noto Sans Arabic',
+  family: 'Noto Naskh Arabic',
   fonts: [
-    { src: '/fonts/pdf/noto-sans-arabic-400.woff', fontWeight: 400 },
-    { src: '/fonts/pdf/noto-sans-arabic-600.woff', fontWeight: 600 },
-    { src: '/fonts/pdf/noto-sans-arabic-700.woff', fontWeight: 700 },
+    { src: '/fonts/pdf/noto-naskh-arabic-400.woff', fontWeight: 400 },
+    { src: '/fonts/pdf/noto-naskh-arabic-600.woff', fontWeight: 600 },
+    { src: '/fonts/pdf/noto-naskh-arabic-700.woff', fontWeight: 700 },
   ],
 });
 
@@ -62,10 +63,11 @@ export interface ContactStatementPdfProps {
 
 export function ContactStatementPdf({ locale, copy, tenant, contact }: ContactStatementPdfProps) {
   const isRtl = locale === 'ar';
-  const fontFamily = isRtl ? 'Noto Sans Arabic' : 'IBM Plex Sans';
+  const fontFamily = isRtl ? 'Noto Naskh Arabic' : 'IBM Plex Sans';
   const accent = BRAND_COLOR_VALUES[tenant.brandColor];
   const align = isRtl ? 'right' : 'left';
   const rowDirection = isRtl ? 'row-reverse' : 'row';
+  const s = (text: string) => (isRtl ? shapeBidiText(text) : text);
 
   const balanceTone = contact.balance > 0 ? 'danger' : contact.balance < 0 ? 'success' : 'neutral';
   const balanceHint = contact.balance > 0 ? copy.theyOwe : contact.balance < 0 ? copy.youOwe : copy.settled;
@@ -147,37 +149,37 @@ export function ContactStatementPdf({ locale, copy, tenant, contact }: ContactSt
           <View style={styles.headerBrand}>
             {tenant.logoUrl && <Image src={tenant.logoUrl} style={styles.logo} />}
             <View>
-              <Text style={styles.tenantName}>{tenant.displayName}</Text>
-              {tenant.phone && <Text style={styles.tenantPhone}>{tenant.phone}</Text>}
+              <Text style={styles.tenantName}>{s(tenant.displayName)}</Text>
+              {tenant.phone && <Text style={styles.tenantPhone}>{s(tenant.phone)}</Text>}
             </View>
           </View>
-          <Text style={styles.docLabel}>{copy.documentLabel}</Text>
+          <Text style={styles.docLabel}>{s(copy.documentLabel)}</Text>
         </View>
 
-        <Text style={styles.title}>{copy.title}</Text>
-        <Text style={styles.generatedOn}>{copy.generatedOn}</Text>
+        <Text style={styles.title}>{s(copy.title)}</Text>
+        <Text style={styles.generatedOn}>{s(copy.generatedOn)}</Text>
 
         <View style={styles.metaPanel}>
           <View style={styles.metaRow}>
-            <Text style={styles.metaLabel}>{copy.contactLabel}</Text>
-            <Text style={styles.metaValue}>{contact.name}</Text>
+            <Text style={styles.metaLabel}>{s(copy.contactLabel)}</Text>
+            <Text style={styles.metaValue}>{s(contact.name)}</Text>
           </View>
           {contact.phone && (
             <View style={styles.metaRow}>
-              <Text style={styles.metaLabel}>{copy.phoneLabel}</Text>
-              <Text style={styles.metaValue}>{contact.phone}</Text>
+              <Text style={styles.metaLabel}>{s(copy.phoneLabel)}</Text>
+              <Text style={styles.metaValue}>{s(contact.phone)}</Text>
             </View>
           )}
         </View>
 
         <View style={styles.balancePanel}>
-          <Text style={styles.balanceLabel}>{copy.balanceLabel}</Text>
-          <Text style={styles.balanceValue}>{formatMoney(Math.abs(contact.balance), locale)}</Text>
-          <Text style={styles.balanceHint}>{balanceHint}</Text>
+          <Text style={styles.balanceLabel}>{s(copy.balanceLabel)}</Text>
+          <Text style={styles.balanceValue}>{s(formatMoney(Math.abs(contact.balance), locale))}</Text>
+          <Text style={styles.balanceHint}>{s(balanceHint)}</Text>
         </View>
 
         <View style={styles.footer} fixed>
-          <Text style={styles.footerText}>{copy.footer}</Text>
+          <Text style={styles.footerText}>{s(copy.footer)}</Text>
         </View>
       </Page>
     </Document>
