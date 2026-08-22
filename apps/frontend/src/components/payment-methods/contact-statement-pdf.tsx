@@ -67,7 +67,10 @@ export function ContactStatementPdf({ locale, copy, tenant, contact }: ContactSt
   const accent = BRAND_COLOR_VALUES[tenant.brandColor];
   const align = isRtl ? 'right' : 'left';
   const rowDirection = isRtl ? 'row-reverse' : 'row';
-  const s = (text: string) => (isRtl ? shapeBidiText(text) : text);
+  const LEFT_TO_RIGHT_OVERRIDE = String.fromCharCode(0x202d);
+  const POP_DIRECTIONAL_FORMATTING = String.fromCharCode(0x202c);
+  const s = (text: string) =>
+    isRtl ? `${LEFT_TO_RIGHT_OVERRIDE}${shapeBidiText(text)}${POP_DIRECTIONAL_FORMATTING}` : text;
 
   const balanceTone = contact.balance > 0 ? 'danger' : contact.balance < 0 ? 'success' : 'neutral';
   const balanceHint = contact.balance > 0 ? copy.theyOwe : contact.balance < 0 ? copy.youOwe : copy.settled;
