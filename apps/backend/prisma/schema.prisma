@@ -20,6 +20,11 @@ enum ContractStatus {
   CANCELLED
 }
 
+enum CustomerStatus {
+  ACTIVE
+  DELETED
+}
+
 enum InstallmentStatus {
   PENDING
   PARTIALLY_PAID
@@ -237,6 +242,7 @@ model Customer {
   telegramNotificationsEnabled Boolean                   @default(true)
   telegramBroadcastsEnabled    Boolean                   @default(true)
   notificationLanguage         NotificationLanguage      @default(AR)
+  status                       CustomerStatus            @default(ACTIVE)
   broadcastRecipients          BroadcastRecipient[]
   notificationLogs             CustomerNotificationLog[]
   createdAt                    DateTime                  @default(now())
@@ -246,6 +252,7 @@ model Customer {
 
   @@index([tenantId, name])
   @@index([tenantId, phone])
+  @@index([tenantId, status])
 }
 
 model Contract {

@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { BroadcastRecipientStatus, Customer, Prisma, ReminderChannel } from '@prisma/client';
+import { BroadcastRecipientStatus, Customer, CustomerStatus, Prisma, ReminderChannel } from '@prisma/client';
 import { getUtcToday } from '../../common/date/utc-date';
 import { MAX_CUSTOMER_ID_UPLOAD_BYTES, MAX_CUSTOMER_PHOTO_UPLOAD_BYTES } from '../../common/constants';
 import { decodeImageUpload } from '../../common/decode-image-upload';
@@ -48,6 +48,7 @@ export class CustomersService {
     const today = getUtcToday();
     const where: Prisma.CustomerWhereInput = {
       tenantId,
+      ...(query.status && { status: query.status }),
       ...(query.q && {
         OR: [
           { name: { contains: query.q, mode: 'insensitive' } },
@@ -112,7 +113,7 @@ export class CustomersService {
 
   async remove(tenantId: string, id: string): Promise<void> {
     await this.ensureExists(tenantId, id);
-    await this.prisma.customer.delete({ where: { id } });
+    await this.prisma.customer.update({ where: { id }, data: { status: CustomerStatus.DELETED } });
   }
 
   async getNotificationHistory(

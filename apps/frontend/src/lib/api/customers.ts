@@ -1,3 +1,4 @@
+import { CustomerStatus } from '@/lib/enums';
 import { fileToBase64 } from '@/lib/file';
 import { CustomerInput } from '@/lib/schemas/customer';
 import { apiClient } from './client';
@@ -13,6 +14,7 @@ export interface Customer {
   photoUrl: string | null;
   idImageFrontUrl: string | null;
   idImageBackUrl: string | null;
+  status: CustomerStatus;
   createdAt: string;
   updatedAt: string;
 }
@@ -35,6 +37,7 @@ export interface CustomerListItem extends Customer {
 
 export interface CustomerListParams {
   q?: string;
+  status?: CustomerStatus;
   delayedOnly?: boolean;
   page?: number;
   limit?: number;

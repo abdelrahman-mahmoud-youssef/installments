@@ -7,6 +7,9 @@ export type RecurrenceType = (typeof RECURRENCE_TYPES)[number];
 export const CONTRACT_STATUSES = ['ACTIVE', 'COMPLETED', 'CANCELLED'] as const;
 export type ContractStatus = (typeof CONTRACT_STATUSES)[number];
 
+export const CUSTOMER_STATUSES = ['ACTIVE', 'DELETED'] as const;
+export type CustomerStatus = (typeof CUSTOMER_STATUSES)[number];
+
 export const INSTALLMENT_STATUSES = ['PENDING', 'PARTIALLY_PAID', 'PAID', 'CANCELLED'] as const;
 export type InstallmentStatus = (typeof INSTALLMENT_STATUSES)[number];
 

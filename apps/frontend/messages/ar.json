@@ -148,7 +148,8 @@
     "OVERDUE": "متأخر",
     "CANCELLED": "ملغي",
     "ACTIVE": "نشط",
-    "COMPLETED": "مكتمل"
+    "COMPLETED": "مكتمل",
+    "DELETED": "محذوف"
   },
   "calculationMethod": {
     "FIXED_COUNT": "عدد الأقساط",
@@ -265,8 +266,9 @@
     "name": "الاسم",
     "phone": "التليفون",
     "address": "العنوان",
+    "status": "الحالة",
     "deleteTitle": "تحذف العميل؟",
-    "deleteDescription": "هيتم حذف {name} نهائيًا. مينفعش تحذف عميل عنده عقود.",
+    "deleteDescription": "{name} هيتخفي من قايمة عملاءك النشطين. عقوده وسجله هيفضلوا محفوظين.",
     "delete": "حذف",
     "deleted": "اتحذف العميل.",
     "deleteError": "معرفناش نحذف العميل.",

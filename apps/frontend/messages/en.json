@@ -148,7 +148,8 @@
     "OVERDUE": "Overdue",
     "CANCELLED": "Cancelled",
     "ACTIVE": "Active",
-    "COMPLETED": "Completed"
+    "COMPLETED": "Completed",
+    "DELETED": "Deleted"
   },
   "calculationMethod": {
     "FIXED_COUNT": "Number of installments",
@@ -265,8 +266,9 @@
     "name": "Name",
     "phone": "Phone",
     "address": "Address",
+    "status": "Status",
     "deleteTitle": "Delete customer?",
-    "deleteDescription": "This will permanently remove {name}. Customers with contracts cannot be deleted.",
+    "deleteDescription": "{name} will be hidden from your active customers. Their contracts and history are kept.",
     "delete": "Delete",
     "deleted": "Customer deleted.",
     "deleteError": "Could not delete customer.",

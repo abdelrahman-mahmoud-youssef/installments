@@ -15,26 +15,32 @@ import { PaginationControls } from '@/components/shared/pagination-controls';
 import { SearchInput } from '@/components/shared/search-input';
 import { Section } from '@/components/shared/section';
 import { TableSkeleton } from '@/components/shared/skeletons';
+import { StatusBadge } from '@/components/shared/status-badge';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Link } from '@/i18n/navigation';
 import type { CustomerListItem } from '@/lib/api/customers';
 import { useCreateCustomer, useCustomers, useDeleteCustomer } from '@/hooks/use-customers';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { ApiError } from '@/lib/api/client';
+import { CUSTOMER_STATUSES, CustomerStatus } from '@/lib/enums';
 import { routes } from '@/lib/routes';
 
 export default function CustomersPage() {
   const t = useTranslations('customers');
   const tCommon = useTranslations('common');
+  const tStatus = useTranslations('status');
   const [search, setSearch] = useState('');
+  const [status, setStatus] = useState<CustomerStatus>('ACTIVE');
   const [delayedOnly, setDelayedOnly] = useState(false);
   const [page, setPage] = useState(1);
   const debouncedSearch = useDebouncedValue(search, 300);
 
   const { data, isLoading, isError } = useCustomers({
     q: debouncedSearch || undefined,
+    status,
     delayedOnly: delayedOnly || undefined,
     page,
     limit: 20,
@@ -74,35 +80,42 @@ export default function CustomersPage() {
       cell: (customer) => <span className="text-muted-foreground">{customer.address ?? '—'}</span>,
     },
     {
+      id: 'status',
+      header: t('status'),
+      role: 'trailing',
+      cell: (customer) => <StatusBadge status={customer.status} />,
+    },
+    {
       id: 'action',
       header: '',
       headerHidden: true,
       role: 'action',
       align: 'end',
       className: 'w-0',
-      cell: (customer) => (
-        <div onClick={(event) => event.stopPropagation()}>
-          <ConfirmDialog
-            trigger={
-              <Button variant="ghost" size="icon-sm" aria-label={t('delete')}>
-                <Trash2 className="size-4 text-muted-foreground" />
-              </Button>
-            }
-            title={t('deleteTitle')}
-            description={t('deleteDescription', { name: customer.name })}
-            destructive
-            confirmLabel={t('delete')}
-            onConfirm={async () => {
-              try {
-                await deleteCustomer.mutateAsync(customer.id);
-                toast.success(t('deleted'));
-              } catch (error) {
-                toast.error(error instanceof ApiError ? error.message : t('deleteError'));
+      cell: (customer) =>
+        customer.status === 'ACTIVE' && (
+          <div onClick={(event) => event.stopPropagation()}>
+            <ConfirmDialog
+              trigger={
+                <Button variant="ghost" size="icon-sm" aria-label={t('delete')}>
+                  <Trash2 className="size-4 text-muted-foreground" />
+                </Button>
               }
-            }}
-          />
-        </div>
-      ),
+              title={t('deleteTitle')}
+              description={t('deleteDescription', { name: customer.name })}
+              destructive
+              confirmLabel={t('delete')}
+              onConfirm={async () => {
+                try {
+                  await deleteCustomer.mutateAsync(customer.id);
+                  toast.success(t('deleted'));
+                } catch (error) {
+                  toast.error(error instanceof ApiError ? error.message : t('deleteError'));
+                }
+              }}
+            />
+          </div>
+        ),
     },
   ];
 
@@ -128,26 +141,46 @@ export default function CustomersPage() {
 
       <FadeIn delay={0.05} className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <SearchInput
-            value={search}
-            onChange={(value) => {
-              setSearch(value);
+          <Tabs
+            value={status}
+            onValueChange={(value) => {
+              setStatus(value as CustomerStatus);
               setPage(1);
             }}
-            placeholder={t('searchPlaceholder')}
-            className="max-w-sm"
-          />
+          >
+            <div className="-mx-1 overflow-x-auto px-1">
+              <TabsList className="min-w-fit">
+                {CUSTOMER_STATUSES.map((value) => (
+                  <TabsTrigger key={value} value={value} className="shrink-0">
+                    {tStatus(value)}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
+          </Tabs>
 
-          <label className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Switch
-              checked={delayedOnly}
-              onCheckedChange={(next) => {
-                setDelayedOnly(next);
+          <div className="flex flex-wrap items-center gap-3">
+            <SearchInput
+              value={search}
+              onChange={(value) => {
+                setSearch(value);
                 setPage(1);
               }}
+              placeholder={t('searchPlaceholder')}
+              className="max-w-sm"
             />
-            {tCommon('delayedOnly')}
-          </label>
+
+            <label className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Switch
+                checked={delayedOnly}
+                onCheckedChange={(next) => {
+                  setDelayedOnly(next);
+                  setPage(1);
+                }}
+              />
+              {tCommon('delayedOnly')}
+            </label>
+          </div>
         </div>
 
         {isLoading ? (
