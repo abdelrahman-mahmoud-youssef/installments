@@ -133,7 +133,7 @@
     "reports": "التقارير",
     "announcements": "الإعلانات",
     "offers": "العروض",
-    "paymentMethods": "وسائل الدفع",
+    "paymentMethods": "المحافظ",
     "staff": "الموظفين",
     "activity": "سجل النشاط",
     "settings": "الإعدادات",
@@ -822,7 +822,7 @@
     "channelSms": "الرسائل النصية"
   },
   "paymentMethods": {
-    "title": "وسائل الدفع",
+    "title": "المحافظ",
     "subtitle": "المحافظ والحسابات اللي بتحصّل منها الدفعات — تابع استخدام كل واحدة مقابل حدها الشهري.",
     "walletsTab": "المحافظ",
     "contactsTab": "جهات الاتصال",
@@ -1006,6 +1006,6 @@
     "alreadyApproved": "المطالبة دي اتوافق عليها بالفعل.",
     "alreadyDeclined": "اترفضت: {reason}",
     "noReason": "من غير سبب",
-    "managePaymentMethods": "وسائل الدفع"
+    "managePaymentMethods": "المحافظ"
   }
 }
