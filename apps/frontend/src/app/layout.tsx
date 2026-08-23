@@ -34,11 +34,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       className={`${plexSans.variable} ${plexArabic.variable} ${plexMono.variable} h-full antialiased`}
     >
       <body className="min-h-full">
-        <Script id="locale-init" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: localeInitScript }} />
-        <Script id="theme-init" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        <Script id="locale-init" strategy="afterInteractive" dangerouslySetInnerHTML={{ __html: localeInitScript }} />
+        <Script id="theme-init" strategy="afterInteractive" dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <Script
           id="font-size-init"
-          strategy="beforeInteractive"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{ __html: fontSizeInitScript }}
         />
         {children}
