@@ -15,7 +15,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import { useChangePassword } from '@/hooks/use-current-user';
 import { ApiError } from '@/lib/api/client';
 import { ChangePasswordInput, changePasswordSchema } from '@/lib/schemas/auth';
@@ -71,7 +71,7 @@ export function ChangePasswordDialog({
                 <FormItem>
                   <FormLabel>{t('currentPassword')}</FormLabel>
                   <FormControl>
-                    <Input type="password" autoComplete="current-password" {...field} />
+                    <PasswordInput autoComplete="current-password" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -84,7 +84,7 @@ export function ChangePasswordDialog({
                 <FormItem>
                   <FormLabel>{t('newPassword')}</FormLabel>
                   <FormControl>
-                    <Input type="password" autoComplete="new-password" {...field} />
+                    <PasswordInput autoComplete="new-password" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

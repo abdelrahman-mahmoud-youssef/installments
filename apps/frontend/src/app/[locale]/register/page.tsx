@@ -10,6 +10,7 @@ import { LogoMark } from '@/components/shared/logo';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import { Link, useRouter } from '@/i18n/navigation';
 import { register as registerBusiness } from '@/lib/api/auth';
 import { ApiError } from '@/lib/api/client';
@@ -100,7 +101,7 @@ export default function RegisterPage() {
                 <FormItem>
                   <FormLabel>{t('password')}</FormLabel>
                   <FormControl>
-                    <Input type="password" autoComplete="new-password" placeholder="••••••••" {...field} />
+                    <PasswordInput autoComplete="new-password" placeholder="••••••••" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

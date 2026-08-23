@@ -10,6 +10,7 @@ import { LogoMark } from '@/components/shared/logo';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import { Link, useRouter } from '@/i18n/navigation';
 import { login, verifyTwoFactor } from '@/lib/api/auth';
 import { ApiError } from '@/lib/api/client';
@@ -153,7 +154,7 @@ export default function LoginPage() {
                       </Link>
                     </div>
                     <FormControl>
-                      <Input type="password" autoComplete="current-password" placeholder="••••••••" {...field} />
+                      <PasswordInput autoComplete="current-password" placeholder="••••••••" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

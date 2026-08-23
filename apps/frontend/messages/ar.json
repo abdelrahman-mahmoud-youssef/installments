@@ -17,7 +17,9 @@
     "installBannerMessage": "ثبّت التطبيق ده عشان توصله بسرعة من شاشة موبايلك.",
     "delayed": "متأخر",
     "delayedOnly": "المتأخرين بس",
-    "delayedOnlyHint": "اعرض بس اللي عندهم دفعة متأخرة."
+    "delayedOnlyHint": "اعرض بس اللي عندهم دفعة متأخرة.",
+    "showPassword": "اظهار كلمة السر",
+    "hidePassword": "اخفاء كلمة السر"
   },
   "theme": {
     "toggle": "تغيير الشكل"

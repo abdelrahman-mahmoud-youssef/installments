@@ -10,7 +10,7 @@ import { AuthShell } from '@/components/auth/auth-shell';
 import { LogoMark } from '@/components/shared/logo';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Link, useRouter } from '@/i18n/navigation';
 import { resetPassword } from '@/lib/api/auth';
@@ -87,7 +87,7 @@ function ResetPasswordForm() {
                 <FormItem>
                   <FormLabel>{t('newPassword')}</FormLabel>
                   <FormControl>
-                    <Input type="password" autoComplete="new-password" placeholder="••••••••" {...field} />
+                    <PasswordInput autoComplete="new-password" placeholder="••••••••" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -100,7 +100,7 @@ function ResetPasswordForm() {
                 <FormItem>
                   <FormLabel>{t('confirmPassword')}</FormLabel>
                   <FormControl>
-                    <Input type="password" autoComplete="new-password" placeholder="••••••••" {...field} />
+                    <PasswordInput autoComplete="new-password" placeholder="••••••••" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

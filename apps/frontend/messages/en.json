@@ -17,7 +17,9 @@
     "installBannerMessage": "Install this app for quick access from your home screen.",
     "delayed": "Delayed",
     "delayedOnly": "Delayed only",
-    "delayedOnlyHint": "Only show those with an overdue payment."
+    "delayedOnlyHint": "Only show those with an overdue payment.",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   },
   "theme": {
     "toggle": "Toggle theme"
