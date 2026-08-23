@@ -21,6 +21,14 @@ function downloadBlob(blob: Blob, fileName: string) {
   URL.revokeObjectURL(url);
 }
 
+const INVALID_FILENAME_CHARS_PATTERN = /[<>:"/\\|?*\x00-\x1f]/g;
+const WHITESPACE_PATTERN = /\s+/g;
+
+function sanitizeFileName(name: string): string {
+  const sanitized = name.replace(INVALID_FILENAME_CHARS_PATTERN, '').replace(WHITESPACE_PATTERN, ' ').trim();
+  return sanitized.length > 0 ? sanitized : 'statement';
+}
+
 export function ContactStatementShareButton({ contact }: { contact: Counterparty }) {
   const t = useTranslations('contacts');
   const locale = useLocale();
@@ -56,7 +64,7 @@ export function ContactStatementShareButton({ contact }: { contact: Counterparty
       />
     );
     const blob = await pdf(doc).toBlob();
-    return { blob, fileName: `statement-${contact.id}.pdf` };
+    return { blob, fileName: `${sanitizeFileName(branding.displayName)}.pdf` };
   }
 
   async function handleShare() {
