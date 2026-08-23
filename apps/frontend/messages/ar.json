@@ -395,7 +395,7 @@
       "pdfTitle": "كشف حساب الرصيد",
       "pdfGeneratedOnLabel": "تاريخ الإصدار",
       "pdfContactLabel": "جهة الاتصال",
-      "pdfFooter": "تم إصداره بواسطة {tenant}"
+      "pdfFooterPrefix": "تم إصداره بواسطة"
     }
   },
   "offers": {

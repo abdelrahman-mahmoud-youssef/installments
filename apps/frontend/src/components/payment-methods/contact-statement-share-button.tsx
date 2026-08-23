@@ -44,7 +44,7 @@ export function ContactStatementShareButton({ contact }: { contact: Counterparty
           theyOwe: t('detail.theyOwe'),
           youOwe: t('detail.youOwe'),
           settled: t('detail.settled'),
-          footer: t('detail.pdfFooter', { tenant: branding.displayName }),
+          footerPrefix: t('detail.pdfFooterPrefix'),
         }}
         tenant={{
           displayName: branding.displayName,

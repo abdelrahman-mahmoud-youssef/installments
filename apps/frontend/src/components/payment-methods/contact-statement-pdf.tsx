@@ -1,7 +1,6 @@
 import { Document, Font, Image, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
 import { render as shapeBidiText } from 'bidi-shaper';
 import { BRAND_COLOR_VALUES } from '@/lib/brand-colors';
-import { formatMoney } from '@/lib/format';
 import { BrandColorPreset } from '@/lib/schemas/branding';
 
 Font.register({
@@ -42,7 +41,7 @@ export interface ContactStatementCopy {
   theyOwe: string;
   youOwe: string;
   settled: string;
-  footer: string;
+  footerPrefix: string;
 }
 
 export interface ContactStatementPdfProps {
@@ -64,6 +63,27 @@ export interface ContactStatementPdfProps {
 const ARABIC_SCRIPT_PATTERN = /[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿]/;
 const containsArabicScript = (text: string) => ARABIC_SCRIPT_PATTERN.test(text);
 
+const BIDI_CONTROL_CHARS_PATTERN = new RegExp('[\\u200e\\u200f\\u061c\\u202a-\\u202e\\u2066-\\u2069]', 'g');
+const NON_BREAKING_SPACE_PATTERN = new RegExp('\\u00a0', 'g');
+
+const sanitizeForPdfFont = (text: string) =>
+  text.replace(BIDI_CONTROL_CHARS_PATTERN, '').replace(NON_BREAKING_SPACE_PATTERN, ' ');
+
+const splitMoneyParts = (minorUnits: number, locale: 'en' | 'ar') => {
+  const parts = new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: 'EGP',
+    minimumFractionDigits: 2,
+    numberingSystem: 'latn',
+  }).formatToParts(minorUnits / 100);
+  const amount = parts
+    .filter((part) => part.type !== 'currency' && part.type !== 'literal')
+    .map((part) => part.value)
+    .join('');
+  const currency = parts.find((part) => part.type === 'currency')?.value ?? '';
+  return { amount, currency };
+};
+
 export function ContactStatementPdf({ locale, copy, tenant, contact }: ContactStatementPdfProps) {
   const isRtl = locale === 'ar';
   const fontFamily = isRtl ? 'Noto Naskh Arabic' : 'IBM Plex Sans';
@@ -71,12 +91,17 @@ export function ContactStatementPdf({ locale, copy, tenant, contact }: ContactSt
   const align = isRtl ? 'right' : 'left';
   const rowDirection = isRtl ? 'row-reverse' : 'row';
   const LEFT_TO_RIGHT_OVERRIDE = String.fromCharCode(0x202d);
-  const s = (text: string) =>
-    isRtl && containsArabicScript(text) ? `${LEFT_TO_RIGHT_OVERRIDE}${shapeBidiText(text)}` : text;
+  const s = (text: string) => {
+    const clean = sanitizeForPdfFont(text);
+    return isRtl && containsArabicScript(clean)
+      ? `${LEFT_TO_RIGHT_OVERRIDE}${sanitizeForPdfFont(shapeBidiText(clean))}`
+      : clean;
+  };
   const fontFamilyFor = (text: string) => (isRtl && containsArabicScript(text) ? 'Noto Naskh Arabic' : 'IBM Plex Sans');
 
   const balanceTone = contact.balance > 0 ? 'danger' : contact.balance < 0 ? 'success' : 'neutral';
   const balanceHint = contact.balance > 0 ? copy.theyOwe : contact.balance < 0 ? copy.youOwe : copy.settled;
+  const moneyParts = splitMoneyParts(Math.abs(contact.balance), locale);
 
   const styles = StyleSheet.create({
     page: {
@@ -129,8 +154,14 @@ export function ContactStatementPdf({ locale, copy, tenant, contact }: ContactSt
       marginBottom: 28,
     },
     balanceLabel: { fontSize: 10, color: COLORS.muted, marginBottom: 8 },
+    balanceValueRow: { flexDirection: rowDirection, alignItems: 'baseline', gap: 6 },
     balanceValue: {
       fontSize: 30,
+      fontWeight: 700,
+      color: balanceTone === 'danger' ? COLORS.danger : balanceTone === 'success' ? COLORS.success : COLORS.ink,
+    },
+    balanceCurrency: {
+      fontSize: 14,
       fontWeight: 700,
       color: balanceTone === 'danger' ? COLORS.danger : balanceTone === 'success' ? COLORS.success : COLORS.ink,
     },
@@ -143,7 +174,9 @@ export function ContactStatementPdf({ locale, copy, tenant, contact }: ContactSt
       borderTopWidth: 1,
       borderTopColor: COLORS.border,
       paddingTop: 12,
-      textAlign: 'center',
+      flexDirection: rowDirection,
+      justifyContent: 'center',
+      gap: 4,
     },
     footerText: { fontSize: 8, color: COLORS.muted },
   });
@@ -186,12 +219,20 @@ export function ContactStatementPdf({ locale, copy, tenant, contact }: ContactSt
 
         <View style={styles.balancePanel}>
           <Text style={styles.balanceLabel}>{s(copy.balanceLabel)}</Text>
-          <Text style={styles.balanceValue}>{s(formatMoney(Math.abs(contact.balance), locale))}</Text>
+          <View style={styles.balanceValueRow}>
+            <Text style={[styles.balanceCurrency, { fontFamily: fontFamilyFor(moneyParts.currency) }]}>
+              {s(moneyParts.currency)}
+            </Text>
+            <Text style={[styles.balanceValue, { fontFamily: 'IBM Plex Sans' }]}>{moneyParts.amount}</Text>
+          </View>
           <Text style={styles.balanceHint}>{s(balanceHint)}</Text>
         </View>
 
         <View style={styles.footer} fixed>
-          <Text style={styles.footerText}>{s(copy.footer)}</Text>
+          <Text style={styles.footerText}>{s(copy.footerPrefix)}</Text>
+          <Text style={[styles.footerText, { fontFamily: fontFamilyFor(tenant.displayName) }]}>
+            {s(tenant.displayName)}
+          </Text>
         </View>
       </Page>
     </Document>
