@@ -7,6 +7,7 @@ import { ContractsService } from './contracts.service';
 import { ContractQueryDto } from './dto/contract-query.dto';
 import { CreateContractDto } from './dto/create-contract.dto';
 import { UpdateContractStatusDto } from './dto/update-contract-status.dto';
+import { UpdateContractTagDto } from './dto/update-contract-tag.dto';
 
 @Controller('contracts')
 export class ContractsController {
@@ -23,6 +24,12 @@ export class ContractsController {
     return this.contractsService.findAll(user.tenantId, query);
   }
 
+  @Get('tags')
+  @Roles(Role.ADMIN)
+  findTags(@CurrentUser() user: AuthenticatedUser) {
+    return this.contractsService.findDistinctTags(user.tenantId);
+  }
+
   @Get(':id')
   findOne(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.contractsService.findOne(user.tenantId, id);
@@ -37,5 +44,16 @@ export class ContractsController {
     @Body() updateContractStatusDto: UpdateContractStatusDto,
   ) {
     return this.contractsService.cancel(user.tenantId, id);
+  }
+
+  @Patch(':id/tag')
+  @Roles(Role.ADMIN)
+  @Audit('contract.updateTag', 'Contract')
+  updateTag(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() updateContractTagDto: UpdateContractTagDto,
+  ) {
+    return this.contractsService.updateTag(user.tenantId, id, updateContractTagDto.tag?.trim() || null);
   }
 }

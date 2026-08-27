@@ -19,6 +19,7 @@ export const contractSchema = z
     intervalDays: z.number().int().positive().optional(),
     startDate: z.string().min(1, 'Start date is required.'),
     firstPaymentDate: z.string().min(1, 'First payment date is required.'),
+    tag: z.string().max(30, 'Tag must be under 30 characters.').optional(),
     image: z
       .instanceof(File)
       .optional()

@@ -1,7 +1,7 @@
 'use client';
 
 import { ReceiptText, Settings2 } from 'lucide-react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -42,7 +42,6 @@ const STATUS_LABEL_KEY: Record<PaymentClaimStatus, string> = {
 export default function PaymentClaimsPage() {
   const t = useTranslations('paymentClaims');
   const tCommon = useTranslations('common');
-  const locale = useLocale();
   const [status, setStatus] = useState<PaymentClaimStatus | 'ALL'>('PENDING');
   const [page, setPage] = useState(1);
   const [activeClaim, setActiveClaim] = useState<PaymentClaimEntry | null>(null);
@@ -87,7 +86,7 @@ export default function PaymentClaimsPage() {
       header: t('columnDate'),
       align: 'end',
       cell: (claim) => (
-        <span className="text-muted-foreground tabular-nums">{formatDateTime(claim.createdAt, locale)}</span>
+        <span className="text-muted-foreground tabular-nums">{formatDateTime(claim.createdAt)}</span>
       ),
     },
     {

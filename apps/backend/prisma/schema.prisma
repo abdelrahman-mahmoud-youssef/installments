@@ -273,6 +273,7 @@ model Contract {
   startDate         DateTime          @db.Date
   firstPaymentDate  DateTime          @db.Date
   status            ContractStatus    @default(ACTIVE)
+  tag               String?
   imageUrl          String?
   createdAt         DateTime          @default(now())
   tenant            Tenant            @relation(fields: [tenantId], references: [id])

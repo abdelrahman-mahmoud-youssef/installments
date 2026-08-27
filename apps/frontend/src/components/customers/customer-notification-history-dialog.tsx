@@ -1,7 +1,7 @@
 'use client';
 
 import { Bell, History, Megaphone } from 'lucide-react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { FaTelegram, FaWhatsapp } from 'react-icons/fa6';
 import { EmptyState } from '@/components/shared/empty-state';
@@ -20,7 +20,6 @@ const CHANNEL_ICON: Record<CustomerNotificationChannel, typeof FaTelegram> = {
 
 function NotificationRow({ item }: { item: CustomerNotificationHistoryItem }) {
   const t = useTranslations('customers.detail');
-  const locale = useLocale();
   const ChannelIcon = CHANNEL_ICON[item.channel];
   const TypeIcon = item.type === 'BROADCAST' ? Megaphone : Bell;
 
@@ -46,7 +45,7 @@ function NotificationRow({ item }: { item: CustomerNotificationHistoryItem }) {
         >
           {item.success ? t('historyDelivered') : t('historyFailed')}
         </span>
-        <span className="text-xs text-muted-foreground tabular-nums">{formatDateTime(item.sentAt, locale)}</span>
+        <span className="text-xs text-muted-foreground tabular-nums">{formatDateTime(item.sentAt)}</span>
       </div>
     </div>
   );

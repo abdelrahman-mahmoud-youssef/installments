@@ -16,4 +16,8 @@ export class ContractQueryDto extends PaginationQueryDto {
   @Transform(({ value }) => value === 'true')
   @IsBoolean()
   delayedOnly?: boolean;
+
+  @IsOptional()
+  @IsString()
+  tag?: string;
 }

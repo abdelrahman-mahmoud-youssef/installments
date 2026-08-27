@@ -6,7 +6,9 @@ import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { useForm, type UseFormReturn } from 'react-hook-form';
 import { toast } from 'sonner';
+import { DatePickerField } from '@/components/shared/date-picker-field';
 import { NumberInput } from '@/components/shared/number-input';
+import { PhoneInput } from '@/components/shared/phone-input';
 import { PaymentMethodIcon } from '@/components/shared/payment-method-icon';
 import { Button } from '@/components/ui/button';
 import {
@@ -236,7 +238,12 @@ export function LogTransactionDialog({
                     <FormItem className="min-w-0">
                       <FormLabel>{t('transactionDate')}</FormLabel>
                       <FormControl>
-                        <Input type="date" max={todayIso()} {...field} />
+                        <DatePickerField
+                          value={field.value}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          max={todayIso()}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -259,7 +266,7 @@ export function LogTransactionDialog({
                       <FormItem>
                         <FormLabel>{t('counterpartyPhone')}</FormLabel>
                         <FormControl>
-                          <Input dir="ltr" {...field} />
+                          <PhoneInput dir="ltr" {...field} onContactSelected={(phone) => field.onChange(phone)} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

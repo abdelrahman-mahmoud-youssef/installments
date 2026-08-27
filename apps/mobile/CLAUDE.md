@@ -1,0 +1,20 @@
+# Mobile app (Expo + React Native + TypeScript)
+
+iOS-first companion app for the installment SaaS. Shared codebase for iOS and Android via Expo SDK 54 + Expo Router.
+
+## Run
+
+- `pnpm dev:mobile` from the repo root (backend must be running on port 3001); root `pnpm dev` intentionally does not start the mobile app
+- The API URL is auto-derived from the Expo dev server host (phone on the same LAN hits `http://<dev-machine>:3001`). Override with `EXPO_PUBLIC_API_URL`.
+- Auth is a JWT from `POST /auth/login`, stored in `expo-secure-store` and sent as a Bearer header (no cookies — the web proxy is not used).
+
+## Architecture (do not silently change)
+
+- **Routes** live in `app/` (Expo Router file-based). Five tabs: Dashboard, Contracts, Customers, Wallets (payment methods), More. Detail screens (`contract/[id]`, `customer/[id]`, `staff`, `activity`, `settings`) are stack screens with native headers.
+- **Theme**: all colors/spacing/radius/font sizes come from `src/theme/tokens.ts` via `useTheme()`. Never hardcode a color in a screen. Light/dark/system mode and the font-size setting live in `theme-context.tsx`; every text size flows through `fontSize(token)` so the font-size setting scales the whole app.
+- **i18n**: every string goes through `useI18n().t('section.key')` with dictionaries in `src/i18n/translations.ts` (en + ar, structurally identical — `ar` is typed as `typeof en`). Arabic switches the app to RTL via `I18nManager.forceRTL` + reload; layouts must use logical properties (`start`/`end`, `flexDirection: 'row'`) so they flip automatically.
+- **API layer**: all HTTP through `src/api/*` (thin typed wrappers over `src/api/client.ts`). Never `fetch` in a component. Money stays in minor units end-to-end; formatting only via `formatMoney`/`MoneyText`.
+- **Server state**: TanStack Query hooks in `src/hooks/queries.ts` (infinite queries for paginated lists, mutations invalidate related keys). UI state is local React state.
+- **UI primitives** in `src/components/ui/` (AppText, Card, Button, Badge, TextField, BottomSheet, ConfirmSheet, Skeleton, EmptyState, ErrorState, toast…). Feature components in `src/components/<feature>/`. Reuse these; never re-implement a card/sheet/badge inline.
+- **OVERDUE is derived** on the client the same way as the backend: `dueDate < today AND status IN (PENDING, PARTIALLY_PAID)` (`src/lib/statuses.ts`).
+- Destructive actions (remove wallet, deactivate, sign out) always go through `ConfirmSheet`.

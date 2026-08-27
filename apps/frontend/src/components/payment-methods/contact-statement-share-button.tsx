@@ -45,7 +45,7 @@ export function ContactStatementShareButton({ contact }: { contact: Counterparty
         copy={{
           documentLabel: t('detail.pdfDocumentLabel'),
           title: t('detail.pdfTitle'),
-          generatedOn: `${t('detail.pdfGeneratedOnLabel')} ${formatDateTime(new Date(), locale)}`,
+          generatedOn: `${t('detail.pdfGeneratedOnLabel')} ${formatDateTime(new Date())}`,
           contactLabel: t('detail.pdfContactLabel'),
           phoneLabel: t('phone'),
           balanceLabel: t('detail.balanceLabel'),

@@ -19,7 +19,9 @@
     "delayedOnly": "المتأخرين بس",
     "delayedOnlyHint": "اعرض بس اللي عندهم دفعة متأخرة.",
     "showPassword": "اظهار كلمة السر",
-    "hidePassword": "اخفاء كلمة السر"
+    "hidePassword": "اخفاء كلمة السر",
+    "pickDate": "اختار تاريخ",
+    "pickFromContacts": "اختار من جهات الاتصال"
   },
   "theme": {
     "toggle": "تغيير الشكل"
@@ -29,6 +31,14 @@
     "smaller": "أصغر",
     "normal": "عادي",
     "bigger": "أكبر"
+  },
+  "arabicFont": {
+    "toggle": "الخط العربي",
+    "plex": "IBM Plex Sans Arabic",
+    "cairo": "Cairo",
+    "tajawal": "Tajawal",
+    "notoSansArabic": "Noto Sans Arabic",
+    "almarai": "Almarai"
   },
   "notFound": {
     "title": "الصفحة مش موجودة",
@@ -456,6 +466,8 @@
     "createPrompt": "اعمل عقد عشان تبدأ.",
     "customer": "العميل",
     "product": "المنتج",
+    "tag": "التصنيف",
+    "allTags": "كل التصنيفات",
     "total": "الإجمالي",
     "status": "الحالة",
     "created": "تاريخ الإنشاء",
@@ -481,6 +493,8 @@
       "loadingCustomers": "بيتحمّل…",
       "selectCustomer": "اختار عميل",
       "productName": "اسم المنتج",
+      "tag": "تصنيف (اختياري)",
+      "tagPlaceholder": "زي: VIP، جملة",
       "productPrice": "سعر المنتج",
       "costPrice": "سعر التكلفة",
       "costPriceHint": "اللي انت دفعته فيه. مش بيتشاف للعميل خالص.",
@@ -503,6 +517,8 @@
     "detail": {
       "notFound": "العقد مش موجود",
       "viewImage": "شوف المرفق",
+      "addTag": "ضيف تصنيف",
+      "tagPlaceholder": "زي: VIP، جملة",
       "sendReminder": "ابعت تذكير",
       "recordPayment": "سجّل دفعة",
       "cancelContract": "إلغاء العقد",
@@ -545,6 +561,7 @@
       "paymentMethod": "وسيلة الدفع",
       "cash": "كاش",
       "paidAt": "تاريخ الدفع",
+      "remainingAfterPayment": "المتبقي بعد الدفعة دي",
       "quickNext": "القسط الجاي",
       "quickFull": "كل المتبقي",
       "note": "ملاحظة (اختياري)",

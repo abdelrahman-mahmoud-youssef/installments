@@ -129,7 +129,7 @@ export default async function PublicContractDetailPage({
                 <ul className="space-y-2">
                   {contract.payments.map((payment, index) => (
                     <li key={index} className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">{formatDate(payment.paidAt, locale)}</span>
+                      <span className="text-muted-foreground">{formatDate(payment.paidAt)}</span>
                       <span className="font-medium tabular-nums text-success">
                         {formatMoney(payment.amount, locale)}
                       </span>

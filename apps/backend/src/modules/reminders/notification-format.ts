@@ -11,5 +11,5 @@ export function formatMoney(minorUnits: number, language: NotificationLanguage):
 
 export function formatDate(date: Date, language: NotificationLanguage): string {
   const locale = language === NotificationLanguage.AR ? 'ar-EG' : 'en-GB';
-  return date.toLocaleDateString(locale, { day: 'numeric', month: 'short', timeZone: 'UTC' });
+  return date.toLocaleDateString(locale, { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' });
 }

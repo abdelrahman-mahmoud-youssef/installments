@@ -71,6 +71,11 @@ export class CreateContractDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(30)
+  tag?: string;
+
+  @IsOptional()
+  @IsString()
   @MaxLength(Math.ceil((MAX_CONTRACT_IMAGE_UPLOAD_BYTES * 4) / 3))
   image?: string;
 }

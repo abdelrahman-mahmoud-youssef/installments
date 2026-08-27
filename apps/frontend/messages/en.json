@@ -19,7 +19,9 @@
     "delayedOnly": "Delayed only",
     "delayedOnlyHint": "Only show those with an overdue payment.",
     "showPassword": "Show password",
-    "hidePassword": "Hide password"
+    "hidePassword": "Hide password",
+    "pickDate": "Pick a date",
+    "pickFromContacts": "Pick from contacts"
   },
   "theme": {
     "toggle": "Toggle theme"
@@ -29,6 +31,14 @@
     "smaller": "Smaller",
     "normal": "Normal",
     "bigger": "Bigger"
+  },
+  "arabicFont": {
+    "toggle": "Arabic font",
+    "plex": "IBM Plex Sans Arabic",
+    "cairo": "Cairo",
+    "tajawal": "Tajawal",
+    "notoSansArabic": "Noto Sans Arabic",
+    "almarai": "Almarai"
   },
   "notFound": {
     "title": "Page not found",
@@ -456,6 +466,8 @@
     "createPrompt": "Create a contract to get started.",
     "customer": "Customer",
     "product": "Product",
+    "tag": "Tag",
+    "allTags": "All tags",
     "total": "Total",
     "status": "Status",
     "created": "Created",
@@ -481,6 +493,8 @@
       "loadingCustomers": "Loading…",
       "selectCustomer": "Select a customer",
       "productName": "Product name",
+      "tag": "Tag (optional)",
+      "tagPlaceholder": "e.g. VIP, Wholesale",
       "productPrice": "Product price",
       "costPrice": "Cost price",
       "costPriceHint": "What you paid for it. Never shown to the customer.",
@@ -503,6 +517,8 @@
     "detail": {
       "notFound": "Contract not found",
       "viewImage": "View attachment",
+      "addTag": "Add tag",
+      "tagPlaceholder": "e.g. VIP, Wholesale",
       "sendReminder": "Send reminder",
       "recordPayment": "Record payment",
       "cancelContract": "Cancel contract",
@@ -545,6 +561,7 @@
       "paymentMethod": "Payment method",
       "cash": "Cash",
       "paidAt": "Payment date",
+      "remainingAfterPayment": "Remaining after this payment",
       "quickNext": "Next installment",
       "quickFull": "Full outstanding",
       "note": "Note (optional)",

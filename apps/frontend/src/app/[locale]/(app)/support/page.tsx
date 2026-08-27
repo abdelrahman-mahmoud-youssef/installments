@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, Send } from 'lucide-react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -21,7 +21,6 @@ import { SupportMessageInput, supportMessageSchema } from '@/lib/schemas/support
 
 export default function SupportPage() {
   const t = useTranslations('support');
-  const locale = useLocale();
   const { data: currentUser } = useCurrentUser();
   const { data: messages } = useSupportMessages();
   const submitMessage = useSubmitSupportMessage();
@@ -115,7 +114,7 @@ export default function SupportPage() {
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium">{message.subject}</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">{formatDateTime(message.createdAt, locale)}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{formatDateTime(message.createdAt)}</p>
                 </div>
                 {message.adminReply && (
                   <Badge variant="secondary" className="shrink-0">
@@ -129,7 +128,7 @@ export default function SupportPage() {
                   <p className="text-xs font-medium text-foreground">{t('replyLabel')}</p>
                   <p className="mt-1 text-sm whitespace-pre-wrap">{message.adminReply}</p>
                   {message.repliedAt && (
-                    <p className="mt-1.5 text-xs text-muted-foreground">{formatDateTime(message.repliedAt, locale)}</p>
+                    <p className="mt-1.5 text-xs text-muted-foreground">{formatDateTime(message.repliedAt)}</p>
                   )}
                 </div>
               )}

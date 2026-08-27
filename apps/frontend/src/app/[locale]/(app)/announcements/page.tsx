@@ -1,7 +1,7 @@
 'use client';
 
 import { ImagePlus, Megaphone, Send, Users, X } from 'lucide-react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
@@ -31,7 +31,6 @@ const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 export default function AnnouncementsPage() {
   const t = useTranslations('announcements');
   const tCommon = useTranslations('common');
-  const locale = useLocale();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { data: currentUser } = useCurrentUser();
   const canCompose = currentUser?.role === 'ADMIN';
@@ -268,7 +267,7 @@ export default function AnnouncementsPage() {
                         {broadcast.body || (broadcast.hasImage ? t('imageOnly') : '—')}
                       </p>
                       <span className="shrink-0 text-xs text-muted-foreground">
-                        {formatDate(broadcast.createdAt, locale)}
+                        {formatDate(broadcast.createdAt)}
                       </span>
                     </div>
                     <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">

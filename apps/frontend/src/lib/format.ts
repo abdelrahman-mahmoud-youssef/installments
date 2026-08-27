@@ -1,3 +1,5 @@
+import { format } from 'date-fns';
+
 export function formatMoney(minorUnits: number, locale = 'en'): string {
   return new Intl.NumberFormat(locale, {
     style: 'currency',
@@ -25,22 +27,14 @@ export function toMajorUnits(minorUnits: number): number {
   return minorUnits / 100;
 }
 
-export function formatDate(date: string | Date, locale = 'en'): string {
-  return new Intl.DateTimeFormat(locale, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    timeZone: 'UTC',
-    numberingSystem: 'latn',
-  }).format(new Date(date));
+export function formatDate(date: string | Date): string {
+  const parsed = new Date(date);
+  const utcDate = new Date(parsed.getUTCFullYear(), parsed.getUTCMonth(), parsed.getUTCDate());
+  return format(utcDate, 'dd/MM/yyyy');
 }
 
-export function formatDateTime(date: string | Date, locale = 'en'): string {
-  return new Intl.DateTimeFormat(locale, {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-    numberingSystem: 'latn',
-  }).format(new Date(date));
+export function formatDateTime(date: string | Date): string {
+  return format(new Date(date), 'dd/MM/yyyy, HH:mm');
 }
 
 export function formatWeekday(date: string | Date, locale = 'en'): string {

@@ -1,5 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { cancelContract, ContractListParams, createContract, getContract, listContracts } from '@/lib/api/contracts';
+import {
+  cancelContract,
+  ContractListParams,
+  createContract,
+  getContract,
+  listContracts,
+  listContractTags,
+  updateContractTag,
+} from '@/lib/api/contracts';
 import { ContractInput } from '@/lib/schemas/contract';
 import { customerKeys } from './use-customers';
 
@@ -7,6 +15,7 @@ export const contractKeys = {
   all: ['contracts'] as const,
   list: (params: ContractListParams) => [...contractKeys.all, 'list', params] as const,
   detail: (id: string) => [...contractKeys.all, 'detail', id] as const,
+  tags: () => [...contractKeys.all, 'tags'] as const,
 };
 
 export function useContracts(params: ContractListParams) {
@@ -43,6 +52,25 @@ export function useCancelContract(id: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: contractKeys.all });
       queryClient.invalidateQueries({ queryKey: contractKeys.detail(id) });
+    },
+  });
+}
+
+export function useContractTags() {
+  return useQuery({
+    queryKey: contractKeys.tags(),
+    queryFn: listContractTags,
+  });
+}
+
+export function useUpdateContractTag(id: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (tag: string | null) => updateContractTag(id, tag),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: contractKeys.all });
+      queryClient.invalidateQueries({ queryKey: contractKeys.detail(id) });
+      queryClient.invalidateQueries({ queryKey: contractKeys.tags() });
     },
   });
 }

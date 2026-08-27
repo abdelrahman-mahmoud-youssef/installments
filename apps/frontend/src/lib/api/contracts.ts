@@ -45,6 +45,7 @@ export interface ContractListItem {
   installmentCount: number;
   recurrenceType: RecurrenceType;
   status: ContractStatus;
+  tag: string | null;
   createdAt: string;
   imageUrl: string | null;
   customer: ContractCustomer;
@@ -63,6 +64,7 @@ export interface ContractListParams {
   status?: ContractStatus;
   customerId?: string;
   delayedOnly?: boolean;
+  tag?: string;
   page?: number;
   limit?: number;
 }
@@ -83,6 +85,7 @@ async function toCreateContractPayload(input: ContractInput): Promise<Record<str
     intervalDays: input.intervalDays,
     startDate: input.startDate,
     firstPaymentDate: input.firstPaymentDate,
+    tag: input.tag || undefined,
     image: input.image ? await fileToBase64(input.image) : undefined,
   };
 }
@@ -101,4 +104,12 @@ export async function createContract(input: ContractInput): Promise<ContractDeta
 
 export function cancelContract(id: string): Promise<ContractDetail> {
   return apiClient.patch(`contracts/${id}/status`, { status: 'CANCELLED' });
+}
+
+export function updateContractTag(id: string, tag: string | null): Promise<ContractDetail> {
+  return apiClient.patch(`contracts/${id}/tag`, { tag: tag ?? '' });
+}
+
+export function listContractTags(): Promise<string[]> {
+  return apiClient.get('contracts/tags');
 }

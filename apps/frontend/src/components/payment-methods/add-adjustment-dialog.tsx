@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { toast } from 'sonner';
+import { DatePickerField } from '@/components/shared/date-picker-field';
 import { Money } from '@/components/shared/money';
 import { NumberInput } from '@/components/shared/number-input';
 import { Button } from '@/components/ui/button';
@@ -19,7 +20,6 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
 import { useCreateCounterpartyAdjustment } from '@/hooks/use-counterparties';
@@ -131,7 +131,12 @@ export function AddAdjustmentDialog({
                   <FormItem className="min-w-0">
                     <FormLabel>{t('adjustmentDate')}</FormLabel>
                     <FormControl>
-                      <Input type="date" max={todayIso()} {...field} />
+                      <DatePickerField
+                        value={field.value}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        max={todayIso()}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

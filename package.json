@@ -7,6 +7,7 @@
   },
   "scripts": {
     "dev": "pnpm --parallel -r dev",
+    "dev:mobile": "pnpm --filter installment-mobile start",
     "build": "pnpm -r build",
     "lint": "pnpm -r --if-present lint",
     "test": "pnpm -r --if-present test",

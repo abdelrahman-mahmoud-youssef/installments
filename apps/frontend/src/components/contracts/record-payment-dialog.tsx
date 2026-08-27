@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { DatePickerField } from '@/components/shared/date-picker-field';
 import { Money } from '@/components/shared/money';
 import { NumberInput } from '@/components/shared/number-input';
 import { PaymentMethodIcon } from '@/components/shared/payment-method-icon';
@@ -59,6 +60,14 @@ export function RecordPaymentDialog({
     0,
   );
   const manualTotal = Object.values(manualAmounts).reduce((total, value) => total + (Number(value) || 0), 0);
+
+  const watchedAmount = form.watch('amount');
+  const enteredMinorUnits = isManual
+    ? toMinorUnits(manualTotal)
+    : typeof watchedAmount === 'number' && !Number.isNaN(watchedAmount) && watchedAmount > 0
+      ? toMinorUnits(watchedAmount)
+      : 0;
+  const previewRemaining = Math.max(totalOutstanding - enteredMinorUnits, 0);
 
   async function handleSubmit(values: PaymentInput) {
     const allocations = isManual
@@ -167,12 +176,27 @@ export function RecordPaymentDialog({
                   <FormItem>
                     <FormLabel>{t('paidAt')}</FormLabel>
                     <FormControl>
-                      <Input type="date" max={todayIso()} {...field} />
+                      <DatePickerField
+                        value={field.value}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        max={todayIso()}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
+              {outstandingInstallments.length > 0 && (
+                <div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 px-3 py-2.5">
+                  <span className="text-sm text-muted-foreground">{t('remainingAfterPayment')}</span>
+                  <Money
+                    minorUnits={previewRemaining}
+                    className={cn('text-sm font-semibold', previewRemaining === 0 && 'text-success')}
+                  />
+                </div>
+              )}
 
               <FormField
                 control={form.control}

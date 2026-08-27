@@ -20,6 +20,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { ImageUploadSlot } from '@/components/shared/image-upload-slot';
+import { PhoneInput } from '@/components/shared/phone-input';
 import { ApiError } from '@/lib/api/client';
 import { Customer } from '@/lib/api/customers';
 import { CustomerInput, customerSchema } from '@/lib/schemas/customer';
@@ -111,7 +112,7 @@ export function CustomerFormDialog({
                 <FormItem>
                   <FormLabel>{t('phone')}</FormLabel>
                   <FormControl>
-                    <Input type="tel" {...field} />
+                    <PhoneInput {...field} onContactSelected={(phone) => field.onChange(phone)} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

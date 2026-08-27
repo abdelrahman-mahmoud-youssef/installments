@@ -15,13 +15,16 @@ import { TableSkeleton } from '@/components/shared/skeletons';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Link } from '@/i18n/navigation';
 import type { ContractListItem } from '@/lib/api/contracts';
-import { useContracts } from '@/hooks/use-contracts';
+import { useContracts, useContractTags } from '@/hooks/use-contracts';
 import { ContractStatus, CONTRACT_STATUSES } from '@/lib/enums';
 import { routes } from '@/lib/routes';
+
+const ALL_TAGS = '__all__';
 
 export default function ContractsPage() {
   const t = useTranslations('contracts');
@@ -29,11 +32,14 @@ export default function ContractsPage() {
   const tStatus = useTranslations('status');
   const [status, setStatus] = useState<ContractStatus>('ACTIVE');
   const [delayedOnly, setDelayedOnly] = useState(false);
+  const [tag, setTag] = useState<string | undefined>(undefined);
   const [page, setPage] = useState(1);
 
+  const { data: tags } = useContractTags();
   const { data, isLoading, isError } = useContracts({
     status,
     delayedOnly: delayedOnly || undefined,
+    tag,
     page,
     limit: 20,
   });
@@ -63,6 +69,16 @@ export default function ContractsPage() {
       id: 'total',
       header: t('total'),
       cell: (contract) => <Money minorUnits={contract.totalAmount} className="font-medium" />,
+    },
+    {
+      id: 'tag',
+      header: t('tag'),
+      cell: (contract) =>
+        contract.tag ? (
+          <Badge variant="outline" className="shrink-0">
+            {contract.tag}
+          </Badge>
+        ) : null,
     },
     {
       id: 'status',
@@ -116,16 +132,39 @@ export default function ContractsPage() {
             </div>
           </Tabs>
 
-          <label className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Switch
-              checked={delayedOnly}
-              onCheckedChange={(next) => {
-                setDelayedOnly(next);
-                setPage(1);
-              }}
-            />
-            {tCommon('delayedOnly')}
-          </label>
+          <div className="flex flex-wrap items-center gap-3">
+            {tags && tags.length > 0 && (
+              <Select
+                value={tag ?? ALL_TAGS}
+                onValueChange={(value) => {
+                  setTag(value && value !== ALL_TAGS ? value : undefined);
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger className="w-40">
+                  <SelectValue>{tag ?? t('allTags')}</SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ALL_TAGS}>{t('allTags')}</SelectItem>
+                  {tags.map((tagOption) => (
+                    <SelectItem key={tagOption} value={tagOption}>
+                      {tagOption}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            <label className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Switch
+                checked={delayedOnly}
+                onCheckedChange={(next) => {
+                  setDelayedOnly(next);
+                  setPage(1);
+                }}
+              />
+              {tCommon('delayedOnly')}
+            </label>
+          </div>
         </div>
 
         {isLoading ? (

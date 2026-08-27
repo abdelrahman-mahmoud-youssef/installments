@@ -1,7 +1,7 @@
 'use client';
 
 import { History } from 'lucide-react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { EmptyState } from '@/components/shared/empty-state';
 import { DataTable, type Column } from '@/components/shared/data-table';
@@ -17,7 +17,6 @@ import { formatDateTime } from '@/lib/format';
 export default function ActivityPage() {
   const t = useTranslations('activity');
   const tCommon = useTranslations('common');
-  const locale = useLocale();
   const [page, setPage] = useState(1);
 
   const { data, isLoading, isError } = useAuditLog({ page, limit: 20 });
@@ -47,7 +46,7 @@ export default function ActivityPage() {
       header: t('date'),
       align: 'end',
       cell: (entry) => (
-        <span className="text-muted-foreground tabular-nums">{formatDateTime(entry.createdAt, locale)}</span>
+        <span className="text-muted-foreground tabular-nums">{formatDateTime(entry.createdAt)}</span>
       ),
     },
   ];

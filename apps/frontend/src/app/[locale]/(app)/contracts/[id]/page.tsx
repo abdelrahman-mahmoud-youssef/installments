@@ -16,6 +16,7 @@ import { useParams } from 'next/navigation';
 import { useState } from 'react';
 import { FaWhatsapp } from 'react-icons/fa6';
 import { toast } from 'sonner';
+import { ContractTagBadge } from '@/components/contracts/contract-tag-badge';
 import { RecordPaymentDialog } from '@/components/contracts/record-payment-dialog';
 import { CustomerQrDialog } from '@/components/customers/customer-qr-dialog';
 import { BackLink } from '@/components/shared/back-link';
@@ -186,6 +187,7 @@ export default function ContractDetailPage() {
             <div className="flex flex-wrap items-center gap-3">
               <h1 className="font-heading text-2xl font-semibold tracking-tight">{contract.productName}</h1>
               <StatusBadge status={contract.status} />
+              <ContractTagBadge contractId={contract.id} tag={contract.tag} />
             </div>
             <Link
               href={routes.customer(contract.customer.id)}

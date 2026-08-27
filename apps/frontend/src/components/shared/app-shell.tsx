@@ -3,6 +3,8 @@
 import { ArrowUpRight, KeyRound, LogOut, Menu, ShieldCheck, Store, User } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
+import { AdminArabicFontPicker } from '@/components/shared/admin-arabic-font-picker';
+import { AdminFontSizeToggle } from '@/components/shared/admin-font-size-toggle';
 import { ChangePasswordDialog } from '@/components/shared/change-password-dialog';
 import { InstallBanner } from '@/components/shared/install-banner';
 import { LanguageSwitcher } from '@/components/shared/language-switcher';
@@ -25,6 +27,8 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { usePaymentClaims } from '@/hooks/use-payment-claims';
 import { useSupportMessages } from '@/hooks/use-support';
 import { Link, usePathname, useRouter } from '@/i18n/navigation';
+import { AdminArabicFontProvider } from '@/lib/admin-arabic-font';
+import { AdminFontSizeProvider } from '@/lib/admin-font-size';
 import { logout } from '@/lib/api/auth';
 import { navigationItems } from '@/lib/navigation';
 import { getShopUrl } from '@/lib/root-domain';
@@ -175,57 +179,63 @@ export function AppShell({
   const logoUrl = branding?.logoUrl ?? null;
 
   return (
-    <div className="min-h-screen bg-background">
-      <aside className="fixed inset-y-0 start-0 z-40 hidden w-64 flex-col border-e border-sidebar-border bg-sidebar md:flex">
-        <div className="flex h-16 items-center px-5">
-          <BrandLogo logoUrl={logoUrl} label={appLabel} />
-        </div>
-        {branding?.slug && <ViewShopPageLink slug={branding.slug} className="px-5 pb-3" />}
-        <div className="flex-1 overflow-y-auto px-3 py-2">
-          <NavLinks />
-        </div>
-      </aside>
+    <AdminFontSizeProvider>
+      <AdminArabicFontProvider>
+        <div className="min-h-screen bg-background">
+          <aside className="fixed inset-y-0 start-0 z-40 hidden w-64 flex-col border-e border-sidebar-border bg-sidebar md:flex">
+            <div className="flex h-16 items-center px-5">
+              <BrandLogo logoUrl={logoUrl} label={appLabel} />
+            </div>
+            {branding?.slug && <ViewShopPageLink slug={branding.slug} className="px-5 pb-3" />}
+            <div className="flex-1 overflow-y-auto px-3 py-2">
+              <NavLinks />
+            </div>
+          </aside>
 
-      <div className="flex min-h-screen flex-col md:ps-64">
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur-md sm:px-6">
-          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-            <SheetTrigger
-              render={
-                <Button variant="ghost" size="icon-sm" className="md:hidden" aria-label="Menu">
-                  <Menu className="size-5" />
-                </Button>
-              }
-            />
-            <SheetContent side={sheetSide} className="w-72 p-0">
-              <SheetTitle className="sr-only">{appLabel}</SheetTitle>
-              <div className="flex h-16 items-center px-5">
+          <div className="flex min-h-screen flex-col md:ps-64">
+            <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur-md sm:px-6">
+              <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+                <SheetTrigger
+                  render={
+                    <Button variant="ghost" size="icon-sm" className="md:hidden" aria-label="Menu">
+                      <Menu className="size-5" />
+                    </Button>
+                  }
+                />
+                <SheetContent side={sheetSide} className="w-72 p-0">
+                  <SheetTitle className="sr-only">{appLabel}</SheetTitle>
+                  <div className="flex h-16 items-center px-5">
+                    <BrandLogo logoUrl={logoUrl} label={appLabel} />
+                  </div>
+                  {branding?.slug && <ViewShopPageLink slug={branding.slug} className="px-5 pb-3" />}
+                  <div className="px-3 py-2">
+                    <NavLinks onNavigate={() => setMobileOpen(false)} />
+                  </div>
+                </SheetContent>
+              </Sheet>
+
+              <div className="md:hidden">
                 <BrandLogo logoUrl={logoUrl} label={appLabel} />
               </div>
-              {branding?.slug && <ViewShopPageLink slug={branding.slug} className="px-5 pb-3" />}
-              <div className="px-3 py-2">
-                <NavLinks onNavigate={() => setMobileOpen(false)} />
+
+              <div className="ms-auto flex items-center gap-1">
+                <ThemeToggle />
+                <AdminFontSizeToggle />
+                <AdminArabicFontPicker />
+                <LanguageSwitcher />
+                <div className="mx-1 h-5 w-px bg-border" />
+                <UserMenu appLabel={appLabel} />
               </div>
-            </SheetContent>
-          </Sheet>
+            </header>
 
-          <div className="md:hidden">
-            <BrandLogo logoUrl={logoUrl} label={appLabel} />
+            <InstallBanner storageKey="pwa-install-banner-dashboard" message={tCommon('installBannerMessage')} />
+
+            <main className="flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+              <div className="mx-auto w-full max-w-6xl">{children}</div>
+            </main>
           </div>
-
-          <div className="ms-auto flex items-center gap-1">
-            <ThemeToggle />
-            <LanguageSwitcher />
-            <div className="mx-1 h-5 w-px bg-border" />
-            <UserMenu appLabel={appLabel} />
-          </div>
-        </header>
-
-        <InstallBanner storageKey="pwa-install-banner-dashboard" message={tCommon('installBannerMessage')} />
-
-        <main className="flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-          <div className="mx-auto w-full max-w-6xl">{children}</div>
-        </main>
-      </div>
-    </div>
+        </div>
+      </AdminArabicFontProvider>
+    </AdminFontSizeProvider>
   );
 }

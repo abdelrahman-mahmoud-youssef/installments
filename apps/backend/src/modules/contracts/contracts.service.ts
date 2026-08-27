@@ -84,6 +84,7 @@ export class ContractsService {
           intervalDays: createContractDto.intervalDays,
           startDate: new Date(createContractDto.startDate),
           firstPaymentDate: new Date(createContractDto.firstPaymentDate),
+          tag: createContractDto.tag,
           imageUrl,
         },
       });
@@ -113,6 +114,7 @@ export class ContractsService {
       ...(query.status && { status: query.status }),
       ...(query.customerId && { customerId: query.customerId }),
       ...(query.delayedOnly && { installments: { some: overdueInstallmentWhere(getUtcToday()) } }),
+      ...(query.tag && { tag: query.tag }),
     };
 
     const [data, total] = await Promise.all([
@@ -170,6 +172,27 @@ export class ContractsService {
     });
 
     return this.findOne(tenantId, id);
+  }
+
+  async updateTag(tenantId: string, id: string, tag: string | null): Promise<ContractDetail> {
+    const contract = await this.prisma.contract.findFirst({ where: { id, tenantId } });
+    if (!contract) {
+      throw new NotFoundException('Contract not found.');
+    }
+
+    await this.prisma.contract.update({ where: { id }, data: { tag } });
+
+    return this.findOne(tenantId, id);
+  }
+
+  async findDistinctTags(tenantId: string): Promise<string[]> {
+    const rows = await this.prisma.contract.findMany({
+      where: { tenantId, tag: { not: null } },
+      distinct: ['tag'],
+      select: { tag: true },
+      orderBy: { tag: 'asc' },
+    });
+    return rows.map((row) => row.tag as string);
   }
 
   private async saveContractImage(tenantId: string, image: string): Promise<string> {

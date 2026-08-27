@@ -9,6 +9,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { CustomerFormDialog } from '@/components/customers/customer-form-dialog';
 import { BackLink } from '@/components/shared/back-link';
+import { DatePickerField } from '@/components/shared/date-picker-field';
 import { NumberInput } from '@/components/shared/number-input';
 import { PageHeader } from '@/components/shared/page-header';
 import { Section } from '@/components/shared/section';
@@ -24,7 +25,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useRouter } from '@/i18n/navigation';
-import { useCreateContract } from '@/hooks/use-contracts';
+import { useContractTags, useCreateContract } from '@/hooks/use-contracts';
 import { useCreateCustomer, useCustomers } from '@/hooks/use-customers';
 import { ApiError } from '@/lib/api/client';
 import { CALCULATION_METHODS, type CalculationMethod, RECURRENCE_TYPES } from '@/lib/enums';
@@ -113,6 +114,7 @@ export default function NewContractPage() {
   const preselectedCustomerId = searchParams.get('customerId') ?? '';
 
   const { data: customers, isLoading: isLoadingCustomers } = useCustomers({ limit: 100 });
+  const { data: existingTags } = useContractTags();
   const createContract = useCreateContract();
   const createCustomer = useCreateCustomer();
   const [imageName, setImageName] = useState<string | null>(null);
@@ -130,6 +132,7 @@ export default function NewContractPage() {
       recurrenceType: 'MONTHLY',
       startDate: '',
       firstPaymentDate: '',
+      tag: '',
     },
   });
 
@@ -236,6 +239,24 @@ export default function NewContractPage() {
                         <FormControl>
                           <Input {...field} />
                         </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="tag"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('tag')}</FormLabel>
+                        <FormControl>
+                          <Input {...field} list="contract-tag-suggestions" placeholder={t('tagPlaceholder')} />
+                        </FormControl>
+                        <datalist id="contract-tag-suggestions">
+                          {(existingTags ?? []).map((tagOption) => (
+                            <option key={tagOption} value={tagOption} />
+                          ))}
+                        </datalist>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -455,7 +476,7 @@ export default function NewContractPage() {
                       <FormItem>
                         <FormLabel>{t('startDate')}</FormLabel>
                         <FormControl>
-                          <Input type="date" {...field} />
+                          <DatePickerField value={field.value} onChange={field.onChange} onBlur={field.onBlur} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -468,7 +489,7 @@ export default function NewContractPage() {
                       <FormItem>
                         <FormLabel>{t('firstPaymentDate')}</FormLabel>
                         <FormControl>
-                          <Input type="date" {...field} />
+                          <DatePickerField value={field.value} onChange={field.onChange} onBlur={field.onBlur} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

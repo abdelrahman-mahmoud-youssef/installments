@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, Plus, Users } from 'lucide-react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -130,7 +130,6 @@ function AddStaffDialog() {
 
 export default function StaffPage() {
   const t = useTranslations('staff');
-  const locale = useLocale();
   const { data: staff, isLoading } = useStaff();
   const setStaffActive = useSetStaffActive();
 
@@ -165,7 +164,7 @@ export default function StaffPage() {
                       {member.email}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {t('staffCreatedAt', { date: formatDate(member.createdAt, locale) })}
+                      {t('staffCreatedAt', { date: formatDate(member.createdAt) })}
                     </p>
                   </div>
                   <div className="flex shrink-0 items-center gap-3">
