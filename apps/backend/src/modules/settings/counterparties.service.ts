@@ -149,32 +149,36 @@ export class CounterpartiesService {
       }),
     ]);
 
-    const items: CounterpartyHistoryItem[] = [
+    const items: (CounterpartyHistoryItem & { createdAt: Date })[] = [
       ...transactions.map(
-        (transaction): CounterpartyHistoryItem => ({
+        (transaction): CounterpartyHistoryItem & { createdAt: Date } => ({
           kind: 'TRANSACTION',
           id: transaction.id,
           direction: transaction.direction,
           amount: transaction.amount,
           note: transaction.note,
           occurredAt: transaction.occurredAt,
+          createdAt: transaction.createdAt,
           receiptUrl: transaction.receiptUrl,
           paymentMethodLabel: transaction.paymentMethod.label,
         }),
       ),
       ...adjustments.map(
-        (adjustment): CounterpartyHistoryItem => ({
+        (adjustment): CounterpartyHistoryItem & { createdAt: Date } => ({
           kind: 'ADJUSTMENT',
           id: adjustment.id,
           direction: adjustment.direction,
           amount: adjustment.amount,
           note: adjustment.note,
           occurredAt: adjustment.occurredAt,
+          createdAt: adjustment.createdAt,
           receiptUrl: null,
           paymentMethodLabel: null,
         }),
       ),
-    ].sort((a, b) => b.occurredAt.getTime() - a.occurredAt.getTime());
+    ].sort(
+      (a, b) => b.occurredAt.getTime() - a.occurredAt.getTime() || b.createdAt.getTime() - a.createdAt.getTime(),
+    );
 
     const totalIn = items.filter((item) => item.direction === 'IN').reduce((sum, item) => sum + item.amount, 0);
     const totalOut = items.filter((item) => item.direction === 'OUT').reduce((sum, item) => sum + item.amount, 0);

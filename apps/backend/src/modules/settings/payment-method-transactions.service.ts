@@ -83,7 +83,7 @@ export class PaymentMethodTransactionsService {
     const [data, total, sums] = await Promise.all([
       this.prisma.paymentMethodTransaction.findMany({
         where,
-        orderBy: { occurredAt: 'desc' },
+        orderBy: [{ occurredAt: 'desc' }, { createdAt: 'desc' }],
         skip: (query.page - 1) * query.limit,
         take: query.limit,
       }),
