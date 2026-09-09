@@ -13,6 +13,9 @@
       "bundleIdentifier": "com.qistak.app",
       "infoPlist": {
         "CFBundleAllowMixedLocalizations": true
+      },
+      "config": {
+        "usesNonExemptEncryption": false
       }
     },
     "android": {
