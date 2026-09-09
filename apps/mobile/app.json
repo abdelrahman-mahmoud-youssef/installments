@@ -7,6 +7,7 @@
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "icon": "./assets/icon.png",
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.qistak.app",
@@ -16,13 +17,26 @@
     },
     "android": {
       "package": "com.qistak.app",
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#f4f6f5"
+      }
     },
     "plugins": [
       "expo-router",
       "expo-secure-store",
       "expo-localization",
-      "expo-updates"
+      "expo-updates",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 220,
+          "resizeMode": "contain",
+          "backgroundColor": "#f4f6f5"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": false

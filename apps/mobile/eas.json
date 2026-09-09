@@ -1,0 +1,25 @@
+{
+  "cli": {
+    "version": ">= 13.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "preview": {
+      "distribution": "internal",
+      "channel": "preview",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://REPLACE_WITH_PRODUCTION_BACKEND_URL"
+      }
+    },
+    "production": {
+      "autoIncrement": true,
+      "channel": "production",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://REPLACE_WITH_PRODUCTION_BACKEND_URL"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

@@ -8,6 +8,13 @@ iOS-first companion app for the installment SaaS. Shared codebase for iOS and An
 - The API URL is auto-derived from the Expo dev server host (phone on the same LAN hits `http://<dev-machine>:3001`). Override with `EXPO_PUBLIC_API_URL`.
 - Auth is a JWT from `POST /auth/login`, stored in `expo-secure-store` and sent as a Bearer header (no cookies — the web proxy is not used).
 
+## Building for iOS (EAS)
+
+- No Mac/Xcode needed — `eas build --profile preview --platform ios` (internal test install) or `--profile production` (App Store) build in the cloud, per `eas.json`.
+- Both non-dev profiles set `EXPO_PUBLIC_API_URL` to a real deployed backend — update the placeholder in `eas.json` once the backend is live (the mobile app hits it directly, so it must be **publicly** reachable, unlike the web frontend's Railway-private backend URL).
+- `app.json`'s `icon`/`adaptiveIcon`/splash assets live in `assets/`, generated from the same master logo (`apps/frontend/public/qistak.png`) used for the web app's PWA icons — regenerate from that file if the brand mark changes, don't hand-edit the PNGs.
+- `eas submit --platform ios` uploads to App Store Connect once Apple Developer credentials are set up via `eas credentials`.
+
 ## Architecture (do not silently change)
 
 - **Routes** live in `app/` (Expo Router file-based). Five tabs: Dashboard, Contracts, Customers, Wallets (payment methods), More. Detail screens (`contract/[id]`, `customer/[id]`, `staff`, `activity`, `settings`) are stack screens with native headers.
