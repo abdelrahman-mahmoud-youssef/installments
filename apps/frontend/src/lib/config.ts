@@ -20,4 +20,5 @@ export const config = {
     return process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? null;
   },
   authCookieName: 'installment_token',
+  contactEmail: 'support@qistak.com',
 } as const;

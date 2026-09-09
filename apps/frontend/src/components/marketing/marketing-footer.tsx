@@ -1,5 +1,7 @@
 import { useTranslations } from 'next-intl';
 import { Logo } from '@/components/shared/logo';
+import { Link } from '@/i18n/navigation';
+import { routes } from '@/lib/routes';
 
 const NAV_LINKS = [
   { key: 'features', href: '#features' },
@@ -29,6 +31,18 @@ export function MarketingFooter() {
               {t(link.key)}
             </a>
           ))}
+          <Link
+            href={routes.privacy}
+            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            {tFooter('privacyLink')}
+          </Link>
+          <Link
+            href={routes.terms}
+            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            {tFooter('termsLink')}
+          </Link>
         </nav>
 
         <p className="text-xs text-muted-foreground">

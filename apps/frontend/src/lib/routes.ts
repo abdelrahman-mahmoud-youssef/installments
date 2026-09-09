@@ -4,6 +4,8 @@ export const routes = {
   register: '/register',
   forgotPassword: '/forgot-password',
   resetPassword: '/reset-password',
+  privacy: '/privacy',
+  terms: '/terms',
   dashboard: '/dashboard',
   customers: '/customers',
   customer: (id: string) => `/customers/${id}`,

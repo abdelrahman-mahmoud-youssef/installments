@@ -5,7 +5,9 @@ import { useLocale, useTranslations } from 'next-intl';
 import { LanguageSwitcher } from '@/components/shared/language-switcher';
 import { LogoMark } from '@/components/shared/logo';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
+import { Link } from '@/i18n/navigation';
 import { formatMoney } from '@/lib/format';
+import { routes } from '@/lib/routes';
 
 function BrandPanel() {
   const t = useTranslations('auth.brand');
@@ -94,6 +96,8 @@ function BrandPanel() {
 }
 
 export function AuthShell({ children }: { children: React.ReactNode }) {
+  const t = useTranslations('landing.footer');
+
   return (
     <div className="flex min-h-screen bg-background">
       <div className="flex flex-1 flex-col px-6 py-6 sm:px-10">
@@ -103,6 +107,14 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
         </div>
         <div className="flex flex-1 items-center justify-center py-10">
           <div className="w-full max-w-sm">{children}</div>
+        </div>
+        <div className="flex items-center justify-center gap-4 pb-2">
+          <Link href={routes.privacy} className="text-xs text-muted-foreground hover:text-foreground hover:underline">
+            {t('privacyLink')}
+          </Link>
+          <Link href={routes.terms} className="text-xs text-muted-foreground hover:text-foreground hover:underline">
+            {t('termsLink')}
+          </Link>
         </div>
       </div>
       <BrandPanel />
