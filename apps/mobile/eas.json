@@ -8,14 +8,14 @@
       "distribution": "internal",
       "channel": "preview",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://REPLACE_WITH_PRODUCTION_BACKEND_URL"
+        "EXPO_PUBLIC_API_URL": "https://api.qistak.com"
       }
     },
     "production": {
       "autoIncrement": true,
       "channel": "production",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://REPLACE_WITH_PRODUCTION_BACKEND_URL"
+        "EXPO_PUBLIC_API_URL": "https://api.qistak.com"
       }
     }
   },
