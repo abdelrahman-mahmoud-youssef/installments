@@ -136,7 +136,7 @@ export default function LoginScreen() {
               label={t('auth.password')}
               value={password}
               onChangeText={setPassword}
-              secureTextEntry
+              secureToggle
               textContentType="password"
             />
             {error ? (

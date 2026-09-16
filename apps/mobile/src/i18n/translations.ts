@@ -20,6 +20,8 @@ const en = {
     genericError: 'Something went wrong. Please try again.',
     networkError: 'Could not reach the server. Check your connection.',
     requiredField: 'This field is required.',
+    showPassword: 'Show password',
+    hidePassword: 'Hide password',
   },
   tabs: {
     dashboard: 'Home',
@@ -224,6 +226,8 @@ const ar: typeof en = {
     genericError: 'حدث خطأ ما. حاول مرة أخرى.',
     networkError: 'تعذر الوصول إلى الخادم. تحقق من اتصالك بالإنترنت.',
     requiredField: 'هذا الحقل مطلوب.',
+    showPassword: 'إظهار كلمة المرور',
+    hidePassword: 'إخفاء كلمة المرور',
   },
   tabs: {
     dashboard: 'الرئيسية',

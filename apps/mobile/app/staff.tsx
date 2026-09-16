@@ -117,7 +117,7 @@ export default function StaffScreen() {
             autoCapitalize="none"
             keyboardType="email-address"
           />
-          <TextField label={t('staff.password')} value={password} onChangeText={setPassword} secureTextEntry />
+          <TextField label={t('staff.password')} value={password} onChangeText={setPassword} secureToggle />
           {formError ? (
             <AppText variant="caption" tone="danger">
               {formError}
