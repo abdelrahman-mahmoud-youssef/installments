@@ -11,13 +11,7 @@ import {
   getContract,
   listContracts,
 } from '@/api/contracts';
-import {
-  CreateCustomerInput,
-  createCustomer,
-  CustomerListParams,
-  getCustomer,
-  listCustomers,
-} from '@/api/customers';
+import { CustomerListParams, getCustomer, listCustomers } from '@/api/customers';
 import { getDashboard } from '@/api/dashboard';
 import {
   CreatePaymentMethodInput,
@@ -62,14 +56,6 @@ export function useCustomers(params: Omit<CustomerListParams, 'page' | 'limit'>)
 
 export function useCustomer(id: string) {
   return useQuery({ queryKey: queryKeys.customer(id), queryFn: () => getCustomer(id) });
-}
-
-export function useCreateCustomer() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (input: CreateCustomerInput) => createCustomer(input),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['customers'] }),
-  });
 }
 
 export function useContracts(params: Omit<ContractListParams, 'page' | 'limit'>) {

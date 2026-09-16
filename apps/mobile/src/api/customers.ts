@@ -39,21 +39,10 @@ export interface CustomerListParams {
   limit?: number;
 }
 
-export interface CreateCustomerInput {
-  name: string;
-  phone: string;
-  address?: string;
-  notes?: string;
-}
-
 export function listCustomers(params: CustomerListParams): Promise<PaginatedResult<CustomerListItem>> {
   return apiClient.get(`customers${buildQuery({ ...params })}`);
 }
 
 export function getCustomer(id: string): Promise<CustomerDetail> {
   return apiClient.get(`customers/${id}`);
-}
-
-export function createCustomer(input: CreateCustomerInput): Promise<Customer> {
-  return apiClient.post('customers', input);
 }

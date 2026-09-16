@@ -1,7 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, RefreshControl, View } from 'react-native';
-import { CustomerFormSheet } from '@/components/customers/customer-form-sheet';
 import { CustomerCard } from '@/components/customers/customer-card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
@@ -9,8 +8,7 @@ import { FilterChips } from '@/components/ui/filter-chips';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { SearchBar } from '@/components/ui/search-bar';
 import { SkeletonCardList } from '@/components/ui/skeleton';
-import { useToast } from '@/components/ui/toast-context';
-import { useCreateCustomer, useCustomers } from '@/hooks/queries';
+import { useCustomers } from '@/hooks/queries';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useI18n } from '@/i18n/i18n-context';
 import { useTheme } from '@/theme/theme-context';
@@ -22,12 +20,9 @@ export default function CustomersScreen() {
   const { t } = useI18n();
   const { colors } = useTheme();
   const router = useRouter();
-  const { showToast } = useToast();
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<CustomerFilter>('all');
-  const [formVisible, setFormVisible] = useState(false);
   const debouncedSearch = useDebouncedValue(search);
-  const createMutation = useCreateCustomer();
 
   const query = useCustomers({
     q: debouncedSearch.trim() || undefined,
@@ -56,12 +51,7 @@ export default function CustomersScreen() {
         }
         ListHeaderComponent={
           <View style={{ gap: spacing.md }}>
-            <ScreenHeader
-              title={t('customers.title')}
-              actionIcon="add"
-              actionLabel={t('customers.addCustomer')}
-              onAction={() => setFormVisible(true)}
-            >
+            <ScreenHeader title={t('customers.title')}>
               <SearchBar
                 value={search}
                 onChangeText={setSearch}
@@ -87,13 +77,7 @@ export default function CustomersScreen() {
             ) : debouncedSearch.trim() ? (
               <EmptyState icon="search-outline" title={t('customers.emptySearch')} />
             ) : (
-              <EmptyState
-                icon="people-outline"
-                title={t('customers.empty')}
-                message={t('customers.emptyHint')}
-                actionTitle={t('customers.addCustomer')}
-                onAction={() => setFormVisible(true)}
-              />
+              <EmptyState icon="people-outline" title={t('customers.empty')} message={t('customers.emptyHint')} />
             )}
           </View>
         }
@@ -107,17 +91,6 @@ export default function CustomersScreen() {
             <CustomerCard customer={item} onPress={() => router.push(`/customer/${item.id}`)} />
           </View>
         )}
-      />
-
-      <CustomerFormSheet
-        visible={formVisible}
-        saving={createMutation.isPending}
-        onClose={() => setFormVisible(false)}
-        onSubmit={async (input) => {
-          await createMutation.mutateAsync(input);
-          setFormVisible(false);
-          showToast(t('customers.created'));
-        }}
       />
     </View>
   );

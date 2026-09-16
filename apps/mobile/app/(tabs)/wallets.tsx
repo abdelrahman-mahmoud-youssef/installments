@@ -47,7 +47,7 @@ export default function WalletsScreen() {
     [methods],
   );
 
-  const openForm = (method: PaymentMethod | null) => {
+  const openForm = (method: PaymentMethod) => {
     setActionMethod(null);
     setEditingMethod(method);
     setFormVisible(true);
@@ -109,13 +109,7 @@ export default function WalletsScreen() {
           <RefreshControl refreshing={isRefetching} onRefresh={() => void refetch()} tintColor={colors.textMuted} />
         }
         ListHeaderComponent={
-          <ScreenHeader
-            title={t('wallets.title')}
-            subtitle={t('wallets.subtitle')}
-            actionIcon={isAdmin ? 'add' : undefined}
-            actionLabel={t('wallets.addMethod')}
-            onAction={isAdmin ? () => openForm(null) : undefined}
-          />
+          <ScreenHeader title={t('wallets.title')} subtitle={t('wallets.subtitle')} />
         }
         ListEmptyComponent={
           <View style={{ paddingHorizontal: spacing.xl }}>
@@ -130,13 +124,7 @@ export default function WalletsScreen() {
             ) : isError ? (
               <ErrorState error={error} onRetry={() => void refetch()} />
             ) : (
-              <EmptyState
-                icon="wallet-outline"
-                title={t('wallets.empty')}
-                message={t('wallets.emptyHint')}
-                actionTitle={t('wallets.addMethod')}
-                onAction={() => openForm(null)}
-              />
+              <EmptyState icon="wallet-outline" title={t('wallets.empty')} message={t('wallets.emptyHint')} />
             )}
           </View>
         }
