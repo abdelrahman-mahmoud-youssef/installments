@@ -89,6 +89,7 @@ enum BrandColor {
   violet
   rose
   amber
+  yellow
   slate
 }
 

@@ -9,6 +9,7 @@ export const BRAND_COLOR_PRESETS = [
   'violet',
   'rose',
   'amber',
+  'yellow',
   'slate',
 ] as const;
 

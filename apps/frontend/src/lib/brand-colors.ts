@@ -8,6 +8,7 @@ export const BRAND_COLOR_VALUES: Record<BrandColorPreset, string> = {
   violet: '#7c3aed',
   rose: '#be123c',
   amber: '#b45309',
+  yellow: '#f2ae03',
   slate: '#475569',
 };
 
