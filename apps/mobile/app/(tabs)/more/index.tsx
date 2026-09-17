@@ -65,6 +65,12 @@ export default function MoreScreen() {
                 onPress={() => router.push('/offers')}
                 showChevron
               />
+              <ListRow
+                icon="storefront-outline"
+                title={t('more.shop')}
+                onPress={() => router.push('/shop')}
+                showChevron
+              />
             </Card>
           </View>
         ) : null}
