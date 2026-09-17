@@ -7,6 +7,7 @@ import { addUtcDays, getUtcToday } from '../../common/date/utc-date';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ShareLinksService } from '../share-links/share-links.service';
 import { TelegramService } from '../telegram/telegram.service';
+import { toWhatsappRecipient } from '../whatsapp/whatsapp-phone';
 import { WhatsappService } from '../whatsapp/whatsapp.service';
 import { CustomerReminderItem, formatCustomerReminderMessage } from './customer-reminder-message';
 import { buildCustomerWhatsappReminderParams } from './customer-whatsapp-reminder-message';
@@ -110,10 +111,6 @@ export class RemindersService implements OnModuleInit {
     return phoneNumberId && accessToken ? { phoneNumberId, accessToken } : null;
   }
 
-  private toWhatsappRecipient(phone: string): string {
-    return `20${phone.replace(/\D/g, '').replace(/^0/, '')}`;
-  }
-
   async sendRemindersForAllTenants(): Promise<void> {
     const whatsappCredentials = this.getWhatsappCredentials();
 
@@ -151,7 +148,7 @@ export class RemindersService implements OnModuleInit {
           await this.sendWhatsappReminder(
             tenant.id,
             tenant.name,
-            this.toWhatsappRecipient(tenant.phone),
+            toWhatsappRecipient(tenant.phone),
             whatsappCredentials,
             tenant.notificationLanguage,
             totals,
@@ -182,7 +179,7 @@ export class RemindersService implements OnModuleInit {
         await this.sendWhatsappEveningSummary(
           tenant.id,
           tenant.name,
-          this.toWhatsappRecipient(tenant.phone),
+          toWhatsappRecipient(tenant.phone),
           whatsappCredentials,
           tenant.notificationLanguage,
           totals,
@@ -384,7 +381,7 @@ export class RemindersService implements OnModuleInit {
       ? CUSTOMER_REMINDER_WITH_PAY_BUTTON_TEMPLATE[language]
       : CUSTOMER_REMINDER_NO_PAY_BUTTON_TEMPLATE[language];
     const params = buildCustomerWhatsappReminderParams({ customerName, businessName, totalOutstanding }, language);
-    const recipient = this.toWhatsappRecipient(customerPhone);
+    const recipient = toWhatsappRecipient(customerPhone);
 
     try {
       await this.whatsapp.sendTemplateMessage(

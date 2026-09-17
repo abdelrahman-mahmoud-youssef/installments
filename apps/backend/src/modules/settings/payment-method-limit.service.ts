@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { NotificationLanguage, ReminderChannel } from '@prisma/client';
 import { getUtcToday, startOfUtcMonth } from '../../common/date/utc-date';
 import { PrismaService } from '../../prisma/prisma.service';
+import { toWhatsappRecipient } from '../whatsapp/whatsapp-phone';
 import { WhatsappService } from '../whatsapp/whatsapp.service';
 import { buildPaymentMethodLimitAlertParams } from './payment-method-limit-message';
 import { getPaymentMethodMonthlyUsage } from './payment-method-usage.util';
@@ -83,7 +84,7 @@ export class PaymentMethodLimitService {
       await this.whatsapp.sendTemplateMessage(
         credentials.phoneNumberId,
         credentials.accessToken,
-        this.toWhatsappRecipient(tenant.phone),
+        toWhatsappRecipient(tenant.phone),
         template.name,
         template.languageCode,
         params,
@@ -107,9 +108,5 @@ export class PaymentMethodLimitService {
     const phoneNumberId = this.config.get<string>('WHATSAPP_PHONE_NUMBER_ID');
     const accessToken = this.config.get<string>('WHATSAPP_ACCESS_TOKEN');
     return phoneNumberId && accessToken ? { phoneNumberId, accessToken } : null;
-  }
-
-  private toWhatsappRecipient(phone: string): string {
-    return `20${phone.replace(/\D/g, '').replace(/^0/, '')}`;
   }
 }
