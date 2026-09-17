@@ -221,7 +221,10 @@
       "twoFactorDescription": "Enter the 6-digit code from your authenticator app, or one of your backup codes.",
       "twoFactorCodeLabel": "Code",
       "twoFactorSubmit": "Verify",
-      "forgotPassword": "Forgot your password?"
+      "forgotPassword": "Forgot your password?",
+      "emailPlaceholder": "you@business.com",
+      "passwordPlaceholder": "Your password",
+      "twoFactorCodePlaceholder": "123456"
     },
     "forgotPassword": {
       "title": "Reset your password",
@@ -231,7 +234,8 @@
       "submitting": "Sending…",
       "checkYourEmail": "If that email is registered, we've sent a reset link — check your inbox.",
       "backToLogin": "Back to sign in",
-      "genericError": "Something went wrong. Please try again."
+      "genericError": "Something went wrong. Please try again.",
+      "emailPlaceholder": "you@business.com"
     },
     "resetPassword": {
       "title": "Choose a new password",
@@ -242,7 +246,8 @@
       "submitting": "Resetting…",
       "missingToken": "This reset link is missing its token. Request a new one below.",
       "requestNewLink": "Request a new link",
-      "genericError": "This reset link is invalid or has expired."
+      "genericError": "This reset link is invalid or has expired.",
+      "passwordPlaceholder": "At least 8 characters"
     },
     "register": {
       "title": "Create your workspace",
@@ -257,18 +262,20 @@
       "submitting": "Creating your workspace…",
       "haveAccount": "Already have an account?",
       "signIn": "Sign in",
-      "genericError": "Unable to create your account. Please try again."
+      "genericError": "Unable to create your account. Please try again.",
+      "step1Title": "Tell us about your shop",
+      "step1Description": "This is how your workspace and customer pages will be named.",
+      "step2Title": "Create your sign-in",
+      "step2Description": "You will use these to sign in to your workspace.",
+      "stepLabel": "Step {current} of {total}",
+      "next": "Continue",
+      "back": "Back",
+      "emailPlaceholder": "you@business.com",
+      "passwordPlaceholder": "At least 8 characters"
     },
     "brand": {
       "headline": "Get paid on schedule.",
-      "subhead": "Track every installment, customer, and payment in one calm, organized workspace.",
-      "point1": "Automated payment schedules",
-      "point2": "Real-time collection tracking",
-      "point3": "Isolated, secure workspaces",
-      "cardLabel": "Collection progress",
-      "cardCollected": "Collected",
-      "cardRemaining": "Remaining",
-      "footer": "Built for growing businesses."
+      "subhead": "Track every installment, customer, and payment in one calm, organized workspace."
     }
   },
   "dashboard": {

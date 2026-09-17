@@ -221,7 +221,10 @@
       "twoFactorDescription": "اكتب الكود المكوّن من 6 أرقام من تطبيق المصادقة، أو أي كود من أكواد النسخ الاحتياطي بتاعتك.",
       "twoFactorCodeLabel": "الكود",
       "twoFactorSubmit": "تحقق",
-      "forgotPassword": "نسيت كلمة المرور؟"
+      "forgotPassword": "نسيت كلمة المرور؟",
+      "emailPlaceholder": "you@business.com",
+      "passwordPlaceholder": "كلمة المرور",
+      "twoFactorCodePlaceholder": "123456"
     },
     "forgotPassword": {
       "title": "استرجاع كلمة المرور",
@@ -231,7 +234,8 @@
       "submitting": "بيتبعت…",
       "checkYourEmail": "لو البريد ده متسجل عندنا، يبقى بعتنالك لينك الاسترجاع — راجع بريدك.",
       "backToLogin": "ارجع لتسجيل الدخول",
-      "genericError": "حصل خطأ ما. جرّب تاني."
+      "genericError": "حصل خطأ ما. جرّب تاني.",
+      "emailPlaceholder": "you@business.com"
     },
     "resetPassword": {
       "title": "اختار كلمة مرور جديدة",
@@ -242,7 +246,8 @@
       "submitting": "بيتغيّر…",
       "missingToken": "لينك الاسترجاع ده ناقصه الكود. اطلب لينك جديد تحت.",
       "requestNewLink": "اطلب لينك جديد",
-      "genericError": "لينك الاسترجاع ده مش صحيح أو انتهت صلاحيته."
+      "genericError": "لينك الاسترجاع ده مش صحيح أو انتهت صلاحيته.",
+      "passwordPlaceholder": "8 أحرف على الأقل"
     },
     "register": {
       "title": "اعمل مساحة شغلك",
@@ -257,18 +262,20 @@
       "submitting": "بيعمل مساحة العمل…",
       "haveAccount": "عندك حساب خالص؟",
       "signIn": "تسجيل الدخول",
-      "genericError": "مقدرناش نعمل حسابك. جرّب تاني."
+      "genericError": "مقدرناش نعمل حسابك. جرّب تاني.",
+      "step1Title": "عرّفنا على محلك",
+      "step1Description": "ده الاسم اللي هيظهر على مساحة العمل وصفحات العملاء.",
+      "step2Title": "اعمل بيانات الدخول",
+      "step2Description": "هتستخدمهم عشان تدخل على مساحة العمل بتاعتك.",
+      "stepLabel": "خطوة {current} من {total}",
+      "next": "كمّل",
+      "back": "رجوع",
+      "emailPlaceholder": "you@business.com",
+      "passwordPlaceholder": "8 أحرف على الأقل"
     },
     "brand": {
       "headline": "خد فلوسك في ميعادها بالظبط.",
-      "subhead": "تابع كل قسط وعميل ودفعة في مكان واحد منظّم وواضح.",
-      "point1": "جداول سداد بتتعمل لوحدها",
-      "point2": "متابعة التحصيل أول بأول",
-      "point3": "مساحات عمل آمنة ومنفصلة عن بعض",
-      "cardLabel": "نسبة التحصيل",
-      "cardCollected": "اللي اتحصّل",
-      "cardRemaining": "المتبقي",
-      "footer": "متعمِل عشان الأعمال اللي بتكبر."
+      "subhead": "تابع كل قسط وعميل ودفعة في مكان واحد منظّم وواضح."
     }
   },
   "dashboard": {
