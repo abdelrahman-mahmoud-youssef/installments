@@ -50,11 +50,18 @@ function toForm(branding: TenantBranding): ShopForm {
 
 export default function ShopScreen() {
   const { t } = useI18n();
-  const { colors } = useTheme();
+  const { colors, setBrandColor } = useTheme();
   const { isAdmin } = useAuth();
   const { showToast } = useToast();
   const insets = useSafeAreaInsets();
   const branding = useBranding(isAdmin);
+  const savedBrandColor = branding.data?.brandColor;
+
+  useEffect(() => {
+    if (savedBrandColor) {
+      setBrandColor(savedBrandColor);
+    }
+  }, [savedBrandColor, setBrandColor]);
   const updateMutation = useUpdateBranding();
   const uploadLogoMutation = useUploadLogo();
   const removeLogoMutation = useRemoveLogo();

@@ -11,6 +11,7 @@ import {
 import { CurrentUser, getMe, login, verifyTwoFactor } from '@/api/auth';
 import { setAuthToken, setUnauthorizedHandler } from '@/api/client';
 import { tokenStorage } from '@/lib/storage';
+import { useTheme } from '@/theme/theme-context';
 
 export type SignInResult = { status: 'authenticated' } | { status: 'twoFactor'; challengeToken: string };
 
@@ -30,6 +31,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<CurrentUser | null>(null);
   const [isReady, setIsReady] = useState(false);
   const queryClient = useQueryClient();
+  const { setBrandColor } = useTheme();
+
+  useEffect(() => {
+    if (isReady) {
+      setBrandColor(user?.tenant.brandColor ?? null);
+    }
+  }, [user, isReady, setBrandColor]);
 
   const clearSession = useCallback(async () => {
     setAuthToken(null);

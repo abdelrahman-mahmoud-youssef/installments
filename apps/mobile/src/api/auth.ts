@@ -2,6 +2,13 @@ import { apiClient } from './client';
 
 export type Role = 'ADMIN' | 'STAFF';
 
+export interface CurrentUserTenant {
+  slug: string;
+  displayName: string;
+  brandColor: string;
+  logoUrl: string | null;
+}
+
 export interface CurrentUser {
   id: string;
   name: string;
@@ -9,6 +16,7 @@ export interface CurrentUser {
   tenantId: string;
   role: Role;
   twoFactorEnabled: boolean;
+  tenant: CurrentUserTenant;
 }
 
 export type LoginResult = { accessToken: string } | { requiresTwoFactor: true; challengeToken: string };
