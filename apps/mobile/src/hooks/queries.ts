@@ -5,7 +5,17 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import { listAuditLogs } from '@/api/audit';
+import { getBranding, removeLogo, UpdateBrandingInput, updateBranding, uploadLogo } from '@/api/branding';
 import { PaginatedResult } from '@/api/client';
+import {
+  createOffer,
+  deleteOffer,
+  listOffers,
+  OfferListParams,
+  SaveOfferInput,
+  setOffersVisibility,
+  updateOffer,
+} from '@/api/offers';
 import {
   ContractListParams,
   getContract,
@@ -39,6 +49,8 @@ export const queryKeys = {
   paymentMethods: ['payment-methods'] as const,
   staff: ['staff'] as const,
   auditLogs: ['audit-logs'] as const,
+  offers: (params: OfferListParams) => ['offers', params] as const,
+  branding: ['branding'] as const,
 };
 
 export function useDashboard() {
@@ -139,5 +151,75 @@ export function useAuditLogs() {
     queryFn: ({ pageParam }) => listAuditLogs({ page: pageParam, limit: PAGE_SIZE }),
     initialPageParam: 1,
     getNextPageParam: nextPageParam,
+  });
+}
+
+export function useOffers(params: Omit<OfferListParams, 'page' | 'limit'>, enabled = true) {
+  return useInfiniteQuery({
+    queryKey: queryKeys.offers(params),
+    queryFn: ({ pageParam }) => listOffers({ ...params, page: pageParam, limit: PAGE_SIZE }),
+    initialPageParam: 1,
+    getNextPageParam: nextPageParam,
+    enabled,
+  });
+}
+
+export function useCreateOffer() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: SaveOfferInput) => createOffer(input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['offers'] }),
+  });
+}
+
+export function useUpdateOffer() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, input }: { id: string; input: Partial<SaveOfferInput> }) => updateOffer(id, input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['offers'] }),
+  });
+}
+
+export function useDeleteOffer() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => deleteOffer(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['offers'] }),
+  });
+}
+
+export function useSetOffersVisibility() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (showOffersOnPublicPage: boolean) => setOffersVisibility(showOffersOnPublicPage),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.branding }),
+  });
+}
+
+export function useBranding(enabled = true) {
+  return useQuery({ queryKey: queryKeys.branding, queryFn: getBranding, enabled });
+}
+
+export function useUpdateBranding() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: UpdateBrandingInput) => updateBranding(input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.branding }),
+  });
+}
+
+export function useUploadLogo() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (image: string) => uploadLogo(image),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.branding }),
+  });
+}
+
+export function useRemoveLogo() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => removeLogo(),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.branding }),
   });
 }

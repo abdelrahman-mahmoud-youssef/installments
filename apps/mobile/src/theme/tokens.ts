@@ -103,3 +103,5 @@ export type FontSizeToken = keyof typeof fontSizes;
 export const touchTarget = {
   minHeight: 44,
 } as const;
+
+export const floatingActionClearance = touchTarget.minHeight + spacing.xxl;

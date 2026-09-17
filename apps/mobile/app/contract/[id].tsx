@@ -20,9 +20,7 @@ import { useI18n } from '@/i18n/i18n-context';
 import { formatDate, formatDateTime, formatNumber } from '@/lib/format';
 import { contractStatusTone, deriveInstallmentStatus, installmentStatusTone } from '@/lib/statuses';
 import { useTheme } from '@/theme/theme-context';
-import { spacing, touchTarget } from '@/theme/tokens';
-
-const FLOATING_ACTION_CLEARANCE = touchTarget.minHeight + spacing.xxl;
+import { floatingActionClearance, spacing } from '@/theme/tokens';
 
 export default function ContractDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -55,7 +53,7 @@ export default function ContractDetailScreen() {
         contentContainerStyle={{
           padding: spacing.xl,
           gap: spacing.xl,
-          paddingBottom: spacing.xxxl + FLOATING_ACTION_CLEARANCE,
+          paddingBottom: spacing.xxxl + floatingActionClearance,
         }}
         refreshControl={
           <RefreshControl refreshing={isRefetching} onRefresh={() => void refetch()} tintColor={colors.textMuted} />

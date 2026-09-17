@@ -59,6 +59,12 @@ export default function MoreScreen() {
                 onPress={() => router.push('/activity')}
                 showChevron
               />
+              <ListRow
+                icon="pricetags-outline"
+                title={t('more.offers')}
+                onPress={() => router.push('/offers')}
+                showChevron
+              />
             </Card>
           </View>
         ) : null}
