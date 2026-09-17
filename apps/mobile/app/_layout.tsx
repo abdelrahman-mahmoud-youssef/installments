@@ -4,6 +4,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { ReactNode, useEffect } from 'react';
 import { useAuth, AuthProvider } from '@/auth/auth-context';
+import { LaunchReveal } from '@/components/ui/launch-reveal';
 import { ToastProvider } from '@/components/ui/toast-context';
 import { I18nProvider, useI18n } from '@/i18n/i18n-context';
 import { useStackScreenOptions } from '@/navigation/use-stack-screen-options';
@@ -55,6 +56,7 @@ function ThemedNavigator() {
           <Stack.Screen name="login" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         </Stack>
+        <LaunchReveal />
       </AuthGate>
     </>
   );
