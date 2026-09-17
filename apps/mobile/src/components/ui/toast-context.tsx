@@ -1,10 +1,11 @@
 import { createContext, ReactNode, useCallback, useContext, useMemo, useRef, useState } from 'react';
-import { Animated, View } from 'react-native';
+import { Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/theme/theme-context';
 import { radius, spacing } from '@/theme/tokens';
 import { AppText } from './app-text';
+import { GlassSurface } from './glass-surface';
 
 type ToastTone = 'success' | 'error';
 
@@ -55,12 +56,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             alignItems: 'center',
           }}
         >
-          <View
+          <GlassSurface
+            elevated
             style={{
               flexDirection: 'row',
               alignItems: 'center',
               gap: spacing.sm,
-              backgroundColor: toast.tone === 'success' ? colors.text : colors.danger,
               borderRadius: radius.full,
               paddingHorizontal: spacing.xl,
               paddingVertical: spacing.md,
@@ -69,12 +70,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             <Ionicons
               name={toast.tone === 'success' ? 'checkmark-circle' : 'alert-circle'}
               size={18}
-              color={colors.background}
+              color={toast.tone === 'success' ? colors.success : colors.danger}
             />
-            <AppText variant="caption" style={{ color: colors.background, flexShrink: 1 }}>
+            <AppText variant="caption" style={{ flexShrink: 1 }}>
               {toast.message}
             </AppText>
-          </View>
+          </GlassSurface>
         </Animated.View>
       ) : null}
     </ToastContext.Provider>

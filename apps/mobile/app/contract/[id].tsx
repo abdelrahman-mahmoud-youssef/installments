@@ -1,6 +1,7 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText } from '@/components/ui/app-text';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -19,13 +20,16 @@ import { useI18n } from '@/i18n/i18n-context';
 import { formatDate, formatDateTime, formatNumber } from '@/lib/format';
 import { contractStatusTone, deriveInstallmentStatus, installmentStatusTone } from '@/lib/statuses';
 import { useTheme } from '@/theme/theme-context';
-import { spacing } from '@/theme/tokens';
+import { spacing, touchTarget } from '@/theme/tokens';
+
+const FLOATING_ACTION_CLEARANCE = touchTarget.minHeight + spacing.xxl;
 
 export default function ContractDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t, locale } = useI18n();
   const { colors } = useTheme();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { showToast } = useToast();
   const { data, isPending, isError, error, refetch, isRefetching } = useContract(id);
   const recordPayment = useRecordPayment(id);
@@ -47,7 +51,12 @@ export default function ContractDetailScreen() {
       <Stack.Screen options={{ title: data?.productName ?? '' }} />
       <ScrollView
         style={{ backgroundColor: colors.background }}
-        contentContainerStyle={{ padding: spacing.xl, gap: spacing.xl, paddingBottom: spacing.xxxl }}
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={{
+          padding: spacing.xl,
+          gap: spacing.xl,
+          paddingBottom: spacing.xxxl + FLOATING_ACTION_CLEARANCE,
+        }}
         refreshControl={
           <RefreshControl refreshing={isRefetching} onRefresh={() => void refetch()} tintColor={colors.textMuted} />
         }
@@ -133,14 +142,6 @@ export default function ContractDetailScreen() {
                     <AppText variant="caption">{formatNumber(data.installmentCount, locale)}</AppText>
                   </View>
                 </View>
-
-                {data.status === 'ACTIVE' ? (
-                  <Button
-                    title={t('contracts.recordPayment')}
-                    icon="add-circle-outline"
-                    onPress={() => setPaymentSheetVisible(true)}
-                  />
-                ) : null}
               </View>
             </Card>
 
@@ -243,6 +244,25 @@ export default function ContractDetailScreen() {
           </>
         ) : null}
       </ScrollView>
+
+      {data?.status === 'ACTIVE' ? (
+        <View
+          pointerEvents="box-none"
+          style={{
+            position: 'absolute',
+            left: spacing.xl,
+            right: spacing.xl,
+            bottom: insets.bottom + spacing.lg,
+          }}
+        >
+          <Button
+            variant="glass"
+            title={t('contracts.recordPayment')}
+            icon="add-circle-outline"
+            onPress={() => setPaymentSheetVisible(true)}
+          />
+        </View>
+      ) : null}
 
       <RecordPaymentSheet
         visible={paymentSheetVisible}

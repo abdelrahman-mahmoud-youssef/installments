@@ -64,6 +64,7 @@ export default function StaffScreen() {
       <FlatList
         data={data ?? []}
         keyExtractor={(member) => member.id}
+        contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={{ padding: spacing.xl, gap: spacing.md, flexGrow: 1 }}
         refreshControl={
           <RefreshControl refreshing={isRefetching} onRefresh={() => void refetch()} tintColor={colors.textMuted} />

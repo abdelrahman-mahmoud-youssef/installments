@@ -1,3 +1,4 @@
+import { Stack } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { FlatList, RefreshControl, View } from 'react-native';
 import { PaymentMethod } from '@/api/payment-methods';
@@ -11,7 +12,6 @@ import { ConfirmSheet } from '@/components/ui/confirm-sheet';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { ListRow } from '@/components/ui/list-row';
-import { ScreenHeader } from '@/components/ui/screen-header';
 import { SkeletonCardList } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/toast-context';
 import {
@@ -101,15 +101,21 @@ export default function WalletsScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <Stack.Screen options={{ title: t('wallets.title') }} />
       <FlatList
         data={isAdmin ? methods : []}
         keyExtractor={(method) => method.id}
-        contentContainerStyle={{ paddingBottom: spacing.xxxl, gap: spacing.md, flexGrow: 1 }}
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={{ paddingTop: spacing.md, paddingBottom: spacing.xxxl, gap: spacing.md, flexGrow: 1 }}
         refreshControl={
           <RefreshControl refreshing={isRefetching} onRefresh={() => void refetch()} tintColor={colors.textMuted} />
         }
         ListHeaderComponent={
-          <ScreenHeader title={t('wallets.title')} subtitle={t('wallets.subtitle')} />
+          <View style={{ paddingHorizontal: spacing.xl }}>
+            <AppText variant="caption" tone="muted">
+              {t('wallets.subtitle')}
+            </AppText>
+          </View>
         }
         ListEmptyComponent={
           <View style={{ paddingHorizontal: spacing.xl }}>

@@ -66,6 +66,7 @@ export default function SettingsScreen() {
   return (
     <ScrollView
       style={{ backgroundColor: colors.background }}
+      contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={{ padding: spacing.xl, gap: spacing.lg, paddingBottom: spacing.xxxl }}
     >
       <Stack.Screen options={{ title: t('settings.title') }} />

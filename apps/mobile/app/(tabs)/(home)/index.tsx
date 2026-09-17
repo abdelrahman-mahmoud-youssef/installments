@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { DashboardInstallmentSummary } from '@/api/dashboard';
@@ -8,7 +8,6 @@ import { AppText } from '@/components/ui/app-text';
 import { Card } from '@/components/ui/card';
 import { ErrorState } from '@/components/ui/error-state';
 import { MoneyText } from '@/components/ui/money-text';
-import { ScreenHeader } from '@/components/ui/screen-header';
 import { SectionHeader } from '@/components/ui/section-header';
 import { SkeletonCardList } from '@/components/ui/skeleton';
 import { StatCard } from '@/components/ui/stat-card';
@@ -58,16 +57,19 @@ export default function DashboardScreen() {
   return (
     <ScrollView
       style={{ backgroundColor: colors.background }}
-      contentContainerStyle={{ paddingBottom: spacing.xxxl }}
+      contentInsetAdjustmentBehavior="automatic"
+      contentContainerStyle={{ paddingTop: spacing.md, paddingBottom: spacing.xxxl }}
       refreshControl={
         <RefreshControl refreshing={isRefetching} onRefresh={() => void refetch()} tintColor={colors.textMuted} />
       }
     >
-      <ScreenHeader
-        title={t('dashboard.title')}
-        subtitle={user ? t('dashboard.greeting', { name: user.name }) : undefined}
-      />
+      <Stack.Screen options={{ title: t('dashboard.title') }} />
       <View style={{ paddingHorizontal: spacing.xl, gap: spacing.xl }}>
+        {user ? (
+          <AppText variant="caption" tone="muted">
+            {t('dashboard.greeting', { name: user.name })}
+          </AppText>
+        ) : null}
         {isPending ? (
           <SkeletonCardList count={4} />
         ) : isError ? (

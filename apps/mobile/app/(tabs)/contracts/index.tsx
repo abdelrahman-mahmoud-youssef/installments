@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, RefreshControl, View } from 'react-native';
 import { ContractStatus } from '@/api/contracts';
@@ -6,7 +6,6 @@ import { ContractCard } from '@/components/contracts/contract-card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { FilterChips } from '@/components/ui/filter-chips';
-import { ScreenHeader } from '@/components/ui/screen-header';
 import { SkeletonCardList } from '@/components/ui/skeleton';
 import { useContracts } from '@/hooks/queries';
 import { useI18n } from '@/i18n/i18n-context';
@@ -32,10 +31,12 @@ export default function ContractsScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <Stack.Screen options={{ title: t('contracts.title') }} />
       <FlatList
         data={contracts}
         keyExtractor={(contract) => contract.id}
-        contentContainerStyle={{ paddingBottom: spacing.xxxl, gap: spacing.md, flexGrow: 1 }}
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={{ paddingTop: spacing.md, paddingBottom: spacing.xxxl, gap: spacing.md, flexGrow: 1 }}
         onEndReachedThreshold={0.4}
         onEndReached={() => {
           if (hasNextPage && !isFetchingNextPage) {
@@ -46,20 +47,17 @@ export default function ContractsScreen() {
           <RefreshControl refreshing={isRefetching} onRefresh={() => void refetch()} tintColor={colors.textMuted} />
         }
         ListHeaderComponent={
-          <View style={{ gap: spacing.md }}>
-            <ScreenHeader title={t('contracts.title')} />
-            <FilterChips
-              options={[
-                { value: 'all', label: t('contracts.filterAll') },
-                { value: 'ACTIVE', label: t('contracts.filterActive') },
-                { value: 'delayed', label: t('contracts.filterDelayed') },
-                { value: 'COMPLETED', label: t('contracts.filterCompleted') },
-                { value: 'CANCELLED', label: t('contracts.filterCancelled') },
-              ]}
-              selected={filter}
-              onSelect={setFilter}
-            />
-          </View>
+          <FilterChips
+            options={[
+              { value: 'all', label: t('contracts.filterAll') },
+              { value: 'ACTIVE', label: t('contracts.filterActive') },
+              { value: 'delayed', label: t('contracts.filterDelayed') },
+              { value: 'COMPLETED', label: t('contracts.filterCompleted') },
+              { value: 'CANCELLED', label: t('contracts.filterCancelled') },
+            ]}
+            selected={filter}
+            onSelect={setFilter}
+          />
         }
         ListEmptyComponent={
           <View style={{ paddingHorizontal: spacing.xl }}>

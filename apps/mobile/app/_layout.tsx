@@ -6,6 +6,7 @@ import { ReactNode, useEffect } from 'react';
 import { useAuth, AuthProvider } from '@/auth/auth-context';
 import { ToastProvider } from '@/components/ui/toast-context';
 import { I18nProvider, useI18n } from '@/i18n/i18n-context';
+import { useStackScreenOptions } from '@/navigation/use-stack-screen-options';
 import { ThemeProvider, useTheme } from '@/theme/theme-context';
 
 void SplashScreen.preventAutoHideAsync();
@@ -44,20 +45,13 @@ function AuthGate({ children }: { children: ReactNode }) {
 }
 
 function ThemedNavigator() {
-  const { colors, isDark } = useTheme();
+  const { isDark } = useTheme();
+  const screenOptions = useStackScreenOptions();
   return (
     <>
       <StatusBar style={isDark ? 'light' : 'dark'} />
       <AuthGate>
-        <Stack
-          screenOptions={{
-            headerStyle: { backgroundColor: colors.background },
-            headerTintColor: colors.text,
-            headerShadowVisible: false,
-            headerBackButtonDisplayMode: 'minimal',
-            contentStyle: { backgroundColor: colors.background },
-          }}
-        >
+        <Stack screenOptions={screenOptions}>
           <Stack.Screen name="login" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         </Stack>

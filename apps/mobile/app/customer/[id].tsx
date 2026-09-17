@@ -29,6 +29,7 @@ export default function CustomerDetailScreen() {
       <Stack.Screen options={{ title: data?.name ?? '' }} />
       <ScrollView
         style={{ backgroundColor: colors.background }}
+        contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={{ padding: spacing.xl, gap: spacing.xl, paddingBottom: spacing.xxxl }}
         refreshControl={
           <RefreshControl refreshing={isRefetching} onRefresh={() => void refetch()} tintColor={colors.textMuted} />

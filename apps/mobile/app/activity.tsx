@@ -27,6 +27,7 @@ export default function ActivityScreen() {
       <FlatList
         data={entries}
         keyExtractor={(entry) => entry.id}
+        contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={{ padding: spacing.xl, gap: spacing.md, flexGrow: 1 }}
         onEndReachedThreshold={0.4}
         onEndReached={() => {

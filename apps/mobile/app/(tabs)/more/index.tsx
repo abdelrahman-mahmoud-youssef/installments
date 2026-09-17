@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useAuth } from '@/auth/auth-context';
@@ -8,7 +8,6 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { ConfirmSheet } from '@/components/ui/confirm-sheet';
 import { ListRow } from '@/components/ui/list-row';
-import { ScreenHeader } from '@/components/ui/screen-header';
 import { SectionHeader } from '@/components/ui/section-header';
 import { useI18n } from '@/i18n/i18n-context';
 import { useTheme } from '@/theme/theme-context';
@@ -24,9 +23,10 @@ export default function MoreScreen() {
   return (
     <ScrollView
       style={{ backgroundColor: colors.background }}
-      contentContainerStyle={{ paddingBottom: spacing.xxxl }}
+      contentInsetAdjustmentBehavior="automatic"
+      contentContainerStyle={{ paddingTop: spacing.md, paddingBottom: spacing.xxxl }}
     >
-      <ScreenHeader title={t('more.title')} />
+      <Stack.Screen options={{ title: t('more.title') }} />
       <View style={{ paddingHorizontal: spacing.xl, gap: spacing.lg }}>
         {user ? (
           <Card>

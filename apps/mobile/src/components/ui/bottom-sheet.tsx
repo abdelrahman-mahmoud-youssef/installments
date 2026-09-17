@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/theme/theme-context';
 import { radius, spacing } from '@/theme/tokens';
 import { AppText } from './app-text';
+import { GlassSurface } from './glass-surface';
 
 const ANIMATION_DURATION = 240;
 
@@ -80,35 +81,35 @@ export function BottomSheet({ visible, onClose, title, children, scrollable = tr
         >
           <Pressable style={{ flex: 1 }} onPress={onClose} accessibilityRole="button" />
         </Animated.View>
-        <Animated.View
-          style={{
-            transform: [{ translateY }],
-            backgroundColor: colors.surface,
-            borderTopLeftRadius: radius.xl,
-            borderTopRightRadius: radius.xl,
-            paddingTop: spacing.md,
-            paddingHorizontal: spacing.xl,
-            paddingBottom: insets.bottom + spacing.xl,
-            maxHeight: '88%',
-          }}
-        >
-          <View
+        <Animated.View style={{ transform: [{ translateY }], maxHeight: '88%' }}>
+          <GlassSurface
             style={{
-              alignSelf: 'center',
-              width: 40,
-              height: 4,
-              borderRadius: radius.full,
-              backgroundColor: colors.border,
-              marginBottom: spacing.lg,
+              flexShrink: 1,
+              borderTopLeftRadius: radius.xl,
+              borderTopRightRadius: radius.xl,
+              paddingTop: spacing.md,
+              paddingHorizontal: spacing.xl,
+              paddingBottom: insets.bottom + spacing.xl,
             }}
-          />
-          {scrollable ? (
-            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-              {content}
-            </ScrollView>
-          ) : (
-            content
-          )}
+          >
+            <View
+              style={{
+                alignSelf: 'center',
+                width: 40,
+                height: 4,
+                borderRadius: radius.full,
+                backgroundColor: colors.border,
+                marginBottom: spacing.lg,
+              }}
+            />
+            {scrollable ? (
+              <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+                {content}
+              </ScrollView>
+            ) : (
+              content
+            )}
+          </GlassSurface>
         </Animated.View>
       </KeyboardAvoidingView>
     </Modal>

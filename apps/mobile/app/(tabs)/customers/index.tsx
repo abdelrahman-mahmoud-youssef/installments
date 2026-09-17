@@ -1,12 +1,10 @@
-import { useRouter } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, RefreshControl, View } from 'react-native';
 import { CustomerCard } from '@/components/customers/customer-card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { FilterChips } from '@/components/ui/filter-chips';
-import { ScreenHeader } from '@/components/ui/screen-header';
-import { SearchBar } from '@/components/ui/search-bar';
 import { SkeletonCardList } from '@/components/ui/skeleton';
 import { useCustomers } from '@/hooks/queries';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
@@ -35,10 +33,23 @@ export default function CustomersScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <Stack.Screen
+        options={{
+          title: t('customers.title'),
+          headerSearchBarOptions: {
+            placeholder: t('customers.searchPlaceholder'),
+            cancelButtonText: t('common.cancel'),
+            autoCapitalize: 'none',
+            hideWhenScrolling: false,
+            onChangeText: (event) => setSearch(event.nativeEvent.text),
+          },
+        }}
+      />
       <FlatList
         data={customers}
         keyExtractor={(customer) => customer.id}
-        contentContainerStyle={{ paddingBottom: spacing.xxxl, gap: spacing.md, flexGrow: 1 }}
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={{ paddingTop: spacing.md, paddingBottom: spacing.xxxl, gap: spacing.md, flexGrow: 1 }}
         keyboardShouldPersistTaps="handled"
         onEndReachedThreshold={0.4}
         onEndReached={() => {
@@ -50,23 +61,14 @@ export default function CustomersScreen() {
           <RefreshControl refreshing={isRefetching} onRefresh={() => void refetch()} tintColor={colors.textMuted} />
         }
         ListHeaderComponent={
-          <View style={{ gap: spacing.md }}>
-            <ScreenHeader title={t('customers.title')}>
-              <SearchBar
-                value={search}
-                onChangeText={setSearch}
-                placeholder={t('customers.searchPlaceholder')}
-              />
-            </ScreenHeader>
-            <FilterChips
-              options={[
-                { value: 'all', label: t('common.all') },
-                { value: 'delayed', label: t('customers.delayedOnly') },
-              ]}
-              selected={filter}
-              onSelect={setFilter}
-            />
-          </View>
+          <FilterChips
+            options={[
+              { value: 'all', label: t('common.all') },
+              { value: 'delayed', label: t('customers.delayedOnly') },
+            ]}
+            selected={filter}
+            onSelect={setFilter}
+          />
         }
         ListEmptyComponent={
           <View style={{ paddingHorizontal: spacing.xl }}>
