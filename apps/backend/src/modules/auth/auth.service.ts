@@ -63,6 +63,23 @@ export interface EnableTwoFactorResult {
   backupCodes: string[];
 }
 
+export interface CurrentUserTenant {
+  slug: string;
+  displayName: string;
+  brandColor: string;
+  logoUrl: string | null;
+}
+
+export interface CurrentUserResponse {
+  id: string;
+  name: string;
+  email: string;
+  tenantId: string;
+  role: User['role'];
+  twoFactorEnabled: boolean;
+  tenant: CurrentUserTenant;
+}
+
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
@@ -80,17 +97,13 @@ export class AuthService {
     email: string;
     tenantId: string;
     role: User['role'];
-  }): Promise<{
-    id: string;
-    name: string;
-    email: string;
-    tenantId: string;
-    role: User['role'];
-    twoFactorEnabled: boolean;
-  }> {
-    const { twoFactorEnabled } = await this.prisma.user.findUniqueOrThrow({
+  }): Promise<CurrentUserResponse> {
+    const { twoFactorEnabled, tenant } = await this.prisma.user.findUniqueOrThrow({
       where: { id: user.userId },
-      select: { twoFactorEnabled: true },
+      select: {
+        twoFactorEnabled: true,
+        tenant: { select: { slug: true, name: true, displayName: true, brandColor: true, logoUrl: true } },
+      },
     });
     return {
       id: user.userId,
@@ -99,6 +112,12 @@ export class AuthService {
       tenantId: user.tenantId,
       role: user.role,
       twoFactorEnabled,
+      tenant: {
+        slug: tenant.slug,
+        displayName: tenant.displayName ?? tenant.name,
+        brandColor: tenant.brandColor,
+        logoUrl: tenant.logoUrl,
+      },
     };
   }
 

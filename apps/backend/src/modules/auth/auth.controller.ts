@@ -1,11 +1,11 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Patch, Post } from '@nestjs/common';
-import { Role } from '@prisma/client';
 import { Throttle } from '@nestjs/throttler';
 import { AuthenticatedUser, CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Public } from '../../common/decorators/public.decorator';
 import { Audit } from '../../common/decorators/audit.decorator';
 import {
   AuthService,
+  CurrentUserResponse,
   EnableTwoFactorResult,
   LoginResult,
   LoginSuccess,
@@ -19,15 +19,6 @@ import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyTwoFactorDto } from './dto/verify-two-factor.dto';
-
-export interface CurrentUserResponse {
-  id: string;
-  name: string;
-  email: string;
-  tenantId: string;
-  role: Role;
-  twoFactorEnabled: boolean;
-}
 
 @Controller('auth')
 export class AuthController {
