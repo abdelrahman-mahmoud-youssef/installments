@@ -9,7 +9,7 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { Alert, I18nManager } from 'react-native';
+import { Alert, DevSettings, I18nManager } from 'react-native';
 import { preferenceKeys, preferenceStorage } from '@/lib/storage';
 import { Locale, translations } from './translations';
 
@@ -49,12 +49,20 @@ function interpolate(template: string, params?: TranslateParams): string {
   );
 }
 
+function reloadApp(): void {
+  if (__DEV__) {
+    DevSettings.reload();
+    return;
+  }
+  void Updates.reloadAsync().catch(() => undefined);
+}
+
 function applyLayoutDirection(locale: Locale): void {
   const shouldBeRTL = locale === 'ar';
   if (I18nManager.isRTL !== shouldBeRTL) {
     I18nManager.allowRTL(shouldBeRTL);
     I18nManager.forceRTL(shouldBeRTL);
-    void Updates.reloadAsync().catch(() => undefined);
+    reloadApp();
   }
 }
 
