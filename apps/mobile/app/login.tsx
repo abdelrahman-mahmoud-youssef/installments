@@ -1,20 +1,23 @@
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ApiError, NetworkError } from '@/api/client';
 import { useAuth } from '@/auth/auth-context';
+import { resolveAuthErrorMessage } from '@/auth/resolve-auth-error';
+import { AuthIntro } from '@/components/auth/auth-intro';
 import { AppText } from '@/components/ui/app-text';
 import { Button } from '@/components/ui/button';
+import { PressableScale } from '@/components/ui/pressable-scale';
 import { TextField } from '@/components/ui/text-field';
 import { useI18n } from '@/i18n/i18n-context';
 import { useTheme } from '@/theme/theme-context';
-import { radius, spacing } from '@/theme/tokens';
+import { spacing } from '@/theme/tokens';
 
 export default function LoginScreen() {
   const { signIn, completeTwoFactor } = useAuth();
   const { t } = useI18n();
   const { colors } = useTheme();
+  const router = useRouter();
   const insets = useSafeAreaInsets();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -22,16 +25,6 @@ export default function LoginScreen() {
   const [challengeToken, setChallengeToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-
-  const resolveErrorMessage = (caught: unknown): string => {
-    if (caught instanceof NetworkError) {
-      return t('common.networkError');
-    }
-    if (caught instanceof ApiError) {
-      return caught.message;
-    }
-    return t('common.genericError');
-  };
 
   const submitCredentials = async () => {
     if (!email.trim() || !password) {
@@ -46,7 +39,7 @@ export default function LoginScreen() {
         setChallengeToken(result.challengeToken);
       }
     } catch (caught) {
-      setError(resolveErrorMessage(caught));
+      setError(resolveAuthErrorMessage(caught, t));
     } finally {
       setSubmitting(false);
     }
@@ -61,7 +54,7 @@ export default function LoginScreen() {
     try {
       await completeTwoFactor(challengeToken, code.trim());
     } catch (caught) {
-      setError(resolveErrorMessage(caught));
+      setError(resolveAuthErrorMessage(caught, t));
     } finally {
       setSubmitting(false);
     }
@@ -83,26 +76,10 @@ export default function LoginScreen() {
           gap: spacing.xl,
         }}
       >
-        <View style={{ alignItems: 'center', gap: spacing.md }}>
-          <View
-            style={{
-              width: 72,
-              height: 72,
-              borderRadius: radius.xl,
-              backgroundColor: colors.primaryMuted,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Ionicons name="wallet" size={34} color={colors.primary} />
-          </View>
-          <AppText variant="largeTitle" align="center">
-            {challengeToken ? t('auth.twoFactorTitle') : t('auth.welcomeTitle')}
-          </AppText>
-          <AppText variant="caption" tone="muted" align="center">
-            {challengeToken ? t('auth.twoFactorSubtitle') : t('auth.welcomeSubtitle')}
-          </AppText>
-        </View>
+        <AuthIntro
+          title={challengeToken ? t('auth.twoFactorTitle') : t('auth.welcomeTitle')}
+          subtitle={challengeToken ? t('auth.twoFactorSubtitle') : t('auth.welcomeSubtitle')}
+        />
 
         {challengeToken ? (
           <View style={{ gap: spacing.lg }}>
@@ -145,6 +122,16 @@ export default function LoginScreen() {
               </AppText>
             ) : null}
             <Button title={t('auth.signIn')} onPress={() => void submitCredentials()} loading={submitting} />
+            <View style={{ flexDirection: 'row', justifyContent: 'center', gap: spacing.xs, flexWrap: 'wrap' }}>
+              <AppText variant="caption" tone="muted">
+                {t('auth.noAccount')}
+              </AppText>
+              <PressableScale onPress={() => router.push('/register')} accessibilityRole="link" hitSlop={8}>
+                <AppText variant="caption" tone="primary" style={{ fontWeight: '600' }}>
+                  {t('auth.createAccount')}
+                </AppText>
+              </PressableScale>
+            </View>
           </View>
         )}
       </ScrollView>

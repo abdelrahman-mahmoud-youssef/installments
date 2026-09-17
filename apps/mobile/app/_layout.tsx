@@ -31,10 +31,10 @@ function AuthGate({ children }: { children: ReactNode }) {
       return;
     }
     void SplashScreen.hideAsync();
-    const isOnLogin = segments[0] === 'login';
-    if (!isAuthenticated && !isOnLogin) {
+    const isOnAuthScreen = segments[0] === 'login' || segments[0] === 'register';
+    if (!isAuthenticated && !isOnAuthScreen) {
       router.replace('/login');
-    } else if (isAuthenticated && isOnLogin) {
+    } else if (isAuthenticated && isOnAuthScreen) {
       router.replace('/');
     }
   }, [isReady, isAuthenticated, segments, router]);
@@ -54,6 +54,7 @@ function ThemedNavigator() {
       <AuthGate>
         <Stack screenOptions={screenOptions}>
           <Stack.Screen name="login" options={{ headerShown: false }} />
+          <Stack.Screen name="register" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         </Stack>
         <LaunchReveal />

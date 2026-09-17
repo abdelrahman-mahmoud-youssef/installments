@@ -21,8 +21,19 @@ export interface CurrentUser {
 
 export type LoginResult = { accessToken: string } | { requiresTwoFactor: true; challengeToken: string };
 
+export interface RegisterInput {
+  businessName: string;
+  name: string;
+  email: string;
+  password: string;
+}
+
 export function login(email: string, password: string): Promise<LoginResult> {
   return apiClient.post('auth/login', { email, password });
+}
+
+export function register(input: RegisterInput): Promise<{ accessToken: string }> {
+  return apiClient.post('auth/register', input);
 }
 
 export function verifyTwoFactor(challengeToken: string, code: string): Promise<{ accessToken: string }> {

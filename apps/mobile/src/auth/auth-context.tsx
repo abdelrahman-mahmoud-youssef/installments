@@ -8,7 +8,7 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { CurrentUser, getMe, login, verifyTwoFactor } from '@/api/auth';
+import { CurrentUser, getMe, login, register, RegisterInput, verifyTwoFactor } from '@/api/auth';
 import { setAuthToken, setUnauthorizedHandler } from '@/api/client';
 import { tokenStorage } from '@/lib/storage';
 import { useTheme } from '@/theme/theme-context';
@@ -21,6 +21,7 @@ interface AuthContextValue {
   isReady: boolean;
   isAdmin: boolean;
   signIn: (email: string, password: string) => Promise<SignInResult>;
+  register: (input: RegisterInput) => Promise<void>;
   completeTwoFactor: (challengeToken: string, code: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
@@ -95,6 +96,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [adoptToken],
   );
 
+  const registerAccount = useCallback(
+    async (input: RegisterInput) => {
+      const result = await register(input);
+      await adoptToken(result.accessToken);
+    },
+    [adoptToken],
+  );
+
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
@@ -102,10 +111,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isReady,
       isAdmin: user?.role === 'ADMIN',
       signIn,
+      register: registerAccount,
       completeTwoFactor,
       signOut: clearSession,
     }),
-    [user, isReady, signIn, completeTwoFactor, clearSession],
+    [user, isReady, signIn, registerAccount, completeTwoFactor, clearSession],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
