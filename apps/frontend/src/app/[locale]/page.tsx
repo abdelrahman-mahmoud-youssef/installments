@@ -1,14 +1,11 @@
 import { cookies } from 'next/headers';
 import { getLocale } from 'next-intl/server';
-import { FaqSection } from '@/components/marketing/faq-section';
-import { FeatureGridSection } from '@/components/marketing/feature-grid-section';
 import { FinalCtaSection } from '@/components/marketing/final-cta-section';
 import { HeroSection } from '@/components/marketing/hero-section';
 import { HowItWorksSection } from '@/components/marketing/how-it-works-section';
 import { MarketingFooter } from '@/components/marketing/marketing-footer';
 import { MarketingHeader } from '@/components/marketing/marketing-header';
-import { ProblemSolutionSection } from '@/components/marketing/problem-solution-section';
-import { TrustSection } from '@/components/marketing/trust-section';
+import { ValuePropsSection } from '@/components/marketing/value-props-section';
 import { redirect } from '@/i18n/navigation';
 import { config } from '@/lib/config';
 import { routes } from '@/lib/routes';
@@ -27,11 +24,8 @@ export default async function RootPage() {
       <MarketingHeader />
       <main>
         <HeroSection />
-        <ProblemSolutionSection />
-        <FeatureGridSection />
+        <ValuePropsSection />
         <HowItWorksSection />
-        <TrustSection />
-        <FaqSection />
         <FinalCtaSection />
       </main>
       <MarketingFooter />

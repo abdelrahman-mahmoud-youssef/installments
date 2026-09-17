@@ -6,7 +6,6 @@ import { routes } from '@/lib/routes';
 const NAV_LINKS = [
   { key: 'features', href: '#features' },
   { key: 'howItWorks', href: '#how-it-works' },
-  { key: 'faq', href: '#faq' },
 ] as const;
 
 export function MarketingFooter() {
