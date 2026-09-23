@@ -109,6 +109,7 @@ export default function NewAnnouncementScreen() {
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         contentContainerStyle={{
           padding: spacing.xl,
           paddingBottom: spacing.xxxl + floatingActionClearance,
@@ -149,6 +150,7 @@ export default function NewAnnouncementScreen() {
             onSelect={(value) => {
               setAudience(value);
               setDraftError(null);
+              setPickerVisible(value === 'SELECTED');
             }}
           />
           {audience === 'SELECTED' ? (

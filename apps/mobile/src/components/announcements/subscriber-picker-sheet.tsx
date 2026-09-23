@@ -50,6 +50,7 @@ export function SubscriberPickerSheet({ visible, selectedIds, onToggle, onClose 
         keyExtractor={(subscriber) => subscriber.id}
         style={{ height: height * LIST_HEIGHT_RATIO }}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         onEndReachedThreshold={0.4}
         onEndReached={() => {
           if (hasNextPage && !isFetchingNextPage) {
