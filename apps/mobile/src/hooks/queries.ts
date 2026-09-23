@@ -79,6 +79,12 @@ import { CreatePaymentInput, createPayment } from '@/api/payments';
 import { createShareLink } from '@/api/share-links';
 import { getReports } from '@/api/reports';
 import { CreateStaffInput, createStaff, listStaff, setStaffActive } from '@/api/staff';
+import {
+  CreateSupportMessageInput,
+  createSupportMessage,
+  listSupportMessages,
+  markSupportRepliesSeen,
+} from '@/api/support';
 
 const PAGE_SIZE = 20;
 
@@ -115,6 +121,7 @@ export const queryKeys = {
   paymentClaims: (params: PaymentClaimListParams) => ['payment-claims', 'list', params] as const,
   reportsRoot: ['reports'] as const,
   reports: (month: string) => ['reports', month] as const,
+  supportMessages: ['support'] as const,
 };
 
 export function useDashboard() {
@@ -513,5 +520,25 @@ export function useReports(month: string) {
     queryKey: queryKeys.reports(month),
     queryFn: () => getReports(month),
     placeholderData: keepPreviousData,
+  });
+}
+
+export function useSupportMessages() {
+  return useQuery({ queryKey: queryKeys.supportMessages, queryFn: listSupportMessages });
+}
+
+export function useCreateSupportMessage() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: CreateSupportMessageInput) => createSupportMessage(input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.supportMessages }),
+  });
+}
+
+export function useMarkSupportRepliesSeen() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => markSupportRepliesSeen(),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.supportMessages }),
   });
 }
