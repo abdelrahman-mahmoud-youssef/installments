@@ -6,6 +6,9 @@ export interface PickedImage {
 }
 
 const UPLOAD_QUALITY = 0.6;
+const BASE64_CHARS_PER_BLOCK = 4;
+const BYTES_PER_BASE64_BLOCK = 3;
+const BASE64_PADDING_PATTERN = /=+$/;
 
 interface PickImagesOptions {
   limit: number;
@@ -31,4 +34,9 @@ export async function pickImages({ limit, square = false }: PickImagesOptions): 
     return [];
   }
   return result.assets.filter(hasBase64).map((asset) => ({ uri: asset.uri, base64: asset.base64 }));
+}
+
+export function base64ByteLength(base64: string): number {
+  const paddingLength = base64.match(BASE64_PADDING_PATTERN)?.[0].length ?? 0;
+  return (base64.length / BASE64_CHARS_PER_BLOCK) * BYTES_PER_BASE64_BLOCK - paddingLength;
 }

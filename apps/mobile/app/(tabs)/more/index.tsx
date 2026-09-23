@@ -105,6 +105,18 @@ export default function MoreScreen() {
         </View>
 
         <View style={{ gap: spacing.sm }}>
+          <SectionHeader title={t('more.outreachSection')} />
+          <Card>
+            <ListRow
+              icon="megaphone-outline"
+              title={t('more.announcements')}
+              onPress={() => router.push('/announcements')}
+              showChevron
+            />
+          </Card>
+        </View>
+
+        <View style={{ gap: spacing.sm }}>
           <SectionHeader title={t('more.preferencesSection')} />
           <Card>
             <ListRow

@@ -6,6 +6,13 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
+import {
+  CreateAnnouncementInput,
+  createAnnouncement,
+  listAnnouncements,
+  listAnnouncementSubscribers,
+  SubscriberListParams,
+} from '@/api/announcements';
 import { listAuditLogs } from '@/api/audit';
 import { getBranding, removeLogo, UpdateBrandingInput, updateBranding, uploadLogo } from '@/api/branding';
 import { PaginatedResult } from '@/api/client';
@@ -122,6 +129,8 @@ export const queryKeys = {
   reportsRoot: ['reports'] as const,
   reports: (month: string) => ['reports', month] as const,
   supportMessages: ['support'] as const,
+  announcements: ['announcements', 'list'] as const,
+  announcementSubscribers: (params: SubscriberListParams) => ['announcements', 'subscribers', params] as const,
 };
 
 export function useDashboard() {
@@ -540,5 +549,32 @@ export function useMarkSupportRepliesSeen() {
   return useMutation({
     mutationFn: () => markSupportRepliesSeen(),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.supportMessages }),
+  });
+}
+
+export function useAnnouncements() {
+  return useInfiniteQuery({
+    queryKey: queryKeys.announcements,
+    queryFn: ({ pageParam }) => listAnnouncements({ page: pageParam, limit: PAGE_SIZE }),
+    initialPageParam: 1,
+    getNextPageParam: nextPageParam,
+  });
+}
+
+export function useAnnouncementSubscribers(params: Omit<SubscriberListParams, 'page' | 'limit'>, enabled = true) {
+  return useInfiniteQuery({
+    queryKey: queryKeys.announcementSubscribers(params),
+    queryFn: ({ pageParam }) => listAnnouncementSubscribers({ ...params, page: pageParam, limit: PAGE_SIZE }),
+    initialPageParam: 1,
+    getNextPageParam: nextPageParam,
+    enabled,
+  });
+}
+
+export function useCreateAnnouncement() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: CreateAnnouncementInput) => createAnnouncement(input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.announcements }),
   });
 }
