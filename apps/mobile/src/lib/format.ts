@@ -19,6 +19,10 @@ export function formatNumber(value: number, locale: Locale): string {
   return new Intl.NumberFormat(intlLocale(locale)).format(value);
 }
 
+export function formatPercent(ratio: number, locale: Locale): string {
+  return new Intl.NumberFormat(intlLocale(locale), { style: 'percent', maximumFractionDigits: 0 }).format(ratio);
+}
+
 export function toMinorUnits(majorUnits: number): number {
   return Math.round(majorUnits * MINOR_UNITS_PER_MAJOR);
 }
@@ -41,12 +45,39 @@ export function formatDateTime(isoDate: string, locale: Locale): string {
   }).format(new Date(isoDate));
 }
 
-export function todayIsoDate(): string {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
+export function toIsoDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
+}
+
+export function todayIsoDate(): string {
+  return toIsoDate(new Date());
+}
+
+const ARABIC_INDIC_ZERO = 0x0660;
+const EASTERN_ARABIC_INDIC_ZERO = 0x06f0;
+const ARABIC_DIGIT_PATTERN = /[٠-٩۰-۹]/g;
+const ARABIC_DECIMAL_SEPARATOR_PATTERN = /٫/g;
+const THOUSANDS_SEPARATOR_PATTERN = /[٬,\s]/g;
+
+function toLatinDigit(digit: string): string {
+  const code = digit.charCodeAt(0);
+  const zero = code >= EASTERN_ARABIC_INDIC_ZERO ? EASTERN_ARABIC_INDIC_ZERO : ARABIC_INDIC_ZERO;
+  return String(code - zero);
+}
+
+export function parseAmountInput(text: string): number | null {
+  const normalized = text
+    .replace(ARABIC_DIGIT_PATTERN, toLatinDigit)
+    .replace(THOUSANDS_SEPARATOR_PATTERN, '')
+    .replace(ARABIC_DECIMAL_SEPARATOR_PATTERN, '.');
+  if (!normalized) {
+    return null;
+  }
+  const amount = Number(normalized);
+  return Number.isFinite(amount) && amount > 0 ? amount : null;
 }
 
 export function maskAccountDetails(details: string): string {

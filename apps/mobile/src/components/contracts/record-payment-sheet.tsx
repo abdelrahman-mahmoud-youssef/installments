@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { PressableScale } from '@/components/ui/pressable-scale';
 import { TextField } from '@/components/ui/text-field';
 import { useI18n } from '@/i18n/i18n-context';
-import { todayIsoDate, toMinorUnits } from '@/lib/format';
+import { parseAmountInput, todayIsoDate, toMinorUnits } from '@/lib/format';
 import { usePaymentMethods } from '@/hooks/queries';
 import { useTheme } from '@/theme/theme-context';
 import { radius, spacing } from '@/theme/tokens';
@@ -48,8 +48,8 @@ export function RecordPaymentSheet({
   const activeMethods = (paymentMethods ?? []).filter((method) => method.isActive);
 
   const submit = async () => {
-    const parsedAmount = Number(amount);
-    if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+    const parsedAmount = parseAmountInput(amount);
+    if (parsedAmount === null) {
       setError(t('contracts.amountRequired'));
       return;
     }
