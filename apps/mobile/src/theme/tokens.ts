@@ -1,3 +1,5 @@
+import { Platform } from 'react-native';
+
 export interface ThemeColors {
   background: string;
   surface: string;
@@ -99,6 +101,10 @@ export const fontSizes = {
 } as const;
 
 export type FontSizeToken = keyof typeof fontSizes;
+
+export const fontFamilies = {
+  monospace: Platform.select({ ios: 'Menlo', default: 'monospace' }),
+} as const;
 
 export const touchTarget = {
   minHeight: 44,

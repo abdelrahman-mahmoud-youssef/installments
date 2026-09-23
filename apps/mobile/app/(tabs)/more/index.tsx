@@ -77,6 +77,12 @@ export default function MoreScreen() {
                 onPress={() => router.push('/shop')}
                 showChevron
               />
+              <ListRow
+                icon="notifications-outline"
+                title={t('more.notifications')}
+                onPress={() => router.push('/notifications')}
+                showChevron
+              />
             </Card>
           </View>
         ) : null}

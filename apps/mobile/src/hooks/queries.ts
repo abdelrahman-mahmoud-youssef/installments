@@ -60,6 +60,18 @@ import {
 } from '@/api/customers';
 import { getDashboard } from '@/api/dashboard';
 import {
+  disconnectTelegram,
+  getNotificationSettings,
+  NotificationLanguage,
+  NotificationSettings,
+  ReminderMessageToggles,
+  saveTelegramBotToken,
+  sendTelegramTestMessage,
+  setNotificationLanguage,
+  setTelegramPublicVisibility,
+  updateReminderMessageToggles,
+} from '@/api/notification-settings';
+import {
   CreatePaymentMethodInput,
   createPaymentMethod,
   deletePaymentMethod,
@@ -131,6 +143,7 @@ export const queryKeys = {
   supportMessages: ['support'] as const,
   announcements: ['announcements', 'list'] as const,
   announcementSubscribers: (params: SubscriberListParams) => ['announcements', 'subscribers', params] as const,
+  notificationSettings: ['settings', 'notifications'] as const,
 };
 
 export function useDashboard() {
@@ -576,5 +589,71 @@ export function useCreateAnnouncement() {
   return useMutation({
     mutationFn: (input: CreateAnnouncementInput) => createAnnouncement(input),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.announcements }),
+  });
+}
+
+export function useNotificationSettings(enabled = true) {
+  return useQuery({ queryKey: queryKeys.notificationSettings, queryFn: getNotificationSettings, enabled });
+}
+
+function useNotificationSettingsMutation<TVariables>(
+  mutationFn: (variables: TVariables) => Promise<NotificationSettings>,
+  applyOptimistic?: (settings: NotificationSettings, variables: TVariables) => NotificationSettings,
+) {
+  const queryClient = useQueryClient();
+  const queryKey = queryKeys.notificationSettings;
+  return useMutation({
+    mutationFn,
+    onMutate: async (variables: TVariables) => {
+      const previous = queryClient.getQueryData<NotificationSettings>(queryKey);
+      if (applyOptimistic && previous) {
+        await queryClient.cancelQueries({ queryKey });
+        queryClient.setQueryData(queryKey, applyOptimistic(previous, variables));
+      }
+      return { previous };
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(queryKey, context.previous);
+      }
+    },
+    onSuccess: (settings) => queryClient.setQueryData(queryKey, settings),
+  });
+}
+
+export function useSaveTelegramBotToken() {
+  return useNotificationSettingsMutation((token: string) => saveTelegramBotToken(token));
+}
+
+export function useDisconnectTelegram() {
+  return useNotificationSettingsMutation<void>(() => disconnectTelegram());
+}
+
+export function useSetNotificationLanguage() {
+  return useNotificationSettingsMutation(
+    (language: NotificationLanguage) => setNotificationLanguage(language),
+    (settings, language) => ({ ...settings, notificationLanguage: language }),
+  );
+}
+
+export function useSetTelegramPublicVisibility() {
+  return useNotificationSettingsMutation(
+    (isVisible: boolean) => setTelegramPublicVisibility(isVisible),
+    (settings, isVisible) => ({ ...settings, showTelegramOnPublicPage: isVisible }),
+  );
+}
+
+export function useUpdateReminderMessageToggles() {
+  return useNotificationSettingsMutation(
+    (toggles: Partial<ReminderMessageToggles>) => updateReminderMessageToggles(toggles),
+    (settings, toggles) => ({ ...settings, reminderMessage: { ...settings.reminderMessage, ...toggles } }),
+  );
+}
+
+export function useSendTelegramTestMessage() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => sendTelegramTestMessage(),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.notificationSettings }),
   });
 }
