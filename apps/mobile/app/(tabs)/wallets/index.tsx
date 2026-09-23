@@ -1,214 +1,128 @@
 import { Stack } from 'expo-router';
-import { useMemo, useState } from 'react';
-import { FlatList, RefreshControl, View } from 'react-native';
-import { PaymentMethod } from '@/api/payment-methods';
+import { useState } from 'react';
+import { ScrollView, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/auth/auth-context';
-import { PaymentMethodCard } from '@/components/wallets/payment-method-card';
-import { PaymentMethodFormSheet } from '@/components/wallets/payment-method-form-sheet';
+import { ContactFormSheet } from '@/components/contacts/contact-form-sheet';
+import { ContactList } from '@/components/contacts/contact-list';
 import { AppText } from '@/components/ui/app-text';
-import { BottomSheet } from '@/components/ui/bottom-sheet';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { ConfirmSheet } from '@/components/ui/confirm-sheet';
-import { EmptyState } from '@/components/ui/empty-state';
-import { ErrorState } from '@/components/ui/error-state';
-import { ListRow } from '@/components/ui/list-row';
-import { SkeletonCardList } from '@/components/ui/skeleton';
+import { SegmentedControl } from '@/components/ui/segmented-control';
 import { useToast } from '@/components/ui/toast-context';
-import {
-  useCreatePaymentMethod,
-  useDeletePaymentMethod,
-  usePaymentMethods,
-  useUpdatePaymentMethod,
-} from '@/hooks/queries';
+import { PaymentMethodFormSheet } from '@/components/wallets/payment-method-form-sheet';
+import { PresetQuickAdd } from '@/components/wallets/preset-quick-add';
+import { WalletList } from '@/components/wallets/wallet-list';
+import { useCreateCounterparty, useCreatePaymentMethod } from '@/hooks/queries';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useI18n } from '@/i18n/i18n-context';
+import { CUSTOM_PRESET_KEY } from '@/lib/payment-method-presets';
 import { useTheme } from '@/theme/theme-context';
 import { spacing } from '@/theme/tokens';
 
-type PendingConfirm = { kind: 'remove' | 'deactivate'; method: PaymentMethod } | null;
+type Segment = 'wallets' | 'contacts';
 
 export default function WalletsScreen() {
   const { t } = useI18n();
   const { colors } = useTheme();
   const { isAdmin } = useAuth();
   const { showToast } = useToast();
-  const { data, isPending, isError, error, refetch, isRefetching } = usePaymentMethods();
-  const createMutation = useCreatePaymentMethod();
-  const updateMutation = useUpdatePaymentMethod();
-  const deleteMutation = useDeletePaymentMethod();
+  const insets = useSafeAreaInsets();
+  const [segment, setSegment] = useState<Segment>('wallets');
+  const [search, setSearch] = useState('');
+  const debouncedSearch = useDebouncedValue(search.trim());
+  const [newWalletPreset, setNewWalletPreset] = useState<string | null>(null);
+  const [isContactFormVisible, setIsContactFormVisible] = useState(false);
+  const createWallet = useCreatePaymentMethod();
+  const createContact = useCreateCounterparty();
 
-  const [actionMethod, setActionMethod] = useState<PaymentMethod | null>(null);
-  const [formVisible, setFormVisible] = useState(false);
-  const [editingMethod, setEditingMethod] = useState<PaymentMethod | null>(null);
-  const [pendingConfirm, setPendingConfirm] = useState<PendingConfirm>(null);
+  const isWallets = segment === 'wallets';
 
-  const methods = data ?? [];
-  const primaryMethodId = useMemo(
-    () => methods.find((method) => method.isActive)?.id ?? null,
-    [methods],
+  const header = (
+    <View style={{ gap: spacing.lg, paddingBottom: spacing.xs }}>
+      <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+        <SegmentedControl
+          options={[
+            { value: 'wallets', label: t('wallets.walletsSegment'), icon: 'wallet-outline' },
+            { value: 'contacts', label: t('wallets.contactsSegment'), icon: 'people-outline' },
+          ]}
+          selected={segment}
+          onSelect={setSegment}
+        />
+        <AppText variant="caption" tone="muted">
+          {isWallets ? t('wallets.subtitle') : t('contacts.emptyHint')}
+        </AppText>
+      </View>
+      {isWallets && !debouncedSearch ? <PresetQuickAdd onSelect={setNewWalletPreset} /> : null}
+    </View>
   );
-
-  const openForm = (method: PaymentMethod) => {
-    setActionMethod(null);
-    setEditingMethod(method);
-    setFormVisible(true);
-  };
-
-  const toggleActive = (method: PaymentMethod) => {
-    if (method.isActive) {
-      setActionMethod(null);
-      setPendingConfirm({ kind: 'deactivate', method });
-      return;
-    }
-    setActionMethod(null);
-    updateMutation.mutate(
-      { id: method.id, input: { isActive: true } },
-      { onSuccess: () => showToast(t('wallets.updated')) },
-    );
-  };
-
-  const confirmPendingAction = () => {
-    if (!pendingConfirm) {
-      return;
-    }
-    const { kind, method } = pendingConfirm;
-    if (kind === 'remove') {
-      deleteMutation.mutate(method.id, {
-        onSuccess: () => {
-          setPendingConfirm(null);
-          showToast(t('wallets.removed'));
-        },
-        onError: () => {
-          setPendingConfirm(null);
-          showToast(t('common.genericError'), 'error');
-        },
-      });
-    } else {
-      updateMutation.mutate(
-        { id: method.id, input: { isActive: false } },
-        {
-          onSuccess: () => {
-            setPendingConfirm(null);
-            showToast(t('wallets.updated'));
-          },
-          onError: () => {
-            setPendingConfirm(null);
-            showToast(t('common.genericError'), 'error');
-          },
-        },
-      );
-    }
-  };
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <Stack.Screen options={{ title: t('wallets.title') }} />
-      <FlatList
-        data={isAdmin ? methods : []}
-        keyExtractor={(method) => method.id}
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={{ paddingTop: spacing.md, paddingBottom: spacing.xxxl, gap: spacing.md, flexGrow: 1 }}
-        refreshControl={
-          <RefreshControl refreshing={isRefetching} onRefresh={() => void refetch()} tintColor={colors.textMuted} />
-        }
-        ListHeaderComponent={
-          <View style={{ paddingHorizontal: spacing.xl }}>
-            <AppText variant="caption" tone="muted">
-              {t('wallets.subtitle')}
-            </AppText>
-          </View>
-        }
-        ListEmptyComponent={
-          <View style={{ paddingHorizontal: spacing.xl }}>
-            {!isAdmin ? (
-              <Card>
-                <AppText variant="caption" tone="muted">
-                  {t('wallets.adminOnly')}
-                </AppText>
-              </Card>
-            ) : isPending ? (
-              <SkeletonCardList count={4} />
-            ) : isError ? (
-              <ErrorState error={error} onRetry={() => void refetch()} />
-            ) : (
-              <EmptyState icon="wallet-outline" title={t('wallets.empty')} message={t('wallets.emptyHint')} />
-            )}
-          </View>
-        }
-        renderItem={({ item }) => (
-          <View style={{ paddingHorizontal: spacing.xl }}>
-            <PaymentMethodCard
-              method={item}
-              isPrimary={item.id === primaryMethodId}
-              onPress={() => setActionMethod(item)}
-            />
-          </View>
-        )}
+      <Stack.Screen
+        options={{
+          title: t('wallets.title'),
+          headerSearchBarOptions: isAdmin
+            ? {
+                placeholder: t('wallets.searchPlaceholder'),
+                cancelButtonText: t('common.cancel'),
+                autoCapitalize: 'none',
+                onChangeText: (event) => setSearch(event.nativeEvent.text),
+              }
+            : undefined,
+        }}
       />
+      {!isAdmin ? (
+        <ScrollView contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ padding: spacing.xl }}>
+          <Card>
+            <AppText variant="caption" tone="muted">
+              {t('wallets.adminOnly')}
+            </AppText>
+          </Card>
+        </ScrollView>
+      ) : isWallets ? (
+        <WalletList header={header} search={debouncedSearch} />
+      ) : (
+        <ContactList header={header} search={debouncedSearch} />
+      )}
 
-      <BottomSheet
-        visible={actionMethod !== null}
-        onClose={() => setActionMethod(null)}
-        title={actionMethod?.label}
-        scrollable={false}
-      >
-        {actionMethod ? (
-          <View>
-            <ListRow
-              icon="create-outline"
-              title={t('wallets.editMethod')}
-              onPress={() => openForm(actionMethod)}
-            />
-            <ListRow
-              icon={actionMethod.isActive ? 'pause-circle-outline' : 'play-circle-outline'}
-              title={actionMethod.isActive ? t('wallets.deactivate') : t('wallets.activate')}
-              onPress={() => toggleActive(actionMethod)}
-            />
-            <ListRow
-              icon="trash-outline"
-              title={t('common.remove')}
-              destructive
-              onPress={() => {
-                setPendingConfirm({ kind: 'remove', method: actionMethod });
-                setActionMethod(null);
-              }}
-            />
-          </View>
-        ) : null}
-      </BottomSheet>
+      {isAdmin ? (
+        <View
+          pointerEvents="box-none"
+          style={{ position: 'absolute', left: spacing.xl, right: spacing.xl, bottom: insets.bottom + spacing.lg }}
+        >
+          <Button
+            variant="glass"
+            title={isWallets ? t('wallets.addMethod') : t('contacts.newContact')}
+            icon={isWallets ? 'add-circle-outline' : 'person-add-outline'}
+            onPress={() => (isWallets ? setNewWalletPreset(CUSTOM_PRESET_KEY) : setIsContactFormVisible(true))}
+          />
+        </View>
+      ) : null}
 
       <PaymentMethodFormSheet
-        visible={formVisible}
-        method={editingMethod}
-        saving={createMutation.isPending || updateMutation.isPending}
-        onClose={() => setFormVisible(false)}
-        onCreate={async (input) => {
-          await createMutation.mutateAsync(input);
-          setFormVisible(false);
+        visible={newWalletPreset !== null}
+        method={null}
+        initialPresetKey={newWalletPreset ?? CUSTOM_PRESET_KEY}
+        saving={createWallet.isPending}
+        onClose={() => setNewWalletPreset(null)}
+        onSubmit={async ({ monthlyLimit, ...values }) => {
+          await createWallet.mutateAsync({ ...values, monthlyLimit: monthlyLimit ?? undefined });
+          setNewWalletPreset(null);
           showToast(t('wallets.added'));
-        }}
-        onUpdate={async (id, input) => {
-          await updateMutation.mutateAsync({ id, input });
-          setFormVisible(false);
-          showToast(t('wallets.updated'));
         }}
       />
 
-      <ConfirmSheet
-        visible={pendingConfirm !== null}
-        title={pendingConfirm?.kind === 'remove' ? t('wallets.removeTitle') : t('wallets.deactivateTitle')}
-        message={
-          pendingConfirm
-            ? t(
-                pendingConfirm.kind === 'remove' ? 'wallets.removeConfirm' : 'wallets.deactivateConfirm',
-                { label: pendingConfirm.method.label },
-              )
-            : ''
-        }
-        confirmTitle={pendingConfirm?.kind === 'remove' ? t('common.remove') : t('wallets.deactivate')}
-        destructive
-        loading={deleteMutation.isPending || updateMutation.isPending}
-        onConfirm={confirmPendingAction}
-        onCancel={() => setPendingConfirm(null)}
+      <ContactFormSheet
+        visible={isContactFormVisible}
+        contact={null}
+        saving={createContact.isPending}
+        onClose={() => setIsContactFormVisible(false)}
+        onSubmit={async (input) => {
+          await createContact.mutateAsync(input);
+          setIsContactFormVisible(false);
+          showToast(t('contacts.created'));
+        }}
       />
     </View>
   );

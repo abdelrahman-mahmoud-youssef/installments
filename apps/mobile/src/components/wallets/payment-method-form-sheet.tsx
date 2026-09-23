@@ -2,36 +2,52 @@ import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ApiError } from '@/api/client';
-import { CreatePaymentMethodInput, PaymentMethod, UpdatePaymentMethodInput } from '@/api/payment-methods';
+import { PaymentMethod } from '@/api/payment-methods';
 import { AppText } from '@/components/ui/app-text';
 import { BottomSheet } from '@/components/ui/bottom-sheet';
 import { Button } from '@/components/ui/button';
 import { PressableScale } from '@/components/ui/pressable-scale';
 import { TextField } from '@/components/ui/text-field';
 import { useI18n } from '@/i18n/i18n-context';
-import { toMinorUnits } from '@/lib/format';
-import { PAYMENT_METHOD_PRESETS, resolvePaymentMethodPreset } from '@/lib/payment-method-presets';
+import { parseAmountInput, toMinorUnits } from '@/lib/format';
+import { CUSTOM_PRESET_KEY, PAYMENT_METHOD_PRESETS, resolvePaymentMethodPreset } from '@/lib/payment-method-presets';
 import { useTheme } from '@/theme/theme-context';
 import { radius, spacing } from '@/theme/tokens';
-
-const CUSTOM_PRESET_KEY = 'custom';
 
 interface PaymentMethodFormSheetProps {
   visible: boolean;
   method: PaymentMethod | null;
   saving: boolean;
   onClose: () => void;
-  onCreate: (input: CreatePaymentMethodInput) => Promise<void>;
-  onUpdate: (id: string, input: UpdatePaymentMethodInput) => Promise<void>;
+  onSubmit: (values: PaymentMethodFormValues) => Promise<void>;
+  initialPresetKey?: string;
+}
+
+export interface PaymentMethodFormValues {
+  label: string;
+  details: string;
+  presetKey?: string;
+  monthlyLimit: number | null;
+}
+
+function presetDefaults(key: string): { label: string; monthlyLimit: string } {
+  if (key === CUSTOM_PRESET_KEY) {
+    return { label: '', monthlyLimit: '' };
+  }
+  const preset = resolvePaymentMethodPreset(key);
+  return {
+    label: preset.label,
+    monthlyLimit: preset.suggestedMonthlyLimit ? String(preset.suggestedMonthlyLimit / 100) : '',
+  };
 }
 
 export function PaymentMethodFormSheet({
   visible,
   method,
   saving,
+  initialPresetKey = CUSTOM_PRESET_KEY,
   onClose,
-  onCreate,
-  onUpdate,
+  onSubmit,
 }: PaymentMethodFormSheetProps) {
   const { t } = useI18n();
   const { colors } = useTheme();
@@ -52,20 +68,21 @@ export function PaymentMethodFormSheet({
       setDetails(method.details);
       setMonthlyLimit(method.monthlyLimit !== null ? String(method.monthlyLimit / 100) : '');
     } else {
-      setPresetKey(CUSTOM_PRESET_KEY);
-      setLabel('');
+      const preset = presetDefaults(initialPresetKey);
+      setPresetKey(initialPresetKey);
+      setLabel(preset.label);
       setDetails('');
-      setMonthlyLimit('');
+      setMonthlyLimit(preset.monthlyLimit);
     }
-  }, [visible, method]);
+  }, [visible, method, initialPresetKey]);
 
   const selectPreset = (key: string) => {
     setPresetKey(key);
     if (!method && key !== CUSTOM_PRESET_KEY) {
-      const preset = resolvePaymentMethodPreset(key);
+      const preset = presetDefaults(key);
       setLabel(preset.label);
-      if (preset.suggestedMonthlyLimit) {
-        setMonthlyLimit(String(preset.suggestedMonthlyLimit / 100));
+      if (preset.monthlyLimit) {
+        setMonthlyLimit(preset.monthlyLimit);
       }
     }
   };
@@ -82,26 +99,14 @@ export function PaymentMethodFormSheet({
     if (nextErrors.label || nextErrors.details) {
       return;
     }
-    const parsedLimit = Number(monthlyLimit);
-    const limitMinorUnits =
-      monthlyLimit.trim() && Number.isFinite(parsedLimit) && parsedLimit > 0
-        ? toMinorUnits(parsedLimit)
-        : undefined;
+    const parsedLimit = parseAmountInput(monthlyLimit);
     try {
-      if (method) {
-        await onUpdate(method.id, {
-          label: label.trim(),
-          details: details.trim(),
-          monthlyLimit: limitMinorUnits ?? null,
-        });
-      } else {
-        await onCreate({
-          label: label.trim(),
-          details: details.trim(),
-          presetKey: presetKey !== CUSTOM_PRESET_KEY ? presetKey : undefined,
-          monthlyLimit: limitMinorUnits,
-        });
-      }
+      await onSubmit({
+        label: label.trim(),
+        details: details.trim(),
+        presetKey: presetKey !== CUSTOM_PRESET_KEY ? presetKey : undefined,
+        monthlyLimit: parsedLimit !== null ? toMinorUnits(parsedLimit) : null,
+      });
     } catch (error) {
       setErrors({ api: error instanceof ApiError ? error.message : t('common.genericError') });
     }

@@ -1,35 +1,37 @@
-import { useState } from 'react';
 import { View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { PaymentMethod } from '@/api/payment-methods';
 import { AppText } from '@/components/ui/app-text';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { MoneyText } from '@/components/ui/money-text';
 import { PressableScale } from '@/components/ui/pressable-scale';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { useI18n } from '@/i18n/i18n-context';
-import { formatMoney, maskAccountDetails } from '@/lib/format';
+import { formatMoney } from '@/lib/format';
 import { resolvePaymentMethodPreset } from '@/lib/payment-method-presets';
-import { useTheme } from '@/theme/theme-context';
 import { radius, spacing } from '@/theme/tokens';
+import { MaskedAccountDetails } from './masked-account-details';
 
 interface PaymentMethodCardProps {
   method: PaymentMethod;
   isPrimary: boolean;
   onPress: () => void;
+  onLongPress?: () => void;
 }
 
-export function PaymentMethodCard({ method, isPrimary, onPress }: PaymentMethodCardProps) {
-  const { colors } = useTheme();
+export function PaymentMethodCard({ method, isPrimary, onPress, onLongPress }: PaymentMethodCardProps) {
   const { t, locale } = useI18n();
-  const [detailsVisible, setDetailsVisible] = useState(false);
   const preset = resolvePaymentMethodPreset(method.presetKey);
   const usageRatio = method.monthlyLimit ? method.monthToDateUsage / method.monthlyLimit : 0;
   const usageTone = usageRatio >= 1 ? 'danger' : usageRatio >= 0.8 ? 'warning' : 'primary';
 
   return (
-    <PressableScale onPress={onPress} accessibilityRole="button" accessibilityLabel={method.label}>
+    <PressableScale
+      onPress={onPress}
+      onLongPress={onLongPress}
+      accessibilityRole="button"
+      accessibilityLabel={method.label}
+    >
       <Card style={{ opacity: method.isActive ? 1 : 0.6 }}>
         <View style={{ gap: spacing.md }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
@@ -49,23 +51,7 @@ export function PaymentMethodCard({ method, isPrimary, onPress }: PaymentMethodC
               <AppText variant="bodyStrong" numberOfLines={1}>
                 {method.label}
               </AppText>
-              <PressableScale
-                onPress={() => setDetailsVisible((visible) => !visible)}
-                accessibilityRole="button"
-                accessibilityLabel={detailsVisible ? t('wallets.hideDetails') : t('wallets.showDetails')}
-                hitSlop={8}
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
-                  <AppText variant="caption" tone="muted">
-                    {detailsVisible ? method.details : maskAccountDetails(method.details)}
-                  </AppText>
-                  <Ionicons
-                    name={detailsVisible ? 'eye-off-outline' : 'eye-outline'}
-                    size={14}
-                    color={colors.textFaint}
-                  />
-                </View>
-              </PressableScale>
+              <MaskedAccountDetails details={method.details} />
             </View>
             <View style={{ alignItems: 'flex-end', gap: spacing.xs }}>
               {isPrimary ? <Badge label={t('wallets.primary')} tone="primary" /> : null}

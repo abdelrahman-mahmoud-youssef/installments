@@ -21,8 +21,10 @@ export const PAYMENT_METHOD_PRESETS: PaymentMethodPreset[] = [
   { key: 'aman', label: 'Aman', color: '#ef5a28', icon: 'cash-outline' },
 ];
 
+export const CUSTOM_PRESET_KEY = 'custom';
+
 const FALLBACK_PRESET: PaymentMethodPreset = {
-  key: 'custom',
+  key: CUSTOM_PRESET_KEY,
   label: 'Custom',
   color: '#64748b',
   icon: 'card-outline',
