@@ -24,6 +24,7 @@ interface AuthContextValue {
   register: (input: RegisterInput) => Promise<void>;
   completeTwoFactor: (challengeToken: string, code: string) => Promise<void>;
   signOut: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -76,6 +77,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(currentUser);
   }, []);
 
+  const refreshUser = useCallback(async () => {
+    setUser(await getMe());
+  }, []);
+
   const signIn = useCallback(
     async (email: string, password: string): Promise<SignInResult> => {
       const result = await login(email, password);
@@ -114,8 +119,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       register: registerAccount,
       completeTwoFactor,
       signOut: clearSession,
+      refreshUser,
     }),
-    [user, isReady, signIn, registerAccount, completeTwoFactor, clearSession],
+    [user, isReady, signIn, registerAccount, completeTwoFactor, clearSession, refreshUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

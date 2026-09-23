@@ -12,13 +12,12 @@ import { PressableScale } from '@/components/ui/pressable-scale';
 import { TextField } from '@/components/ui/text-field';
 import { useI18n } from '@/i18n/i18n-context';
 import { formatNumber } from '@/lib/format';
+import { isValidEmail, isValidPassword } from '@/lib/validation';
 import { useTheme } from '@/theme/theme-context';
 import { spacing } from '@/theme/tokens';
 
 const TOTAL_STEPS = 2;
-const PASSWORD_MIN_LENGTH = 8;
 const STEP_FADE_DURATION = 220;
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type FieldErrors = Partial<Record<'businessName' | 'name' | 'email' | 'password', string>>;
 
@@ -60,10 +59,10 @@ export default function RegisterScreen() {
   const submit = async () => {
     const nextErrors: FieldErrors = {};
     const normalizedEmail = email.trim().toLowerCase();
-    if (!EMAIL_PATTERN.test(normalizedEmail)) {
+    if (!isValidEmail(normalizedEmail)) {
       nextErrors.email = t('auth.invalidEmail');
     }
-    if (password.length < PASSWORD_MIN_LENGTH) {
+    if (!isValidPassword(password)) {
       nextErrors.password = t('auth.passwordTooShort');
     }
     setErrors(nextErrors);

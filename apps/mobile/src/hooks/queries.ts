@@ -14,6 +14,7 @@ import {
   SubscriberListParams,
 } from '@/api/announcements';
 import { listAuditLogs } from '@/api/audit';
+import { ChangePasswordInput, changePassword, disableTwoFactor, enableTwoFactor, setupTwoFactor } from '@/api/auth';
 import { getBranding, removeLogo, UpdateBrandingInput, updateBranding, uploadLogo } from '@/api/branding';
 import { PaginatedResult } from '@/api/client';
 import {
@@ -656,4 +657,20 @@ export function useSendTelegramTestMessage() {
     mutationFn: () => sendTelegramTestMessage(),
     onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.notificationSettings }),
   });
+}
+
+export function useChangePassword() {
+  return useMutation({ mutationFn: (input: ChangePasswordInput) => changePassword(input) });
+}
+
+export function useSetupTwoFactor() {
+  return useMutation({ mutationFn: () => setupTwoFactor() });
+}
+
+export function useEnableTwoFactor() {
+  return useMutation({ mutationFn: (code: string) => enableTwoFactor(code) });
+}
+
+export function useDisableTwoFactor() {
+  return useMutation({ mutationFn: (code: string) => disableTwoFactor(code) });
 }

@@ -123,8 +123,14 @@ export default function MoreScreen() {
         </View>
 
         <View style={{ gap: spacing.sm }}>
-          <SectionHeader title={t('more.preferencesSection')} />
+          <SectionHeader title={t('more.accountSection')} />
           <Card>
+            <ListRow
+              icon="shield-checkmark-outline"
+              title={t('more.security')}
+              onPress={() => router.push('/security')}
+              showChevron
+            />
             <ListRow
               icon="settings-outline"
               title={t('more.settings')}
