@@ -81,6 +81,9 @@ const en = {
     emptyOverdue: 'No overdue installments',
     emptyUpcoming: 'Nothing due in the next 7 days',
     emptyPayments: 'No payments recorded yet',
+    upcomingCollections: 'Upcoming collections',
+    upcomingTotal: 'Expected over the next 7 days',
+    newContract: 'New contract',
     allCaughtUp: 'All caught up',
   },
   customers: {
@@ -645,6 +648,9 @@ const ar: typeof en = {
     emptyOverdue: 'لا توجد أقساط متأخرة',
     emptyUpcoming: 'لا توجد أقساط خلال الأيام السبعة القادمة',
     emptyPayments: 'لم تُسجَّل أي مدفوعات بعد',
+    upcomingCollections: 'التحصيلات القادمة',
+    upcomingTotal: 'المتوقع خلال الأيام السبعة القادمة',
+    newContract: 'عقد جديد',
     allCaughtUp: 'كل شيء تحت السيطرة',
   },
   customers: {

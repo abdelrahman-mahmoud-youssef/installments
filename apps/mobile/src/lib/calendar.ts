@@ -1,5 +1,5 @@
 import type { Locale } from '@/i18n/translations';
-import { toIsoDate } from './format';
+import { intlLocale, toIsoDate } from './format';
 
 function monthKeyOf(date: Date): string {
   return toIsoDate(date).slice(0, 7);
@@ -26,7 +26,7 @@ export function shiftMonthKey(monthKey: string, months: number): string {
 }
 
 export function formatMonthKey(monthKey: string, locale: Locale): string {
-  return new Intl.DateTimeFormat(locale === 'ar' ? 'ar-EG' : 'en-EG', { month: 'long', year: 'numeric' }).format(
+  return new Intl.DateTimeFormat(intlLocale(locale), { month: 'long', year: 'numeric' }).format(
     parseMonthKey(monthKey),
   );
 }
@@ -46,6 +46,10 @@ export function shiftIsoDateByMonths(isoDate: string, months: number): string {
       Math.min(anchor.getDate(), lastDayOfTargetMonth),
     ),
   );
+}
+
+export function formatShortWeekday(isoDate: string, locale: Locale): string {
+  return new Intl.DateTimeFormat(intlLocale(locale), { weekday: 'short' }).format(parseIsoDate(isoDate));
 }
 
 export function shiftIsoDate(isoDate: string, days: number): string {

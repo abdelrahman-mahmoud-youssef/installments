@@ -3,7 +3,7 @@ import type { Locale } from '@/i18n/translations';
 const CURRENCY = 'EGP';
 const MINOR_UNITS_PER_MAJOR = 100;
 
-function intlLocale(locale: Locale): string {
+export function intlLocale(locale: Locale): string {
   return locale === 'ar' ? 'ar-EG' : 'en-EG';
 }
 
