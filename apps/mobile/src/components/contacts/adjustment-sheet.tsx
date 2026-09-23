@@ -93,7 +93,12 @@ export function AdjustmentSheet({ visible, counterpartyId, currentBalance, onClo
           placeholder="0"
           error={error ?? undefined}
         />
-        <DateStepper label={t('transactions.date')} value={occurredAt} onChange={setOccurredAt} />
+        <DateStepper
+          label={t('transactions.date')}
+          value={occurredAt}
+          onChange={setOccurredAt}
+          maxDate={todayIsoDate()}
+        />
         <View
           style={{
             flexDirection: 'row',

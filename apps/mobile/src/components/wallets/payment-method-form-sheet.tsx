@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { PressableScale } from '@/components/ui/pressable-scale';
 import { TextField } from '@/components/ui/text-field';
 import { useI18n } from '@/i18n/i18n-context';
-import { parseAmountInput, toMinorUnits } from '@/lib/format';
+import { parseAmountInput, toMajorUnitsText, toMinorUnits } from '@/lib/format';
 import { CUSTOM_PRESET_KEY, PAYMENT_METHOD_PRESETS, resolvePaymentMethodPreset } from '@/lib/payment-method-presets';
 import { useTheme } from '@/theme/theme-context';
 import { radius, spacing } from '@/theme/tokens';
@@ -37,7 +37,7 @@ function presetDefaults(key: string): { label: string; monthlyLimit: string } {
   const preset = resolvePaymentMethodPreset(key);
   return {
     label: preset.label,
-    monthlyLimit: preset.suggestedMonthlyLimit ? String(preset.suggestedMonthlyLimit / 100) : '',
+    monthlyLimit: preset.suggestedMonthlyLimit ? toMajorUnitsText(preset.suggestedMonthlyLimit) : '',
   };
 }
 
@@ -66,7 +66,7 @@ export function PaymentMethodFormSheet({
       setPresetKey(method.presetKey ?? CUSTOM_PRESET_KEY);
       setLabel(method.label);
       setDetails(method.details);
-      setMonthlyLimit(method.monthlyLimit !== null ? String(method.monthlyLimit / 100) : '');
+      setMonthlyLimit(method.monthlyLimit !== null ? toMajorUnitsText(method.monthlyLimit) : '');
     } else {
       const preset = presetDefaults(initialPresetKey);
       setPresetKey(initialPresetKey);

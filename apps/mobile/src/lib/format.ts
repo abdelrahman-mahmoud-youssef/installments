@@ -23,6 +23,10 @@ export function formatPercent(ratio: number, locale: Locale): string {
   return new Intl.NumberFormat(intlLocale(locale), { style: 'percent', maximumFractionDigits: 0 }).format(ratio);
 }
 
+export function toMajorUnitsText(minorUnits: number): string {
+  return String(minorUnits / MINOR_UNITS_PER_MAJOR);
+}
+
 export function toMinorUnits(majorUnits: number): number {
   return Math.round(majorUnits * MINOR_UNITS_PER_MAJOR);
 }
@@ -78,17 +82,23 @@ function normalizeSeparators(text: string): string {
   return DECIMAL_COMMA_PATTERN.test(text) ? text.replace(',', '.') : text;
 }
 
-export function parseAmountInput(text: string): number | null {
+export function parseNonNegativeAmountInput(text: string): number | null {
   const latin = text
     .replace(ARABIC_DIGIT_PATTERN, toLatinDigit)
     .replace(IGNORED_CHARACTERS_PATTERN, '')
     .replace(ARABIC_DECIMAL_SEPARATOR_PATTERN, '.');
   const normalized = normalizeSeparators(latin);
-  if (!PLAIN_AMOUNT_PATTERN.test(normalized)) {
-    return null;
-  }
-  const amount = Number(normalized);
-  return amount > 0 ? amount : null;
+  return PLAIN_AMOUNT_PATTERN.test(normalized) ? Number(normalized) : null;
+}
+
+export function parseAmountInput(text: string): number | null {
+  const amount = parseNonNegativeAmountInput(text);
+  return amount !== null && amount > 0 ? amount : null;
+}
+
+export function parseCountInput(text: string): number | null {
+  const count = parseAmountInput(text);
+  return count !== null && Number.isInteger(count) ? count : null;
 }
 
 export function maskAccountDetails(details: string): string {

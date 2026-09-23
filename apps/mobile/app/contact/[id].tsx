@@ -1,8 +1,6 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, Linking, RefreshControl, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 import { Counterparty, CounterpartyHistoryItem } from '@/api/counterparties';
 import { useAuth } from '@/auth/auth-context';
 import { AdjustmentSheet } from '@/components/contacts/adjustment-sheet';
@@ -16,9 +14,10 @@ import { DetailFallback } from '@/components/ui/detail-fallback';
 import { ConfirmSheet } from '@/components/ui/confirm-sheet';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
+import { FloatingActionBar } from '@/components/ui/floating-action-bar';
 import { MoneyText } from '@/components/ui/money-text';
 import { MonthSwitcher } from '@/components/ui/month-switcher';
-import { PressableScale } from '@/components/ui/pressable-scale';
+import { QuickAction } from '@/components/ui/quick-action';
 import { SectionHeader } from '@/components/ui/section-header';
 import { SkeletonCardList } from '@/components/ui/skeleton';
 import { StatCard } from '@/components/ui/stat-card';
@@ -36,7 +35,7 @@ import { currentMonthKey } from '@/lib/calendar';
 import { balanceStatus, balanceTone } from '@/lib/counterparty-balance';
 import { formatDate, formatMoney } from '@/lib/format';
 import { useTheme } from '@/theme/theme-context';
-import { floatingActionClearance, radius, spacing, touchTarget } from '@/theme/tokens';
+import { floatingActionClearance, spacing, touchTarget } from '@/theme/tokens';
 
 type OpenSheet = 'edit' | 'adjust' | 'log' | 'remove' | null;
 
@@ -49,7 +48,6 @@ export default function ContactDetailScreen() {
   const { isAdmin } = useAuth();
   const { showToast } = useToast();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const shareStatement = useShareStatement();
   const [month, setMonth] = useState(currentMonthKey());
   const [openSheet, setOpenSheet] = useState<OpenSheet>(null);
@@ -190,12 +188,9 @@ export default function ContactDetailScreen() {
         )}
       />
 
-      <View
-        pointerEvents="box-none"
-        style={{ position: 'absolute', left: spacing.xl, right: spacing.xl, bottom: insets.bottom + spacing.lg }}
-      >
+      <FloatingActionBar>
         <Button variant="glass" title={t('transactions.log')} icon="swap-vertical" onPress={() => setOpenSheet('log')} />
-      </View>
+      </FloatingActionBar>
 
       <LogTransactionSheet visible={openSheet === 'log'} counterparty={contact} onClose={closeSheet} />
       <AdjustmentSheet
@@ -274,39 +269,5 @@ function ContactHero({ contact, onCall, onShare, onAdjust, onEdit }: ContactHero
         </View>
       </View>
     </Card>
-  );
-}
-
-interface QuickActionProps {
-  icon: keyof typeof Ionicons.glyphMap;
-  label: string;
-  onPress: () => void;
-}
-
-function QuickAction({ icon, label, onPress }: QuickActionProps) {
-  const { colors } = useTheme();
-  return (
-    <PressableScale
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      style={{ alignItems: 'center', gap: spacing.xs, minWidth: touchTarget.minHeight + spacing.lg }}
-    >
-      <View
-        style={{
-          width: touchTarget.minHeight + spacing.xs,
-          height: touchTarget.minHeight + spacing.xs,
-          borderRadius: radius.full,
-          backgroundColor: colors.primaryMuted,
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <Ionicons name={icon} size={20} color={colors.primary} />
-      </View>
-      <AppText variant="label" tone="primary">
-        {label}
-      </AppText>
-    </PressableScale>
   );
 }

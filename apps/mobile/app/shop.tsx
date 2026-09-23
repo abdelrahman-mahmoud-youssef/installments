@@ -1,7 +1,6 @@
 import { Stack } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, Switch, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TenantBranding, UpdateBrandingInput } from '@/api/branding';
 import { ApiError } from '@/api/client';
 import { useAuth } from '@/auth/auth-context';
@@ -13,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ConfirmSheet } from '@/components/ui/confirm-sheet';
 import { ErrorState } from '@/components/ui/error-state';
+import { FloatingActionBar } from '@/components/ui/floating-action-bar';
 import { ListRow } from '@/components/ui/list-row';
 import { SectionHeader } from '@/components/ui/section-header';
 import { SkeletonCardList } from '@/components/ui/skeleton';
@@ -53,7 +53,6 @@ export default function ShopScreen() {
   const { colors, setBrandColor } = useTheme();
   const { isAdmin } = useAuth();
   const { showToast } = useToast();
-  const insets = useSafeAreaInsets();
   const branding = useBranding(isAdmin);
   const savedBrandColor = branding.data?.brandColor;
 
@@ -306,10 +305,7 @@ export default function ShopScreen() {
       </ScrollView>
 
       {isAdmin && form ? (
-        <View
-          pointerEvents="box-none"
-          style={{ position: 'absolute', left: spacing.xl, right: spacing.xl, bottom: insets.bottom + spacing.lg }}
-        >
+        <FloatingActionBar>
           <Button
             variant="glass"
             title={t('common.save')}
@@ -317,7 +313,7 @@ export default function ShopScreen() {
             onPress={() => void submit()}
             loading={updateMutation.isPending}
           />
-        </View>
+        </FloatingActionBar>
       ) : null}
 
       <BottomSheet

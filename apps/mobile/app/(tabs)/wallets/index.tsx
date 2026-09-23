@@ -1,12 +1,12 @@
 import { Stack } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/auth/auth-context';
 import { ContactFormSheet } from '@/components/contacts/contact-form-sheet';
 import { ContactList } from '@/components/contacts/contact-list';
 import { AppText } from '@/components/ui/app-text';
 import { Button } from '@/components/ui/button';
+import { FloatingActionBar } from '@/components/ui/floating-action-bar';
 import { Card } from '@/components/ui/card';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { useToast } from '@/components/ui/toast-context';
@@ -27,7 +27,6 @@ export default function WalletsScreen() {
   const { colors } = useTheme();
   const { isAdmin } = useAuth();
   const { showToast } = useToast();
-  const insets = useSafeAreaInsets();
   const [segment, setSegment] = useState<Segment>('wallets');
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search.trim());
@@ -87,17 +86,14 @@ export default function WalletsScreen() {
       )}
 
       {isAdmin ? (
-        <View
-          pointerEvents="box-none"
-          style={{ position: 'absolute', left: spacing.xl, right: spacing.xl, bottom: insets.bottom + spacing.lg }}
-        >
+        <FloatingActionBar>
           <Button
             variant="glass"
             title={isWallets ? t('wallets.addMethod') : t('contacts.newContact')}
             icon={isWallets ? 'add-circle-outline' : 'person-add-outline'}
             onPress={() => (isWallets ? setNewWalletPreset(CUSTOM_PRESET_KEY) : setIsContactFormVisible(true))}
           />
-        </View>
+        </FloatingActionBar>
       ) : null}
 
       <PaymentMethodFormSheet

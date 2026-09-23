@@ -1,7 +1,6 @@
 import { Stack } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, RefreshControl, Switch, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Offer } from '@/api/offers';
 import { useAuth } from '@/auth/auth-context';
 import { OfferCard } from '@/components/offers/offer-card';
@@ -13,6 +12,7 @@ import { Card } from '@/components/ui/card';
 import { ConfirmSheet } from '@/components/ui/confirm-sheet';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
+import { FloatingActionBar } from '@/components/ui/floating-action-bar';
 import { ListRow } from '@/components/ui/list-row';
 import { SkeletonCardList } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/toast-context';
@@ -36,7 +36,6 @@ export default function OffersScreen() {
   const { colors } = useTheme();
   const { isAdmin } = useAuth();
   const { showToast } = useToast();
-  const insets = useSafeAreaInsets();
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search);
   const [actionOffer, setActionOffer] = useState<Offer | null>(null);
@@ -178,12 +177,9 @@ export default function OffersScreen() {
       />
 
       {isAdmin ? (
-        <View
-          pointerEvents="box-none"
-          style={{ position: 'absolute', left: spacing.xl, right: spacing.xl, bottom: insets.bottom + spacing.lg }}
-        >
+        <FloatingActionBar>
           <Button variant="glass" title={t('offers.newOffer')} icon="add-circle-outline" onPress={() => openForm(null)} />
-        </View>
+        </FloatingActionBar>
       ) : null}
 
       <BottomSheet

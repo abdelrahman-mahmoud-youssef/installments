@@ -1,7 +1,6 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, RefreshControl, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { PaymentMethodTransaction } from '@/api/payment-method-transactions';
 import { PaymentMethod } from '@/api/payment-methods';
@@ -13,6 +12,7 @@ import { Card } from '@/components/ui/card';
 import { DetailFallback } from '@/components/ui/detail-fallback';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
+import { FloatingActionBar } from '@/components/ui/floating-action-bar';
 import { MonthSwitcher } from '@/components/ui/month-switcher';
 import { PressableScale } from '@/components/ui/pressable-scale';
 import { SectionHeader } from '@/components/ui/section-header';
@@ -39,7 +39,6 @@ export default function WalletDetailScreen() {
   const { colors } = useTheme();
   const { isAdmin } = useAuth();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const [month, setMonth] = useState(currentMonthKey());
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search.trim());
@@ -191,12 +190,9 @@ export default function WalletDetailScreen() {
         )}
       />
 
-      <View
-        pointerEvents="box-none"
-        style={{ position: 'absolute', left: spacing.xl, right: spacing.xl, bottom: insets.bottom + spacing.lg }}
-      >
+      <FloatingActionBar>
         <Button variant="glass" title={t('transactions.log')} icon="swap-vertical" onPress={() => setIsLogOpen(true)} />
-      </View>
+      </FloatingActionBar>
 
       <WalletActions
         method={isActionsOpen ? method : null}

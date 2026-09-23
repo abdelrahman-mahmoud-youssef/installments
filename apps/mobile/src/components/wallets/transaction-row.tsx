@@ -4,7 +4,8 @@ import { MoneyDirection } from '@/api/payment-method-transactions';
 import { AppText } from '@/components/ui/app-text';
 import { Badge } from '@/components/ui/badge';
 import { MoneyText } from '@/components/ui/money-text';
-import { ReceiptThumbnail } from '@/components/ui/receipt-thumbnail';
+import { ImageThumbnail } from '@/components/ui/image-thumbnail';
+import { useI18n } from '@/i18n/i18n-context';
 import { useTheme } from '@/theme/theme-context';
 import { radius, spacing } from '@/theme/tokens';
 
@@ -21,6 +22,7 @@ interface TransactionRowProps {
 
 export function TransactionRow({ direction, amount, title, subtitle, tag, receiptUrl }: TransactionRowProps) {
   const { colors } = useTheme();
+  const { t } = useI18n();
   const isOutgoing = direction === 'OUT';
   const tint = isOutgoing ? colors.danger : colors.success;
 
@@ -51,7 +53,7 @@ export function TransactionRow({ direction, amount, title, subtitle, tag, receip
           </AppText>
         ) : null}
       </View>
-      {receiptUrl ? <ReceiptThumbnail path={receiptUrl} /> : null}
+      {receiptUrl ? <ImageThumbnail path={receiptUrl} label={t('transactions.viewReceipt')} /> : null}
       <MoneyText minorUnits={amount} variant="bodyStrong" tone={isOutgoing ? 'danger' : 'success'} />
     </View>
   );

@@ -203,7 +203,12 @@ export function LogTransactionSheet({ visible, onClose, paymentMethodId, counter
           error={errors.amount}
         />
 
-        <DateStepper label={t('transactions.date')} value={occurredAt} onChange={setOccurredAt} />
+        <DateStepper
+          label={t('transactions.date')}
+          value={occurredAt}
+          onChange={setOccurredAt}
+          maxDate={todayIsoDate()}
+        />
 
         {counterparty ? (
           <View

@@ -1,35 +1,54 @@
 import { View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useI18n } from '@/i18n/i18n-context';
-import { shiftIsoDate } from '@/lib/calendar';
+import { shiftIsoDate, shiftIsoDateByMonths } from '@/lib/calendar';
 import { formatDate, todayIsoDate } from '@/lib/format';
 import { useTheme } from '@/theme/theme-context';
 import { radius, spacing, touchTarget } from '@/theme/tokens';
 import { AppText } from './app-text';
 import { PressableScale } from './pressable-scale';
 
-type Step = -1 | 1;
+type Direction = -1 | 1;
+type StepUnit = 'day' | 'month';
 
 interface DateStepperProps {
   label: string;
   value: string;
   onChange: (isoDate: string) => void;
+  maxDate?: string;
+  showMonthSteps?: boolean;
 }
 
-export function DateStepper({ label, value, onChange }: DateStepperProps) {
+const STEP_ICONS: Record<StepUnit, { back: keyof typeof Ionicons.glyphMap; forward: keyof typeof Ionicons.glyphMap }> = {
+  day: { back: 'chevron-back', forward: 'chevron-forward' },
+  month: { back: 'play-back', forward: 'play-forward' },
+};
+
+const STEP_LABELS: Record<StepUnit, { back: string; forward: string }> = {
+  day: { back: 'calendar.previousDay', forward: 'calendar.nextDay' },
+  month: { back: 'calendar.previousMonth', forward: 'calendar.nextMonth' },
+};
+
+export function DateStepper({ label, value, onChange, maxDate, showMonthSteps = false }: DateStepperProps) {
   const { colors } = useTheme();
   const { t, locale, isRTL } = useI18n();
-  const isToday = value >= todayIsoDate();
+  const isToday = value === todayIsoDate();
 
-  const renderStepButton = (step: Step) => {
-    const isDisabled = step === 1 && isToday;
-    const pointsBack = (step === -1) !== isRTL;
+  const shift = (unit: StepUnit, direction: Direction) =>
+    unit === 'day' ? shiftIsoDate(value, direction) : shiftIsoDateByMonths(value, direction);
+
+  const renderStepButton = (unit: StepUnit, direction: Direction) => {
+    const next = shift(unit, direction);
+    const isDisabled = direction === 1 && maxDate !== undefined && next > maxDate;
+    const pointsBack = (direction === -1) !== isRTL;
+    const icons = STEP_ICONS[unit];
+    const labels = STEP_LABELS[unit];
     return (
       <PressableScale
-        onPress={() => onChange(shiftIsoDate(value, step))}
+        onPress={() => onChange(next)}
         disabled={isDisabled}
         accessibilityRole="button"
-        accessibilityLabel={step === -1 ? t('calendar.previousDay') : t('calendar.nextDay')}
+        accessibilityLabel={t(direction === -1 ? labels.back : labels.forward)}
         style={{
           width: touchTarget.minHeight,
           height: touchTarget.minHeight,
@@ -38,7 +57,7 @@ export function DateStepper({ label, value, onChange }: DateStepperProps) {
           opacity: isDisabled ? 0.3 : 1,
         }}
       >
-        <Ionicons name={pointsBack ? 'chevron-back' : 'chevron-forward'} size={18} color={colors.primary} />
+        <Ionicons name={pointsBack ? icons.back : icons.forward} size={unit === 'day' ? 18 : 14} color={colors.primary} />
       </PressableScale>
     );
   };
@@ -59,11 +78,13 @@ export function DateStepper({ label, value, onChange }: DateStepperProps) {
           minHeight: touchTarget.minHeight + 4,
         }}
       >
-        {renderStepButton(-1)}
+        {showMonthSteps ? renderStepButton('month', -1) : null}
+        {renderStepButton('day', -1)}
         <View style={{ flex: 1, alignItems: 'center' }}>
           <AppText variant="body">{isToday ? t('calendar.today') : formatDate(value, locale)}</AppText>
         </View>
-        {renderStepButton(1)}
+        {renderStepButton('day', 1)}
+        {showMonthSteps ? renderStepButton('month', 1) : null}
       </View>
     </View>
   );

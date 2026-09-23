@@ -31,6 +31,23 @@ export function formatMonthKey(monthKey: string, locale: Locale): string {
   );
 }
 
+export function shiftIsoDateByMonths(isoDate: string, months: number): string {
+  const anchor = parseIsoDate(isoDate);
+  const targetMonthStart = new Date(anchor.getFullYear(), anchor.getMonth() + months, 1);
+  const lastDayOfTargetMonth = new Date(
+    targetMonthStart.getFullYear(),
+    targetMonthStart.getMonth() + 1,
+    0,
+  ).getDate();
+  return toIsoDate(
+    new Date(
+      targetMonthStart.getFullYear(),
+      targetMonthStart.getMonth(),
+      Math.min(anchor.getDate(), lastDayOfTargetMonth),
+    ),
+  );
+}
+
 export function shiftIsoDate(isoDate: string, days: number): string {
   const date = parseIsoDate(isoDate);
   date.setDate(date.getDate() + days);

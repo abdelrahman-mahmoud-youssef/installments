@@ -8,15 +8,17 @@ import { useTheme } from '@/theme/theme-context';
 import { radius, spacing, touchTarget } from '@/theme/tokens';
 import { PressableScale } from './pressable-scale';
 
-const THUMBNAIL_SIZE = 40;
+const DEFAULT_THUMBNAIL_SIZE = 40;
 const VIEWER_BACKDROP = 'rgba(0,0,0,0.92)';
 const VIEWER_FOREGROUND = '#ffffff';
 
-interface ReceiptThumbnailProps {
+interface ImageThumbnailProps {
   path: string;
+  label: string;
+  size?: number;
 }
 
-export function ReceiptThumbnail({ path }: ReceiptThumbnailProps) {
+export function ImageThumbnail({ path, label, size = DEFAULT_THUMBNAIL_SIZE }: ImageThumbnailProps) {
   const { colors } = useTheme();
   const { t } = useI18n();
   const insets = useSafeAreaInsets();
@@ -28,10 +30,10 @@ export function ReceiptThumbnail({ path }: ReceiptThumbnailProps) {
       <PressableScale
         onPress={() => setIsOpen(true)}
         accessibilityRole="imagebutton"
-        accessibilityLabel={t('transactions.viewReceipt')}
+        accessibilityLabel={label}
         style={{
-          width: THUMBNAIL_SIZE,
-          height: THUMBNAIL_SIZE,
+          width: size,
+          height: size,
           borderRadius: radius.sm,
           overflow: 'hidden',
           borderWidth: 1,
