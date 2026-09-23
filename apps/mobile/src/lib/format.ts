@@ -60,7 +60,10 @@ const ARABIC_INDIC_ZERO = 0x0660;
 const EASTERN_ARABIC_INDIC_ZERO = 0x06f0;
 const ARABIC_DIGIT_PATTERN = /[٠-٩۰-۹]/g;
 const ARABIC_DECIMAL_SEPARATOR_PATTERN = /٫/g;
-const THOUSANDS_SEPARATOR_PATTERN = /[٬,\s]/g;
+const IGNORED_CHARACTERS_PATTERN = /[٬\s]/g;
+const GROUPED_THOUSANDS_PATTERN = /^\d{1,3}(,\d{3})+(\.\d+)?$/;
+const DECIMAL_COMMA_PATTERN = /^\d+,\d{1,2}$/;
+const PLAIN_AMOUNT_PATTERN = /^\d+(\.\d{1,2})?$/;
 
 function toLatinDigit(digit: string): string {
   const code = digit.charCodeAt(0);
@@ -68,16 +71,24 @@ function toLatinDigit(digit: string): string {
   return String(code - zero);
 }
 
+function normalizeSeparators(text: string): string {
+  if (GROUPED_THOUSANDS_PATTERN.test(text)) {
+    return text.replace(/,/g, '');
+  }
+  return DECIMAL_COMMA_PATTERN.test(text) ? text.replace(',', '.') : text;
+}
+
 export function parseAmountInput(text: string): number | null {
-  const normalized = text
+  const latin = text
     .replace(ARABIC_DIGIT_PATTERN, toLatinDigit)
-    .replace(THOUSANDS_SEPARATOR_PATTERN, '')
+    .replace(IGNORED_CHARACTERS_PATTERN, '')
     .replace(ARABIC_DECIMAL_SEPARATOR_PATTERN, '.');
-  if (!normalized) {
+  const normalized = normalizeSeparators(latin);
+  if (!PLAIN_AMOUNT_PATTERN.test(normalized)) {
     return null;
   }
   const amount = Number(normalized);
-  return Number.isFinite(amount) && amount > 0 ? amount : null;
+  return amount > 0 ? amount : null;
 }
 
 export function maskAccountDetails(details: string): string {
