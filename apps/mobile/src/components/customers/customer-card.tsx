@@ -11,15 +11,21 @@ import { spacing } from '@/theme/tokens';
 interface CustomerCardProps {
   customer: CustomerListItem;
   onPress: () => void;
+  onLongPress?: () => void;
 }
 
-export function CustomerCard({ customer, onPress }: CustomerCardProps) {
+export function CustomerCard({ customer, onPress, onLongPress }: CustomerCardProps) {
   const { t } = useI18n();
   return (
-    <PressableScale onPress={onPress} accessibilityRole="button" accessibilityLabel={customer.name}>
+    <PressableScale
+      onPress={onPress}
+      onLongPress={onLongPress}
+      accessibilityRole="button"
+      accessibilityLabel={customer.name}
+    >
       <Card>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-          <Avatar name={customer.name} />
+          <Avatar name={customer.name} photoUrl={customer.photoUrl} />
           <View style={{ flex: 1, gap: 2 }}>
             <AppText variant="bodyStrong" numberOfLines={1}>
               {customer.name}
@@ -27,7 +33,13 @@ export function CustomerCard({ customer, onPress }: CustomerCardProps) {
             <AppText variant="caption" tone="muted">
               {customer.phone}
             </AppText>
+            {customer.address ? (
+              <AppText variant="label" tone="faint" numberOfLines={1}>
+                {customer.address}
+              </AppText>
+            ) : null}
           </View>
+          {customer.status === 'DELETED' ? <Badge label={t('customerActions.deleted')} tone="neutral" /> : null}
           {customer.hasOverdue ? <Badge label={t('customers.overdue')} tone="danger" /> : null}
         </View>
       </Card>

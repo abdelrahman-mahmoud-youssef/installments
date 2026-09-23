@@ -1,15 +1,18 @@
 import Constants from 'expo-constants';
 
 const BACKEND_PORT = 3001;
+const WEB_PORT = 3000;
 
-function inferDevelopmentApiUrl(): string | undefined {
-  const hostUri = Constants.expoConfig?.hostUri;
-  if (!hostUri) {
-    return undefined;
-  }
-  const host = hostUri.split(':')[0];
-  return `http://${host}:${BACKEND_PORT}`;
+function developmentHost(): string | undefined {
+  return Constants.expoConfig?.hostUri?.split(':')[0];
 }
 
-export const apiBaseUrl: string =
-  process.env.EXPO_PUBLIC_API_URL ?? inferDevelopmentApiUrl() ?? `http://localhost:${BACKEND_PORT}`;
+function developmentUrl(port: number): string {
+  return `http://${developmentHost() ?? 'localhost'}:${port}`;
+}
+
+export const apiBaseUrl: string = process.env.EXPO_PUBLIC_API_URL ?? developmentUrl(BACKEND_PORT);
+
+export const siteUrl: string = process.env.EXPO_PUBLIC_SITE_URL ?? developmentUrl(WEB_PORT);
+
+export const rootDomain: string | null = process.env.EXPO_PUBLIC_ROOT_DOMAIN ?? null;
