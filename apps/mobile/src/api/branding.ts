@@ -40,6 +40,8 @@ export interface UpdateBrandingInput {
   facebookUrl?: string;
   tiktokUrl?: string;
   showInstallmentCalculator?: boolean;
+  calculatorPlans?: CalculatorPlan[];
+  locations?: TenantLocation[];
 }
 
 export function getBranding(): Promise<TenantBranding> {

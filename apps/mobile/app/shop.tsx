@@ -1,10 +1,12 @@
 import { Stack } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, Switch, View } from 'react-native';
-import { TenantBranding, UpdateBrandingInput } from '@/api/branding';
+import { KeyboardAvoidingView, Platform, ScrollView, Share, Switch, View } from 'react-native';
+import { TenantBranding, TenantLocation, UpdateBrandingInput } from '@/api/branding';
 import { ApiError } from '@/api/client';
 import { useAuth } from '@/auth/auth-context';
 import { BrandColorPicker } from '@/components/shop/brand-color-picker';
+import { CalculatorPlansCard } from '@/components/shop/calculator-plans-card';
+import { LocationsCard } from '@/components/shop/locations-card';
 import { ShopPreviewCard } from '@/components/shop/shop-preview-card';
 import { AppText } from '@/components/ui/app-text';
 import { BottomSheet } from '@/components/ui/bottom-sheet';
@@ -22,6 +24,7 @@ import { useBranding, useRemoveLogo, useSetOffersVisibility, useUpdateBranding, 
 import { useI18n } from '@/i18n/i18n-context';
 import { BRAND_COLOR_PRESETS, BrandColorPreset } from '@/lib/brand-colors';
 import { pickImages } from '@/lib/image-picker';
+import { buildShopUrl } from '@/lib/share-url';
 import { useTheme } from '@/theme/theme-context';
 import { floatingActionClearance, spacing } from '@/theme/tokens';
 
@@ -93,6 +96,17 @@ export default function ShopScreen() {
       onSuccess: () => showToast(successMessage),
       onError: () => showToast(t('common.genericError'), 'error'),
     });
+  };
+
+  const saveLocations = async (locations: TenantLocation[]): Promise<boolean> => {
+    try {
+      await updateMutation.mutateAsync({ locations });
+      showToast(t('shop.saved'));
+      return true;
+    } catch (error) {
+      showToast(error instanceof ApiError ? error.message : t('common.genericError'), 'error');
+      return false;
+    }
   };
 
   const submit = async () => {
@@ -208,6 +222,15 @@ export default function ShopScreen() {
               onPressLogo={() => setLogoSheetVisible(true)}
             />
 
+            <Card>
+              <ListRow
+                icon="share-outline"
+                title={t('shopExtras.shareShop')}
+                subtitle={buildShopUrl(data.slug)}
+                onPress={() => void Share.share({ message: buildShopUrl(data.slug) })}
+              />
+            </Card>
+
             <View style={{ gap: spacing.sm }}>
               <SectionHeader title={t('shop.brandColor')} />
               <BrandColorPicker
@@ -290,6 +313,20 @@ export default function ShopScreen() {
                   saveQuietly({ showInstallmentCalculator: value }, t('shop.saved')),
                 )}
               </Card>
+            </View>
+
+            <View style={{ gap: spacing.sm }}>
+              <SectionHeader title={t('shopExtras.plansSection')} />
+              <CalculatorPlansCard
+                plans={data.calculatorPlans}
+                saving={updateMutation.isPending}
+                onSave={(calculatorPlans) => saveQuietly({ calculatorPlans }, t('shop.saved'))}
+              />
+            </View>
+
+            <View style={{ gap: spacing.sm }}>
+              <SectionHeader title={t('shopExtras.locationsSection')} />
+              <LocationsCard locations={data.locations} saving={updateMutation.isPending} onSave={saveLocations} />
             </View>
 
             {errors.api ? (
