@@ -397,6 +397,9 @@ const en = {
     deactivateConfirm: '{name} will no longer be able to sign in.',
     activate: 'Activate',
     deactivate: 'Deactivate',
+    addedOn: 'Added {date}',
+    statusUpdated: 'Staff account updated.',
+    passwordHint: 'At least 8 characters. Share it with them directly.',
   },
   activity: {
     title: 'Activity log',
@@ -1134,6 +1137,9 @@ const ar: typeof en = {
     deactivateConfirm: 'لن يتمكن {name} من تسجيل الدخول بعد الآن.',
     activate: 'تفعيل',
     deactivate: 'إيقاف',
+    addedOn: 'أُضيف في {date}',
+    statusUpdated: 'تم تحديث حساب الموظف.',
+    passwordHint: '8 أحرف على الأقل. شاركها معه مباشرة.',
   },
   activity: {
     title: 'سجل النشاط',
