@@ -64,11 +64,21 @@ export default function ContactDetailScreen() {
   const contact = contactQuery.data;
   const closeSheet = () => setOpenSheet(null);
 
-  const describe = (item: CounterpartyHistoryItem) => ({
-    title: item.paymentMethodLabel ?? t(item.direction === 'OUT' ? 'transactions.sent' : 'transactions.received'),
-    subtitle: [formatDate(item.occurredAt, locale), item.note].filter(Boolean).join(' · '),
-    tag: item.kind === 'ADJUSTMENT' ? t('transactions.adjustmentTag') : undefined,
-  });
+  const describe = (item: CounterpartyHistoryItem) => {
+    const isOutgoing = item.direction === 'OUT';
+    const subtitle = [formatDate(item.occurredAt, locale), item.note].filter(Boolean).join(' · ');
+    if (item.kind === 'ADJUSTMENT') {
+      return {
+        title: t(isOutgoing ? 'contacts.increase' : 'contacts.decrease'),
+        subtitle,
+        tag: t('transactions.adjustmentTag'),
+      };
+    }
+    return {
+      title: item.paymentMethodLabel ?? t(isOutgoing ? 'transactions.sent' : 'transactions.received'),
+      subtitle,
+    };
+  };
 
   const removeContact = async () => {
     closeSheet();

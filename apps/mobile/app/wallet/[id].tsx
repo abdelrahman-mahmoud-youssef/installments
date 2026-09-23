@@ -191,14 +191,12 @@ export default function WalletDetailScreen() {
         )}
       />
 
-      {method.isActive ? (
-        <View
-          pointerEvents="box-none"
-          style={{ position: 'absolute', left: spacing.xl, right: spacing.xl, bottom: insets.bottom + spacing.lg }}
-        >
-          <Button variant="glass" title={t('transactions.log')} icon="swap-vertical" onPress={() => setIsLogOpen(true)} />
-        </View>
-      ) : null}
+      <View
+        pointerEvents="box-none"
+        style={{ position: 'absolute', left: spacing.xl, right: spacing.xl, bottom: insets.bottom + spacing.lg }}
+      >
+        <Button variant="glass" title={t('transactions.log')} icon="swap-vertical" onPress={() => setIsLogOpen(true)} />
+      </View>
 
       <WalletActions
         method={isActionsOpen ? method : null}
