@@ -13,12 +13,14 @@ import { currentMonthKey } from '@/lib/calendar';
 import { useTheme } from '@/theme/theme-context';
 import { spacing } from '@/theme/tokens';
 
+const PLACEHOLDER_OPACITY = 0.5;
+
 export default function ReportsScreen() {
   const { t } = useI18n();
   const { colors } = useTheme();
   const router = useRouter();
   const [month, setMonth] = useState(currentMonthKey());
-  const { data, isPending, isError, error, refetch, isRefetching } = useReports(month);
+  const { data, isPending, isError, error, refetch, isRefetching, isPlaceholderData } = useReports(month);
 
   return (
     <ScrollView
@@ -38,7 +40,9 @@ export default function ReportsScreen() {
           <ErrorState error={error} onRetry={() => void refetch()} />
         ) : (
           <>
-            <MonthlyReportStats report={data} />
+            <View style={{ opacity: isPlaceholderData ? PLACEHOLDER_OPACITY : 1 }}>
+              <MonthlyReportStats report={data} />
+            </View>
             <CurrentReportStats report={data} />
             <OverdueCustomersSection
               customers={data.overdueCustomers}
