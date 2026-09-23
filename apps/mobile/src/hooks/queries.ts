@@ -1,4 +1,5 @@
 import {
+  QueryClient,
   useInfiniteQuery,
   useMutation,
   useQuery,
@@ -65,6 +66,14 @@ import {
   listPaymentMethodTransactions,
   PaymentMethodTransactionListParams,
 } from '@/api/payment-method-transactions';
+import {
+  ApprovePaymentClaimInput,
+  approvePaymentClaim,
+  DeclinePaymentClaimInput,
+  declinePaymentClaim,
+  listPaymentClaims,
+  PaymentClaimListParams,
+} from '@/api/payment-claims';
 import { CreatePaymentInput, createPayment } from '@/api/payments';
 import { createShareLink } from '@/api/share-links';
 import { CreateStaffInput, createStaff, listStaff, setStaffActive } from '@/api/staff';
@@ -100,6 +109,8 @@ export const queryKeys = {
   counterparty: (id: string) => ['counterparties', 'detail', id] as const,
   counterpartyHistory: (id: string, params: CounterpartyHistoryParams) =>
     ['counterparties', 'history', id, params] as const,
+  paymentClaimsRoot: ['payment-claims'] as const,
+  paymentClaims: (params: PaymentClaimListParams) => ['payment-claims', 'list', params] as const,
 };
 
 export function useDashboard() {
@@ -455,5 +466,37 @@ export function useCreateCounterpartyAdjustment() {
     mutationFn: ({ id, input }: { id: string; input: CreateCounterpartyAdjustmentInput }) =>
       createCounterpartyAdjustment(id, input),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.counterpartiesRoot }),
+  });
+}
+
+export function usePaymentClaims(params: Omit<PaymentClaimListParams, 'page' | 'limit'>) {
+  return useInfiniteQuery({
+    queryKey: queryKeys.paymentClaims(params),
+    queryFn: ({ pageParam }) => listPaymentClaims({ ...params, page: pageParam, limit: PAGE_SIZE }),
+    initialPageParam: 1,
+    getNextPageParam: nextPageParam,
+  });
+}
+
+function invalidateAfterClaimReview(queryClient: QueryClient): void {
+  void queryClient.invalidateQueries({ queryKey: queryKeys.paymentClaimsRoot });
+  void queryClient.invalidateQueries({ queryKey: queryKeys.dashboard });
+  void queryClient.invalidateQueries({ queryKey: ['contracts'] });
+  void queryClient.invalidateQueries({ queryKey: queryKeys.paymentMethods });
+}
+
+export function useApprovePaymentClaim() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, input }: { id: string; input: ApprovePaymentClaimInput }) => approvePaymentClaim(id, input),
+    onSuccess: () => invalidateAfterClaimReview(queryClient),
+  });
+}
+
+export function useDeclinePaymentClaim() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, input }: { id: string; input: DeclinePaymentClaimInput }) => declinePaymentClaim(id, input),
+    onSuccess: () => invalidateAfterClaimReview(queryClient),
   });
 }

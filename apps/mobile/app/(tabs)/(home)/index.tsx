@@ -1,9 +1,9 @@
 import { Stack, useRouter } from 'expo-router';
 import { RefreshControl, ScrollView, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { DashboardInstallmentSummary } from '@/api/dashboard';
 import { useAuth } from '@/auth/auth-context';
 import { InstallmentRow } from '@/components/dashboard/installment-row';
+import { PendingClaimsCard } from '@/components/dashboard/pending-claims-card';
 import { AppText } from '@/components/ui/app-text';
 import { Card } from '@/components/ui/card';
 import { ErrorState } from '@/components/ui/error-state';
@@ -107,19 +107,7 @@ export default function DashboardScreen() {
             </View>
 
             {data.pendingPaymentClaims > 0 ? (
-              <Card style={{ backgroundColor: colors.warningMuted, borderColor: colors.warningMuted }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-                  <Ionicons name="hourglass-outline" size={22} color={colors.warning} />
-                  <View style={{ flex: 1, gap: 2 }}>
-                    <AppText variant="bodyStrong" tone="warning">
-                      {formatNumber(data.pendingPaymentClaims, locale)} {t('dashboard.pendingClaims')}
-                    </AppText>
-                    <AppText variant="caption" tone="muted">
-                      {t('dashboard.pendingClaimsAction')}
-                    </AppText>
-                  </View>
-                </View>
-              </Card>
+              <PendingClaimsCard count={data.pendingPaymentClaims} onPress={() => router.push('/payment-claims')} />
             ) : null}
 
             {renderInstallmentSection(

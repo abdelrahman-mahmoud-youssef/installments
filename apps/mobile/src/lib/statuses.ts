@@ -1,4 +1,5 @@
 import { ContractStatus, Installment, InstallmentStatus } from '@/api/contracts';
+import { PaymentClaimStatus } from '@/api/payment-claims';
 import { BadgeTone } from '@/components/ui/badge';
 import { todayIsoDate } from './format';
 
@@ -24,4 +25,10 @@ export const installmentStatusTone: Record<DerivedInstallmentStatus, BadgeTone> 
   PAID: 'success',
   CANCELLED: 'neutral',
   OVERDUE: 'danger',
+};
+
+export const paymentClaimStatusTone: Record<PaymentClaimStatus, BadgeTone> = {
+  PENDING: 'warning',
+  APPROVED: 'success',
+  DECLINED: 'danger',
 };

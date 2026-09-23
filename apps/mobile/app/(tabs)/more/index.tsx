@@ -9,16 +9,19 @@ import { Card } from '@/components/ui/card';
 import { ConfirmSheet } from '@/components/ui/confirm-sheet';
 import { ListRow } from '@/components/ui/list-row';
 import { SectionHeader } from '@/components/ui/section-header';
+import { useDashboard } from '@/hooks/queries';
 import { useI18n } from '@/i18n/i18n-context';
+import { formatNumber } from '@/lib/format';
 import { useTheme } from '@/theme/theme-context';
 import { spacing } from '@/theme/tokens';
 
 export default function MoreScreen() {
   const { user, isAdmin, signOut } = useAuth();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const { colors } = useTheme();
   const router = useRouter();
   const [signOutVisible, setSignOutVisible] = useState(false);
+  const pendingClaimCount = useDashboard().data?.pendingPaymentClaims ?? 0;
 
   return (
     <ScrollView
@@ -74,6 +77,23 @@ export default function MoreScreen() {
             </Card>
           </View>
         ) : null}
+
+        <View style={{ gap: spacing.sm }}>
+          <SectionHeader title={t('more.collectionsSection')} />
+          <Card>
+            <ListRow
+              icon="receipt-outline"
+              title={t('more.paymentClaims')}
+              onPress={() => router.push('/payment-claims')}
+              trailing={
+                pendingClaimCount > 0 ? (
+                  <Badge label={formatNumber(pendingClaimCount, locale)} tone="warning" />
+                ) : undefined
+              }
+              showChevron
+            />
+          </Card>
+        </View>
 
         <View style={{ gap: spacing.sm }}>
           <SectionHeader title={t('more.preferencesSection')} />

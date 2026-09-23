@@ -31,6 +31,10 @@ export function toMinorUnits(majorUnits: number): number {
   return Math.round(majorUnits * MINOR_UNITS_PER_MAJOR);
 }
 
+export function toMajorUnits(minorUnits: number): number {
+  return minorUnits / MINOR_UNITS_PER_MAJOR;
+}
+
 export function formatDate(isoDate: string, locale: Locale): string {
   return new Intl.DateTimeFormat(intlLocale(locale), {
     year: 'numeric',
