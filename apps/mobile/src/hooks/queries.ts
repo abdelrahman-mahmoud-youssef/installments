@@ -8,6 +8,19 @@ import { listAuditLogs } from '@/api/audit';
 import { getBranding, removeLogo, UpdateBrandingInput, updateBranding, uploadLogo } from '@/api/branding';
 import { PaginatedResult } from '@/api/client';
 import {
+  CounterpartyHistoryParams,
+  CounterpartyListParams,
+  CreateCounterpartyAdjustmentInput,
+  createCounterparty,
+  createCounterpartyAdjustment,
+  deleteCounterparty,
+  getCounterparty,
+  getCounterpartyHistory,
+  listCounterparties,
+  SaveCounterpartyInput,
+  updateCounterparty,
+} from '@/api/counterparties';
+import {
   createOffer,
   deleteOffer,
   listOffers,
@@ -31,6 +44,13 @@ import {
   UpdatePaymentMethodInput,
   updatePaymentMethod,
 } from '@/api/payment-methods';
+import {
+  CreatePaymentMethodTransactionInput,
+  createPaymentMethodTransaction,
+  getPaymentMethodMonthlySummary,
+  listPaymentMethodTransactions,
+  PaymentMethodTransactionListParams,
+} from '@/api/payment-method-transactions';
 import { CreatePaymentInput, createPayment } from '@/api/payments';
 import { CreateStaffInput, createStaff, listStaff, setStaffActive } from '@/api/staff';
 
@@ -51,6 +71,16 @@ export const queryKeys = {
   auditLogs: ['audit-logs'] as const,
   offers: (params: OfferListParams) => ['offers', params] as const,
   branding: ['branding'] as const,
+  paymentMethodTransactionsRoot: ['payment-method-transactions'] as const,
+  paymentMethodTransactions: (paymentMethodId: string, params: PaymentMethodTransactionListParams) =>
+    ['payment-method-transactions', paymentMethodId, 'list', params] as const,
+  paymentMethodSummary: (paymentMethodId: string, month: string) =>
+    ['payment-method-transactions', paymentMethodId, 'summary', month] as const,
+  counterpartiesRoot: ['counterparties'] as const,
+  counterparties: (params: CounterpartyListParams) => ['counterparties', 'list', params] as const,
+  counterparty: (id: string) => ['counterparties', 'detail', id] as const,
+  counterpartyHistory: (id: string, params: CounterpartyHistoryParams) =>
+    ['counterparties', 'history', id, params] as const,
 };
 
 export function useDashboard() {
@@ -221,5 +251,107 @@ export function useRemoveLogo() {
   return useMutation({
     mutationFn: () => removeLogo(),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.branding }),
+  });
+}
+
+export function usePaymentMethodTransactions(
+  paymentMethodId: string,
+  params: Omit<PaymentMethodTransactionListParams, 'page' | 'limit'>,
+  enabled = true,
+) {
+  return useInfiniteQuery({
+    queryKey: queryKeys.paymentMethodTransactions(paymentMethodId, params),
+    queryFn: ({ pageParam }) =>
+      listPaymentMethodTransactions(paymentMethodId, { ...params, page: pageParam, limit: PAGE_SIZE }),
+    initialPageParam: 1,
+    getNextPageParam: nextPageParam,
+    enabled,
+  });
+}
+
+export function usePaymentMethodMonthlySummary(paymentMethodId: string, month: string, enabled = true) {
+  return useQuery({
+    queryKey: queryKeys.paymentMethodSummary(paymentMethodId, month),
+    queryFn: () => getPaymentMethodMonthlySummary(paymentMethodId, month),
+    enabled,
+  });
+}
+
+export function useCreatePaymentMethodTransaction() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      paymentMethodId,
+      input,
+    }: {
+      paymentMethodId: string;
+      input: CreatePaymentMethodTransactionInput;
+    }) => createPaymentMethodTransaction(paymentMethodId, input),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.paymentMethodTransactionsRoot });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.paymentMethods });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.counterpartiesRoot });
+    },
+  });
+}
+
+export function useCounterparties(params: Omit<CounterpartyListParams, 'page' | 'limit'>, enabled = true) {
+  return useInfiniteQuery({
+    queryKey: queryKeys.counterparties(params),
+    queryFn: ({ pageParam }) => listCounterparties({ ...params, page: pageParam, limit: PAGE_SIZE }),
+    initialPageParam: 1,
+    getNextPageParam: nextPageParam,
+    enabled,
+  });
+}
+
+export function useCounterparty(id: string, enabled = true) {
+  return useQuery({ queryKey: queryKeys.counterparty(id), queryFn: () => getCounterparty(id), enabled });
+}
+
+export function useCounterpartyHistory(
+  id: string,
+  params: Omit<CounterpartyHistoryParams, 'page' | 'limit'>,
+  enabled = true,
+) {
+  return useInfiniteQuery({
+    queryKey: queryKeys.counterpartyHistory(id, params),
+    queryFn: ({ pageParam }) => getCounterpartyHistory(id, { ...params, page: pageParam, limit: PAGE_SIZE }),
+    initialPageParam: 1,
+    getNextPageParam: nextPageParam,
+    enabled,
+  });
+}
+
+export function useCreateCounterparty() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: SaveCounterpartyInput) => createCounterparty(input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.counterpartiesRoot }),
+  });
+}
+
+export function useUpdateCounterparty() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, input }: { id: string; input: SaveCounterpartyInput }) => updateCounterparty(id, input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.counterpartiesRoot }),
+  });
+}
+
+export function useDeleteCounterparty() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => deleteCounterparty(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.counterpartiesRoot }),
+  });
+}
+
+export function useCreateCounterpartyAdjustment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, input }: { id: string; input: CreateCounterpartyAdjustmentInput }) =>
+      createCounterpartyAdjustment(id, input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.counterpartiesRoot }),
   });
 }
