@@ -1,11 +1,11 @@
 import { Stack, useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { ActivityIndicator, FlatList, RefreshControl, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/auth/auth-context';
 import { AnnouncementCard } from '@/components/announcements/announcement-card';
 import { AppText } from '@/components/ui/app-text';
 import { Button } from '@/components/ui/button';
+import { FloatingActionBar } from '@/components/ui/floating-action-bar';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { SkeletonCardList } from '@/components/ui/skeleton';
@@ -19,7 +19,6 @@ export default function AnnouncementsScreen() {
   const { colors } = useTheme();
   const { isAdmin } = useAuth();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const { data, isPending, isError, error, refetch, isRefetching, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useAnnouncements();
 
@@ -74,17 +73,14 @@ export default function AnnouncementsScreen() {
       />
 
       {isAdmin ? (
-        <View
-          pointerEvents="box-none"
-          style={{ position: 'absolute', left: spacing.xl, right: spacing.xl, bottom: insets.bottom + spacing.lg }}
-        >
+        <FloatingActionBar>
           <Button
             variant="glass"
             title={t('announcements.newAnnouncement')}
             icon="megaphone-outline"
             onPress={() => router.push('/new-announcement')}
           />
-        </View>
+        </FloatingActionBar>
       ) : null}
     </View>
   );

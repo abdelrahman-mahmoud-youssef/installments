@@ -1,11 +1,11 @@
 import { Stack } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { FlatList, RefreshControl, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SupportFormSheet } from '@/components/support/support-form-sheet';
 import { SupportMessageCard } from '@/components/support/support-message-card';
 import { AppText } from '@/components/ui/app-text';
 import { Button } from '@/components/ui/button';
+import { FloatingActionBar } from '@/components/ui/floating-action-bar';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { SkeletonCardList } from '@/components/ui/skeleton';
@@ -18,7 +18,6 @@ import { floatingActionClearance, spacing } from '@/theme/tokens';
 export default function SupportScreen() {
   const { t } = useI18n();
   const { colors } = useTheme();
-  const insets = useSafeAreaInsets();
   const [formVisible, setFormVisible] = useState(false);
   const { data, isPending, isError, error, refetch, isRefetching } = useSupportMessages();
   const { mutate: markSeen } = useMarkSupportRepliesSeen();
@@ -66,17 +65,14 @@ export default function SupportScreen() {
         renderItem={({ item }) => <SupportMessageCard message={item} />}
       />
 
-      <View
-        pointerEvents="box-none"
-        style={{ position: 'absolute', left: spacing.xl, right: spacing.xl, bottom: insets.bottom + spacing.lg }}
-      >
+      <FloatingActionBar>
         <Button
           variant="glass"
           title={t('support.newMessage')}
           icon="create-outline"
           onPress={() => setFormVisible(true)}
         />
-      </View>
+      </FloatingActionBar>
 
       <SupportFormSheet visible={formVisible} onClose={() => setFormVisible(false)} />
     </View>

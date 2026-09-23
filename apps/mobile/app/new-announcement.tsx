@@ -1,7 +1,6 @@
 import { Stack, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   ANNOUNCEMENT_BODY_MAX_LENGTH,
   ANNOUNCEMENT_IMAGE_MAX_MEGABYTES,
@@ -13,6 +12,7 @@ import { AnnouncementImageField } from '@/components/announcements/announcement-
 import { SubscriberPickerSheet } from '@/components/announcements/subscriber-picker-sheet';
 import { AppText } from '@/components/ui/app-text';
 import { Button } from '@/components/ui/button';
+import { FloatingActionBar } from '@/components/ui/floating-action-bar';
 import { Card } from '@/components/ui/card';
 import { ConfirmSheet } from '@/components/ui/confirm-sheet';
 import { ListRow } from '@/components/ui/list-row';
@@ -33,7 +33,6 @@ export default function NewAnnouncementScreen() {
   const { isAdmin } = useAuth();
   const { showToast } = useToast();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const createMutation = useCreateAnnouncement();
   const [body, setBody] = useState('');
   const [image, setImage] = useState<PickedImage | null>(null);
@@ -172,12 +171,9 @@ export default function NewAnnouncementScreen() {
         ) : null}
       </ScrollView>
 
-      <View
-        pointerEvents="box-none"
-        style={{ position: 'absolute', left: spacing.xl, right: spacing.xl, bottom: insets.bottom + spacing.lg }}
-      >
+      <FloatingActionBar>
         <Button variant="glass" title={t('announcements.send')} icon="paper-plane-outline" onPress={requestSend} />
-      </View>
+      </FloatingActionBar>
 
       <SubscriberPickerSheet
         visible={pickerVisible}
