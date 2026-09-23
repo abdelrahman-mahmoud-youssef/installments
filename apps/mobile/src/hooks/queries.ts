@@ -30,11 +30,25 @@ import {
   updateOffer,
 } from '@/api/offers';
 import {
+  cancelContract,
   ContractListParams,
+  createContract,
+  CreateContractInput,
   getContract,
   listContracts,
+  listContractTags,
+  updateContractTag,
 } from '@/api/contracts';
-import { CustomerListParams, getCustomer, listCustomers } from '@/api/customers';
+import {
+  createCustomer,
+  CustomerListParams,
+  deleteCustomer,
+  getCustomer,
+  listCustomerNotifications,
+  listCustomers,
+  SaveCustomerInput,
+  updateCustomer,
+} from '@/api/customers';
 import { getDashboard } from '@/api/dashboard';
 import {
   CreatePaymentMethodInput,
@@ -52,6 +66,7 @@ import {
   PaymentMethodTransactionListParams,
 } from '@/api/payment-method-transactions';
 import { CreatePaymentInput, createPayment } from '@/api/payments';
+import { createShareLink } from '@/api/share-links';
 import { CreateStaffInput, createStaff, listStaff, setStaffActive } from '@/api/staff';
 
 const PAGE_SIZE = 20;
@@ -66,6 +81,10 @@ export const queryKeys = {
   customer: (id: string) => ['customers', 'detail', id] as const,
   contracts: (params: ContractListParams) => ['contracts', params] as const,
   contract: (id: string) => ['contracts', 'detail', id] as const,
+  contractsRoot: ['contracts'] as const,
+  contractTags: ['contracts', 'tags'] as const,
+  customersRoot: ['customers'] as const,
+  customerNotifications: (id: string) => ['customers', 'notifications', id] as const,
   paymentMethods: ['payment-methods'] as const,
   staff: ['staff'] as const,
   auditLogs: ['audit-logs'] as const,
@@ -113,6 +132,89 @@ export function useContract(id: string) {
   return useQuery({ queryKey: queryKeys.contract(id), queryFn: () => getContract(id) });
 }
 
+export function useContractTags(enabled: boolean) {
+  return useQuery({ queryKey: queryKeys.contractTags, queryFn: listContractTags, enabled });
+}
+
+export function useCreateContract() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: CreateContractInput) => createContract(input),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.contractsRoot });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.customersRoot });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.dashboard });
+    },
+  });
+}
+
+export function useCancelContract(contractId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => cancelContract(contractId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.contractsRoot });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.customersRoot });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.dashboard });
+    },
+  });
+}
+
+export function useUpdateContractTag(contractId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (tag: string) => updateContractTag(contractId, tag),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.contractsRoot }),
+  });
+}
+
+export function useCreateCustomer() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: SaveCustomerInput) => createCustomer(input),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.customersRoot });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.dashboard });
+    },
+  });
+}
+
+export function useUpdateCustomer(customerId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: SaveCustomerInput) => updateCustomer(customerId, input),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.customersRoot });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.contractsRoot });
+    },
+  });
+}
+
+export function useDeleteCustomer() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (customerId: string) => deleteCustomer(customerId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.customersRoot });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.dashboard });
+    },
+  });
+}
+
+export function useCustomerNotifications(customerId: string, enabled: boolean) {
+  return useInfiniteQuery({
+    queryKey: queryKeys.customerNotifications(customerId),
+    queryFn: ({ pageParam }) => listCustomerNotifications(customerId, { page: pageParam, limit: PAGE_SIZE }),
+    initialPageParam: 1,
+    getNextPageParam: nextPageParam,
+    enabled,
+  });
+}
+
+export function useCreateShareLink() {
+  return useMutation({ mutationFn: (targetPath: string) => createShareLink(targetPath) });
+}
+
 export function useRecordPayment(contractId: string) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -126,8 +228,8 @@ export function useRecordPayment(contractId: string) {
   });
 }
 
-export function usePaymentMethods() {
-  return useQuery({ queryKey: queryKeys.paymentMethods, queryFn: listPaymentMethods });
+export function usePaymentMethods(enabled = true) {
+  return useQuery({ queryKey: queryKeys.paymentMethods, queryFn: listPaymentMethods, enabled });
 }
 
 export function useCreatePaymentMethod() {
