@@ -9,6 +9,7 @@ import { ErrorState } from '@/components/ui/error-state';
 import { SkeletonCardList } from '@/components/ui/skeleton';
 import { useAuditLogs } from '@/hooks/queries';
 import { useI18n } from '@/i18n/i18n-context';
+import { auditActionLabel } from '@/lib/audit-action-label';
 import { formatDateTime } from '@/lib/format';
 import { useTheme } from '@/theme/theme-context';
 import { spacing } from '@/theme/tokens';
@@ -64,7 +65,7 @@ export default function ActivityScreen() {
                 <Badge label={item.entityType} tone="info" />
               </View>
               <AppText variant="caption" tone="muted">
-                {item.action}
+                {auditActionLabel(item.action, locale)}
               </AppText>
               <AppText variant="label" tone="faint">
                 {formatDateTime(item.createdAt, locale)}
