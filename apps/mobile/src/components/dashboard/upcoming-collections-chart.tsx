@@ -16,6 +16,7 @@ const CHART_HEIGHT = 96;
 const MIN_VISIBLE_BAR_HEIGHT = 4;
 const EMPTY_BAR_HEIGHT = 2;
 const BAR_WIDTH_RATIO = '60%';
+const MIN_LABEL_FONT_SCALE = 0.7;
 
 interface UpcomingCollectionsChartProps {
   installments: DashboardInstallmentSummary[];
@@ -85,7 +86,13 @@ function DayBar({ day, highestAmount }: DayBarProps) {
           }}
         />
       </View>
-      <AppText variant="label" tone="muted" numberOfLines={1}>
+      <AppText
+        variant="label"
+        tone="muted"
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={MIN_LABEL_FONT_SCALE}
+      >
         {weekday}
       </AppText>
     </View>
