@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, RefreshControl, View } from 'react-native';
-import { PaymentClaim, PaymentClaimStatus } from '@/api/payment-claims';
+import { PaymentClaimStatus } from '@/api/payment-claims';
 import { ClaimReviewSheet } from '@/components/payment-claims/claim-review-sheet';
 import { PaymentClaimCard } from '@/components/payment-claims/payment-claim-card';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -19,12 +19,13 @@ export default function PaymentClaimsScreen() {
   const { t } = useI18n();
   const { colors } = useTheme();
   const [filter, setFilter] = useState<ClaimFilter>('PENDING');
-  const [selectedClaim, setSelectedClaim] = useState<PaymentClaim | null>(null);
+  const [selectedClaimId, setSelectedClaimId] = useState<string | null>(null);
 
   const query = usePaymentClaims({ status: filter === 'ALL' ? undefined : filter });
   const { data, isPending, isError, error, refetch, isRefetching, fetchNextPage, hasNextPage, isFetchingNextPage } =
     query;
   const claims = useMemo(() => data?.pages.flatMap((page) => page.data) ?? [], [data]);
+  const selectedClaim = claims.find((claim) => claim.id === selectedClaimId) ?? null;
 
   const filterOptions: SegmentOption<ClaimFilter>[] = [
     { value: 'PENDING', label: t('paymentClaims.status.PENDING') },
@@ -75,9 +76,9 @@ export default function PaymentClaimsScreen() {
             <ActivityIndicator color={colors.textMuted} style={{ paddingVertical: spacing.lg }} />
           ) : null
         }
-        renderItem={({ item }) => <PaymentClaimCard claim={item} onPress={() => setSelectedClaim(item)} />}
+        renderItem={({ item }) => <PaymentClaimCard claim={item} onPress={() => setSelectedClaimId(item.id)} />}
       />
-      <ClaimReviewSheet claim={selectedClaim} onClose={() => setSelectedClaim(null)} />
+      <ClaimReviewSheet claim={selectedClaim} onClose={() => setSelectedClaimId(null)} />
     </View>
   );
 }

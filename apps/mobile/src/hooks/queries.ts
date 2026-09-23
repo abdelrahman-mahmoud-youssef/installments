@@ -488,6 +488,7 @@ function invalidateAfterClaimReview(queryClient: QueryClient): void {
   void queryClient.invalidateQueries({ queryKey: queryKeys.dashboard });
   void queryClient.invalidateQueries({ queryKey: ['contracts'] });
   void queryClient.invalidateQueries({ queryKey: queryKeys.paymentMethods });
+  void queryClient.invalidateQueries({ queryKey: queryKeys.paymentMethodTransactionsRoot });
   void queryClient.invalidateQueries({ queryKey: queryKeys.reportsRoot });
 }
 
@@ -495,7 +496,7 @@ export function useApprovePaymentClaim() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, input }: { id: string; input: ApprovePaymentClaimInput }) => approvePaymentClaim(id, input),
-    onSuccess: () => invalidateAfterClaimReview(queryClient),
+    onSettled: () => invalidateAfterClaimReview(queryClient),
   });
 }
 
@@ -503,7 +504,7 @@ export function useDeclinePaymentClaim() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, input }: { id: string; input: DeclinePaymentClaimInput }) => declinePaymentClaim(id, input),
-    onSuccess: () => invalidateAfterClaimReview(queryClient),
+    onSettled: () => invalidateAfterClaimReview(queryClient),
   });
 }
 
