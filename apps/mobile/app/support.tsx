@@ -1,5 +1,5 @@
 import { Stack } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { FlatList, RefreshControl, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SupportFormSheet } from '@/components/support/support-form-sheet';
@@ -21,15 +21,17 @@ export default function SupportScreen() {
   const insets = useSafeAreaInsets();
   const [formVisible, setFormVisible] = useState(false);
   const { data, isPending, isError, error, refetch, isRefetching } = useSupportMessages();
-  const { mutate: markSeen, isPending: isMarkingSeen } = useMarkSupportRepliesSeen();
+  const { mutate: markSeen } = useMarkSupportRepliesSeen();
+  const hasRequestedMarkSeen = useRef(false);
 
   const unseenCount = countUnseenReplies(data ?? []);
 
   useEffect(() => {
-    if (unseenCount > 0 && !isMarkingSeen) {
+    if (unseenCount > 0 && !hasRequestedMarkSeen.current) {
+      hasRequestedMarkSeen.current = true;
       markSeen();
     }
-  }, [unseenCount, isMarkingSeen, markSeen]);
+  }, [unseenCount, markSeen]);
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
