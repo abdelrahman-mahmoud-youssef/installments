@@ -1,0 +1,2 @@
+export const MAX_PRODUCT_NAME_LENGTH = 200;
+export const MAX_CONTRACT_TAG_LENGTH = 30;

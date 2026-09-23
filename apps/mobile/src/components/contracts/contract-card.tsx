@@ -38,6 +38,7 @@ export function ContractCard({ contract, onPress }: ContractCardProps) {
               {contract.hasOverdue ? (
                 <Badge label={t('status.installment.OVERDUE')} tone="danger" />
               ) : null}
+              {contract.tag ? <Badge label={contract.tag} tone="info" /> : null}
             </View>
           </View>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
