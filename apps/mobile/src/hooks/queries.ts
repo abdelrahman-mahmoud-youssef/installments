@@ -1,4 +1,5 @@
 import {
+  keepPreviousData,
   QueryClient,
   useInfiniteQuery,
   useMutation,
@@ -76,6 +77,7 @@ import {
 } from '@/api/payment-claims';
 import { CreatePaymentInput, createPayment } from '@/api/payments';
 import { createShareLink } from '@/api/share-links';
+import { getReports } from '@/api/reports';
 import { CreateStaffInput, createStaff, listStaff, setStaffActive } from '@/api/staff';
 
 const PAGE_SIZE = 20;
@@ -111,6 +113,8 @@ export const queryKeys = {
     ['counterparties', 'history', id, params] as const,
   paymentClaimsRoot: ['payment-claims'] as const,
   paymentClaims: (params: PaymentClaimListParams) => ['payment-claims', 'list', params] as const,
+  reportsRoot: ['reports'] as const,
+  reports: (month: string) => ['reports', month] as const,
 };
 
 export function useDashboard() {
@@ -235,6 +239,7 @@ export function useRecordPayment(contractId: string) {
       void queryClient.invalidateQueries({ queryKey: ['contracts'] });
       void queryClient.invalidateQueries({ queryKey: queryKeys.dashboard });
       void queryClient.invalidateQueries({ queryKey: queryKeys.paymentMethods });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.reportsRoot });
     },
   });
 }
@@ -483,6 +488,7 @@ function invalidateAfterClaimReview(queryClient: QueryClient): void {
   void queryClient.invalidateQueries({ queryKey: queryKeys.dashboard });
   void queryClient.invalidateQueries({ queryKey: ['contracts'] });
   void queryClient.invalidateQueries({ queryKey: queryKeys.paymentMethods });
+  void queryClient.invalidateQueries({ queryKey: queryKeys.reportsRoot });
 }
 
 export function useApprovePaymentClaim() {
@@ -498,5 +504,13 @@ export function useDeclinePaymentClaim() {
   return useMutation({
     mutationFn: ({ id, input }: { id: string; input: DeclinePaymentClaimInput }) => declinePaymentClaim(id, input),
     onSuccess: () => invalidateAfterClaimReview(queryClient),
+  });
+}
+
+export function useReports(month: string) {
+  return useQuery({
+    queryKey: queryKeys.reports(month),
+    queryFn: () => getReports(month),
+    placeholderData: keepPreviousData,
   });
 }

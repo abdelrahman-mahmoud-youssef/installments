@@ -92,6 +92,12 @@ export default function MoreScreen() {
               }
               showChevron
             />
+            <ListRow
+              icon="bar-chart-outline"
+              title={t('more.reports')}
+              onPress={() => router.push('/reports')}
+              showChevron
+            />
           </Card>
         </View>
 

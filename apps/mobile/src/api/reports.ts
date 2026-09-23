@@ -1,0 +1,24 @@
+import { apiClient, buildQuery } from './client';
+
+export interface OverdueCustomerSummary {
+  customerId: string;
+  customerName: string;
+  customerPhone: string;
+  overdueBalance: number;
+  overdueInstallmentCount: number;
+}
+
+export interface ReportsResponse {
+  todayCollections: number;
+  monthlyCollections: number;
+  overdueBalance: number;
+  overdueCustomers: OverdueCustomerSummary[];
+  totalContracts: number;
+  activeContracts: number;
+  totalCustomers: number;
+  installmentsThisMonth: number;
+}
+
+export function getReports(month: string): Promise<ReportsResponse> {
+  return apiClient.get(`reports${buildQuery({ month })}`);
+}
