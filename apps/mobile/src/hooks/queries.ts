@@ -107,6 +107,7 @@ import {
 } from '@/api/support';
 
 const PAGE_SIZE = 20;
+const BADGE_REFRESH_INTERVAL_MS = 60_000;
 
 function nextPageParam<T>(lastPage: PaginatedResult<T>): number | undefined {
   return lastPage.page < lastPage.totalPages ? lastPage.page + 1 : undefined;
@@ -148,7 +149,7 @@ export const queryKeys = {
 };
 
 export function useDashboard() {
-  return useQuery({ queryKey: queryKeys.dashboard, queryFn: getDashboard });
+  return useQuery({ queryKey: queryKeys.dashboard, queryFn: getDashboard, refetchInterval: BADGE_REFRESH_INTERVAL_MS });
 }
 
 export function useCustomers(params: Omit<CustomerListParams, 'page' | 'limit'>) {
@@ -547,7 +548,11 @@ export function useReports(month: string) {
 }
 
 export function useSupportMessages() {
-  return useQuery({ queryKey: queryKeys.supportMessages, queryFn: listSupportMessages });
+  return useQuery({
+    queryKey: queryKeys.supportMessages,
+    queryFn: listSupportMessages,
+    refetchInterval: BADGE_REFRESH_INTERVAL_MS,
+  });
 }
 
 export function useCreateSupportMessage() {
