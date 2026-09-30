@@ -7,7 +7,9 @@ import { selectionHaptic } from '@/lib/haptics';
 import { useTheme } from '@/theme/theme-context';
 import { fontSizes, radius, spacing } from '@/theme/tokens';
 
-type TileVisual = { icon: keyof typeof Ionicons.glyphMap } | { glyph: string; glyphScale?: number };
+type TileVisual =
+  | { icon: keyof typeof Ionicons.glyphMap }
+  | { glyph: string; glyphScale?: number; fontFamily?: string };
 
 export interface OptionTile<T extends string> {
   value: T;
@@ -31,7 +33,13 @@ function TileVisualView({ visual, color }: { visual: TileVisual; color: string }
   }
   return (
     <AppText
-      style={{ color, fontWeight: '700', fontSize: fontSizes.xl * (visual.glyphScale ?? 1), lineHeight: ICON_SIZE + 6 }}
+      style={{
+        color,
+        fontWeight: visual.fontFamily ? undefined : '700',
+        fontFamily: visual.fontFamily,
+        fontSize: fontSizes.xl * (visual.glyphScale ?? 1),
+        lineHeight: ICON_SIZE + 6,
+      }}
     >
       {visual.glyph}
     </AppText>

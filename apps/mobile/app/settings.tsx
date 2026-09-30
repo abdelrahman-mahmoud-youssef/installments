@@ -1,6 +1,7 @@
 import { Stack } from 'expo-router';
 import { ScrollView } from 'react-native';
 import { OptionTiles } from '@/components/settings/option-tiles';
+import { ARABIC_FONT_OPTIONS, ArabicFontOption } from '@/theme/arabic-fonts';
 import { useI18n } from '@/i18n/i18n-context';
 import { Locale } from '@/i18n/translations';
 import { FontScaleOption, ThemeMode, useTheme } from '@/theme/theme-context';
@@ -8,7 +9,8 @@ import { spacing } from '@/theme/tokens';
 
 export default function SettingsScreen() {
   const { t, locale, setLocale } = useI18n();
-  const { colors, mode, setMode, fontScaleOption, setFontScaleOption } = useTheme();
+  const { colors, mode, setMode, fontScaleOption, setFontScaleOption, arabicFont, setArabicFont, arabicFontPreview } =
+    useTheme();
 
   return (
     <ScrollView
@@ -46,6 +48,16 @@ export default function SettingsScreen() {
         ]}
         selected={fontScaleOption}
         onSelect={setFontScaleOption}
+      />
+      <OptionTiles<ArabicFontOption>
+        title={t('settings.arabicFont')}
+        options={ARABIC_FONT_OPTIONS.map((option) => ({
+          value: option,
+          label: t(`settings.arabicFonts.${option}`),
+          visual: { glyph: 'أب', fontFamily: arabicFontPreview(option) },
+        }))}
+        selected={arabicFont}
+        onSelect={setArabicFont}
       />
     </ScrollView>
   );

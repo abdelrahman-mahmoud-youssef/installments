@@ -7,8 +7,15 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { useColorScheme } from 'react-native';
+import { TextStyle, useColorScheme } from 'react-native';
+import { useFonts } from 'expo-font';
 import { BrandColorPreset, isBrandColorPreset } from '@/lib/brand-colors';
+import {
+  ARABIC_FONT_ASSETS,
+  ArabicFontOption,
+  isArabicFontOption,
+  resolveArabicFontFamily,
+} from './arabic-fonts';
 import { preferenceKeys, preferenceStorage } from '@/lib/storage';
 import { BRAND_PALETTES } from './brand-palettes';
 import { darkColors, fontSizes, FontSizeToken, lightColors, ThemeColors } from './tokens';
@@ -36,6 +43,10 @@ interface ThemeContextValue {
   fontSize: (token: FontSizeToken) => number;
   brandColor: BrandColorPreset | null;
   setBrandColor: (preset: string | null) => void;
+  arabicFont: ArabicFontOption;
+  setArabicFont: (option: ArabicFontOption) => void;
+  arabicFontFamily: (weight: TextStyle['fontWeight']) => string | undefined;
+  arabicFontPreview: (option: ArabicFontOption) => string | undefined;
   isReady: boolean;
 }
 
@@ -58,6 +69,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [mode, setModeState] = useState<ThemeMode>('system');
   const [fontScaleOption, setFontScaleState] = useState<FontScaleOption>('default');
   const [brandColor, setBrandColorState] = useState<BrandColorPreset | null>(null);
+  const [arabicFont, setArabicFontState] = useState<ArabicFontOption>('system');
+  const [arabicFontsLoaded] = useFonts(ARABIC_FONT_ASSETS);
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
@@ -65,7 +78,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       preferenceStorage.get(preferenceKeys.themeMode),
       preferenceStorage.get(preferenceKeys.fontScale),
       preferenceStorage.get(preferenceKeys.brandColor),
-    ]).then(([storedMode, storedScale, storedBrandColor]) => {
+      preferenceStorage.get(preferenceKeys.arabicFont),
+    ]).then(([storedMode, storedScale, storedBrandColor, storedArabicFont]) => {
       if (storedMode && THEME_MODES.includes(storedMode as ThemeMode)) {
         setModeState(storedMode as ThemeMode);
       }
@@ -73,6 +87,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         setFontScaleState(storedScale as FontScaleOption);
       }
       setBrandColorState(toBrandColorPreset(storedBrandColor));
+      if (storedArabicFont && isArabicFontOption(storedArabicFont)) {
+        setArabicFontState(storedArabicFont);
+      }
       setIsReady(true);
     });
   }, []);
@@ -85,6 +102,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const setFontScaleOption = useCallback((option: FontScaleOption) => {
     setFontScaleState(option);
     void preferenceStorage.set(preferenceKeys.fontScale, option);
+  }, []);
+
+  const setArabicFont = useCallback((option: ArabicFontOption) => {
+    setArabicFontState(option);
+    void preferenceStorage.set(preferenceKeys.arabicFont, option);
   }, []);
 
   const setBrandColor = useCallback((preset: string | null) => {
@@ -106,9 +128,25 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       fontSize: (token) => Math.round(fontSizes[token] * factor),
       brandColor,
       setBrandColor,
+      arabicFont,
+      setArabicFont,
+      arabicFontFamily: (weight) => (arabicFontsLoaded ? resolveArabicFontFamily(arabicFont, weight) : undefined),
+      arabicFontPreview: (option) => (arabicFontsLoaded ? resolveArabicFontFamily(option, '700') : undefined),
       isReady,
     };
-  }, [mode, systemScheme, fontScaleOption, brandColor, setMode, setFontScaleOption, setBrandColor, isReady]);
+  }, [
+    mode,
+    systemScheme,
+    fontScaleOption,
+    brandColor,
+    arabicFont,
+    arabicFontsLoaded,
+    setMode,
+    setFontScaleOption,
+    setBrandColor,
+    setArabicFont,
+    isReady,
+  ]);
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }

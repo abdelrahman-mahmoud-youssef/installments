@@ -1,4 +1,5 @@
 import { Text, TextProps, TextStyle } from 'react-native';
+import { useI18n } from '@/i18n/i18n-context';
 import { useTheme } from '@/theme/theme-context';
 import { FontSizeToken } from '@/theme/tokens';
 
@@ -22,8 +23,10 @@ interface AppTextProps extends TextProps {
 }
 
 export function AppText({ variant = 'body', tone = 'default', align, style, ...rest }: AppTextProps) {
-  const { colors, fontSize } = useTheme();
+  const { colors, fontSize, arabicFontFamily } = useTheme();
+  const { locale } = useI18n();
   const { size, weight } = VARIANT_STYLES[variant];
+  const fontFamily = locale === 'ar' ? arabicFontFamily(weight) : undefined;
   const toneColor: Record<Tone, string> = {
     default: colors.text,
     muted: colors.textMuted,
@@ -41,7 +44,8 @@ export function AppText({ variant = 'body', tone = 'default', align, style, ...r
       style={[
         {
           fontSize: fontSize(size),
-          fontWeight: weight,
+          fontWeight: fontFamily ? undefined : weight,
+          fontFamily,
           color: toneColor[tone],
           textAlign: align,
         },
