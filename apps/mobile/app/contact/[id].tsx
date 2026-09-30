@@ -33,7 +33,7 @@ import {
 import { useI18n } from '@/i18n/i18n-context';
 import { currentMonthKey } from '@/lib/calendar';
 import { balanceStatus, balanceTone } from '@/lib/counterparty-balance';
-import { formatDate, formatMoney } from '@/lib/format';
+import { formatDate, formatMoney, isolateLtr } from '@/lib/format';
 import { useTheme } from '@/theme/theme-context';
 import { floatingActionClearance, spacing, touchTarget } from '@/theme/tokens';
 
@@ -246,7 +246,7 @@ function ContactHero({ contact, onCall, onShare, onAdjust, onEdit }: ContactHero
           </AppText>
           {contact.phone ? (
             <AppText variant="caption" tone="muted">
-              {contact.phone}
+              {isolateLtr(contact.phone)}
             </AppText>
           ) : null}
         </View>

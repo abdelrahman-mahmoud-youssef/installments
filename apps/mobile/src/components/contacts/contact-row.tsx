@@ -8,6 +8,7 @@ import { PressableScale } from '@/components/ui/pressable-scale';
 import { useI18n } from '@/i18n/i18n-context';
 import { balanceStatus, balanceTone } from '@/lib/counterparty-balance';
 import { spacing } from '@/theme/tokens';
+import { isolateLtr } from '@/lib/format';
 
 interface ContactRowProps {
   contact: Counterparty;
@@ -29,7 +30,7 @@ export function ContactRow({ contact, onPress }: ContactRowProps) {
             </AppText>
             {contact.phone ? (
               <AppText variant="caption" tone="muted" numberOfLines={1}>
-                {contact.phone}
+                {isolateLtr(contact.phone)}
               </AppText>
             ) : null}
           </View>

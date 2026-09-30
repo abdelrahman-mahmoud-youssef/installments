@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useI18n } from '@/i18n/i18n-context';
 import { spacing } from '@/theme/tokens';
+import { isolateLtr } from '@/lib/format';
 
 interface TelegramConnectedCardProps {
   chatId: string | null;
@@ -24,7 +25,7 @@ export function TelegramConnectedCard({ chatId, testing, error, onSendTest, onDi
           tone={chatId ? 'success' : 'warning'}
         />
         <AppText variant="caption" tone="muted">
-          {chatId ? t('notifications.connectedChat', { chatId }) : t('notifications.awaitingChatHint')}
+          {chatId ? t('notifications.connectedChat', { chatId: isolateLtr(chatId) }) : t('notifications.awaitingChatHint')}
         </AppText>
         {error ? (
           <AppText variant="caption" tone="danger">

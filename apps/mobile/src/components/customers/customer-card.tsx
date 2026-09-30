@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card';
 import { PressableScale } from '@/components/ui/pressable-scale';
 import { useI18n } from '@/i18n/i18n-context';
 import { spacing } from '@/theme/tokens';
+import { isolateLtr } from '@/lib/format';
 
 interface CustomerCardProps {
   customer: CustomerListItem;
@@ -31,7 +32,7 @@ export function CustomerCard({ customer, onPress, onLongPress }: CustomerCardPro
               {customer.name}
             </AppText>
             <AppText variant="caption" tone="muted">
-              {customer.phone}
+              {isolateLtr(customer.phone)}
             </AppText>
             {customer.address ? (
               <AppText variant="label" tone="faint" numberOfLines={1}>

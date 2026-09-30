@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/app-text';
 import { PressableScale } from '@/components/ui/pressable-scale';
 import { useI18n } from '@/i18n/i18n-context';
-import { maskAccountDetails } from '@/lib/format';
+import { isolateLtr, maskAccountDetails } from '@/lib/format';
 import { useTheme } from '@/theme/theme-context';
 import { spacing } from '@/theme/tokens';
 
@@ -26,7 +26,7 @@ export function MaskedAccountDetails({ details }: MaskedAccountDetailsProps) {
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
         <AppText variant="caption" tone="muted">
-          {isVisible ? details : maskAccountDetails(details)}
+          {isolateLtr(isVisible ? details : maskAccountDetails(details))}
         </AppText>
         <Ionicons name={isVisible ? 'eye-off-outline' : 'eye-outline'} size={14} color={colors.textFaint} />
       </View>

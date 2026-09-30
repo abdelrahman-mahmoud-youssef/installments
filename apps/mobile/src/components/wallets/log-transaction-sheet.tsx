@@ -16,7 +16,7 @@ import { useToast } from '@/components/ui/toast-context';
 import { useCounterparties, useCreatePaymentMethodTransaction, usePaymentMethods } from '@/hooks/queries';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useI18n } from '@/i18n/i18n-context';
-import { parseAmountInput, todayIsoDate, toMinorUnits } from '@/lib/format';
+import { isolateLtr, parseAmountInput, todayIsoDate, toMinorUnits } from '@/lib/format';
 import { PickedImage, pickImages } from '@/lib/image-picker';
 import { resolvePaymentMethodPreset } from '@/lib/payment-method-presets';
 import { useTheme } from '@/theme/theme-context';
@@ -259,7 +259,7 @@ export function LogTransactionSheet({ visible, onClose, paymentMethodId, counter
                   <AppText variant="caption">{suggestion.name}</AppText>
                   {suggestion.phone ? (
                     <AppText variant="label" tone="muted">
-                      {suggestion.phone}
+                      {isolateLtr(suggestion.phone)}
                     </AppText>
                   ) : null}
                 </View>

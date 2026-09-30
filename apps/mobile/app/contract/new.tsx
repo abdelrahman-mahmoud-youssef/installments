@@ -28,7 +28,7 @@ import { TextField } from '@/components/ui/text-field';
 import { useToast } from '@/components/ui/toast-context';
 import { useContractTags, useCreateContract, useCreateCustomer } from '@/hooks/queries';
 import { useI18n } from '@/i18n/i18n-context';
-import { parseCountInput, parseNonNegativeAmountInput, toMinorUnits } from '@/lib/format';
+import { isolateLtr, parseCountInput, parseNonNegativeAmountInput, toMinorUnits } from '@/lib/format';
 import { useTheme } from '@/theme/theme-context';
 import { floatingActionClearance, spacing } from '@/theme/tokens';
 
@@ -106,7 +106,7 @@ export default function NewContractScreen() {
                 <View style={{ flex: 1, gap: 2 }}>
                   <AppText variant="bodyStrong">{values.customer?.name ?? t('contractForm.chooseCustomer')}</AppText>
                   <AppText variant="caption" tone={errorFor('customer') ? 'danger' : 'muted'}>
-                    {values.customer?.phone ?? errorFor('customer') ?? t('contractForm.chooseCustomerHint')}
+                    {values.customer ? isolateLtr(values.customer.phone) : (errorFor('customer') ?? t('contractForm.chooseCustomerHint'))}
                   </AppText>
                 </View>
                 <Ionicons name="chevron-expand" size={18} color={colors.textFaint} />

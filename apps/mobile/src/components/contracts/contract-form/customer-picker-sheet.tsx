@@ -13,6 +13,7 @@ import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useI18n } from '@/i18n/i18n-context';
 import { useTheme } from '@/theme/theme-context';
 import { radius, spacing } from '@/theme/tokens';
+import { isolateLtr } from '@/lib/format';
 
 interface CustomerPickerSheetProps {
   visible: boolean;
@@ -70,7 +71,7 @@ export function CustomerPickerSheet({ visible, selectedId, onClose, onSelect, on
                   {customer.name}
                 </AppText>
                 <AppText variant="caption" tone="muted">
-                  {customer.phone}
+                  {isolateLtr(customer.phone)}
                 </AppText>
               </View>
               {isSelected ? <Ionicons name="checkmark-circle" size={22} color={colors.primary} /> : null}

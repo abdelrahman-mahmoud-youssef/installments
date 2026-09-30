@@ -23,6 +23,7 @@ import { useContract, useRecordPayment } from '@/hooks/queries';
 import { useI18n } from '@/i18n/i18n-context';
 import { useTheme } from '@/theme/theme-context';
 import { floatingActionClearance, spacing } from '@/theme/tokens';
+import { isolateLtr } from '@/lib/format';
 
 export default function ContractDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -80,7 +81,7 @@ export default function ContractDetailScreen() {
                     <View style={{ flex: 1, gap: 2 }}>
                       <AppText variant="bodyStrong">{data.customer.name}</AppText>
                       <AppText variant="caption" tone="muted">
-                        {data.customer.phone}
+                        {isolateLtr(data.customer.phone)}
                       </AppText>
                     </View>
                   </View>

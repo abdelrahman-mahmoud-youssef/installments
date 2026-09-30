@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 import { MoneyText } from '@/components/ui/money-text';
 import { ImageThumbnail } from '@/components/ui/image-thumbnail';
 import { useI18n } from '@/i18n/i18n-context';
-import { formatDate, formatDateTime } from '@/lib/format';
+import { formatDate, formatDateTime, isolateLtr } from '@/lib/format';
 import { useTheme } from '@/theme/theme-context';
 import { spacing } from '@/theme/tokens';
 import { useClaimSubject } from './use-claim-subject';
@@ -39,7 +39,7 @@ export function ClaimDetails({ claim }: ClaimDetailsProps) {
         <DetailRow label={t('paymentClaims.installment')} value={installmentValue} />
         <DetailRow
           label={t('paymentClaims.paymentMethod')}
-          value={`${claim.paymentMethod.label} · ${claim.paymentMethod.details}`}
+          value={`${claim.paymentMethod.label} · ${isolateLtr(claim.paymentMethod.details)}`}
         />
         <DetailRow label={t('paymentClaims.submittedAt')} value={formatDateTime(claim.createdAt, locale)} isLast />
       </Card>

@@ -25,7 +25,7 @@ import { SkeletonCardList } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/toast-context';
 import { useCustomer, useDeleteCustomer, useUpdateCustomer } from '@/hooks/queries';
 import { useI18n } from '@/i18n/i18n-context';
-import { formatDate } from '@/lib/format';
+import { formatDate, isolateLtr } from '@/lib/format';
 import { whatsappChatUrl } from '@/lib/phone';
 import { customerPortalPath } from '@/lib/share-url';
 import { useTheme } from '@/theme/theme-context';
@@ -108,7 +108,7 @@ export default function CustomerDetailScreen() {
                     {data.name}
                   </AppText>
                   <AppText variant="caption" tone="muted">
-                    {data.phone}
+                    {isolateLtr(data.phone)}
                   </AppText>
                   <AppText variant="label" tone="faint">
                     {t('customers.memberSince', { date: formatDate(data.createdAt, locale) })}

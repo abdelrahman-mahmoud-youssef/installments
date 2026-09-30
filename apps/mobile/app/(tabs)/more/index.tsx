@@ -11,7 +11,7 @@ import { ListRow } from '@/components/ui/list-row';
 import { SectionHeader } from '@/components/ui/section-header';
 import { useDashboard, useSupportMessages } from '@/hooks/queries';
 import { useI18n } from '@/i18n/i18n-context';
-import { formatNumber } from '@/lib/format';
+import { formatNumber, isolateLtr } from '@/lib/format';
 import { countUnseenReplies } from '@/lib/support-replies';
 import { useTheme } from '@/theme/theme-context';
 import { spacing } from '@/theme/tokens';
@@ -41,7 +41,7 @@ export default function MoreScreen() {
               <View style={{ flex: 1, gap: 2 }}>
                 <AppText variant="bodyStrong">{user.name}</AppText>
                 <AppText variant="caption" tone="muted">
-                  {user.email}
+                  {isolateLtr(user.email)}
                 </AppText>
               </View>
               <Badge label={t(`more.role.${user.role}`)} tone={isAdmin ? 'primary' : 'neutral'} />

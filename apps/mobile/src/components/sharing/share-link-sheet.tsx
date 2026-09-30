@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { ErrorState } from '@/components/ui/error-state';
 import { useCreateShareLink } from '@/hooks/queries';
 import { useI18n } from '@/i18n/i18n-context';
+import { isolateLtr } from '@/lib/format';
 import { whatsappChatUrl } from '@/lib/phone';
 import { buildShareUrl } from '@/lib/share-url';
 import { useTheme } from '@/theme/theme-context';
@@ -64,7 +65,7 @@ export function ShareLinkSheet({ visible, onClose, title, targetPath, whatsappPh
             <QRCode value={url} size={QR_SIZE} />
           </View>
           <AppText variant="caption" tone="muted" align="center" selectable>
-            {url}
+            {isolateLtr(url)}
           </AppText>
           <Button
             title={t('sharing.shareLink')}

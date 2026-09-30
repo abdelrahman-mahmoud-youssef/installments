@@ -23,6 +23,7 @@ import { useToast } from '@/components/ui/toast-context';
 import { useBranding, useRemoveLogo, useSetOffersVisibility, useUpdateBranding, useUploadLogo } from '@/hooks/queries';
 import { useI18n } from '@/i18n/i18n-context';
 import { BRAND_COLOR_PRESETS, BrandColorPreset } from '@/lib/brand-colors';
+import { isolateLtr } from '@/lib/format';
 import { pickImages } from '@/lib/image-picker';
 import { buildShopUrl } from '@/lib/share-url';
 import { useTheme } from '@/theme/theme-context';
@@ -226,7 +227,7 @@ export default function ShopScreen() {
               <ListRow
                 icon="share-outline"
                 title={t('shopExtras.shareShop')}
-                subtitle={buildShopUrl(data.slug)}
+                subtitle={isolateLtr(buildShopUrl(data.slug))}
                 onPress={() => void Share.share({ message: buildShopUrl(data.slug) })}
               />
             </Card>
@@ -256,6 +257,7 @@ export default function ShopScreen() {
                   <TextField
                     label={t('shop.slug')}
                     value={form.slug}
+                    ltr
                     onChangeText={(value) => updateField('slug', value.toLowerCase())}
                     error={errors.slug}
                     hint={t('shop.slugHint')}

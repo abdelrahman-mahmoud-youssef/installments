@@ -5,7 +5,7 @@ import { useAuth } from '@/auth/auth-context';
 import { useToast } from '@/components/ui/toast-context';
 import { useI18n } from '@/i18n/i18n-context';
 import { balanceStatus } from '@/lib/counterparty-balance';
-import { formatDate, formatMoney, todayIsoDate } from '@/lib/format';
+import { formatDate, formatMoney, isolateLtr, todayIsoDate } from '@/lib/format';
 
 export function useShareStatement() {
   const { t, locale } = useI18n();
@@ -20,7 +20,7 @@ export function useShareStatement() {
         t('contacts.statementDate', { date: formatDate(todayIsoDate(), locale) }),
         '',
         t('contacts.statementContact', { name: contact.name }),
-        contact.phone ? t('contacts.statementPhone', { phone: contact.phone }) : null,
+        contact.phone ? t('contacts.statementPhone', { phone: isolateLtr(contact.phone) }) : null,
         t('contacts.statementBalance', {
           amount: formatMoney(Math.abs(contact.balance), locale),
           status: t(`contacts.${balanceStatus(contact.balance)}`),

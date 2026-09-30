@@ -12,10 +12,11 @@ interface TextFieldProps extends TextInputProps {
   hint?: string;
   optional?: boolean;
   secureToggle?: boolean;
+  ltr?: boolean;
 }
 
 export const TextField = forwardRef<TextInput, TextFieldProps>(function TextField(
-  { label, error, hint, optional = false, secureToggle = false, style, multiline, secureTextEntry, ...rest },
+  { label, error, hint, optional = false, secureToggle = false, ltr, style, multiline, secureTextEntry, ...rest },
   ref,
 ) {
   const { colors, fontSize } = useTheme();
@@ -24,6 +25,9 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const borderColor = error ? colors.danger : isFocused ? colors.primary : colors.border;
+  const forceLtr =
+    ltr ??
+    (rest.keyboardType === 'email-address' || rest.keyboardType === 'url' || rest.keyboardType === 'phone-pad');
 
   return (
     <View style={{ gap: spacing.xs }}>
@@ -65,7 +69,8 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
               paddingVertical: spacing.md,
               minHeight: multiline ? 96 : touchTarget.minHeight + 4,
               textAlignVertical: multiline ? 'top' : 'center',
-              textAlign: isRTL ? 'right' : 'left',
+              textAlign: forceLtr || !isRTL ? 'left' : 'right',
+              writingDirection: forceLtr ? 'ltr' : undefined,
             },
             style,
           ]}

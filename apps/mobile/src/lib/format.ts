@@ -105,6 +105,13 @@ export function parseCountInput(text: string): number | null {
   return count !== null && Number.isInteger(count) ? count : null;
 }
 
+const LTR_ISOLATE_START = '⁦';
+const LTR_ISOLATE_END = '⁩';
+
+export function isolateLtr(text: string): string {
+  return `${LTR_ISOLATE_START}${text}${LTR_ISOLATE_END}`;
+}
+
 export function maskAccountDetails(details: string): string {
   const compact = details.replace(/\s+/g, '');
   if (compact.length <= 4) {

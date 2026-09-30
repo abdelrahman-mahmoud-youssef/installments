@@ -5,7 +5,7 @@ import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { useI18n } from '@/i18n/i18n-context';
-import { formatDate } from '@/lib/format';
+import { formatDate, isolateLtr } from '@/lib/format';
 import { useTheme } from '@/theme/theme-context';
 import { spacing } from '@/theme/tokens';
 
@@ -28,7 +28,7 @@ export function StaffCard({ member, disabled, onToggleActive }: StaffCardProps) 
             {member.name}
           </AppText>
           <AppText variant="caption" tone="muted" numberOfLines={1}>
-            {member.email}
+            {isolateLtr(member.email)}
           </AppText>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginTop: spacing.xs }}>
             <Badge
