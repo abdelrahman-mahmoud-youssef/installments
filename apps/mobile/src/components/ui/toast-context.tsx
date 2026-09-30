@@ -2,6 +2,7 @@ import { createContext, ReactNode, useCallback, useContext, useMemo, useRef, use
 import { Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { notificationHaptic } from '@/lib/haptics';
 import { useTheme } from '@/theme/theme-context';
 import { radius, spacing } from '@/theme/tokens';
 import { AppText } from './app-text';
@@ -28,6 +29,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       if (hideTimer.current) {
         clearTimeout(hideTimer.current);
       }
+      notificationHaptic(tone);
       setToast({ message, tone });
       Animated.timing(opacity, { toValue: 1, duration: 180, useNativeDriver: true }).start();
       hideTimer.current = setTimeout(() => {

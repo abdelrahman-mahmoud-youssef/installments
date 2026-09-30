@@ -3,6 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/app-text';
 import { PressableScale } from '@/components/ui/pressable-scale';
 import { SectionHeader } from '@/components/ui/section-header';
+import { selectionHaptic } from '@/lib/haptics';
 import { useTheme } from '@/theme/theme-context';
 import { fontSizes, radius, spacing } from '@/theme/tokens';
 
@@ -49,7 +50,10 @@ export function OptionTiles<T extends string>({ title, options, selected, onSele
           return (
             <PressableScale
               key={option.value}
-              onPress={() => onSelect(option.value)}
+              onPress={() => {
+                selectionHaptic();
+                onSelect(option.value);
+              }}
               accessibilityRole="button"
               accessibilityLabel={option.label}
               accessibilityState={{ selected: isSelected }}

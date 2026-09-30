@@ -1,4 +1,5 @@
 import { ScrollView } from 'react-native';
+import { selectionHaptic } from '@/lib/haptics';
 import { useTheme } from '@/theme/theme-context';
 import { radius, spacing, touchTarget } from '@/theme/tokens';
 import { AppText } from './app-text';
@@ -28,7 +29,10 @@ export function FilterChips<T extends string>({ options, selected, onSelect }: F
         return (
           <PressableScale
             key={option.value}
-            onPress={() => onSelect(option.value)}
+            onPress={() => {
+              selectionHaptic();
+              onSelect(option.value);
+            }}
             accessibilityRole="button"
             accessibilityState={{ selected: isSelected }}
             style={{

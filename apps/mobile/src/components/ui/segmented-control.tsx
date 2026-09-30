@@ -1,5 +1,6 @@
 import { View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { selectionHaptic } from '@/lib/haptics';
 import { useTheme } from '@/theme/theme-context';
 import { radius, spacing, touchTarget } from '@/theme/tokens';
 import { AppText } from './app-text';
@@ -37,7 +38,10 @@ export function SegmentedControl<T extends string>({ options, selected, onSelect
         return (
           <PressableScale
             key={option.value}
-            onPress={() => onSelect(option.value)}
+            onPress={() => {
+              selectionHaptic();
+              onSelect(option.value);
+            }}
             accessibilityRole="tab"
             accessibilityState={{ selected: isSelected }}
             style={{
