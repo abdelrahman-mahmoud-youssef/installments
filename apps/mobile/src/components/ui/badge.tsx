@@ -31,7 +31,7 @@ export function Badge({ label, tone = 'neutral' }: BadgeProps) {
         alignSelf: 'flex-start',
       }}
     >
-      <AppText variant="label" style={{ color: foreground }}>
+      <AppText variant="label" numberOfLines={1} style={{ color: foreground }}>
         {label}
       </AppText>
     </View>

@@ -21,25 +21,22 @@ export function ContractCard({ contract, onPress }: ContractCardProps) {
     <PressableScale onPress={onPress} accessibilityRole="button" accessibilityLabel={contract.productName}>
       <Card>
         <View style={{ gap: spacing.md }}>
-          <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md }}>
-            <View style={{ flex: 1, gap: 2 }}>
-              <AppText variant="bodyStrong" numberOfLines={1}>
-                {contract.productName}
-              </AppText>
-              <AppText variant="caption" tone="muted" numberOfLines={1}>
-                {contract.customer.name}
-              </AppText>
-            </View>
-            <View style={{ alignItems: 'flex-end', gap: spacing.xs }}>
-              <Badge
-                label={t(`status.contract.${contract.status}`)}
-                tone={contractStatusTone[contract.status]}
-              />
-              {contract.hasOverdue ? (
-                <Badge label={t('status.installment.OVERDUE')} tone="danger" />
-              ) : null}
-              {contract.tag ? <Badge label={contract.tag} tone="info" /> : null}
-            </View>
+          <View style={{ gap: 2 }}>
+            <AppText variant="bodyStrong" numberOfLines={1}>
+              {contract.productName}
+            </AppText>
+            <AppText variant="caption" tone="muted" numberOfLines={1}>
+              {contract.customer.name}
+            </AppText>
+          </View>
+          <View style={{ flexDirection: 'row', gap: spacing.xs, overflow: 'hidden' }}>
+            {contract.hasOverdue ? <Badge label={t('status.installment.OVERDUE')} tone="danger" /> : null}
+            <Badge label={t(`status.contract.${contract.status}`)} tone={contractStatusTone[contract.status]} />
+            {contract.tag ? (
+              <View style={{ flexShrink: 1 }}>
+                <Badge label={contract.tag} tone="info" />
+              </View>
+            ) : null}
           </View>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <MoneyText minorUnits={contract.totalAmount} variant="heading" />
