@@ -3,7 +3,6 @@ import { RefreshControl, ScrollView, View } from 'react-native';
 import { useAuth } from '@/auth/auth-context';
 import { DashboardSummaryStats } from '@/components/dashboard/dashboard-summary-stats';
 import { InstallmentSection } from '@/components/dashboard/installment-section';
-import { NewContractHeaderButton } from '@/components/dashboard/new-contract-header-button';
 import { PendingClaimsCard } from '@/components/dashboard/pending-claims-card';
 import { RecentPaymentsSection } from '@/components/dashboard/recent-payments-section';
 import { UpcomingCollectionsChart } from '@/components/dashboard/upcoming-collections-chart';
@@ -36,7 +35,7 @@ export default function DashboardScreen() {
       }
       {...scrollProps}
     >
-      <Stack.Screen options={{ ...headerOptions, headerRight: () => <NewContractHeaderButton /> }} />
+      <Stack.Screen options={headerOptions} />
       <View style={{ paddingHorizontal: spacing.xl, gap: spacing.xl }}>
         {largeTitle}
         {user ? (
