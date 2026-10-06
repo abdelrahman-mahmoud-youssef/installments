@@ -15,6 +15,7 @@ import { useToast } from '@/components/ui/toast-context';
 import { useCreateCustomer, useCustomers, useDeleteCustomer } from '@/hooks/queries';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useI18n } from '@/i18n/i18n-context';
+import { useCollapsingLargeTitle } from '@/navigation/use-collapsing-large-title';
 import { useHeaderSearchBarOptions } from '@/navigation/use-header-search-bar-options';
 import { useTheme } from '@/theme/theme-context';
 import { floatingActionClearance, spacing } from '@/theme/tokens';
@@ -62,16 +63,13 @@ export default function CustomersScreen() {
     query;
 
   const customers = useMemo(() => data?.pages.flatMap((page) => page.data) ?? [], [data]);
+  const { headerOptions, largeTitle, scrollProps } = useCollapsingLargeTitle(t('customers.title'));
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          title: t('customers.title'),
-          headerSearchBarOptions: searchBarOptions,
-        }}
-      />
+      <Stack.Screen options={{ ...headerOptions, headerSearchBarOptions: searchBarOptions }} />
       <FlatList
+        {...scrollProps}
         data={customers}
         keyExtractor={(customer) => customer.id}
         contentInsetAdjustmentBehavior="automatic"
@@ -92,15 +90,18 @@ export default function CustomersScreen() {
           <RefreshControl refreshing={isRefetching} onRefresh={() => void refetch()} tintColor={colors.textMuted} />
         }
         ListHeaderComponent={
-          <FilterChips
-            options={[
-              { value: 'active', label: t('common.active') },
-              { value: 'delayed', label: t('customers.delayedOnly') },
-              { value: 'deleted', label: t('customerActions.deletedFilter') },
-            ]}
-            selected={filter}
-            onSelect={setFilter}
-          />
+          <View style={{ gap: spacing.md }}>
+            <View style={{ paddingHorizontal: spacing.xl }}>{largeTitle}</View>
+            <FilterChips
+              options={[
+                { value: 'active', label: t('common.active') },
+                { value: 'delayed', label: t('customers.delayedOnly') },
+                { value: 'deleted', label: t('customerActions.deletedFilter') },
+              ]}
+              selected={filter}
+              onSelect={setFilter}
+            />
+          </View>
         }
         ListEmptyComponent={
           <View style={{ paddingHorizontal: spacing.xl }}>

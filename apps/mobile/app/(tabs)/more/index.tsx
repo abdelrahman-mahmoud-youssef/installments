@@ -11,6 +11,7 @@ import { ListRow } from '@/components/ui/list-row';
 import { SectionHeader } from '@/components/ui/section-header';
 import { useDashboard, useSupportMessages } from '@/hooks/queries';
 import { useI18n } from '@/i18n/i18n-context';
+import { useCollapsingLargeTitle } from '@/navigation/use-collapsing-large-title';
 import { formatNumber, isolateLtr } from '@/lib/format';
 import { countUnseenReplies } from '@/lib/support-replies';
 import { useTheme } from '@/theme/theme-context';
@@ -25,15 +26,18 @@ export default function MoreScreen() {
   const pendingClaimCount = useDashboard().data?.pendingPaymentClaims ?? 0;
   const supportMessages = useSupportMessages();
   const unseenReplies = countUnseenReplies(supportMessages.data ?? []);
+  const { headerOptions, largeTitle, scrollProps } = useCollapsingLargeTitle(t('more.title'));
 
   return (
     <ScrollView
       style={{ backgroundColor: colors.background }}
       contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={{ paddingTop: spacing.md, paddingBottom: spacing.xxxl }}
+      {...scrollProps}
     >
-      <Stack.Screen options={{ title: t('more.title') }} />
+      <Stack.Screen options={headerOptions} />
       <View style={{ paddingHorizontal: spacing.xl, gap: spacing.lg }}>
+        {largeTitle}
         {user ? (
           <Card>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>

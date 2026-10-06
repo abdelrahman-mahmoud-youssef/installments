@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { ReactElement, useMemo, useState } from 'react';
-import { FlatList, RefreshControl, View } from 'react-native';
+import { FlatList, RefreshControl, ScrollViewProps, View } from 'react-native';
 import { PaymentMethod } from '@/api/payment-methods';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
@@ -15,6 +15,7 @@ import { WalletActions } from './wallet-actions';
 interface WalletListProps {
   header: ReactElement;
   search: string;
+  scrollProps?: Pick<ScrollViewProps, 'onScroll' | 'scrollEventThrottle'>;
 }
 
 function matchesSearch(method: PaymentMethod, search: string): boolean {
@@ -22,7 +23,7 @@ function matchesSearch(method: PaymentMethod, search: string): boolean {
   return method.label.toLowerCase().includes(needle) || method.details.toLowerCase().includes(needle);
 }
 
-export function WalletList({ header, search }: WalletListProps) {
+export function WalletList({ header, search, scrollProps }: WalletListProps) {
   const { t } = useI18n();
   const { colors } = useTheme();
   const router = useRouter();
@@ -38,6 +39,7 @@ export function WalletList({ header, search }: WalletListProps) {
   return (
     <>
       <FlatList
+        {...scrollProps}
         data={methods}
         keyExtractor={(method) => method.id}
         contentInsetAdjustmentBehavior="automatic"

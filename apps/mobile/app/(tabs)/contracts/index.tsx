@@ -14,6 +14,7 @@ import { FilterChips } from '@/components/ui/filter-chips';
 import { SkeletonCardList } from '@/components/ui/skeleton';
 import { useContracts, useContractTags } from '@/hooks/queries';
 import { useI18n } from '@/i18n/i18n-context';
+import { useCollapsingLargeTitle } from '@/navigation/use-collapsing-large-title';
 import { useTheme } from '@/theme/theme-context';
 import { floatingActionClearance, spacing } from '@/theme/tokens';
 
@@ -40,11 +41,13 @@ export default function ContractsScreen() {
 
   const contracts = useMemo(() => data?.pages.flatMap((page) => page.data) ?? [], [data]);
   const openNewContract = () => router.push('/contract/new');
+  const { headerOptions, largeTitle, scrollProps } = useCollapsingLargeTitle(t('contracts.title'));
 
   return (
     <>
-      <Stack.Screen options={{ title: t('contracts.title') }} />
+      <Stack.Screen options={headerOptions} />
       <FlatList
+        {...scrollProps}
         data={contracts}
         keyExtractor={(contract) => contract.id}
         contentInsetAdjustmentBehavior="automatic"
@@ -64,23 +67,26 @@ export default function ContractsScreen() {
           <RefreshControl refreshing={isRefetching} onRefresh={() => void refetch()} tintColor={colors.textMuted} />
         }
         ListHeaderComponent={
-          <View style={{ flexDirection: 'row', alignItems: 'center', paddingEnd: spacing.xl }}>
-            <View style={{ flex: 1 }}>
-              <FilterChips
-                options={[
-                  { value: 'all', label: t('contracts.filterAll') },
-                  { value: 'ACTIVE', label: t('contracts.filterActive') },
-                  { value: 'delayed', label: t('contracts.filterDelayed') },
-                  { value: 'COMPLETED', label: t('contracts.filterCompleted') },
-                  { value: 'CANCELLED', label: t('contracts.filterCancelled') },
-                ]}
-                selected={filter}
-                onSelect={setFilter}
-              />
+          <View style={{ gap: spacing.md }}>
+            <View style={{ paddingHorizontal: spacing.xl }}>{largeTitle}</View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', paddingEnd: spacing.xl }}>
+              <View style={{ flex: 1 }}>
+                <FilterChips
+                  options={[
+                    { value: 'all', label: t('contracts.filterAll') },
+                    { value: 'ACTIVE', label: t('contracts.filterActive') },
+                    { value: 'delayed', label: t('contracts.filterDelayed') },
+                    { value: 'COMPLETED', label: t('contracts.filterCompleted') },
+                    { value: 'CANCELLED', label: t('contracts.filterCancelled') },
+                  ]}
+                  selected={filter}
+                  onSelect={setFilter}
+                />
+              </View>
+              {tags.length > 0 ? (
+                <ContractTagFilterButton isFiltering={tag !== null} onPress={() => setIsTagFilterOpen(true)} />
+              ) : null}
             </View>
-            {tags.length > 0 ? (
-              <ContractTagFilterButton isFiltering={tag !== null} onPress={() => setIsTagFilterOpen(true)} />
-            ) : null}
           </View>
         }
         ListEmptyComponent={

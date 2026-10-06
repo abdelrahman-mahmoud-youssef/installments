@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { ReactElement, useMemo } from 'react';
-import { ActivityIndicator, FlatList, RefreshControl, View } from 'react-native';
+import { ActivityIndicator, FlatList, RefreshControl, ScrollViewProps, View } from 'react-native';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { SkeletonCardList } from '@/components/ui/skeleton';
@@ -13,9 +13,10 @@ import { ContactRow } from './contact-row';
 interface ContactListProps {
   header: ReactElement;
   search: string;
+  scrollProps?: Pick<ScrollViewProps, 'onScroll' | 'scrollEventThrottle'>;
 }
 
-export function ContactList({ header, search }: ContactListProps) {
+export function ContactList({ header, search, scrollProps }: ContactListProps) {
   const { t } = useI18n();
   const { colors } = useTheme();
   const router = useRouter();
@@ -26,6 +27,7 @@ export function ContactList({ header, search }: ContactListProps) {
 
   return (
     <FlatList
+      {...scrollProps}
       data={contacts}
       keyExtractor={(contact) => contact.id}
       contentInsetAdjustmentBehavior="automatic"

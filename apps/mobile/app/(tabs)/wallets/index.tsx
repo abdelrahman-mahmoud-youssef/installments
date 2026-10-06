@@ -16,6 +16,7 @@ import { WalletList } from '@/components/wallets/wallet-list';
 import { useCreateCounterparty, useCreatePaymentMethod } from '@/hooks/queries';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useI18n } from '@/i18n/i18n-context';
+import { useCollapsingLargeTitle } from '@/navigation/use-collapsing-large-title';
 import { useHeaderSearchBarOptions } from '@/navigation/use-header-search-bar-options';
 import { CUSTOM_PRESET_KEY } from '@/lib/payment-method-presets';
 import { spacing } from '@/theme/tokens';
@@ -39,10 +40,12 @@ export default function WalletsScreen() {
   const createContact = useCreateCounterparty();
 
   const isWallets = segment === 'wallets';
+  const { headerOptions, largeTitle, scrollProps } = useCollapsingLargeTitle(t('wallets.title'));
 
   const header = (
     <View style={{ gap: spacing.lg, paddingBottom: spacing.xs }}>
       <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+        {largeTitle}
         <SegmentedControl
           options={[
             { value: 'wallets', label: t('wallets.walletsSegment'), icon: 'wallet-outline' },
@@ -62,13 +65,15 @@ export default function WalletsScreen() {
   return (
     <>
       <Stack.Screen
-        options={{
-          title: t('wallets.title'),
-          headerSearchBarOptions: isAdmin ? searchBarOptions : undefined,
-        }}
+        options={{ ...headerOptions, headerSearchBarOptions: isAdmin ? searchBarOptions : undefined }}
       />
       {!isAdmin ? (
-        <ScrollView contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ padding: spacing.xl }}>
+        <ScrollView
+          contentInsetAdjustmentBehavior="automatic"
+          contentContainerStyle={{ padding: spacing.xl, gap: spacing.lg }}
+          {...scrollProps}
+        >
+          {largeTitle}
           <Card>
             <AppText variant="caption" tone="muted">
               {t('wallets.adminOnly')}
@@ -76,9 +81,9 @@ export default function WalletsScreen() {
           </Card>
         </ScrollView>
       ) : isWallets ? (
-        <WalletList header={header} search={debouncedSearch} />
+        <WalletList header={header} search={debouncedSearch} scrollProps={scrollProps} />
       ) : (
-        <ContactList header={header} search={debouncedSearch} />
+        <ContactList header={header} search={debouncedSearch} scrollProps={scrollProps} />
       )}
 
       {isAdmin ? (

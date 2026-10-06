@@ -12,6 +12,7 @@ import { ErrorState } from '@/components/ui/error-state';
 import { SkeletonCardList } from '@/components/ui/skeleton';
 import { useDashboard } from '@/hooks/queries';
 import { useI18n } from '@/i18n/i18n-context';
+import { useCollapsingLargeTitle } from '@/navigation/use-collapsing-large-title';
 import { useTheme } from '@/theme/theme-context';
 import { spacing } from '@/theme/tokens';
 
@@ -21,6 +22,7 @@ export default function DashboardScreen() {
   const { colors } = useTheme();
   const router = useRouter();
   const { data, isPending, isError, error, refetch, isRefetching } = useDashboard();
+  const { headerOptions, largeTitle, scrollProps } = useCollapsingLargeTitle(t('dashboard.title'));
 
   const openContract = (contractId: string) => router.push(`/contract/${contractId}`);
 
@@ -32,9 +34,11 @@ export default function DashboardScreen() {
       refreshControl={
         <RefreshControl refreshing={isRefetching} onRefresh={() => void refetch()} tintColor={colors.textMuted} />
       }
+      {...scrollProps}
     >
-      <Stack.Screen options={{ title: t('dashboard.title'), headerRight: () => <NewContractHeaderButton /> }} />
+      <Stack.Screen options={{ ...headerOptions, headerRight: () => <NewContractHeaderButton /> }} />
       <View style={{ paddingHorizontal: spacing.xl, gap: spacing.xl }}>
+        {largeTitle}
         {user ? (
           <AppText variant="caption" tone="muted">
             {t('dashboard.greeting', { name: user.name })}
