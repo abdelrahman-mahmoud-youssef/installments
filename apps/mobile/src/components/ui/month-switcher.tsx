@@ -58,7 +58,7 @@ export function MonthSwitcher({ month, onChange }: MonthSwitcherProps) {
         disabled={isCurrentMonth}
         accessibilityRole="button"
         accessibilityHint={t('calendar.backToThisMonth')}
-        style={{ flex: 1, alignItems: 'center', gap: 2 }}
+        style={{ flex: 1, alignSelf: 'stretch', alignItems: 'center', justifyContent: 'center', gap: 2 }}
       >
         <AppText variant="bodyStrong">{formatMonthKey(month, locale)}</AppText>
         {!isCurrentMonth ? (
