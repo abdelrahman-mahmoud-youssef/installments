@@ -34,7 +34,6 @@ export default function CustomersScreen() {
   const searchBarOptions = useHeaderSearchBarOptions({
     placeholder: t('customers.searchPlaceholder'),
     onSearch: setSearch,
-    hideWhenScrolling: false,
   });
   const { showToast } = useToast();
   const createCustomer = useCreateCustomer();

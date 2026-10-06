@@ -5,21 +5,17 @@ import { useTheme } from '@/theme/theme-context';
 interface HeaderSearchBarConfig {
   placeholder: string;
   onSearch: (text: string) => void;
-  hideWhenScrolling?: boolean;
 }
 
-export function useHeaderSearchBarOptions({
-  placeholder,
-  onSearch,
-  hideWhenScrolling,
-}: HeaderSearchBarConfig): SearchBarProps {
+export function useHeaderSearchBarOptions({ placeholder, onSearch }: HeaderSearchBarConfig): SearchBarProps {
   const { t } = useI18n();
   const { colors } = useTheme();
   return {
     placeholder,
     cancelButtonText: t('common.cancel'),
     autoCapitalize: 'none',
-    hideWhenScrolling,
+    hideWhenScrolling: false,
+    placement: 'stacked',
     allowToolbarIntegration: false,
     barTintColor: colors.surface,
     textColor: colors.text,
