@@ -47,14 +47,10 @@ const TABS: TabDefinition[] = [
 
 export default function TabsLayout() {
   const { colors } = useTheme();
-  const { t, isRTL } = useI18n();
+  const { t, direction } = useI18n();
 
   return (
-    <NativeTabs
-      tintColor={colors.primary}
-      minimizeBehavior="onScrollDown"
-      unstable_nativeProps={{ direction: isRTL ? 'rtl' : 'ltr' }}
-    >
+    <NativeTabs tintColor={colors.primary} minimizeBehavior="onScrollDown" unstable_nativeProps={{ direction }}>
       {TABS.map((tab) => (
         <NativeTabs.Trigger key={tab.name} name={tab.name}>
           <NativeTabs.Trigger.Icon

@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useI18n } from '@/i18n/i18n-context';
 import { useTheme } from '@/theme/theme-context';
 import { radius, spacing } from '@/theme/tokens';
 import { AppText } from './app-text';
@@ -26,6 +27,7 @@ interface BottomSheetProps {
 
 export function BottomSheet({ visible, onClose, title, children, scrollable = true }: BottomSheetProps) {
   const { colors } = useTheme();
+  const { direction } = useI18n();
   const insets = useSafeAreaInsets();
   const [isMounted, setIsMounted] = useState(visible);
   const progress = useRef(new Animated.Value(0)).current;
@@ -66,7 +68,7 @@ export function BottomSheet({ visible, onClose, title, children, scrollable = tr
     <Modal transparent visible animationType="none" onRequestClose={onClose} statusBarTranslucent>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={{ flex: 1, justifyContent: 'flex-end' }}
+        style={{ flex: 1, direction, justifyContent: 'flex-end' }}
       >
         <Animated.View
           style={{

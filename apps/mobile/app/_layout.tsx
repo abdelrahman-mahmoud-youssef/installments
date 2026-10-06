@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Stack, useRouter, useSegments } from 'expo-router';
+import { LocaleDirContext } from 'expo-router/react-navigation';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { ReactNode, useEffect } from 'react';
@@ -47,9 +48,10 @@ function AuthGate({ children }: { children: ReactNode }) {
 
 function ThemedNavigator() {
   const { isDark } = useTheme();
+  const { direction } = useI18n();
   const screenOptions = useStackScreenOptions();
   return (
-    <>
+    <LocaleDirContext.Provider value={direction}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
       <AuthGate>
         <Stack screenOptions={screenOptions}>
@@ -59,7 +61,7 @@ function ThemedNavigator() {
         </Stack>
         <LaunchReveal />
       </AuthGate>
-    </>
+    </LocaleDirContext.Provider>
   );
 }
 

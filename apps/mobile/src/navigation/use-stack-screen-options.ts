@@ -18,7 +18,7 @@ const isIOS = Platform.OS === 'ios';
 
 export function useStackScreenOptions({ largeTitle = false }: StackScreenOptionsConfig = {}): StackScreenOptions {
   const { colors } = useTheme();
-  const { t } = useI18n();
+  const { t, direction } = useI18n();
   const usesSystemGlass = isIOS && isLiquidGlassAvailable();
 
   return {
@@ -33,6 +33,6 @@ export function useStackScreenOptions({ largeTitle = false }: StackScreenOptions
     headerTransparent: isIOS,
     headerBlurEffect: isIOS && !usesSystemGlass ? 'systemChromeMaterial' : undefined,
     headerStyle: isIOS ? undefined : { backgroundColor: colors.background },
-    contentStyle: { backgroundColor: colors.background },
+    contentStyle: { backgroundColor: colors.background, direction },
   };
 }

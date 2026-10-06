@@ -1,5 +1,4 @@
 import { getLocales } from 'expo-localization';
-import * as Updates from 'expo-updates';
 import {
   createContext,
   ReactNode,
@@ -9,15 +8,18 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { Alert, DevSettings, I18nManager } from 'react-native';
+import { I18nManager } from 'react-native';
 import { preferenceKeys, preferenceStorage } from '@/lib/storage';
 import { Locale, translations } from './translations';
 
 type TranslateParams = Record<string, string | number>;
 
+export type LayoutDirection = 'ltr' | 'rtl';
+
 interface I18nContextValue {
   locale: Locale;
   isRTL: boolean;
+  direction: LayoutDirection;
   setLocale: (locale: Locale) => void;
   t: (key: string, params?: TranslateParams) => string;
   isReady: boolean;
@@ -49,60 +51,39 @@ function interpolate(template: string, params?: TranslateParams): string {
   );
 }
 
-function reloadApp(): void {
-  void Updates.reloadAsync().catch(() => DevSettings.reload());
+function disableNativeLayoutMirroring(): void {
+  I18nManager.allowRTL(false);
+  I18nManager.forceRTL(false);
 }
 
-function persistLayoutDirection(locale: Locale): void {
-  const shouldBeRTL = locale === 'ar';
-  I18nManager.allowRTL(shouldBeRTL);
-  I18nManager.forceRTL(shouldBeRTL);
-}
-
-function applyLayoutDirectionAndReload(locale: Locale): void {
-  persistLayoutDirection(locale);
-  reloadApp();
-}
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>('en');
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
+    disableNativeLayoutMirroring();
     void preferenceStorage.get(preferenceKeys.locale).then((stored) => {
-      const initial = stored === 'ar' || stored === 'en' ? stored : deviceLocale();
-      setLocaleState(initial);
+      setLocaleState(stored === 'ar' || stored === 'en' ? stored : deviceLocale());
       setIsReady(true);
-      persistLayoutDirection(initial);
     });
   }, []);
 
-  const setLocale = useCallback(
-    (next: Locale) => {
-      void preferenceStorage.set(preferenceKeys.locale, next).then(() => {
-        const needsRestart = I18nManager.isRTL !== (next === 'ar');
-        setLocaleState(next);
-        if (needsRestart) {
-          Alert.alert(
-            resolveKey(next, 'settings.restartTitle'),
-            resolveKey(next, 'settings.restartMessage'),
-            [{ text: resolveKey(next, 'common.confirm'), onPress: () => applyLayoutDirectionAndReload(next) }],
-          );
-        }
-      });
-    },
-    [],
-  );
+  const setLocale = useCallback((next: Locale) => {
+    setLocaleState(next);
+    void preferenceStorage.set(preferenceKeys.locale, next);
+  }, []);
 
-  const value = useMemo<I18nContextValue>(
-    () => ({
+  const value = useMemo<I18nContextValue>(() => {
+    const isRTL = locale === 'ar';
+    return {
       locale,
-      isRTL: I18nManager.isRTL,
+      isRTL,
+      direction: isRTL ? 'rtl' : 'ltr',
       setLocale,
       t: (key, params) => interpolate(resolveKey(locale, key), params),
       isReady,
-    }),
-    [locale, setLocale, isReady],
-  );
+    };
+  }, [locale, setLocale, isReady]);
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }

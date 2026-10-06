@@ -2,6 +2,7 @@ import { createContext, ReactNode, useCallback, useContext, useMemo, useRef, use
 import { Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useI18n } from '@/i18n/i18n-context';
 import { notificationHaptic } from '@/lib/haptics';
 import { useTheme } from '@/theme/theme-context';
 import { radius, spacing } from '@/theme/tokens';
@@ -19,6 +20,7 @@ const VISIBLE_DURATION = 2400;
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const { colors } = useTheme();
+  const { direction } = useI18n();
   const insets = useSafeAreaInsets();
   const [toast, setToast] = useState<{ message: string; tone: ToastTone } | null>(null);
   const opacity = useRef(new Animated.Value(0)).current;
@@ -51,6 +53,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           pointerEvents="none"
           style={{
             position: 'absolute',
+            direction,
             top: insets.top + spacing.md,
             left: spacing.xl,
             right: spacing.xl,

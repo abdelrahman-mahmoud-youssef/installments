@@ -20,7 +20,7 @@ interface ImageThumbnailProps {
 
 export function ImageThumbnail({ path, label, size = DEFAULT_THUMBNAIL_SIZE }: ImageThumbnailProps) {
   const { colors } = useTheme();
-  const { t } = useI18n();
+  const { t, direction } = useI18n();
   const insets = useSafeAreaInsets();
   const [isOpen, setIsOpen] = useState(false);
   const uri = resolveAssetUrl(path);
@@ -43,7 +43,7 @@ export function ImageThumbnail({ path, label, size = DEFAULT_THUMBNAIL_SIZE }: I
         <Image source={{ uri }} style={{ width: '100%', height: '100%' }} />
       </PressableScale>
       <Modal visible={isOpen} transparent animationType="fade" onRequestClose={() => setIsOpen(false)}>
-        <View style={{ flex: 1, backgroundColor: VIEWER_BACKDROP, justifyContent: 'center' }}>
+        <View style={{ flex: 1, direction, backgroundColor: VIEWER_BACKDROP, justifyContent: 'center' }}>
           <Image source={{ uri }} resizeMode="contain" style={{ width: '100%', height: '80%' }} />
           <Pressable
             onPress={() => setIsOpen(false)}

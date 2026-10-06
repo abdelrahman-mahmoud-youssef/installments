@@ -628,8 +628,6 @@ const en = {
     fontExtraLarge: 'Extra large',
     arabicFont: 'Arabic font',
     arabicFonts: { system: 'System', cairo: 'Cairo', tajawal: 'Tajawal', almarai: 'Almarai' },
-    restartTitle: 'Restart required',
-    restartMessage: 'The app will reload to apply the new layout direction.',
   },
   contractForm: {
     title: 'New contract',
@@ -1389,8 +1387,6 @@ const ar: typeof en = {
     fontExtraLarge: 'كبير جداً',
     arabicFont: 'الخط العربي',
     arabicFonts: { system: 'خط النظام', cairo: 'خط القاهرة', tajawal: 'خط تجوّل', almarai: 'خط المراعي' },
-    restartTitle: 'إعادة تشغيل مطلوبة',
-    restartMessage: 'سيُعاد تشغيل التطبيق لتطبيق اتجاه الواجهة الجديد.',
   },
   contractForm: {
     title: 'عقد جديد',
