@@ -5,20 +5,30 @@ import { radius, spacing, touchTarget } from '@/theme/tokens';
 import { AppText } from './app-text';
 import { PressableScale } from './pressable-scale';
 
+const DISABLED_OPACITY = 0.4;
+
 interface QuickActionProps {
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
-  onPress: () => void;
+  onPress?: () => void;
 }
 
 export function QuickAction({ icon, label, onPress }: QuickActionProps) {
   const { colors } = useTheme();
+  const isDisabled = !onPress;
   return (
     <PressableScale
       onPress={onPress}
+      disabled={isDisabled}
       accessibilityRole="button"
       accessibilityLabel={label}
-      style={{ alignItems: 'center', gap: spacing.xs, minWidth: touchTarget.minHeight + spacing.lg }}
+      accessibilityState={{ disabled: isDisabled }}
+      style={{
+        alignItems: 'center',
+        gap: spacing.xs,
+        minWidth: touchTarget.minHeight + spacing.lg,
+        opacity: isDisabled ? DISABLED_OPACITY : 1,
+      }}
     >
       <View
         style={{

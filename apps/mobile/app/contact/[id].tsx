@@ -48,7 +48,7 @@ export default function ContactDetailScreen() {
   const { isAdmin } = useAuth();
   const { showToast } = useToast();
   const router = useRouter();
-  const shareStatement = useShareStatement();
+  const { shareStatement, canShare } = useShareStatement();
   const [month, setMonth] = useState(currentMonthKey());
   const [openSheet, setOpenSheet] = useState<OpenSheet>(null);
 
@@ -108,7 +108,7 @@ export default function ContactDetailScreen() {
       <ContactHero
         contact={contact}
         onCall={contact.phone ? () => void Linking.openURL(`tel:${contact.phone}`) : undefined}
-        onShare={() => void shareStatement(contact)}
+        onShare={canShare ? () => void shareStatement(contact) : undefined}
         onAdjust={() => setOpenSheet('adjust')}
         onEdit={() => setOpenSheet('edit')}
       />
@@ -227,7 +227,7 @@ export default function ContactDetailScreen() {
 interface ContactHeroProps {
   contact: Counterparty;
   onCall?: () => void;
-  onShare: () => void;
+  onShare?: () => void;
   onAdjust: () => void;
   onEdit: () => void;
 }
