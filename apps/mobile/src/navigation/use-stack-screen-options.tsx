@@ -1,3 +1,4 @@
+import { isLiquidGlassAvailable } from 'expo-glass-effect';
 import { Stack } from 'expo-router';
 import { ComponentProps } from 'react';
 import { Platform } from 'react-native';
@@ -15,6 +16,7 @@ const isIOS = Platform.OS === 'ios';
 export function useStackScreenOptions(): StackScreenOptions {
   const { colors } = useTheme();
   const { t, direction } = useI18n();
+  const usesSystemGlass = isIOS && isLiquidGlassAvailable();
   return {
     headerTintColor: colors.primary,
     headerTitle: ({ children }) => <HeaderTitle title={children} />,
@@ -22,7 +24,7 @@ export function useStackScreenOptions(): StackScreenOptions {
     headerBackButtonDisplayMode: 'minimal',
     headerShadowVisible: false,
     headerTransparent: isIOS,
-    headerBlurEffect: isIOS ? 'systemChromeMaterial' : undefined,
+    headerBlurEffect: isIOS && !usesSystemGlass ? 'systemChromeMaterial' : undefined,
     headerStyle: isIOS ? undefined : { backgroundColor: colors.background },
     contentStyle: { backgroundColor: colors.background, direction },
   };
