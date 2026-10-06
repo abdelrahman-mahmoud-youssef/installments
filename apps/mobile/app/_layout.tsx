@@ -10,6 +10,7 @@ import { ToastProvider } from '@/components/ui/toast-context';
 import { I18nProvider, useI18n } from '@/i18n/i18n-context';
 import { useStackScreenOptions } from '@/navigation/use-stack-screen-options';
 import { ThemeProvider, useTheme } from '@/theme/theme-context';
+import { TodayWidgetSync } from '@/widgets/today-widget-sync';
 
 void SplashScreen.preventAutoHideAsync();
 
@@ -60,6 +61,7 @@ function ThemedNavigator() {
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         </Stack>
         <LaunchReveal />
+        <TodayWidgetSync />
       </AuthGate>
     </LocaleDirContext.Provider>
   );

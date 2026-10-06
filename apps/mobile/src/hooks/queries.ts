@@ -148,8 +148,13 @@ export const queryKeys = {
   notificationSettings: ['settings', 'notifications'] as const,
 };
 
-export function useDashboard() {
-  return useQuery({ queryKey: queryKeys.dashboard, queryFn: getDashboard, refetchInterval: BADGE_REFRESH_INTERVAL_MS });
+export function useDashboard(enabled = true) {
+  return useQuery({
+    queryKey: queryKeys.dashboard,
+    queryFn: getDashboard,
+    refetchInterval: BADGE_REFRESH_INTERVAL_MS,
+    enabled,
+  });
 }
 
 export function useCustomers(params: Omit<CustomerListParams, 'page' | 'limit'>) {

@@ -63,6 +63,14 @@ const en = {
     continue: 'Continue',
     create: 'Create account',
   },
+  widget: {
+    dueToday: 'Due today',
+    pendingClaims: 'Pending claims',
+    nothingDue: 'Nothing due today',
+    signedOut: 'Open Qistak to sign in',
+    more: '+{count} more',
+    inline: '{due} due today · {claims} claims',
+  },
   dashboard: {
     title: 'Dashboard',
     greeting: 'Hello, {name}',
@@ -831,6 +839,14 @@ const ar: typeof en = {
     passwordHint: '8 أحرف على الأقل',
     continue: 'متابعة',
     create: 'إنشاء الحساب',
+  },
+  widget: {
+    dueToday: 'مستحق اليوم',
+    pendingClaims: 'طلبات دفع معلقة',
+    nothingDue: 'لا توجد أقساط مستحقة اليوم',
+    signedOut: 'افتح قسطك لتسجيل الدخول',
+    more: '+{count} أخرى',
+    inline: '{due} مستحق اليوم · {claims} طلبات',
   },
   dashboard: {
     title: 'الرئيسية',
