@@ -3,7 +3,7 @@ import { Pressable, TextInput, TextInputProps, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useI18n } from '@/i18n/i18n-context';
 import { useTheme } from '@/theme/theme-context';
-import { radius, spacing, touchTarget } from '@/theme/tokens';
+import { logicalTextAlign, radius, spacing, touchTarget } from '@/theme/tokens';
 import { AppText } from './app-text';
 
 interface TextFieldProps extends TextInputProps {
@@ -20,7 +20,7 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
   ref,
 ) {
   const { colors, fontSize } = useTheme();
-  const { t, isRTL } = useI18n();
+  const { t } = useI18n();
   const [isFocused, setIsFocused] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
@@ -69,7 +69,7 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
               paddingVertical: spacing.md,
               minHeight: multiline ? 96 : touchTarget.minHeight + 4,
               textAlignVertical: multiline ? 'top' : 'center',
-              textAlign: forceLtr || !isRTL ? 'left' : 'right',
+              textAlign: logicalTextAlign.start,
               writingDirection: forceLtr ? 'ltr' : undefined,
             },
             style,

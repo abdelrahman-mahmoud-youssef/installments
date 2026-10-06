@@ -1,7 +1,7 @@
 import { Text, TextProps, TextStyle } from 'react-native';
 import { useI18n } from '@/i18n/i18n-context';
 import { useTheme } from '@/theme/theme-context';
-import { FontSizeToken } from '@/theme/tokens';
+import { FontSizeToken, logicalTextAlign } from '@/theme/tokens';
 
 type Variant = 'largeTitle' | 'title' | 'heading' | 'body' | 'bodyStrong' | 'caption' | 'label';
 type Tone = 'default' | 'muted' | 'faint' | 'primary' | 'danger' | 'success' | 'warning' | 'inverse';
@@ -47,7 +47,7 @@ export function AppText({ variant = 'body', tone = 'default', align, style, ...r
           fontWeight: fontFamily ? undefined : weight,
           fontFamily,
           color: toneColor[tone],
-          textAlign: align,
+          textAlign: align ?? logicalTextAlign.start,
         },
         style,
       ]}

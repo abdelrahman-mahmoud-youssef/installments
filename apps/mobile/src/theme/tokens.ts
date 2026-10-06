@@ -106,6 +106,11 @@ export const fontFamilies = {
   monospace: Platform.select({ ios: 'Menlo', default: 'monospace' }),
 } as const;
 
+export const logicalTextAlign = {
+  start: 'left',
+  end: 'right',
+} as const;
+
 export const touchTarget = {
   minHeight: 44,
 } as const;

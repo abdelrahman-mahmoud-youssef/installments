@@ -50,22 +50,19 @@ function interpolate(template: string, params?: TranslateParams): string {
 }
 
 function reloadApp(): void {
-  if (__DEV__) {
-    DevSettings.reload();
-    return;
-  }
-  void Updates.reloadAsync().catch(() => undefined);
+  void Updates.reloadAsync().catch(() => DevSettings.reload());
 }
 
-function applyLayoutDirection(locale: Locale): void {
+function persistLayoutDirection(locale: Locale): void {
   const shouldBeRTL = locale === 'ar';
-  if (I18nManager.isRTL !== shouldBeRTL) {
-    I18nManager.allowRTL(shouldBeRTL);
-    I18nManager.forceRTL(shouldBeRTL);
-    reloadApp();
-  }
+  I18nManager.allowRTL(shouldBeRTL);
+  I18nManager.forceRTL(shouldBeRTL);
 }
 
+function applyLayoutDirectionAndReload(locale: Locale): void {
+  persistLayoutDirection(locale);
+  reloadApp();
+}
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>('en');
   const [isReady, setIsReady] = useState(false);
@@ -75,7 +72,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
       const initial = stored === 'ar' || stored === 'en' ? stored : deviceLocale();
       setLocaleState(initial);
       setIsReady(true);
-      applyLayoutDirection(initial);
+      persistLayoutDirection(initial);
     });
   }, []);
 
@@ -88,7 +85,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
           Alert.alert(
             resolveKey(next, 'settings.restartTitle'),
             resolveKey(next, 'settings.restartMessage'),
-            [{ text: resolveKey(next, 'common.confirm'), onPress: () => applyLayoutDirection(next) }],
+            [{ text: resolveKey(next, 'common.confirm'), onPress: () => applyLayoutDirectionAndReload(next) }],
           );
         }
       });
@@ -99,7 +96,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const value = useMemo<I18nContextValue>(
     () => ({
       locale,
-      isRTL: locale === 'ar',
+      isRTL: I18nManager.isRTL,
       setLocale,
       t: (key, params) => interpolate(resolveKey(locale, key), params),
       isReady,

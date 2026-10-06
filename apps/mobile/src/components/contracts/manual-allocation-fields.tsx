@@ -6,7 +6,7 @@ import { useI18n } from '@/i18n/i18n-context';
 import { formatMoney, formatNumber } from '@/lib/format';
 import { remainingOf } from '@/lib/installment-balance';
 import { useTheme } from '@/theme/theme-context';
-import { radius, spacing, touchTarget } from '@/theme/tokens';
+import { logicalTextAlign, radius, spacing, touchTarget } from '@/theme/tokens';
 
 const INPUT_WIDTH = 110;
 
@@ -25,7 +25,7 @@ export function ManualAllocationFields({
   allocatedTotal,
   targetTotal,
 }: ManualAllocationFieldsProps) {
-  const { t, locale, isRTL } = useI18n();
+  const { t, locale } = useI18n();
   const { colors, fontSize } = useTheme();
   const isBalanced = allocatedTotal === targetTotal && targetTotal > 0;
 
@@ -58,7 +58,7 @@ export function ManualAllocationFields({
               color: colors.text,
               fontSize: fontSize('md'),
               backgroundColor: colors.surface,
-              textAlign: isRTL ? 'right' : 'left',
+              textAlign: logicalTextAlign.start,
             }}
           />
         </View>
