@@ -53,6 +53,25 @@ export type ContractFormField =
 
 export type ContractFormErrorCode = 'required' | 'invalidAmount' | 'invalidCount' | 'tooLong' | 'nothingToFinance';
 
+export type ContractFormErrors = Partial<Record<ContractFormField, ContractFormErrorCode>>;
+
+export type SetContractFormField = <K extends keyof ContractFormValues>(field: K, value: ContractFormValues[K]) => void;
+
+export const DETAILS_STEP_FIELDS: ContractFormField[] = [
+  'customer',
+  'productName',
+  'tag',
+  'productPrice',
+  'downPayment',
+  'costPrice',
+];
+
+type RevealedErrors = 'none' | 'details' | 'all';
+
+function pickErrors(errors: ContractFormErrors, fields: ContractFormField[]): ContractFormErrors {
+  return Object.fromEntries(fields.filter((field) => errors[field]).map((field) => [field, errors[field]]));
+}
+
 function initialValues(customer: SelectedCustomer | null): ContractFormValues {
   const today = todayIsoDate();
   return {
@@ -119,9 +138,9 @@ function validate(
   values: ContractFormValues,
   numbers: ParsedNumbers,
   preview: SchedulePreview | null,
-): Partial<Record<ContractFormField, ContractFormErrorCode>> {
+): ContractFormErrors {
   const method = values.calculationMethod;
-  const errors: Partial<Record<ContractFormField, ContractFormErrorCode>> = {};
+  const errors: ContractFormErrors = {};
   if (!values.customer) {
     errors.customer = 'required';
   }
@@ -185,25 +204,37 @@ function buildPayload(values: ContractFormValues, numbers: ParsedNumbers): Creat
 
 export function useContractForm(initialCustomer: SelectedCustomer | null) {
   const [values, setValues] = useState<ContractFormValues>(() => initialValues(initialCustomer));
-  const [showErrors, setShowErrors] = useState(false);
+  const [revealedErrors, setRevealedErrors] = useState<RevealedErrors>('none');
 
   const numbers = useMemo(() => parseNumbers(values), [values]);
   const preview = useMemo(() => buildPreview(values, numbers), [values, numbers]);
   const errorCodes = useMemo(() => validate(values, numbers, preview), [values, numbers, preview]);
+  const detailsErrorCodes = useMemo(() => pickErrors(errorCodes, DETAILS_STEP_FIELDS), [errorCodes]);
 
-  const setField = <K extends keyof ContractFormValues>(field: K, value: ContractFormValues[K]) =>
-    setValues((current) => ({ ...current, [field]: value }));
+  const setField: SetContractFormField = (field, value) => setValues((current) => ({ ...current, [field]: value }));
+
+  const confirmDetails = (): boolean => {
+    setRevealedErrors((current) => (current === 'all' ? 'all' : 'details'));
+    return Object.keys(detailsErrorCodes).length === 0;
+  };
 
   const submitPayload = (): CreateContractInput | null => {
-    setShowErrors(true);
+    setRevealedErrors('all');
     return Object.keys(errorCodes).length === 0 ? buildPayload(values, numbers) : null;
+  };
+
+  const visibleErrorCodes: Record<RevealedErrors, ContractFormErrors> = {
+    none: {},
+    details: detailsErrorCodes,
+    all: errorCodes,
   };
 
   return {
     values,
     setField,
     preview,
-    errorCodes: showErrors ? errorCodes : {},
+    errorCodes: visibleErrorCodes[revealedErrors],
+    confirmDetails,
     submitPayload,
   };
 }

@@ -631,6 +631,10 @@ const en = {
   },
   contractForm: {
     title: 'New contract',
+    detailsStep: 'Client & product',
+    planStep: 'Installment plan',
+    stepOf: 'Step {step} of {total}',
+    next: 'Next',
     create: 'Create contract',
     created: 'Contract created',
     chooseCustomer: 'Choose a customer',
@@ -1390,6 +1394,10 @@ const ar: typeof en = {
   },
   contractForm: {
     title: 'عقد جديد',
+    detailsStep: 'العميل والمنتج',
+    planStep: 'خطة التقسيط',
+    stepOf: 'الخطوة {step} من {total}',
+    next: 'التالي',
     create: 'إنشاء العقد',
     created: 'تم إنشاء العقد',
     chooseCustomer: 'اختر العميل',

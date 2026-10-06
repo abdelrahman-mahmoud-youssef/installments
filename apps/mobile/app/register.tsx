@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/auth/auth-context';
 import { resolveAuthErrorMessage } from '@/auth/resolve-auth-error';
 import { AuthIntro } from '@/components/auth/auth-intro';
-import { StepIndicator } from '@/components/auth/step-indicator';
+import { StepIndicator } from '@/components/ui/step-indicator';
 import { AppText } from '@/components/ui/app-text';
 import { Button } from '@/components/ui/button';
 import { PressableScale } from '@/components/ui/pressable-scale';
