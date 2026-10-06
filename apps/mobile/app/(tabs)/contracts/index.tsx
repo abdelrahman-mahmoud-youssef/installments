@@ -4,6 +4,8 @@ import { ActivityIndicator, FlatList, RefreshControl, View } from 'react-native'
 import { ContractStatus } from '@/api/contracts';
 import { useAuth } from '@/auth/auth-context';
 import { ContractCard } from '@/components/contracts/contract-card';
+import { ContractTagFilterButton } from '@/components/contracts/contract-tag-filter-button';
+import { ContractTagFilterSheet } from '@/components/contracts/contract-tag-filter-sheet';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
@@ -17,22 +19,21 @@ import { floatingActionClearance, spacing } from '@/theme/tokens';
 
 type ContractFilter = 'all' | ContractStatus | 'delayed';
 
-const ALL_TAGS = '__all__';
-
 export default function ContractsScreen() {
   const { t } = useI18n();
   const { colors } = useTheme();
   const { isAdmin } = useAuth();
   const router = useRouter();
   const [filter, setFilter] = useState<ContractFilter>('all');
-  const [tag, setTag] = useState<string>(ALL_TAGS);
+  const [tag, setTag] = useState<string | null>(null);
+  const [isTagFilterOpen, setIsTagFilterOpen] = useState(false);
   const tagsQuery = useContractTags(isAdmin);
   const tags = tagsQuery.data ?? [];
 
   const query = useContracts({
     status: filter === 'all' || filter === 'delayed' ? undefined : filter,
     delayedOnly: filter === 'delayed' || undefined,
-    tag: tag === ALL_TAGS ? undefined : tag,
+    tag: tag ?? undefined,
   });
   const { data, isPending, isError, error, refetch, isRefetching, fetchNextPage, hasNextPage, isFetchingNextPage } =
     query;
@@ -63,27 +64,22 @@ export default function ContractsScreen() {
           <RefreshControl refreshing={isRefetching} onRefresh={() => void refetch()} tintColor={colors.textMuted} />
         }
         ListHeaderComponent={
-          <View style={{ gap: spacing.sm }}>
-            <FilterChips
-              options={[
-                { value: 'all', label: t('contracts.filterAll') },
-                { value: 'ACTIVE', label: t('contracts.filterActive') },
-                { value: 'delayed', label: t('contracts.filterDelayed') },
-                { value: 'COMPLETED', label: t('contracts.filterCompleted') },
-                { value: 'CANCELLED', label: t('contracts.filterCancelled') },
-              ]}
-              selected={filter}
-              onSelect={setFilter}
-            />
-            {tags.length > 0 ? (
+          <View style={{ flexDirection: 'row', alignItems: 'center', paddingEnd: spacing.xl }}>
+            <View style={{ flex: 1 }}>
               <FilterChips
                 options={[
-                  { value: ALL_TAGS, label: t('contractForm.allTags') },
-                  ...tags.map((value) => ({ value, label: `# ${value}` })),
+                  { value: 'all', label: t('contracts.filterAll') },
+                  { value: 'ACTIVE', label: t('contracts.filterActive') },
+                  { value: 'delayed', label: t('contracts.filterDelayed') },
+                  { value: 'COMPLETED', label: t('contracts.filterCompleted') },
+                  { value: 'CANCELLED', label: t('contracts.filterCancelled') },
                 ]}
-                selected={tag}
-                onSelect={setTag}
+                selected={filter}
+                onSelect={setFilter}
               />
+            </View>
+            {tags.length > 0 ? (
+              <ContractTagFilterButton isFiltering={tag !== null} onPress={() => setIsTagFilterOpen(true)} />
             ) : null}
           </View>
         }
@@ -118,6 +114,13 @@ export default function ContractsScreen() {
       <FloatingActionBar>
         <Button variant="glass" title={t('contractForm.title')} icon="add-circle-outline" onPress={openNewContract} />
       </FloatingActionBar>
+      <ContractTagFilterSheet
+        visible={isTagFilterOpen}
+        tags={tags}
+        selectedTag={tag}
+        onSelectTag={setTag}
+        onClose={() => setIsTagFilterOpen(false)}
+      />
     </>
   );
 }
