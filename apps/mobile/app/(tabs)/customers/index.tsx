@@ -64,7 +64,7 @@ export default function CustomersScreen() {
   const customers = useMemo(() => data?.pages.flatMap((page) => page.data) ?? [], [data]);
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background }}>
+    <>
       <Stack.Screen
         options={{
           title: t('customers.title'),
@@ -166,6 +166,6 @@ export default function CustomersScreen() {
         onConfirm={() => void confirmDelete()}
         onCancel={() => setPendingDelete(null)}
       />
-    </View>
+    </>
   );
 }

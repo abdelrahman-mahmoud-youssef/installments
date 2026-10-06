@@ -41,7 +41,7 @@ export default function ContractsScreen() {
   const openNewContract = () => router.push('/contract/new');
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background }}>
+    <>
       <Stack.Screen options={{ title: t('contracts.title') }} />
       <FlatList
         data={contracts}
@@ -118,6 +118,6 @@ export default function ContractsScreen() {
       <FloatingActionBar>
         <Button variant="glass" title={t('contractForm.title')} icon="add-circle-outline" onPress={openNewContract} />
       </FloatingActionBar>
-    </View>
+    </>
   );
 }

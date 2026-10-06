@@ -18,14 +18,12 @@ import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useI18n } from '@/i18n/i18n-context';
 import { useHeaderSearchBarOptions } from '@/navigation/use-header-search-bar-options';
 import { CUSTOM_PRESET_KEY } from '@/lib/payment-method-presets';
-import { useTheme } from '@/theme/theme-context';
 import { spacing } from '@/theme/tokens';
 
 type Segment = 'wallets' | 'contacts';
 
 export default function WalletsScreen() {
   const { t } = useI18n();
-  const { colors } = useTheme();
   const { isAdmin } = useAuth();
   const { showToast } = useToast();
   const [segment, setSegment] = useState<Segment>('wallets');
@@ -62,7 +60,7 @@ export default function WalletsScreen() {
   );
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background }}>
+    <>
       <Stack.Screen
         options={{
           title: t('wallets.title'),
@@ -118,6 +116,6 @@ export default function WalletsScreen() {
           showToast(t('contacts.created'));
         }}
       />
-    </View>
+    </>
   );
 }
