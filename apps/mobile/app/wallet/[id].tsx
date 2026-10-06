@@ -25,6 +25,7 @@ import { WalletMonthSummary } from '@/components/wallets/wallet-month-summary';
 import { usePaymentMethodMonthlySummary, usePaymentMethods, usePaymentMethodTransactions } from '@/hooks/queries';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useI18n } from '@/i18n/i18n-context';
+import { useHeaderSearchBarOptions } from '@/navigation/use-header-search-bar-options';
 import { currentMonthKey } from '@/lib/calendar';
 import { formatDate, formatMoney } from '@/lib/format';
 import { resolvePaymentMethodPreset } from '@/lib/payment-method-presets';
@@ -42,6 +43,10 @@ export default function WalletDetailScreen() {
   const [month, setMonth] = useState(currentMonthKey());
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search.trim());
+  const searchBarOptions = useHeaderSearchBarOptions({
+    placeholder: t('transactions.searchPlaceholder'),
+    onSearch: setSearch,
+  });
   const [isActionsOpen, setIsActionsOpen] = useState(false);
   const [isLogOpen, setIsLogOpen] = useState(false);
 
@@ -118,12 +123,7 @@ export default function WalletDetailScreen() {
       <Stack.Screen
         options={{
           title: method.label,
-          headerSearchBarOptions: {
-            placeholder: t('transactions.searchPlaceholder'),
-            cancelButtonText: t('common.cancel'),
-            autoCapitalize: 'none',
-            onChangeText: (event) => setSearch(event.nativeEvent.text),
-          },
+          headerSearchBarOptions: searchBarOptions,
           headerRight: () => (
             <PressableScale
               onPress={() => setIsActionsOpen(true)}

@@ -26,6 +26,7 @@ import {
 } from '@/hooks/queries';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useI18n } from '@/i18n/i18n-context';
+import { useHeaderSearchBarOptions } from '@/navigation/use-header-search-bar-options';
 import { useTheme } from '@/theme/theme-context';
 import { floatingActionClearance, spacing } from '@/theme/tokens';
 
@@ -38,6 +39,10 @@ export default function OffersScreen() {
   const { showToast } = useToast();
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search);
+  const searchBarOptions = useHeaderSearchBarOptions({
+    placeholder: t('offers.searchPlaceholder'),
+    onSearch: setSearch,
+  });
   const [actionOffer, setActionOffer] = useState<Offer | null>(null);
   const [formVisible, setFormVisible] = useState(false);
   const [editingOffer, setEditingOffer] = useState<Offer | null>(null);
@@ -93,14 +98,7 @@ export default function OffersScreen() {
       <Stack.Screen
         options={{
           title: t('offers.title'),
-          headerSearchBarOptions: isAdmin
-            ? {
-                placeholder: t('offers.searchPlaceholder'),
-                cancelButtonText: t('common.cancel'),
-                autoCapitalize: 'none',
-                onChangeText: (event) => setSearch(event.nativeEvent.text),
-              }
-            : undefined,
+          headerSearchBarOptions: isAdmin ? searchBarOptions : undefined,
         }}
       />
       <FlatList

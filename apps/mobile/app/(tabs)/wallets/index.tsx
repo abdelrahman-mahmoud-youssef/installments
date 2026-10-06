@@ -16,6 +16,7 @@ import { WalletList } from '@/components/wallets/wallet-list';
 import { useCreateCounterparty, useCreatePaymentMethod } from '@/hooks/queries';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useI18n } from '@/i18n/i18n-context';
+import { useHeaderSearchBarOptions } from '@/navigation/use-header-search-bar-options';
 import { CUSTOM_PRESET_KEY } from '@/lib/payment-method-presets';
 import { useTheme } from '@/theme/theme-context';
 import { spacing } from '@/theme/tokens';
@@ -30,6 +31,10 @@ export default function WalletsScreen() {
   const [segment, setSegment] = useState<Segment>('wallets');
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search.trim());
+  const searchBarOptions = useHeaderSearchBarOptions({
+    placeholder: t('wallets.searchPlaceholder'),
+    onSearch: setSearch,
+  });
   const [newWalletPreset, setNewWalletPreset] = useState<string | null>(null);
   const [isContactFormVisible, setIsContactFormVisible] = useState(false);
   const createWallet = useCreatePaymentMethod();
@@ -61,14 +66,7 @@ export default function WalletsScreen() {
       <Stack.Screen
         options={{
           title: t('wallets.title'),
-          headerSearchBarOptions: isAdmin
-            ? {
-                placeholder: t('wallets.searchPlaceholder'),
-                cancelButtonText: t('common.cancel'),
-                autoCapitalize: 'none',
-                onChangeText: (event) => setSearch(event.nativeEvent.text),
-              }
-            : undefined,
+          headerSearchBarOptions: isAdmin ? searchBarOptions : undefined,
         }}
       />
       {!isAdmin ? (

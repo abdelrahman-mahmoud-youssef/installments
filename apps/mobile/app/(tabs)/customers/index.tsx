@@ -15,6 +15,7 @@ import { useToast } from '@/components/ui/toast-context';
 import { useCreateCustomer, useCustomers, useDeleteCustomer } from '@/hooks/queries';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useI18n } from '@/i18n/i18n-context';
+import { useHeaderSearchBarOptions } from '@/navigation/use-header-search-bar-options';
 import { useTheme } from '@/theme/theme-context';
 import { floatingActionClearance, spacing } from '@/theme/tokens';
 
@@ -29,6 +30,11 @@ export default function CustomersScreen() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<CustomerListItem | null>(null);
   const debouncedSearch = useDebouncedValue(search);
+  const searchBarOptions = useHeaderSearchBarOptions({
+    placeholder: t('customers.searchPlaceholder'),
+    onSearch: setSearch,
+    hideWhenScrolling: false,
+  });
   const { showToast } = useToast();
   const createCustomer = useCreateCustomer();
   const deleteCustomer = useDeleteCustomer();
@@ -62,13 +68,7 @@ export default function CustomersScreen() {
       <Stack.Screen
         options={{
           title: t('customers.title'),
-          headerSearchBarOptions: {
-            placeholder: t('customers.searchPlaceholder'),
-            cancelButtonText: t('common.cancel'),
-            autoCapitalize: 'none',
-            hideWhenScrolling: false,
-            onChangeText: (event) => setSearch(event.nativeEvent.text),
-          },
+          headerSearchBarOptions: searchBarOptions,
         }}
       />
       <FlatList
