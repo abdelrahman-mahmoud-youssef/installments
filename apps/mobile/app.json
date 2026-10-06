@@ -46,7 +46,30 @@
       ],
       "expo-font",
       "expo-sharing",
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-widgets",
+        {
+          "groupIdentifier": "group.com.qistak.app",
+          "widgets": [
+            {
+              "name": "TodayWidget",
+              "displayName": "Qistak",
+              "description": "Due today and pending payment claims",
+              "ios": {
+                "supportedFamilies": [
+                  "systemSmall",
+                  "systemMedium",
+                  "systemLarge",
+                  "accessoryCircular",
+                  "accessoryRectangular",
+                  "accessoryInline"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": false
