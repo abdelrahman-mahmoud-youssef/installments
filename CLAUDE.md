@@ -32,6 +32,7 @@ pnpm workspace monorepo:
 - **No repository classes over Prisma.** Services inject `PrismaService` directly.
 - **Public customer page** exposes only `Customer.publicId` (UUID) — never internal ids, phone, notes, or tenant data.
 - Dates are date-only (`@db.Date`); "today" comes from one shared helper.
+- **Subscriptions are derived, never a stored flag:** a shop is active while `today < Tenant.subscriptionExpiresOn` (new shops get a 14-day trial). Each paid month (500 EGP) is a `TenantSubscription` row added by a `PlatformAdmin` from the `/platform` dashboard. The global `SubscriptionGuard` answers non-GET requests from an expired shop with 402 `SUBSCRIPTION_INACTIVE`; opt a route out with `@AllowWithoutSubscription()`. Platform routes use `@PlatformRoute()` with their own JWT scope and cookie — the platform owner is never a tenant `Role`.
 
 # Engineering Standards
 
