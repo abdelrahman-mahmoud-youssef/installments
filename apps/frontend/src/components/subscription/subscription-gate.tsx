@@ -16,6 +16,10 @@ export function SubscriptionGate() {
   }
 
   return (
-    <SubscriptionRequiredDialog subscription={currentUser.subscription} isShopAdmin={currentUser.role === 'ADMIN'} />
+    <SubscriptionRequiredDialog
+      subscription={currentUser.subscription}
+      shopSlug={currentUser.tenant.slug}
+      isShopAdmin={currentUser.role === 'ADMIN'}
+    />
   );
 }

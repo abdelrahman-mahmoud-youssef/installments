@@ -25,6 +25,11 @@ export interface CurrentUserSubscription {
   paymentPhone: string;
 }
 
+export interface CurrentUserTenant {
+  slug: string;
+  displayName: string;
+}
+
 export interface CurrentUser {
   id: string;
   name: string;
@@ -32,6 +37,7 @@ export interface CurrentUser {
   tenantId: string;
   role: Role;
   twoFactorEnabled: boolean;
+  tenant: CurrentUserTenant;
   subscription: CurrentUserSubscription;
 }
 

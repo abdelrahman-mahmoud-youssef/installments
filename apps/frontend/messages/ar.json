@@ -1131,7 +1131,13 @@
       "loadError": "تعذّر تحميل المتاجر.",
       "noResults": "لا توجد متاجر مطابقة لبحثك.",
       "noShops": "لم يسجّل أي متجر بعد.",
-      "genericError": "حدث خطأ ما. حاول مرة أخرى."
+      "genericError": "حدث خطأ ما. حاول مرة أخرى.",
+      "referrals": "الدعوات",
+      "invitedShops": "{count, plural, =0 {لا توجد دعوات} one {دعا متجرًا واحدًا} two {دعا متجرين} few {دعا # متاجر} many {دعا # متجرًا} other {دعا # متجر}}",
+      "invitedBy": "بدعوة من {name}",
+      "activateReferral": "إضافة شهر بسعر الدعوة",
+      "activateReferralTitle": "إضافة شهر بسعر الدعوة لـ {name}؟",
+      "activateReferralDescription": "دعا هذا المتجر {count, plural, one {متجرًا واحدًا} two {متجرين} few {# متاجر} many {# متجرًا} other {# متجر}}. أكّد فقط بعد وصول التحويل عبر إنستاباي."
     },
     "nav": {
       "shops": "المتاجر",
@@ -1157,5 +1163,12 @@
       "loadError": "تعذر تحميل رسائل الدعم.",
       "genericError": "حدث خطأ ما."
     }
+  },
+  "referral": {
+    "sectionTitle": "ادعُ متجرًا",
+    "sectionDescription": "شارك رابطك مع متجر آخر. عندما يسجّل من خلاله يمكنك الحصول على اشتراكك مقابل {price} شهريًا. تواصل مع الدعم لمزيد من التفاصيل.",
+    "inviteLink": "رابط الدعوة الخاص بك",
+    "copyInviteLink": "نسخ رابط الدعوة",
+    "inviteLinkCopied": "تم نسخ رابط الدعوة."
   }
 }

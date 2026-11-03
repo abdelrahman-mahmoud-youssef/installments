@@ -21,5 +21,6 @@ export const config = {
   },
   authCookieName: 'installment_token',
   platformAuthCookieName: 'qistak_platform_token',
+  referralCookieName: 'qistak_referral',
   contactEmail: 'support@qistak.com',
 } as const;

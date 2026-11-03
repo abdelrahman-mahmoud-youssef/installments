@@ -3,12 +3,13 @@ import { config } from '@/lib/config';
 import { setAuthCookie } from '@/lib/set-auth-cookie';
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  const body = await request.text();
+  const payload = (await request.json()) as Record<string, unknown>;
+  const referralCode = request.cookies.get(config.referralCookieName)?.value;
 
   const backendResponse = await fetch(`${config.backendUrl}/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body,
+    body: JSON.stringify(referralCode ? { ...payload, referralCode } : payload),
   });
 
   const data: unknown = await backendResponse.json();
@@ -20,5 +21,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   const { accessToken } = data as { accessToken: string };
   await setAuthCookie(accessToken);
 
-  return NextResponse.json({ success: true });
+  const response = NextResponse.json({ success: true });
+  response.cookies.delete(config.referralCookieName);
+  return response;
 }

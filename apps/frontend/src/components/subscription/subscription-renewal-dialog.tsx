@@ -19,10 +19,12 @@ import { PaymentInstructions } from './payment-instructions';
 
 export function SubscriptionRenewalDialog({
   subscription,
+  shopSlug,
   open,
   onOpenChange,
 }: {
   subscription: CurrentUserSubscription;
+  shopSlug: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
@@ -42,7 +44,7 @@ export function SubscriptionRenewalDialog({
             {t('renewalDialogDescription', { price, date: formatDate(subscription.expiresOn) })}
           </DialogDescription>
         </DialogHeader>
-        <PaymentInstructions subscription={subscription} />
+        <PaymentInstructions subscription={subscription} shopSlug={shopSlug} />
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             {t('later')}

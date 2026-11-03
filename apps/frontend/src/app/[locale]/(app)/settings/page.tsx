@@ -27,6 +27,7 @@ import { Section } from '@/components/shared/section';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { BrandingSection } from '@/components/settings/branding-section';
 import { InstallAppDialog } from '@/components/settings/install-app-dialog';
+import { InviteSection } from '@/components/settings/invite-section';
 import { ShopPageSection } from '@/components/settings/shop-page-section';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -171,8 +172,9 @@ export default function SettingsPage() {
             <BrandingSection />
           </TabsContent>
 
-          <TabsContent value="shopPage">
+          <TabsContent value="shopPage" className="space-y-6">
             <ShopPageSection />
+            <InviteSection />
           </TabsContent>
 
           <TabsContent value="notifications" className="space-y-6">

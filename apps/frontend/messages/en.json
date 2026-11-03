@@ -1131,7 +1131,13 @@
       "loadError": "Couldn't load shops.",
       "noResults": "No shops match your search.",
       "noShops": "No shops have signed up yet.",
-      "genericError": "Something went wrong. Please try again."
+      "genericError": "Something went wrong. Please try again.",
+      "referrals": "Invites",
+      "invitedShops": "{count, plural, =0 {No invites} one {# shop invited} other {# shops invited}}",
+      "invitedBy": "Invited by {name}",
+      "activateReferral": "Add 1 month at the referral price",
+      "activateReferralTitle": "Add one referral-price month for {name}?",
+      "activateReferralDescription": "This shop invited {count, plural, one {# shop} other {# shops}}. Only confirm after the InstaPay payment has arrived."
     },
     "nav": {
       "shops": "Shops",
@@ -1157,5 +1163,12 @@
       "loadError": "Couldn't load support messages.",
       "genericError": "Something went wrong."
     }
+  },
+  "referral": {
+    "sectionTitle": "Invite a shop",
+    "sectionDescription": "Share your link with another shop. When they sign up with it, you can get your subscription for {price} a month. Contact support for more details.",
+    "inviteLink": "Your invite link",
+    "copyInviteLink": "Copy invite link",
+    "inviteLinkCopied": "Invite link copied."
   }
 }

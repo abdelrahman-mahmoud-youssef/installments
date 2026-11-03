@@ -20,9 +20,11 @@ import { PaymentInstructions } from './payment-instructions';
 
 export function SubscriptionRequiredDialog({
   subscription,
+  shopSlug,
   isShopAdmin,
 }: {
   subscription: CurrentUserSubscription;
+  shopSlug: string;
   isShopAdmin: boolean;
 }) {
   const t = useTranslations('subscription');
@@ -43,7 +45,7 @@ export function SubscriptionRequiredDialog({
             {isShopAdmin ? t('adminDescription', { price }) : t('staffDescription')}
           </DialogDescription>
         </DialogHeader>
-        {isShopAdmin && <PaymentInstructions subscription={subscription} />}
+        {isShopAdmin && <PaymentInstructions subscription={subscription} shopSlug={shopSlug} />}
         <DialogFooter>
           <Button variant="outline" onClick={handleLogout}>
             <LogOut className="size-4" />

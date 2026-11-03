@@ -1,6 +1,6 @@
 'use client';
 
-import { Ban, CalendarPlus } from 'lucide-react';
+import { Ban, CalendarPlus, Gift } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
@@ -11,6 +11,7 @@ import {
   useDeactivatePlatformTenant,
 } from '@/hooks/use-platform-tenants';
 import { ApiError } from '@/lib/api/client';
+import { SubscriptionPricing } from '@/lib/api/platform';
 import { formatDate } from '@/lib/format';
 import { TenantSubscriptionHistoryDialog } from './tenant-subscription-history-dialog';
 
@@ -23,9 +24,9 @@ export function TenantActions({ tenant }: { tenant: PlatformTenant }) {
     toast.error(error instanceof ApiError ? error.message : t('genericError'));
   }
 
-  async function handleActivate() {
+  async function handleActivate(pricing: SubscriptionPricing) {
     try {
-      const updated = await activateTenant.mutateAsync(tenant.id);
+      const updated = await activateTenant.mutateAsync({ tenantId: tenant.id, pricing });
       toast.success(t('activated', { name: updated.name, date: formatDate(updated.subscriptionExpiresOn) }));
     } catch (error) {
       showError(error);
@@ -53,8 +54,26 @@ export function TenantActions({ tenant }: { tenant: PlatformTenant }) {
         title={t('activateTitle', { name: tenant.name })}
         description={t('activateDescription')}
         confirmLabel={t('activate')}
-        onConfirm={handleActivate}
+        onConfirm={() => handleActivate('STANDARD')}
       />
+      {tenant.invitedShopsCount > 0 && (
+        <ConfirmDialog
+          trigger={
+            <Button
+              variant="outline"
+              size="icon-sm"
+              aria-label={t('activateReferral')}
+              title={t('activateReferral')}
+            >
+              <Gift className="size-4" />
+            </Button>
+          }
+          title={t('activateReferralTitle', { name: tenant.name })}
+          description={t('activateReferralDescription', { count: tenant.invitedShopsCount })}
+          confirmLabel={t('activateReferral')}
+          onConfirm={() => handleActivate('REFERRAL')}
+        />
+      )}
       <TenantSubscriptionHistoryDialog tenant={tenant} />
       <ConfirmDialog
         trigger={

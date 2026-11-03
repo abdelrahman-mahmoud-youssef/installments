@@ -41,7 +41,12 @@ export function SubscriptionRenewalBanner() {
           <Button type="button" size="sm" onClick={() => setDialogOpen(true)}>
             {t('renewNow')}
           </Button>
-          <SubscriptionRenewalDialog subscription={subscription} open={dialogOpen} onOpenChange={setDialogOpen} />
+          <SubscriptionRenewalDialog
+            subscription={subscription}
+            shopSlug={currentUser.tenant.slug}
+            open={dialogOpen}
+            onOpenChange={setDialogOpen}
+          />
         </>
       )}
     </div>

@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import createMiddleware from 'next-intl/middleware';
 import { routing } from './i18n/routing';
+import { config as appConfig } from './lib/config';
+import { REFERRAL_CODE_MAX_LENGTH, REFERRAL_COOKIE_MAX_AGE_SECONDS, REFERRAL_QUERY_PARAM } from './lib/referral';
 import { extractTenantSlug, getRootDomain } from './lib/root-domain';
 
 const intlMiddleware = createMiddleware(routing);
@@ -39,6 +41,21 @@ function handleTenantSubdomain(request: NextRequest): NextResponse | null {
   return NextResponse.rewrite(new URL(target, request.url));
 }
 
+function rememberReferral(request: NextRequest, response: NextResponse): NextResponse {
+  const referralCode = request.nextUrl.searchParams.get(REFERRAL_QUERY_PARAM)?.trim();
+  if (!referralCode || request.cookies.has(appConfig.referralCookieName)) {
+    return response;
+  }
+  response.cookies.set(appConfig.referralCookieName, referralCode.slice(0, REFERRAL_CODE_MAX_LENGTH), {
+    maxAge: REFERRAL_COOKIE_MAX_AGE_SECONDS,
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    path: '/',
+  });
+  return response;
+}
+
 export default function middleware(request: NextRequest) {
   if (LOCALE_INDEPENDENT_PATHS.some((pattern) => pattern.test(request.nextUrl.pathname))) {
     return NextResponse.next();
@@ -47,7 +64,7 @@ export default function middleware(request: NextRequest) {
   if (subdomainResponse) {
     return subdomainResponse;
   }
-  return intlMiddleware(request);
+  return rememberReferral(request, intlMiddleware(request));
 }
 
 export const config = {

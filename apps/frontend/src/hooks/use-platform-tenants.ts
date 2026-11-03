@@ -8,6 +8,7 @@ import {
   PlatformTenantQuery,
   PlatformTenantSubscription,
   PlatformTenantSubscriptionQuery,
+  SubscriptionPricing,
 } from '@/lib/api/platform';
 
 export const platformTenantKeys = {
@@ -35,7 +36,8 @@ export function usePlatformTenantSubscriptions(tenantId: string, query: Platform
 export function useActivatePlatformTenant() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (tenantId: string) => activatePlatformTenant(tenantId),
+    mutationFn: ({ tenantId, pricing }: { tenantId: string; pricing: SubscriptionPricing }) =>
+      activatePlatformTenant(tenantId, pricing),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: platformTenantKeys.all }),
   });
 }

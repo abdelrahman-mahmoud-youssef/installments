@@ -40,6 +40,20 @@ export function PlatformTenantsTable({ tenants }: { tenants: PlatformTenant[] })
         ),
     },
     {
+      id: 'referrals',
+      header: t('referrals'),
+      cell: (tenant) => (
+        <div className="min-w-0 text-sm">
+          <p className="tabular-nums">{t('invitedShops', { count: tenant.invitedShopsCount })}</p>
+          {tenant.referredBy && (
+            <p className="truncate text-xs text-muted-foreground">
+              {t('invitedBy', { name: tenant.referredBy.name })}
+            </p>
+          )}
+        </div>
+      ),
+    },
+    {
       id: 'status',
       header: t('status'),
       cell: (tenant) => <StatusBadge status={tenant.subscriptionStatus} />,

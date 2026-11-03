@@ -15,7 +15,11 @@ export interface PlatformTenant {
   subscriptionExpiresOn: string;
   subscriptionStatus: SubscriptionStatus;
   owner: { name: string; email: string } | null;
+  referredBy: { name: string; slug: string } | null;
+  invitedShopsCount: number;
 }
+
+export type SubscriptionPricing = 'STANDARD' | 'REFERRAL';
 
 export interface PlatformTenantSubscription {
   id: string;
@@ -72,8 +76,8 @@ export function listPlatformTenants(query: PlatformTenantQuery): Promise<Paginat
   return platformApiClient.get(`tenants${buildQuery(query)}`);
 }
 
-export function activatePlatformTenant(tenantId: string): Promise<PlatformTenant> {
-  return platformApiClient.post(`tenants/${tenantId}/activate`);
+export function activatePlatformTenant(tenantId: string, pricing: SubscriptionPricing): Promise<PlatformTenant> {
+  return platformApiClient.post(`tenants/${tenantId}/activate`, { pricing });
 }
 
 export function deactivatePlatformTenant(tenantId: string): Promise<PlatformTenant> {
