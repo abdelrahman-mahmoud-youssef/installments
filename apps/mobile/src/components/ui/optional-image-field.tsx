@@ -8,14 +8,25 @@ import { radius, spacing } from '@/theme/tokens';
 
 const PREVIEW_ASPECT_RATIO = 4 / 3;
 
-interface AnnouncementImageFieldProps {
+interface OptionalImageFieldProps {
+  label: string;
+  addLabel: string;
+  removeLabel: string;
   image: PickedImage | null;
   error?: string;
   onPick: () => void;
   onRemove: () => void;
 }
 
-export function AnnouncementImageField({ image, error, onPick, onRemove }: AnnouncementImageFieldProps) {
+export function OptionalImageField({
+  label,
+  addLabel,
+  removeLabel,
+  image,
+  error,
+  onPick,
+  onRemove,
+}: OptionalImageFieldProps) {
   const { t } = useI18n();
   const { colors } = useTheme();
 
@@ -23,7 +34,7 @@ export function AnnouncementImageField({ image, error, onPick, onRemove }: Annou
     <View style={{ gap: spacing.sm }}>
       <View style={{ flexDirection: 'row', gap: spacing.xs, alignItems: 'baseline' }}>
         <AppText variant="caption" tone="muted">
-          {t('announcements.image')}
+          {label}
         </AppText>
         <AppText variant="label" tone="faint">
           {t('common.optional')}
@@ -43,9 +54,9 @@ export function AnnouncementImageField({ image, error, onPick, onRemove }: Annou
         />
       ) : null}
       {image ? (
-        <Button title={t('announcements.removeImage')} icon="trash-outline" variant="secondary" onPress={onRemove} />
+        <Button title={removeLabel} icon="trash-outline" variant="secondary" onPress={onRemove} />
       ) : (
-        <Button title={t('announcements.addImage')} icon="image-outline" variant="secondary" onPress={onPick} />
+        <Button title={addLabel} icon="image-outline" variant="secondary" onPress={onPick} />
       )}
       {error ? (
         <AppText variant="caption" tone="danger">

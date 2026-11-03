@@ -8,7 +8,6 @@ import {
 } from '@/api/announcements';
 import { ApiError } from '@/api/client';
 import { useAuth } from '@/auth/auth-context';
-import { AnnouncementImageField } from '@/components/announcements/announcement-image-field';
 import { SubscriberPickerSheet } from '@/components/announcements/subscriber-picker-sheet';
 import { AppText } from '@/components/ui/app-text';
 import { Button } from '@/components/ui/button';
@@ -16,6 +15,7 @@ import { FloatingActionBar } from '@/components/ui/floating-action-bar';
 import { Card } from '@/components/ui/card';
 import { ConfirmSheet } from '@/components/ui/confirm-sheet';
 import { ListRow } from '@/components/ui/list-row';
+import { OptionalImageField } from '@/components/ui/optional-image-field';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { TextField } from '@/components/ui/text-field';
 import { useToast } from '@/components/ui/toast-context';
@@ -126,7 +126,10 @@ export default function NewAnnouncementScreen() {
           maxLength={ANNOUNCEMENT_BODY_MAX_LENGTH}
           multiline
         />
-        <AnnouncementImageField
+        <OptionalImageField
+          label={t('announcements.image')}
+          addLabel={t('announcements.addImage')}
+          removeLabel={t('announcements.removeImage')}
           image={image}
           error={
             draftError === 'imageTooLarge'

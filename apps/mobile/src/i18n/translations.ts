@@ -397,6 +397,11 @@ const en = {
     reply: 'Reply',
     empty: 'No messages yet',
     emptyHint: 'Questions or feedback? Send us a message.',
+    image: 'Image',
+    addImage: 'Attach image',
+    removeImage: 'Remove image',
+    imageTooLarge: 'Image is too large. The maximum size is {max} MB.',
+    attachedImage: 'Attached image',
   },
   subscription: {
     title: 'Subscription inactive',
@@ -1185,6 +1190,11 @@ const ar: typeof en = {
     reply: 'الرد',
     empty: 'لا توجد رسائل بعد',
     emptyHint: 'لديك سؤال أو ملاحظة؟ أرسل لنا رسالة.',
+    image: 'الصورة',
+    addImage: 'إرفاق صورة',
+    removeImage: 'إزالة الصورة',
+    imageTooLarge: 'الصورة كبيرة جدًا. الحد الأقصى {max} ميجابايت.',
+    attachedImage: 'الصورة المرفقة',
   },
   subscription: {
     title: 'الاشتراك غير نشط',

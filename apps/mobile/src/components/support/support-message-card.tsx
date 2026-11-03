@@ -3,10 +3,13 @@ import { SupportMessage } from '@/api/support';
 import { AppText } from '@/components/ui/app-text';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
+import { ImageThumbnail } from '@/components/ui/image-thumbnail';
 import { useI18n } from '@/i18n/i18n-context';
 import { formatDateTime } from '@/lib/format';
 import { useTheme } from '@/theme/theme-context';
 import { radius, spacing } from '@/theme/tokens';
+
+const ATTACHMENT_THUMBNAIL_SIZE = 72;
 
 interface SupportMessageCardProps {
   message: SupportMessage;
@@ -33,6 +36,9 @@ export function SupportMessageCard({ message }: SupportMessageCardProps) {
           />
         </View>
         <AppText tone="muted">{message.message}</AppText>
+        {message.imageUrl ? (
+          <ImageThumbnail path={message.imageUrl} label={t('support.attachedImage')} size={ATTACHMENT_THUMBNAIL_SIZE} />
+        ) : null}
         {hasReply ? (
           <View
             style={{
