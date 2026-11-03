@@ -1086,7 +1086,8 @@
     "renewNow": "جدّد الآن",
     "renewalDialogTitle": "جدّد اشتراكك",
     "renewalDialogDescription": "جدّد مقابل {price} شهريًا قبل {date} ليواصل فريقك العمل دون انقطاع.",
-    "later": "لاحقًا"
+    "later": "لاحقًا",
+    "referralOffer": "ادعُ متجرًا آخر إلى قسطك واحصل على اشتراكك مقابل {price} شهريًا. تواصل مع الدعم لمزيد من التفاصيل."
   },
   "platform": {
     "consoleTitle": "المنصة",

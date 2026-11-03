@@ -1086,7 +1086,8 @@
     "renewNow": "Renew now",
     "renewalDialogTitle": "Renew your subscription",
     "renewalDialogDescription": "Renew for {price} a month before {date} so your team can keep working without interruption.",
-    "later": "Later"
+    "later": "Later",
+    "referralOffer": "Invite another shop to Qistak and get your subscription for {price} a month. Contact support for more details."
   },
   "platform": {
     "consoleTitle": "Platform",

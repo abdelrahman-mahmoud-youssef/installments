@@ -44,6 +44,8 @@ export const SHARE_LINK_TARGET_PATH_PATTERN = /^(\/(en|ar))?\/customer\/[^/]+(\/
 
 export const SUBSCRIPTION_MONTHLY_PRICE = 50_000;
 
+export const SUBSCRIPTION_REFERRAL_MONTHLY_PRICE = 30_000;
+
 export const SUBSCRIPTION_TRIAL_DAYS = 14;
 
 export const SUBSCRIPTION_RENEWAL_NOTICE_DAYS = 5;

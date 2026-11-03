@@ -1,6 +1,6 @@
 'use client';
 
-import { Copy } from 'lucide-react';
+import { Copy, Gift } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -57,6 +57,10 @@ export function PaymentInstructions({ subscription }: { subscription: CurrentUse
         copyLabel={t('copyPhone')}
         copiedMessage={t('phoneCopied')}
       />
+      <p className="flex items-start gap-2 rounded-md bg-primary/5 px-3 py-2 text-sm text-foreground ring-1 ring-primary/20">
+        <Gift className="mt-0.5 size-4 shrink-0 text-primary" />
+        <span>{t('referralOffer', { price: formatMoney(subscription.referralMonthlyPrice, locale) })}</span>
+      </p>
     </div>
   );
 }

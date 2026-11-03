@@ -15,6 +15,7 @@ import {
   PASSWORD_RESET_TOKEN_TTL_MINUTES,
   SUBSCRIPTION_MONTHLY_PRICE,
   SUBSCRIPTION_PAYMENT_PHONE,
+  SUBSCRIPTION_REFERRAL_MONTHLY_PRICE,
 } from '../../common/constants';
 import { decrypt, encrypt } from '../../common/crypto';
 import { getUtcToday } from '../../common/date/utc-date';
@@ -83,6 +84,7 @@ export interface CurrentUserTenant {
 
 export interface CurrentUserSubscription extends SubscriptionSummary {
   monthlyPrice: number;
+  referralMonthlyPrice: number;
   paymentPhone: string;
 }
 
@@ -151,6 +153,7 @@ export class AuthService {
           getUtcToday(),
         ),
         monthlyPrice: SUBSCRIPTION_MONTHLY_PRICE,
+        referralMonthlyPrice: SUBSCRIPTION_REFERRAL_MONTHLY_PRICE,
         paymentPhone: SUBSCRIPTION_PAYMENT_PHONE,
       },
     };
