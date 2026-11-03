@@ -41,3 +41,11 @@ export const LOGIN_LOCKOUT_MAX_SECONDS = 1800;
 export const PASSWORD_RESET_TOKEN_TTL_MINUTES = 30;
 
 export const SHARE_LINK_TARGET_PATH_PATTERN = /^(\/(en|ar))?\/customer\/[^/]+(\/contracts\/[^/]+(\/pay)?)?$/;
+
+export const SUBSCRIPTION_MONTHLY_PRICE = 50_000;
+
+export const SUBSCRIPTION_TRIAL_DAYS = 14;
+
+export const SUBSCRIPTION_PAYMENT_ADDRESS = 'bedonassef02@instapay';
+
+export const SUBSCRIPTION_INACTIVE_ERROR_CODE = 'SUBSCRIPTION_INACTIVE';

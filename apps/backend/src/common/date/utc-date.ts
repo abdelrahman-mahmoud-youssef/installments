@@ -20,6 +20,12 @@ export function daysInUtcMonth(monthStart: Date): number {
   return new Date(Date.UTC(monthStart.getUTCFullYear(), monthStart.getUTCMonth() + 1, 0)).getUTCDate();
 }
 
+export function addUtcMonthsClamped(anchor: Date, monthsToAdd: number): Date {
+  const targetMonthStart = startOfUtcMonth(anchor, monthsToAdd);
+  const targetDay = Math.min(anchor.getUTCDate(), daysInUtcMonth(targetMonthStart));
+  return new Date(Date.UTC(targetMonthStart.getUTCFullYear(), targetMonthStart.getUTCMonth(), targetDay));
+}
+
 export function resolveMonthStart(month: string | undefined, today: Date): Date {
   if (!month) {
     return startOfUtcMonth(today);

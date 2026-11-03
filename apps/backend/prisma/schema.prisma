@@ -115,6 +115,7 @@ model Tenant {
   showTelegramOnPublicPage  Boolean                    @default(true)
   showOffersOnPublicPage    Boolean                    @default(true)
   notificationLanguage      NotificationLanguage       @default(AR)
+  subscriptionExpiresOn     DateTime                   @db.Date
   createdAt                 DateTime                   @default(now())
   users                     User[]
   customers                 Customer[]
@@ -135,6 +136,35 @@ model Tenant {
   offers                    Offer[]
   shareLinks                ShareLink[]
   reminderMessageSettings   ReminderMessageSettings?
+  subscriptions             TenantSubscription[]
+
+  @@index([subscriptionExpiresOn])
+}
+
+model PlatformAdmin {
+  id                     String               @id @default(cuid())
+  name                   String
+  email                  String               @unique
+  passwordHash           String
+  failedLoginAttempts    Int                  @default(0)
+  lockedUntil            DateTime?
+  createdAt              DateTime             @default(now())
+  activatedSubscriptions TenantSubscription[]
+}
+
+model TenantSubscription {
+  id            String         @id @default(cuid())
+  tenantId      String
+  periodStart   DateTime       @db.Date
+  periodEnd     DateTime       @db.Date
+  amount        Int
+  activatedById String?
+  createdAt     DateTime       @default(now())
+  tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  activatedBy   PlatformAdmin? @relation(fields: [activatedById], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, createdAt])
+  @@index([activatedById])
 }
 
 model User {

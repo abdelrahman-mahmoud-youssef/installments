@@ -11,6 +11,7 @@ import {
 } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { slugify } from '../src/common/slugify';
+import { calculateTrialExpiry } from '../src/common/subscription/subscription';
 import { generateDueDates } from '../src/modules/contracts/installments/recurrence';
 import { calculateInstallmentSchedule } from '../src/modules/contracts/installments/schedule';
 
@@ -388,6 +389,7 @@ async function seed(): Promise<void> {
       about: 'We sell home appliances and furniture on flexible installment plans across Cairo and Alexandria.',
       brandColor: 'blue',
       notificationLanguage: 'AR',
+      subscriptionExpiresOn: calculateTrialExpiry(toUtcMidnight(new Date())),
       instagramUrl: 'https://instagram.com/demobusiness',
       facebookUrl: 'https://facebook.com/demobusiness',
       showInstallmentCalculator: true,

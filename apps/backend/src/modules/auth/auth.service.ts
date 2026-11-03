@@ -16,10 +16,12 @@ import {
   PASSWORD_RESET_TOKEN_TTL_MINUTES,
 } from '../../common/constants';
 import { decrypt, encrypt } from '../../common/crypto';
+import { getUtcToday } from '../../common/date/utc-date';
 import { getFrontendOrigin } from '../../common/frontend-url';
 import { computeLockoutSeconds, formatLockoutMessage } from '../../common/login-lockout';
 import { hashPassword, verifyPassword } from '../../common/password';
 import { slugify } from '../../common/slugify';
+import { calculateTrialExpiry } from '../../common/subscription/subscription';
 import { PrismaService } from '../../prisma/prisma.service';
 import { MailService } from '../mail/mail.service';
 import { buildPasswordChangedEmail } from '../mail/templates/password-changed-email';
@@ -193,7 +195,13 @@ export class AuthService {
         name: registerDto.name,
         email: registerDto.email,
         passwordHash,
-        tenant: { create: { name: registerDto.businessName, slug } },
+        tenant: {
+          create: {
+            name: registerDto.businessName,
+            slug,
+            subscriptionExpiresOn: calculateTrialExpiry(getUtcToday()),
+          },
+        },
       },
     });
 
