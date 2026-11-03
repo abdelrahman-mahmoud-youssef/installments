@@ -62,6 +62,8 @@ const en = {
     passwordHint: 'At least 8 characters',
     continue: 'Continue',
     create: 'Create account',
+    inviteCode: 'Invite code',
+    inviteCodePlaceholder: 'The shop name in your invite link',
   },
   widget: {
     dueToday: 'Due today',
@@ -855,6 +857,8 @@ const ar: typeof en = {
     passwordHint: '8 أحرف على الأقل',
     continue: 'متابعة',
     create: 'إنشاء الحساب',
+    inviteCode: 'رمز الدعوة',
+    inviteCodePlaceholder: 'اسم المتجر في رابط الدعوة',
   },
   widget: {
     dueToday: 'مستحق اليوم',

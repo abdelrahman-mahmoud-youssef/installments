@@ -19,6 +19,8 @@ import { spacing } from '@/theme/tokens';
 const TOTAL_STEPS = 2;
 const STEP_FADE_DURATION = 220;
 
+const INVITE_CODE_MAX_LENGTH = 100;
+
 type FieldErrors = Partial<Record<'businessName' | 'name' | 'email' | 'password', string>>;
 
 export default function RegisterScreen() {
@@ -32,6 +34,7 @@ export default function RegisterScreen() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [inviteCode, setInviteCode] = useState('');
   const [errors, setErrors] = useState<FieldErrors>({});
   const [apiError, setApiError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -72,7 +75,13 @@ export default function RegisterScreen() {
     setSubmitting(true);
     setApiError(null);
     try {
-      await register({ businessName: businessName.trim(), name: name.trim(), email: normalizedEmail, password });
+      await register({
+        businessName: businessName.trim(),
+        name: name.trim(),
+        email: normalizedEmail,
+        password,
+        referralCode: inviteCode.trim() || undefined,
+      });
     } catch (caught) {
       setApiError(resolveAuthErrorMessage(caught, t));
     } finally {
@@ -125,6 +134,17 @@ export default function RegisterScreen() {
                 error={errors.name}
                 textContentType="name"
                 maxLength={200}
+              />
+              <TextField
+                label={t('register.inviteCode')}
+                placeholder={t('register.inviteCodePlaceholder')}
+                value={inviteCode}
+                onChangeText={setInviteCode}
+                autoCapitalize="none"
+                autoCorrect={false}
+                maxLength={INVITE_CODE_MAX_LENGTH}
+                optional
+                ltr
               />
               <Button title={t('register.continue')} icon="arrow-forward-outline" onPress={goToAccountStep} />
             </>
