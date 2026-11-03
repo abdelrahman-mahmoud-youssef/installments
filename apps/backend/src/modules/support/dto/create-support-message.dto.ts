@@ -1,4 +1,5 @@
-import { IsString, MaxLength, MinLength } from 'class-validator';
+import { IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import { MAX_SUPPORT_IMAGE_UPLOAD_BYTES, SUPPORT_MESSAGE_MAX_LENGTH } from '../../../common/constants';
 
 export class CreateSupportMessageDto {
   @IsString()
@@ -8,6 +9,11 @@ export class CreateSupportMessageDto {
 
   @IsString()
   @MinLength(1)
-  @MaxLength(2000)
+  @MaxLength(SUPPORT_MESSAGE_MAX_LENGTH)
   message!: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(Math.ceil((MAX_SUPPORT_IMAGE_UPLOAD_BYTES * 4) / 3))
+  image?: string;
 }

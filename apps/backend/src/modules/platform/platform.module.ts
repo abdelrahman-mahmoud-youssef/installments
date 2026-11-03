@@ -6,6 +6,8 @@ import { PlatformAdminBootstrapService } from './platform-admin-bootstrap.servic
 import { PlatformAuthController } from './platform-auth.controller';
 import { PlatformAuthService } from './platform-auth.service';
 import { PlatformJwtStrategy } from './platform-jwt.strategy';
+import { PlatformSupportController } from './platform-support.controller';
+import { PlatformSupportService } from './platform-support.service';
 import { PlatformTenantsController } from './platform-tenants.controller';
 import { PlatformTenantsService } from './platform-tenants.service';
 
@@ -22,7 +24,13 @@ import { PlatformTenantsService } from './platform-tenants.service';
       }),
     }),
   ],
-  controllers: [PlatformAuthController, PlatformTenantsController],
-  providers: [PlatformAuthService, PlatformTenantsService, PlatformJwtStrategy, PlatformAdminBootstrapService],
+  controllers: [PlatformAuthController, PlatformTenantsController, PlatformSupportController],
+  providers: [
+    PlatformAuthService,
+    PlatformTenantsService,
+    PlatformSupportService,
+    PlatformJwtStrategy,
+    PlatformAdminBootstrapService,
+  ],
 })
 export class PlatformModule {}

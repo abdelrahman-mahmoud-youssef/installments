@@ -238,6 +238,7 @@ model SupportMessage {
   userEmail  String
   subject    String
   message    String
+  imageUrl   String?
   adminReply String?
   repliedAt  DateTime?
   seenAt     DateTime?
@@ -247,6 +248,7 @@ model SupportMessage {
 
   @@index([tenantId, createdAt])
   @@index([tenantId, userId])
+  @@index([repliedAt, createdAt])
 }
 
 model ReminderMessageSettings {
