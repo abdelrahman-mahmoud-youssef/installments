@@ -18,8 +18,11 @@ export interface RegisterPayload {
 export interface CurrentUserSubscription {
   status: SubscriptionStatus;
   expiresOn: string;
+  daysRemaining: number;
+  isRenewalDueSoon: boolean;
   monthlyPrice: number;
   paymentAddress: string;
+  paymentPhone: string;
 }
 
 export interface CurrentUser {

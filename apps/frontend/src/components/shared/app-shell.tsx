@@ -12,6 +12,7 @@ import { BrandLogo } from '@/components/shared/logo';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { TwoFactorSetupDialog } from '@/components/shared/two-factor-setup-dialog';
 import { SubscriptionGate } from '@/components/subscription/subscription-gate';
+import { SubscriptionRenewalBanner } from '@/components/subscription/subscription-renewal-banner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -222,6 +223,8 @@ export function AppShell({
                 <UserMenu appLabel={appLabel} />
               </div>
             </header>
+
+            <SubscriptionRenewalBanner />
 
             <InstallBanner storageKey="pwa-install-banner-dashboard" message={tCommon('installBannerMessage')} />
 

@@ -1,8 +1,7 @@
 'use client';
 
-import { Copy, LifeBuoy, Lock, LogOut } from 'lucide-react';
+import { LifeBuoy, Lock, LogOut } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
-import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -17,39 +16,7 @@ import { Link } from '@/i18n/navigation';
 import { CurrentUserSubscription } from '@/lib/api/auth';
 import { formatMoney } from '@/lib/format';
 import { routes } from '@/lib/routes';
-
-function PaymentInstructions({ subscription }: { subscription: CurrentUserSubscription }) {
-  const t = useTranslations('subscription');
-  const locale = useLocale();
-  const price = formatMoney(subscription.monthlyPrice, locale);
-
-  function handleCopyAddress() {
-    void navigator.clipboard.writeText(subscription.paymentAddress);
-    toast.success(t('addressCopied'));
-  }
-
-  return (
-    <div className="space-y-3 rounded-lg border border-border bg-muted/40 p-3">
-      <p className="text-sm font-medium">{t('howToPay')}</p>
-      <ol className="list-decimal space-y-1.5 ps-5 text-sm text-muted-foreground">
-        <li>{t('stepTransfer', { price })}</li>
-        <li>{t('stepSendReceipt')}</li>
-        <li>{t('stepActivation')}</li>
-      </ol>
-      <div className="flex items-center justify-between gap-3 rounded-md bg-background px-3 py-2 ring-1 ring-border">
-        <div className="min-w-0">
-          <p className="text-xs text-muted-foreground">{t('instapayAddress')}</p>
-          <p dir="ltr" className="truncate text-start font-mono text-sm font-medium">
-            {subscription.paymentAddress}
-          </p>
-        </div>
-        <Button variant="ghost" size="icon-sm" onClick={handleCopyAddress} aria-label={t('copyAddress')}>
-          <Copy className="size-4" />
-        </Button>
-      </div>
-    </div>
-  );
-}
+import { PaymentInstructions } from './payment-instructions';
 
 export function SubscriptionRequiredDialog({
   subscription,
