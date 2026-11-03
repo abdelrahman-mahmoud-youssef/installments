@@ -12,6 +12,13 @@ export interface CurrentUserTenant {
   logoUrl: string | null;
 }
 
+export type SubscriptionStatus = 'TRIAL' | 'ACTIVE' | 'EXPIRED';
+
+export interface CurrentUserSubscription {
+  status: SubscriptionStatus;
+  expiresOn: string;
+}
+
 export interface CurrentUser {
   id: string;
   name: string;
@@ -20,6 +27,7 @@ export interface CurrentUser {
   role: Role;
   twoFactorEnabled: boolean;
   tenant: CurrentUserTenant;
+  subscription: CurrentUserSubscription;
 }
 
 export type LoginResult = { accessToken: string } | { requiresTwoFactor: true; challengeToken: string };

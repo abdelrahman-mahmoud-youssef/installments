@@ -9,7 +9,7 @@ import {
   useState,
 } from 'react';
 import { CurrentUser, getMe, login, register, RegisterInput, verifyTwoFactor } from '@/api/auth';
-import { setAuthToken, setUnauthorizedHandler } from '@/api/client';
+import { setAuthToken, setSubscriptionInactiveHandler, setUnauthorizedHandler } from '@/api/client';
 import { tokenStorage } from '@/lib/storage';
 import { useTheme } from '@/theme/theme-context';
 
@@ -20,6 +20,7 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   isReady: boolean;
   isAdmin: boolean;
+  isSubscriptionExpired: boolean;
   signIn: (email: string, password: string) => Promise<SignInResult>;
   register: (input: RegisterInput) => Promise<void>;
   completeTwoFactor: (challengeToken: string, code: string) => Promise<void>;
@@ -81,6 +82,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(await getMe());
   }, []);
 
+  useEffect(() => {
+    setSubscriptionInactiveHandler(() => {
+      void refreshUser();
+    });
+    return () => setSubscriptionInactiveHandler(null);
+  }, [refreshUser]);
+
   const signIn = useCallback(
     async (email: string, password: string): Promise<SignInResult> => {
       const result = await login(email, password);
@@ -115,6 +123,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAuthenticated: user !== null,
       isReady,
       isAdmin: user?.role === 'ADMIN',
+      isSubscriptionExpired: user?.subscription.status === 'EXPIRED',
       signIn,
       register: registerAccount,
       completeTwoFactor,

@@ -1,14 +1,18 @@
 import { apiBaseUrl } from '@/lib/config';
 
+const SUBSCRIPTION_INACTIVE_ERROR_CODE = 'SUBSCRIPTION_INACTIVE';
+
 export interface ApiErrorBody {
   statusCode: number;
   message: string | string[];
   error: string;
+  code?: string;
 }
 
 export class ApiError extends Error {
   readonly statusCode: number;
   readonly details: string[];
+  readonly code: string | null;
 
   constructor(body: ApiErrorBody) {
     const details = Array.isArray(body.message) ? body.message : [body.message];
@@ -16,6 +20,7 @@ export class ApiError extends Error {
     this.name = 'ApiError';
     this.statusCode = body.statusCode;
     this.details = details;
+    this.code = body.code ?? null;
   }
 }
 
@@ -28,6 +33,7 @@ export class NetworkError extends Error {
 
 let authToken: string | null = null;
 let unauthorizedHandler: (() => void) | null = null;
+let subscriptionInactiveHandler: (() => void) | null = null;
 
 export function setAuthToken(token: string | null): void {
   authToken = token;
@@ -35,6 +41,10 @@ export function setAuthToken(token: string | null): void {
 
 export function setUnauthorizedHandler(handler: (() => void) | null): void {
   unauthorizedHandler = handler;
+}
+
+export function setSubscriptionInactiveHandler(handler: (() => void) | null): void {
+  subscriptionInactiveHandler = handler;
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -62,13 +72,17 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     if (response.status === 401 && authToken) {
       unauthorizedHandler?.();
     }
-    throw new ApiError(
+    const error = new ApiError(
       (body as ApiErrorBody) ?? {
         statusCode: response.status,
         message: 'Request failed',
         error: 'Error',
       },
     );
+    if (error.code === SUBSCRIPTION_INACTIVE_ERROR_CODE) {
+      subscriptionInactiveHandler?.();
+    }
+    throw error;
   }
 
   return body as T;

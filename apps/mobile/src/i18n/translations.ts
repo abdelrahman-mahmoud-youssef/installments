@@ -398,6 +398,13 @@ const en = {
     empty: 'No messages yet',
     emptyHint: 'Questions or feedback? Send us a message.',
   },
+  subscription: {
+    title: 'Subscription inactive',
+    adminMessage: "Your shop's subscription is inactive, so changes are paused. Contact support to reactivate it. Your data is safe.",
+    staffMessage: "Your shop's subscription is inactive, so changes are paused. Ask your shop owner to reactivate it.",
+    contactSupport: 'Contact support',
+    checkAgain: 'Check again',
+  },
   staff: {
     title: 'Staff',
     addStaff: 'Add staff member',
@@ -1174,6 +1181,13 @@ const ar: typeof en = {
     reply: 'الرد',
     empty: 'لا توجد رسائل بعد',
     emptyHint: 'لديك سؤال أو ملاحظة؟ أرسل لنا رسالة.',
+  },
+  subscription: {
+    title: 'الاشتراك غير نشط',
+    adminMessage: 'اشتراك متجرك غير نشط، لذا تم إيقاف التعديلات مؤقتًا. تواصل مع الدعم لإعادة تفعيله. بياناتك محفوظة.',
+    staffMessage: 'اشتراك المتجر غير نشط، لذا تم إيقاف التعديلات مؤقتًا. اطلب من صاحب المتجر إعادة تفعيله.',
+    contactSupport: 'تواصل مع الدعم',
+    checkAgain: 'تحقق مرة أخرى',
   },
   staff: {
     title: 'الموظفون',
