@@ -192,7 +192,9 @@
     "CANCELLED": "ملغي",
     "ACTIVE": "نشط",
     "COMPLETED": "مكتمل",
-    "DELETED": "محذوف"
+    "DELETED": "محذوف",
+    "TRIAL": "تجريبي",
+    "EXPIRED": "منتهي"
   },
   "calculationMethod": {
     "FIXED_COUNT": "عدد الأقساط",
@@ -1078,5 +1080,47 @@
     "copyAddress": "نسخ العنوان",
     "addressCopied": "تم نسخ عنوان إنستاباي.",
     "sendReceipt": "إرسال الإيصال"
+  },
+  "platform": {
+    "consoleTitle": "المنصة",
+    "logout": "تسجيل الخروج",
+    "login": {
+      "title": "تسجيل دخول المنصة",
+      "description": "إدارة المتاجر واشتراكاتها.",
+      "email": "البريد الإلكتروني",
+      "password": "كلمة المرور",
+      "submit": "تسجيل الدخول",
+      "submitting": "جارٍ تسجيل الدخول…",
+      "genericError": "تعذّر تسجيل الدخول. حاول مرة أخرى."
+    },
+    "tenants": {
+      "title": "المتاجر",
+      "subtitle": "أضف شهرًا للمتجر بعد وصول دفعة إنستاباي.",
+      "searchPlaceholder": "ابحث بالمتجر أو الهاتف أو البريد",
+      "all": "الكل",
+      "shop": "المتجر",
+      "owner": "المالك",
+      "status": "الاشتراك",
+      "expiresOn": "ينتهي في",
+      "actions": "الإجراءات",
+      "noOwner": "بدون مالك",
+      "activate": "إضافة شهر",
+      "activateTitle": "إضافة شهر إلى {name}؟",
+      "activateDescription": "أكّد فقط بعد وصول دفعة إنستاباي. سيتم تمديد الاشتراك شهرًا واحدًا.",
+      "activated": "اشتراك {name} ينتهي الآن في {date}.",
+      "deactivate": "إيقاف",
+      "deactivateTitle": "إيقاف {name}؟",
+      "deactivateDescription": "سيفقد المتجر صلاحية التعديل اليوم. سيتم الاحتفاظ بسجل المدفوعات.",
+      "deactivated": "تم إيقاف {name}.",
+      "history": "سجل المدفوعات",
+      "historyTitle": "مدفوعات {name}",
+      "historyEmpty": "لا توجد مدفوعات مسجلة بعد.",
+      "historyLoadError": "تعذّر تحميل سجل المدفوعات.",
+      "activatedBy": "فعّله {name}",
+      "loadError": "تعذّر تحميل المتاجر.",
+      "noResults": "لا توجد متاجر مطابقة لبحثك.",
+      "noShops": "لم يسجّل أي متجر بعد.",
+      "genericError": "حدث خطأ ما. حاول مرة أخرى."
+    }
   }
 }

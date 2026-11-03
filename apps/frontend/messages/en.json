@@ -192,7 +192,9 @@
     "CANCELLED": "Cancelled",
     "ACTIVE": "Active",
     "COMPLETED": "Completed",
-    "DELETED": "Deleted"
+    "DELETED": "Deleted",
+    "TRIAL": "Trial",
+    "EXPIRED": "Expired"
   },
   "calculationMethod": {
     "FIXED_COUNT": "Number of installments",
@@ -1078,5 +1080,47 @@
     "copyAddress": "Copy address",
     "addressCopied": "InstaPay address copied.",
     "sendReceipt": "Send receipt"
+  },
+  "platform": {
+    "consoleTitle": "Platform",
+    "logout": "Log out",
+    "login": {
+      "title": "Platform sign in",
+      "description": "Manage shops and their subscriptions.",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign in",
+      "submitting": "Signing in…",
+      "genericError": "Couldn't sign you in. Please try again."
+    },
+    "tenants": {
+      "title": "Shops",
+      "subtitle": "Add a month to a shop once its InstaPay payment arrives.",
+      "searchPlaceholder": "Search shop, phone, or email",
+      "all": "All",
+      "shop": "Shop",
+      "owner": "Owner",
+      "status": "Subscription",
+      "expiresOn": "Expires on",
+      "actions": "Actions",
+      "noOwner": "No owner",
+      "activate": "Add 1 month",
+      "activateTitle": "Add one month for {name}?",
+      "activateDescription": "Only confirm after the InstaPay payment has arrived. Access will be extended by one month.",
+      "activated": "{name} now expires on {date}.",
+      "deactivate": "Deactivate",
+      "deactivateTitle": "Deactivate {name}?",
+      "deactivateDescription": "The shop loses edit access today. Its payment history is kept.",
+      "deactivated": "{name} was deactivated.",
+      "history": "Payment history",
+      "historyTitle": "Payments for {name}",
+      "historyEmpty": "No payments recorded yet.",
+      "historyLoadError": "Couldn't load the payment history.",
+      "activatedBy": "Activated by {name}",
+      "loadError": "Couldn't load shops.",
+      "noResults": "No shops match your search.",
+      "noShops": "No shops have signed up yet.",
+      "genericError": "Something went wrong. Please try again."
+    }
   }
 }

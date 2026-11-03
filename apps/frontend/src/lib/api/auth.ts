@@ -1,5 +1,5 @@
 import { SubscriptionStatus } from '@/lib/enums';
-import { apiClient, ApiError, ApiErrorBody } from './client';
+import { apiClient, ApiError, ApiErrorBody, postJson } from './client';
 
 export type Role = 'ADMIN' | 'STAFF';
 
@@ -44,18 +44,8 @@ export interface ResetPasswordPayload {
 
 export type LoginResponse = { success: true } | { requiresTwoFactor: true; challengeToken: string };
 
-async function postAuth(path: string, payload: unknown): Promise<LoginResponse> {
-  const response = await fetch(`/api/auth/${path}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-
-  const body = (await response.json()) as LoginResponse | ApiErrorBody;
-  if (!response.ok) {
-    throw new ApiError(body as ApiErrorBody);
-  }
-  return body as LoginResponse;
+function postAuth(path: string, payload: unknown): Promise<LoginResponse> {
+  return postJson<LoginResponse>(`/api/auth/${path}`, payload);
 }
 
 export function login(payload: LoginPayload): Promise<LoginResponse> {

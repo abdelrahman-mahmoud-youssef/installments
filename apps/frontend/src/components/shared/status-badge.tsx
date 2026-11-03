@@ -12,6 +12,8 @@ const STATUS_TONE: Record<string, string> = {
   PENDING: 'bg-muted text-muted-foreground',
   CANCELLED: 'bg-muted text-muted-foreground',
   DELETED: 'bg-muted text-muted-foreground',
+  TRIAL: 'bg-warning-soft text-warning',
+  EXPIRED: 'bg-danger-soft text-danger',
 };
 
 export function StatusBadge({
