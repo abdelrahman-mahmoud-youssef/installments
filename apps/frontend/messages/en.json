@@ -1065,5 +1065,18 @@
     "alreadyDeclined": "Declined: {reason}",
     "noReason": "No reason given",
     "managePaymentMethods": "Payment methods"
+  },
+  "subscription": {
+    "title": "Subscription required",
+    "adminDescription": "Your free trial or subscription has ended. Subscribe for {price} a month to keep adding contracts, customers, and payments. Your data is safe and you can still view it.",
+    "staffDescription": "Your shop's subscription has ended. Ask the shop owner to renew it so you can keep making changes.",
+    "howToPay": "How to subscribe",
+    "stepTransfer": "Send {price} via InstaPay to the address below.",
+    "stepSendReceipt": "Send us a screenshot of the transfer through Support.",
+    "stepActivation": "We'll activate your shop for one month.",
+    "instapayAddress": "InstaPay address",
+    "copyAddress": "Copy address",
+    "addressCopied": "InstaPay address copied.",
+    "sendReceipt": "Send receipt"
   }
 }

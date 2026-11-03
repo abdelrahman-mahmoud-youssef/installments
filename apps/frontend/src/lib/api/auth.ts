@@ -1,3 +1,4 @@
+import { SubscriptionStatus } from '@/lib/enums';
 import { apiClient, ApiError, ApiErrorBody } from './client';
 
 export type Role = 'ADMIN' | 'STAFF';
@@ -14,6 +15,13 @@ export interface RegisterPayload {
   password: string;
 }
 
+export interface CurrentUserSubscription {
+  status: SubscriptionStatus;
+  expiresOn: string;
+  monthlyPrice: number;
+  paymentAddress: string;
+}
+
 export interface CurrentUser {
   id: string;
   name: string;
@@ -21,6 +29,7 @@ export interface CurrentUser {
   tenantId: string;
   role: Role;
   twoFactorEnabled: boolean;
+  subscription: CurrentUserSubscription;
 }
 
 export interface ChangePasswordPayload {

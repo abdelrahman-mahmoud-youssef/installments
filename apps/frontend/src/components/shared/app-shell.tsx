@@ -11,6 +11,7 @@ import { LanguageSwitcher } from '@/components/shared/language-switcher';
 import { BrandLogo } from '@/components/shared/logo';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { TwoFactorSetupDialog } from '@/components/shared/two-factor-setup-dialog';
+import { SubscriptionGate } from '@/components/subscription/subscription-gate';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -24,12 +25,12 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { useLogout } from '@/hooks/use-logout';
 import { usePaymentClaims } from '@/hooks/use-payment-claims';
 import { useSupportMessages } from '@/hooks/use-support';
-import { Link, usePathname, useRouter } from '@/i18n/navigation';
+import { Link, usePathname } from '@/i18n/navigation';
 import { AdminArabicFontProvider } from '@/lib/admin-arabic-font';
 import { AdminFontSizeProvider } from '@/lib/admin-font-size';
-import { logout } from '@/lib/api/auth';
 import { navigationItems } from '@/lib/navigation';
 import { getShopUrl } from '@/lib/root-domain';
 import { routes } from '@/lib/routes';
@@ -87,16 +88,10 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
 function UserMenu({ appLabel }: { appLabel: string }) {
   const t = useTranslations('nav');
   const tAccount = useTranslations('account');
-  const router = useRouter();
+  const handleLogout = useLogout();
   const { data: currentUser } = useCurrentUser();
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
   const [twoFactorOpen, setTwoFactorOpen] = useState(false);
-
-  async function handleLogout() {
-    await logout();
-    router.push(routes.login);
-    router.refresh();
-  }
 
   return (
     <>
@@ -234,6 +229,7 @@ export function AppShell({
               <div className="mx-auto w-full max-w-6xl">{children}</div>
             </main>
           </div>
+          <SubscriptionGate />
         </div>
       </AdminArabicFontProvider>
     </AdminFontSizeProvider>

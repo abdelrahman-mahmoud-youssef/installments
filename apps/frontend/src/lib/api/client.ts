@@ -1,12 +1,16 @@
+const SUBSCRIPTION_INACTIVE_ERROR_CODE = 'SUBSCRIPTION_INACTIVE';
+
 export interface ApiErrorBody {
   statusCode: number;
   message: string | string[];
   error: string;
+  code?: string;
 }
 
 export class ApiError extends Error {
   readonly statusCode: number;
   readonly details: string[];
+  readonly code: string | null;
 
   constructor(body: ApiErrorBody) {
     const details = Array.isArray(body.message) ? body.message : [body.message];
@@ -14,7 +18,12 @@ export class ApiError extends Error {
     this.name = 'ApiError';
     this.statusCode = body.statusCode;
     this.details = details;
+    this.code = body.code ?? null;
   }
+}
+
+export function isSubscriptionInactiveError(error: unknown): boolean {
+  return error instanceof ApiError && error.code === SUBSCRIPTION_INACTIVE_ERROR_CODE;
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
