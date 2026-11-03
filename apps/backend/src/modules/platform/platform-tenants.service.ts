@@ -1,13 +1,14 @@
 import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Prisma, Role } from '@prisma/client';
 import { AuthenticatedPlatformAdmin } from '../../common/decorators/current-platform-admin.decorator';
-import { SUBSCRIPTION_MONTHLY_PRICE } from '../../common/constants';
 import { getUtcToday } from '../../common/date/utc-date';
 import { buildPaginatedResult, PaginatedResult } from '../../common/pagination/paginated-result.interface';
 import { buildActiveSubscriptionWhere } from '../../common/subscription/active-subscription-where';
 import {
   calculateNextSubscriptionPeriod,
+  resolveMonthlyPrice,
   resolveSubscriptionStatus,
+  SubscriptionPricing,
   SubscriptionStatus,
 } from '../../common/subscription/subscription';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -29,7 +30,8 @@ const TENANT_SUMMARY_SELECT = {
     take: 1,
     select: { name: true, email: true },
   },
-  _count: { select: { subscriptions: true } },
+  referredBy: { select: { name: true, displayName: true, slug: true } },
+  _count: { select: { subscriptions: true, referrals: true } },
 } satisfies Prisma.TenantSelect;
 
 type TenantSummaryRow = Prisma.TenantGetPayload<{ select: typeof TENANT_SUMMARY_SELECT }>;
@@ -37,6 +39,11 @@ type TenantSummaryRow = Prisma.TenantGetPayload<{ select: typeof TENANT_SUMMARY_
 export interface PlatformTenantOwner {
   name: string;
   email: string;
+}
+
+export interface PlatformTenantReferrer {
+  name: string;
+  slug: string;
 }
 
 export interface PlatformTenantSummary {
@@ -48,6 +55,8 @@ export interface PlatformTenantSummary {
   subscriptionExpiresOn: Date;
   subscriptionStatus: SubscriptionStatus;
   owner: PlatformTenantOwner | null;
+  referredBy: PlatformTenantReferrer | null;
+  invitedShopsCount: number;
 }
 
 export interface PlatformTenantSubscriptionRecord {
@@ -93,7 +102,11 @@ export class PlatformTenantsService {
     );
   }
 
-  async activate(admin: AuthenticatedPlatformAdmin, tenantId: string): Promise<PlatformTenantSummary> {
+  async activate(
+    admin: AuthenticatedPlatformAdmin,
+    tenantId: string,
+    pricing: SubscriptionPricing,
+  ): Promise<PlatformTenantSummary> {
     await this.prisma.$transaction(async (tx) => {
       const tenant = await tx.tenant.findUnique({
         where: { id: tenantId },
@@ -117,13 +130,13 @@ export class PlatformTenantsService {
           tenantId,
           periodStart: period.periodStart,
           periodEnd: period.periodEnd,
-          amount: SUBSCRIPTION_MONTHLY_PRICE,
+          amount: resolveMonthlyPrice(pricing),
           activatedById: admin.platformAdminId,
         },
       });
     });
 
-    this.logger.log(`Platform admin ${admin.email} activated a month for tenant ${tenantId}`);
+    this.logger.log(`Platform admin ${admin.email} activated a ${pricing} month for tenant ${tenantId}`);
     return this.findSummary(tenantId);
   }
 
@@ -187,6 +200,10 @@ export class PlatformTenantsService {
         today,
       ),
       owner: row.users[0] ?? null,
+      referredBy: row.referredBy
+        ? { name: row.referredBy.displayName ?? row.referredBy.name, slug: row.referredBy.slug }
+        : null,
+      invitedShopsCount: row._count.referrals,
     };
   }
 }

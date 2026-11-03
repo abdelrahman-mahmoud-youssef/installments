@@ -137,8 +137,12 @@ model Tenant {
   shareLinks                ShareLink[]
   reminderMessageSettings   ReminderMessageSettings?
   subscriptions             TenantSubscription[]
+  referredByTenantId        String?
+  referredBy                Tenant?                   @relation("TenantReferrals", fields: [referredByTenantId], references: [id], onDelete: SetNull)
+  referrals                 Tenant[]                  @relation("TenantReferrals")
 
   @@index([subscriptionExpiresOn])
+  @@index([referredByTenantId])
 }
 
 model PlatformAdmin {

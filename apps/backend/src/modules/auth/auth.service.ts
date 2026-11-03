@@ -224,7 +224,10 @@ export class AuthService {
 
   async register(registerDto: RegisterDto): Promise<LoginResult> {
     const passwordHash = await hashPassword(registerDto.password);
-    const slug = await this.generateUniqueSlug(registerDto.businessName);
+    const [slug, referredByTenantId] = await Promise.all([
+      this.generateUniqueSlug(registerDto.businessName),
+      this.findReferringTenantId(registerDto.referralCode),
+    ]);
 
     const user = await this.prisma.user.create({
       data: {
@@ -236,6 +239,7 @@ export class AuthService {
             name: registerDto.businessName,
             slug,
             subscriptionExpiresOn: calculateTrialExpiry(getUtcToday()),
+            referredByTenantId,
           },
         },
       },
@@ -417,6 +421,15 @@ export class AuthService {
 
   private twoFactorEncryptionKey(): string {
     return this.config.getOrThrow<string>('TWO_FACTOR_ENCRYPTION_KEY');
+  }
+
+  private async findReferringTenantId(referralCode: string | undefined): Promise<string | null> {
+    const slug = referralCode?.trim().toLowerCase();
+    if (!slug) {
+      return null;
+    }
+    const tenant = await this.prisma.tenant.findUnique({ where: { slug }, select: { id: true } });
+    return tenant?.id ?? null;
   }
 
   private async generateUniqueSlug(businessName: string): Promise<string> {

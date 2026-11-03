@@ -4,7 +4,9 @@ import {
   calculateTrialExpiry,
   isRenewalDueSoon,
   isSubscriptionActive,
+  resolveMonthlyPrice,
   resolveSubscriptionStatus,
+  SubscriptionPricing,
   SubscriptionStatus,
 } from './subscription';
 
@@ -108,5 +110,15 @@ describe('isRenewalDueSoon', () => {
 
   it('is not due soon once expired', () => {
     expect(isRenewalDueSoon(utcDate('2026-12-01'), utcDate('2026-12-01'))).toBe(false);
+  });
+});
+
+describe('resolveMonthlyPrice', () => {
+  it('charges 500 EGP for the standard price', () => {
+    expect(resolveMonthlyPrice(SubscriptionPricing.STANDARD)).toBe(50_000);
+  });
+
+  it('charges 300 EGP for the referral price', () => {
+    expect(resolveMonthlyPrice(SubscriptionPricing.REFERRAL)).toBe(30_000);
   });
 });

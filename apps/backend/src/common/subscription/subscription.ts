@@ -1,4 +1,9 @@
-import { SUBSCRIPTION_RENEWAL_NOTICE_DAYS, SUBSCRIPTION_TRIAL_DAYS } from '../constants';
+import {
+  SUBSCRIPTION_MONTHLY_PRICE,
+  SUBSCRIPTION_REFERRAL_MONTHLY_PRICE,
+  SUBSCRIPTION_RENEWAL_NOTICE_DAYS,
+  SUBSCRIPTION_TRIAL_DAYS,
+} from '../constants';
 import { addUtcDays, addUtcMonthsClamped, differenceInUtcDays } from '../date/utc-date';
 
 export const SubscriptionStatus = {
@@ -8,6 +13,22 @@ export const SubscriptionStatus = {
 } as const;
 
 export type SubscriptionStatus = (typeof SubscriptionStatus)[keyof typeof SubscriptionStatus];
+
+export const SubscriptionPricing = {
+  STANDARD: 'STANDARD',
+  REFERRAL: 'REFERRAL',
+} as const;
+
+export type SubscriptionPricing = (typeof SubscriptionPricing)[keyof typeof SubscriptionPricing];
+
+const MONTHLY_PRICE_BY_PRICING: Record<SubscriptionPricing, number> = {
+  [SubscriptionPricing.STANDARD]: SUBSCRIPTION_MONTHLY_PRICE,
+  [SubscriptionPricing.REFERRAL]: SUBSCRIPTION_REFERRAL_MONTHLY_PRICE,
+};
+
+export function resolveMonthlyPrice(pricing: SubscriptionPricing): number {
+  return MONTHLY_PRICE_BY_PRICING[pricing];
+}
 
 export interface SubscriptionPeriod {
   periodStart: Date;

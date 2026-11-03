@@ -1,9 +1,11 @@
-import { Controller, Get, HttpCode, HttpStatus, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Query } from '@nestjs/common';
 import {
   AuthenticatedPlatformAdmin,
   CurrentPlatformAdmin,
 } from '../../common/decorators/current-platform-admin.decorator';
 import { PlatformRoute } from '../../common/decorators/platform-route.decorator';
+import { SubscriptionPricing } from '../../common/subscription/subscription';
+import { ActivateTenantDto } from './dto/activate-tenant.dto';
 import { PlatformTenantQueryDto } from './dto/platform-tenant-query.dto';
 import { PlatformTenantSubscriptionQueryDto } from './dto/platform-tenant-subscription-query.dto';
 import { PlatformTenantsService } from './platform-tenants.service';
@@ -20,8 +22,12 @@ export class PlatformTenantsController {
 
   @Post(':tenantId/activate')
   @HttpCode(HttpStatus.OK)
-  activate(@CurrentPlatformAdmin() admin: AuthenticatedPlatformAdmin, @Param('tenantId') tenantId: string) {
-    return this.platformTenantsService.activate(admin, tenantId);
+  activate(
+    @CurrentPlatformAdmin() admin: AuthenticatedPlatformAdmin,
+    @Param('tenantId') tenantId: string,
+    @Body() dto: ActivateTenantDto,
+  ) {
+    return this.platformTenantsService.activate(admin, tenantId, dto.pricing ?? SubscriptionPricing.STANDARD);
   }
 
   @Post(':tenantId/deactivate')
