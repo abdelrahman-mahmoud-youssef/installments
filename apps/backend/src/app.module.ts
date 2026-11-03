@@ -20,6 +20,7 @@ import { HealthModule } from './modules/health/health.module';
 import { OffersModule } from './modules/offers/offers.module';
 import { PaymentClaimsModule } from './modules/payment-claims/payment-claims.module';
 import { PaymentsModule } from './modules/payments/payments.module';
+import { PlatformModule } from './modules/platform/platform.module';
 import { PublicModule } from './modules/public/public.module';
 import { RemindersModule } from './modules/reminders/reminders.module';
 import { ReportsModule } from './modules/reports/reports.module';
@@ -65,6 +66,7 @@ import { PrismaModule } from './prisma/prisma.module';
     SupportModule,
     OffersModule,
     ShareLinksModule,
+    PlatformModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },

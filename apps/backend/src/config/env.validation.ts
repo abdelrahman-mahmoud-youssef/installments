@@ -17,6 +17,13 @@ export const envValidationSchema = Joi.object({
   JWT_SECRET: Joi.string().min(16).required(),
   JWT_EXPIRES_IN: Joi.string().required(),
   TWO_FACTOR_ENCRYPTION_KEY: Joi.string().min(32).required(),
+  PLATFORM_ADMIN_EMAIL: Joi.string().email({ tlds: { allow: false } }).allow('').optional(),
+  PLATFORM_ADMIN_PASSWORD: Joi.string().min(12).when('PLATFORM_ADMIN_EMAIL', {
+    is: Joi.string().email({ tlds: { allow: false } }).required(),
+    then: Joi.required(),
+    otherwise: Joi.optional().allow(''),
+  }),
+  PLATFORM_ADMIN_NAME: Joi.string().default('Platform Admin'),
   FRONTEND_URL: Joi.string().optional(),
   ROOT_DOMAIN: Joi.string().optional(),
   REDIS_URL: Joi.string().uri().optional(),

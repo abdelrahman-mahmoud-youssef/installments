@@ -10,15 +10,15 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
-import {
-  APP_NAME,
-  LOGIN_LOCKOUT_THRESHOLD,
-  PASSWORD_RESET_TOKEN_TTL_MINUTES,
-} from '../../common/constants';
+import { APP_NAME, PASSWORD_RESET_TOKEN_TTL_MINUTES } from '../../common/constants';
 import { decrypt, encrypt } from '../../common/crypto';
 import { getUtcToday } from '../../common/date/utc-date';
 import { getFrontendOrigin } from '../../common/frontend-url';
-import { computeLockoutSeconds, formatLockoutMessage } from '../../common/login-lockout';
+import {
+  calculateFailedLoginState,
+  formatLockoutMessage,
+  secondsUntilUnlock,
+} from '../../common/login-lockout';
 import { hashPassword, verifyPassword } from '../../common/password';
 import { slugify } from '../../common/slugify';
 import { calculateTrialExpiry } from '../../common/subscription/subscription';
@@ -129,8 +129,8 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password.');
     }
 
-    if (user.lockedUntil && user.lockedUntil > new Date()) {
-      const secondsRemaining = Math.ceil((user.lockedUntil.getTime() - Date.now()) / 1000);
+    const secondsRemaining = secondsUntilUnlock(user.lockedUntil, new Date());
+    if (secondsRemaining > 0) {
       throw new HttpException(formatLockoutMessage(secondsRemaining), HttpStatus.TOO_MANY_REQUESTS);
     }
 
@@ -355,14 +355,9 @@ export class AuthService {
   }
 
   private async registerFailedLogin(user: User): Promise<void> {
-    const failedLoginAttempts = user.failedLoginAttempts + 1;
-    const lockedUntil =
-      failedLoginAttempts >= LOGIN_LOCKOUT_THRESHOLD
-        ? new Date(Date.now() + computeLockoutSeconds(failedLoginAttempts) * 1000)
-        : null;
     await this.prisma.user.update({
       where: { id: user.id },
-      data: { failedLoginAttempts, lockedUntil },
+      data: calculateFailedLoginState(user.failedLoginAttempts, new Date()),
     });
   }
 
