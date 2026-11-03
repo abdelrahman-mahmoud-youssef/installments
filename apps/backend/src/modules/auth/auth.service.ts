@@ -14,7 +14,6 @@ import {
   APP_NAME,
   PASSWORD_RESET_TOKEN_TTL_MINUTES,
   SUBSCRIPTION_MONTHLY_PRICE,
-  SUBSCRIPTION_PAYMENT_ADDRESS,
   SUBSCRIPTION_PAYMENT_PHONE,
 } from '../../common/constants';
 import { decrypt, encrypt } from '../../common/crypto';
@@ -84,7 +83,6 @@ export interface CurrentUserTenant {
 
 export interface CurrentUserSubscription extends SubscriptionSummary {
   monthlyPrice: number;
-  paymentAddress: string;
   paymentPhone: string;
 }
 
@@ -153,7 +151,6 @@ export class AuthService {
           getUtcToday(),
         ),
         monthlyPrice: SUBSCRIPTION_MONTHLY_PRICE,
-        paymentAddress: SUBSCRIPTION_PAYMENT_ADDRESS,
         paymentPhone: SUBSCRIPTION_PAYMENT_PHONE,
       },
     };

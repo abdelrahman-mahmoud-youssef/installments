@@ -51,20 +51,12 @@ export function PaymentInstructions({ subscription }: { subscription: CurrentUse
         <li>{t('stepSendReceipt')}</li>
         <li>{t('stepActivation')}</li>
       </ol>
-      <div className="space-y-2">
-        <CopyableValue
-          label={t('instapayPhone')}
-          value={subscription.paymentPhone}
-          copyLabel={t('copyPhone')}
-          copiedMessage={t('phoneCopied')}
-        />
-        <CopyableValue
-          label={t('instapayAddress')}
-          value={subscription.paymentAddress}
-          copyLabel={t('copyAddress')}
-          copiedMessage={t('addressCopied')}
-        />
-      </div>
+      <CopyableValue
+        label={t('instapayPhone')}
+        value={subscription.paymentPhone}
+        copyLabel={t('copyPhone')}
+        copiedMessage={t('phoneCopied')}
+      />
     </div>
   );
 }

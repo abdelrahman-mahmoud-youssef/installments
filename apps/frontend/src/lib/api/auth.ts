@@ -21,7 +21,6 @@ export interface CurrentUserSubscription {
   daysRemaining: number;
   isRenewalDueSoon: boolean;
   monthlyPrice: number;
-  paymentAddress: string;
   paymentPhone: string;
 }
 
