@@ -5,6 +5,7 @@ import { DashboardSummaryStats } from '@/components/dashboard/dashboard-summary-
 import { InstallmentSection } from '@/components/dashboard/installment-section';
 import { PendingClaimsCard } from '@/components/dashboard/pending-claims-card';
 import { RecentPaymentsSection } from '@/components/dashboard/recent-payments-section';
+import { SubscriptionRenewalCard } from '@/components/subscription/subscription-renewal-card';
 import { UpcomingCollectionsChart } from '@/components/dashboard/upcoming-collections-chart';
 import { AppText } from '@/components/ui/app-text';
 import { ErrorState } from '@/components/ui/error-state';
@@ -43,6 +44,7 @@ export default function DashboardScreen() {
             {t('dashboard.greeting', { name: user.name })}
           </AppText>
         ) : null}
+        <SubscriptionRenewalCard />
         {isPending ? (
           <SkeletonCardList count={4} />
         ) : isError ? (

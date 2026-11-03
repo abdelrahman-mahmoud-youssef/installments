@@ -404,6 +404,10 @@ const en = {
     staffMessage: "Your shop's subscription is inactive, so changes are paused. Ask your shop owner to reactivate it.",
     contactSupport: 'Contact support',
     checkAgain: 'Check again',
+    endingTitle: 'Subscription ending soon',
+    trialEndingTitle: 'Free trial ending soon',
+    endingAdminMessage: 'Changes pause on {date}. Tap to contact support and keep your shop active.',
+    endingStaffMessage: 'Changes pause on {date}. Ask your shop owner to keep the shop active.',
   },
   staff: {
     title: 'Staff',
@@ -1188,6 +1192,10 @@ const ar: typeof en = {
     staffMessage: 'اشتراك المتجر غير نشط، لذا تم إيقاف التعديلات مؤقتًا. اطلب من صاحب المتجر إعادة تفعيله.',
     contactSupport: 'تواصل مع الدعم',
     checkAgain: 'تحقق مرة أخرى',
+    endingTitle: 'اشتراكك ينتهي قريبًا',
+    trialEndingTitle: 'الفترة التجريبية تنتهي قريبًا',
+    endingAdminMessage: 'ستتوقف التعديلات في {date}. اضغط للتواصل مع الدعم والحفاظ على نشاط متجرك.',
+    endingStaffMessage: 'ستتوقف التعديلات في {date}. اطلب من صاحب المتجر الحفاظ على نشاط المتجر.',
   },
   staff: {
     title: 'الموظفون',

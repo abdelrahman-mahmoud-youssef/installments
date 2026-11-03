@@ -17,6 +17,8 @@ export type SubscriptionStatus = 'TRIAL' | 'ACTIVE' | 'EXPIRED';
 export interface CurrentUserSubscription {
   status: SubscriptionStatus;
   expiresOn: string;
+  daysRemaining: number;
+  isRenewalDueSoon: boolean;
 }
 
 export interface CurrentUser {
