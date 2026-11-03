@@ -1,6 +1,8 @@
 import {
+  calculateDaysRemaining,
   calculateNextSubscriptionPeriod,
   calculateTrialExpiry,
+  isRenewalDueSoon,
   isSubscriptionActive,
   resolveSubscriptionStatus,
   SubscriptionStatus,
@@ -75,5 +77,36 @@ describe('calculateNextSubscriptionPeriod', () => {
     const period = calculateNextSubscriptionPeriod(utcDate('2026-01-31'), utcDate('2026-01-31'));
 
     expect(isoDate(period.periodEnd)).toBe('2026-02-28');
+  });
+});
+
+describe('calculateDaysRemaining', () => {
+  it('counts the active days left before the expiry date', () => {
+    expect(calculateDaysRemaining(utcDate('2026-12-01'), utcDate('2026-11-26'))).toBe(5);
+    expect(calculateDaysRemaining(utcDate('2026-12-01'), utcDate('2026-11-30'))).toBe(1);
+  });
+
+  it('never goes below zero once expired', () => {
+    expect(calculateDaysRemaining(utcDate('2026-12-01'), utcDate('2026-12-01'))).toBe(0);
+    expect(calculateDaysRemaining(utcDate('2026-12-01'), utcDate('2026-12-20'))).toBe(0);
+  });
+
+  it('counts across a month boundary', () => {
+    expect(calculateDaysRemaining(utcDate('2027-03-02'), utcDate('2027-02-27'))).toBe(3);
+  });
+});
+
+describe('isRenewalDueSoon', () => {
+  it('is due soon within the last five active days', () => {
+    expect(isRenewalDueSoon(utcDate('2026-12-01'), utcDate('2026-11-26'))).toBe(true);
+    expect(isRenewalDueSoon(utcDate('2026-12-01'), utcDate('2026-11-30'))).toBe(true);
+  });
+
+  it('is not due soon earlier in the period', () => {
+    expect(isRenewalDueSoon(utcDate('2026-12-01'), utcDate('2026-11-25'))).toBe(false);
+  });
+
+  it('is not due soon once expired', () => {
+    expect(isRenewalDueSoon(utcDate('2026-12-01'), utcDate('2026-12-01'))).toBe(false);
   });
 });

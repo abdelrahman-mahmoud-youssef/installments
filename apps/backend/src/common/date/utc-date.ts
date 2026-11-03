@@ -6,6 +6,12 @@ export function getUtcToday(): Date {
   return toUtcMidnight(new Date());
 }
 
+const MILLISECONDS_PER_DAY = 86_400_000;
+
+export function differenceInUtcDays(later: Date, earlier: Date): number {
+  return Math.round((toUtcMidnight(later).getTime() - toUtcMidnight(earlier).getTime()) / MILLISECONDS_PER_DAY);
+}
+
 export function addUtcDays(date: Date, days: number): Date {
   const result = new Date(date);
   result.setUTCDate(result.getUTCDate() + days);

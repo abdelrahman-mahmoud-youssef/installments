@@ -15,6 +15,7 @@ import {
   PASSWORD_RESET_TOKEN_TTL_MINUTES,
   SUBSCRIPTION_MONTHLY_PRICE,
   SUBSCRIPTION_PAYMENT_ADDRESS,
+  SUBSCRIPTION_PAYMENT_PHONE,
 } from '../../common/constants';
 import { decrypt, encrypt } from '../../common/crypto';
 import { getUtcToday } from '../../common/date/utc-date';
@@ -28,8 +29,8 @@ import { hashPassword, verifyPassword } from '../../common/password';
 import { slugify } from '../../common/slugify';
 import {
   calculateTrialExpiry,
-  resolveSubscriptionStatus,
-  SubscriptionStatus,
+  SubscriptionSummary,
+  summarizeSubscription,
 } from '../../common/subscription/subscription';
 import { PrismaService } from '../../prisma/prisma.service';
 import { MailService } from '../mail/mail.service';
@@ -81,11 +82,10 @@ export interface CurrentUserTenant {
   logoUrl: string | null;
 }
 
-export interface CurrentUserSubscription {
-  status: SubscriptionStatus;
-  expiresOn: Date;
+export interface CurrentUserSubscription extends SubscriptionSummary {
   monthlyPrice: number;
   paymentAddress: string;
+  paymentPhone: string;
 }
 
 export interface CurrentUserResponse {
@@ -148,13 +148,13 @@ export class AuthService {
         logoUrl: tenant.logoUrl,
       },
       subscription: {
-        status: resolveSubscriptionStatus(
+        ...summarizeSubscription(
           { expiresOn: tenant.subscriptionExpiresOn, hasPaidPeriod: tenant._count.subscriptions > 0 },
           getUtcToday(),
         ),
-        expiresOn: tenant.subscriptionExpiresOn,
         monthlyPrice: SUBSCRIPTION_MONTHLY_PRICE,
         paymentAddress: SUBSCRIPTION_PAYMENT_ADDRESS,
+        paymentPhone: SUBSCRIPTION_PAYMENT_PHONE,
       },
     };
   }

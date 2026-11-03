@@ -1,5 +1,5 @@
-import { SUBSCRIPTION_TRIAL_DAYS } from '../constants';
-import { addUtcDays, addUtcMonthsClamped } from '../date/utc-date';
+import { SUBSCRIPTION_RENEWAL_NOTICE_DAYS, SUBSCRIPTION_TRIAL_DAYS } from '../constants';
+import { addUtcDays, addUtcMonthsClamped, differenceInUtcDays } from '../date/utc-date';
 
 export const SubscriptionStatus = {
   TRIAL: 'TRIAL',
@@ -19,8 +19,24 @@ export interface SubscriptionState {
   hasPaidPeriod: boolean;
 }
 
+export interface SubscriptionSummary {
+  status: SubscriptionStatus;
+  expiresOn: Date;
+  daysRemaining: number;
+  isRenewalDueSoon: boolean;
+}
+
 export function isSubscriptionActive(expiresOn: Date, today: Date): boolean {
   return today.getTime() < expiresOn.getTime();
+}
+
+export function calculateDaysRemaining(expiresOn: Date, today: Date): number {
+  return Math.max(0, differenceInUtcDays(expiresOn, today));
+}
+
+export function isRenewalDueSoon(expiresOn: Date, today: Date): boolean {
+  const daysRemaining = calculateDaysRemaining(expiresOn, today);
+  return daysRemaining > 0 && daysRemaining <= SUBSCRIPTION_RENEWAL_NOTICE_DAYS;
 }
 
 export function resolveSubscriptionStatus(state: SubscriptionState, today: Date): SubscriptionStatus {
@@ -28,6 +44,15 @@ export function resolveSubscriptionStatus(state: SubscriptionState, today: Date)
     return SubscriptionStatus.EXPIRED;
   }
   return state.hasPaidPeriod ? SubscriptionStatus.ACTIVE : SubscriptionStatus.TRIAL;
+}
+
+export function summarizeSubscription(state: SubscriptionState, today: Date): SubscriptionSummary {
+  return {
+    status: resolveSubscriptionStatus(state, today),
+    expiresOn: state.expiresOn,
+    daysRemaining: calculateDaysRemaining(state.expiresOn, today),
+    isRenewalDueSoon: isRenewalDueSoon(state.expiresOn, today),
+  };
 }
 
 export function calculateTrialExpiry(today: Date): Date {
