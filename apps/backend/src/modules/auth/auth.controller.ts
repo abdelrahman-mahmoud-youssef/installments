@@ -1,5 +1,6 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Patch, Post } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
+import { AllowWithoutSubscription } from '../../common/decorators/allow-without-subscription.decorator';
 import { AuthenticatedUser, CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Public } from '../../common/decorators/public.decorator';
 import { Audit } from '../../common/decorators/audit.decorator';
@@ -20,6 +21,7 @@ import { RegisterDto } from './dto/register.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyTwoFactorDto } from './dto/verify-two-factor.dto';
 
+@AllowWithoutSubscription()
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}

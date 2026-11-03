@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { InstallmentStatus, NotificationLanguage, ReminderChannel } from '@prisma/client';
 import { Queue } from 'bullmq';
 import { addUtcDays, getUtcToday } from '../../common/date/utc-date';
+import { buildActiveSubscriptionWhere } from '../../common/subscription/active-subscription-where';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ShareLinksService } from '../share-links/share-links.service';
 import { TelegramService } from '../telegram/telegram.service';
@@ -116,6 +117,7 @@ export class RemindersService implements OnModuleInit {
 
     const tenants = await this.prisma.tenant.findMany({
       where: {
+        ...buildActiveSubscriptionWhere(getUtcToday()),
         OR: [
           { telegramBotToken: { not: null }, telegramChatId: { not: null } },
           ...(whatsappCredentials ? [{ phone: { not: null } }] : []),
@@ -168,7 +170,9 @@ export class RemindersService implements OnModuleInit {
       return;
     }
 
-    const tenants = await this.prisma.tenant.findMany({ where: { phone: { not: null } } });
+    const tenants = await this.prisma.tenant.findMany({
+      where: { ...buildActiveSubscriptionWhere(getUtcToday()), phone: { not: null } },
+    });
 
     for (const tenant of tenants) {
       if (!tenant.phone) {
@@ -216,9 +220,10 @@ export class RemindersService implements OnModuleInit {
     const whatsappCredentials = this.getWhatsappCredentials();
 
     const tenants = await this.prisma.tenant.findMany({
-      where: whatsappCredentials
-        ? undefined
-        : { telegramBotToken: { not: null }, telegramBotUsername: { not: null } },
+      where: {
+        ...buildActiveSubscriptionWhere(today),
+        ...(whatsappCredentials ? {} : { telegramBotToken: { not: null }, telegramBotUsername: { not: null } }),
+      },
       select: { id: true, name: true, slug: true, telegramBotToken: true, telegramBotUsername: true },
     });
 

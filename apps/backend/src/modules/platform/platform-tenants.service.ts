@@ -4,6 +4,7 @@ import { AuthenticatedPlatformAdmin } from '../../common/decorators/current-plat
 import { SUBSCRIPTION_MONTHLY_PRICE } from '../../common/constants';
 import { getUtcToday } from '../../common/date/utc-date';
 import { buildPaginatedResult, PaginatedResult } from '../../common/pagination/paginated-result.interface';
+import { buildActiveSubscriptionWhere } from '../../common/subscription/active-subscription-where';
 import {
   calculateNextSubscriptionPeriod,
   resolveSubscriptionStatus,
@@ -129,7 +130,7 @@ export class PlatformTenantsService {
   async deactivate(admin: AuthenticatedPlatformAdmin, tenantId: string): Promise<PlatformTenantSummary> {
     const today = getUtcToday();
     await this.prisma.tenant.updateMany({
-      where: { id: tenantId, subscriptionExpiresOn: { gt: today } },
+      where: { id: tenantId, ...buildActiveSubscriptionWhere(today) },
       data: { subscriptionExpiresOn: today },
     });
 

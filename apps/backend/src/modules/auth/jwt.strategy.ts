@@ -24,7 +24,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('Invalid token.');
     }
 
-    const user = await this.prisma.user.findUnique({ where: { id: payload.sub }, select: { isActive: true } });
+    const user = await this.prisma.user.findUnique({
+      where: { id: payload.sub },
+      select: { isActive: true, tenant: { select: { subscriptionExpiresOn: true } } },
+    });
     if (!user || !user.isActive) {
       throw new UnauthorizedException('This account has been deactivated.');
     }
@@ -34,6 +37,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       role: payload.role,
       email: payload.email,
       name: payload.name ?? payload.email,
+      subscriptionExpiresOn: user.tenant.subscriptionExpiresOn,
     };
   }
 }

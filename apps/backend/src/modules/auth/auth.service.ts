@@ -10,7 +10,12 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
-import { APP_NAME, PASSWORD_RESET_TOKEN_TTL_MINUTES } from '../../common/constants';
+import {
+  APP_NAME,
+  PASSWORD_RESET_TOKEN_TTL_MINUTES,
+  SUBSCRIPTION_MONTHLY_PRICE,
+  SUBSCRIPTION_PAYMENT_ADDRESS,
+} from '../../common/constants';
 import { decrypt, encrypt } from '../../common/crypto';
 import { getUtcToday } from '../../common/date/utc-date';
 import { getFrontendOrigin } from '../../common/frontend-url';
@@ -21,7 +26,11 @@ import {
 } from '../../common/login-lockout';
 import { hashPassword, verifyPassword } from '../../common/password';
 import { slugify } from '../../common/slugify';
-import { calculateTrialExpiry } from '../../common/subscription/subscription';
+import {
+  calculateTrialExpiry,
+  resolveSubscriptionStatus,
+  SubscriptionStatus,
+} from '../../common/subscription/subscription';
 import { PrismaService } from '../../prisma/prisma.service';
 import { MailService } from '../mail/mail.service';
 import { buildPasswordChangedEmail } from '../mail/templates/password-changed-email';
@@ -72,6 +81,13 @@ export interface CurrentUserTenant {
   logoUrl: string | null;
 }
 
+export interface CurrentUserSubscription {
+  status: SubscriptionStatus;
+  expiresOn: Date;
+  monthlyPrice: number;
+  paymentAddress: string;
+}
+
 export interface CurrentUserResponse {
   id: string;
   name: string;
@@ -80,6 +96,7 @@ export interface CurrentUserResponse {
   role: User['role'];
   twoFactorEnabled: boolean;
   tenant: CurrentUserTenant;
+  subscription: CurrentUserSubscription;
 }
 
 @Injectable()
@@ -104,7 +121,17 @@ export class AuthService {
       where: { id: user.userId },
       select: {
         twoFactorEnabled: true,
-        tenant: { select: { slug: true, name: true, displayName: true, brandColor: true, logoUrl: true } },
+        tenant: {
+          select: {
+            slug: true,
+            name: true,
+            displayName: true,
+            brandColor: true,
+            logoUrl: true,
+            subscriptionExpiresOn: true,
+            _count: { select: { subscriptions: true } },
+          },
+        },
       },
     });
     return {
@@ -119,6 +146,15 @@ export class AuthService {
         displayName: tenant.displayName ?? tenant.name,
         brandColor: tenant.brandColor,
         logoUrl: tenant.logoUrl,
+      },
+      subscription: {
+        status: resolveSubscriptionStatus(
+          { expiresOn: tenant.subscriptionExpiresOn, hasPaidPeriod: tenant._count.subscriptions > 0 },
+          getUtcToday(),
+        ),
+        expiresOn: tenant.subscriptionExpiresOn,
+        monthlyPrice: SUBSCRIPTION_MONTHLY_PRICE,
+        paymentAddress: SUBSCRIPTION_PAYMENT_ADDRESS,
       },
     };
   }

@@ -1,8 +1,10 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { AllowWithoutSubscription } from '../../common/decorators/allow-without-subscription.decorator';
 import { AuthenticatedUser, CurrentUser } from '../../common/decorators/current-user.decorator';
 import { CreateSupportMessageDto } from './dto/create-support-message.dto';
 import { SupportService } from './support.service';
 
+@AllowWithoutSubscription()
 @Controller('support')
 export class SupportController {
   constructor(private readonly supportService: SupportService) {}

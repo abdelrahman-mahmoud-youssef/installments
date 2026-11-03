@@ -1,14 +1,18 @@
 import { Prisma } from '@prisma/client';
+import {
+  buildActiveSubscriptionWhere,
+  buildExpiredSubscriptionWhere,
+} from '../../common/subscription/active-subscription-where';
 import { SubscriptionStatus } from '../../common/subscription/subscription';
 
 export function buildSubscriptionStatusWhere(status: SubscriptionStatus, today: Date): Prisma.TenantWhereInput {
   switch (status) {
     case SubscriptionStatus.EXPIRED:
-      return { subscriptionExpiresOn: { lte: today } };
+      return buildExpiredSubscriptionWhere(today);
     case SubscriptionStatus.ACTIVE:
-      return { subscriptionExpiresOn: { gt: today }, subscriptions: { some: {} } };
+      return { ...buildActiveSubscriptionWhere(today), subscriptions: { some: {} } };
     case SubscriptionStatus.TRIAL:
-      return { subscriptionExpiresOn: { gt: today }, subscriptions: { none: {} } };
+      return { ...buildActiveSubscriptionWhere(today), subscriptions: { none: {} } };
   }
 }
 

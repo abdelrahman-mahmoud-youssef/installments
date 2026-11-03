@@ -7,6 +7,7 @@ export interface AuthenticatedUser {
   role: Role;
   email: string;
   name: string;
+  subscriptionExpiresOn: Date;
 }
 
 export const CurrentUser = createParamDecorator(
