@@ -3,9 +3,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, Send } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { AttachedImage } from '@/components/shared/attached-image';
+import { ImageUploadSlot } from '@/components/shared/image-upload-slot';
 import { FadeIn } from '@/components/shared/motion';
 import { PageHeader } from '@/components/shared/page-header';
 import { Badge } from '@/components/ui/badge';
@@ -26,6 +28,7 @@ export default function SupportPage() {
   const submitMessage = useSubmitSupportMessage();
   const markSeen = useMarkSupportRepliesSeen();
   const hasMarkedSeen = useRef(false);
+  const [pickedImageName, setPickedImageName] = useState<string | null>(null);
 
   const hasUnseenReply = (messages ?? []).some((message) => message.adminReply && !message.seenAt);
 
@@ -39,14 +42,15 @@ export default function SupportPage() {
 
   const form = useForm<SupportMessageInput>({
     resolver: zodResolver(supportMessageSchema),
-    defaultValues: { subject: '', message: '' },
+    defaultValues: { subject: '', message: '', image: undefined },
   });
 
   async function handleSubmit(values: SupportMessageInput) {
     try {
       await submitMessage.mutateAsync(values);
       toast.success(t('sent'));
-      form.reset({ subject: '', message: '' });
+      form.reset({ subject: '', message: '', image: undefined });
+      setPickedImageName(null);
     } catch (error) {
       toast.error(error instanceof ApiError ? error.message : t('genericError'));
     }
@@ -88,6 +92,15 @@ export default function SupportPage() {
                   </FormItem>
                 )}
               />
+              <ImageUploadSlot
+                form={form}
+                name="image"
+                label={t('imageLabel')}
+                uploadLabel={t('attachImage')}
+                existingUrl={null}
+                pickedName={pickedImageName}
+                onPickedNameChange={setPickedImageName}
+              />
               {currentUser && (
                 <p className="text-xs text-muted-foreground">
                   {t('sendingAs', { name: currentUser.name, email: currentUser.email })}
@@ -123,6 +136,7 @@ export default function SupportPage() {
                 )}
               </div>
               <p className="text-sm whitespace-pre-wrap text-muted-foreground">{message.message}</p>
+              {message.imageUrl && <AttachedImage path={message.imageUrl} alt={t('attachedImage')} />}
               {message.adminReply && (
                 <div className="rounded-lg border border-border bg-muted/30 p-3">
                   <p className="text-xs font-medium text-foreground">{t('replyLabel')}</p>

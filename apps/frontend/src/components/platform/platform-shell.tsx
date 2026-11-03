@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from '@/i18n/navigation';
 import { platformLogout } from '@/lib/api/platform';
 import { routes } from '@/lib/routes';
+import { PlatformNav } from './platform-nav';
 
 export function PlatformShell({ children }: { children: React.ReactNode }) {
   const t = useTranslations('platform');
@@ -25,9 +26,10 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
     <div className="flex min-h-screen flex-col bg-background">
       <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur-md sm:px-6">
         <Logo label={tCommon('appName')} />
-        <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+        <span className="hidden rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary sm:inline">
           {t('consoleTitle')}
         </span>
+        <PlatformNav />
         <div className="ms-auto flex items-center gap-1">
           <ThemeToggle />
           <LanguageSwitcher />

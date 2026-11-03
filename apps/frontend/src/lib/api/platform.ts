@@ -26,6 +26,28 @@ export interface PlatformTenantSubscription {
   activatedBy: { name: string } | null;
 }
 
+export const SUPPORT_REPLY_STATES = ['AWAITING_REPLY', 'REPLIED'] as const;
+
+export type SupportReplyState = (typeof SUPPORT_REPLY_STATES)[number];
+
+export interface PlatformSupportMessage {
+  id: string;
+  subject: string;
+  message: string;
+  imageUrl: string | null;
+  adminReply: string | null;
+  repliedAt: string | null;
+  createdAt: string;
+  sender: { name: string; email: string };
+  tenant: { id: string; name: string; slug: string };
+}
+
+export interface PlatformSupportQuery {
+  state?: SupportReplyState;
+  page: number;
+  limit: number;
+}
+
 export interface PlatformTenantQuery {
   q?: string;
   status?: SubscriptionStatus;
@@ -63,4 +85,18 @@ export function listPlatformTenantSubscriptions(
   query: PlatformTenantSubscriptionQuery,
 ): Promise<PaginatedResult<PlatformTenantSubscription>> {
   return platformApiClient.get(`tenants/${tenantId}/subscriptions${buildQuery(query)}`);
+}
+
+export function listPlatformSupportMessages(
+  query: PlatformSupportQuery,
+): Promise<PaginatedResult<PlatformSupportMessage>> {
+  return platformApiClient.get(`support${buildQuery(query)}`);
+}
+
+export function countPlatformSupportAwaitingReply(): Promise<{ count: number }> {
+  return platformApiClient.get('support/awaiting-reply-count');
+}
+
+export function replyToPlatformSupportMessage(messageId: string, reply: string): Promise<PlatformSupportMessage> {
+  return platformApiClient.post(`support/${messageId}/reply`, { reply });
 }

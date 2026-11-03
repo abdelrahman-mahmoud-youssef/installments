@@ -970,7 +970,10 @@
     "genericError": "حصل خطأ ما.",
     "previousSubmissions": "الرسايل اللي بعتها قبل كده",
     "replied": "اترد عليها",
-    "replyLabel": "الرد"
+    "replyLabel": "الرد",
+    "imageLabel": "صورة (اختياري)",
+    "attachImage": "أرفق صورة، مثل لقطة شاشة للتحويل",
+    "attachedImage": "الصورة المرفقة"
   },
   "account": {
     "changePassword": "تغيير كلمة المرور",
@@ -1129,6 +1132,30 @@
       "noResults": "لا توجد متاجر مطابقة لبحثك.",
       "noShops": "لم يسجّل أي متجر بعد.",
       "genericError": "حدث خطأ ما. حاول مرة أخرى."
+    },
+    "nav": {
+      "shops": "المتاجر",
+      "support": "الدعم"
+    },
+    "support": {
+      "title": "صندوق رسائل الدعم",
+      "subtitle": "الرسائل والإيصالات المرسلة من المتاجر. يظهر ردك في صفحة الدعم لديهم.",
+      "awaitingReply": "بانتظار الرد",
+      "replied": "تم الرد",
+      "all": "الكل",
+      "reply": "رد",
+      "editReply": "تعديل الرد",
+      "replyTitle": "الرد على {name}",
+      "replyLabel": "ردك",
+      "sendReply": "إرسال الرد",
+      "sending": "جارٍ الإرسال…",
+      "replySent": "تم إرسال الرد إلى {name}.",
+      "yourReply": "ردك",
+      "attachedImage": "الصورة المرفقة",
+      "empty": "لا توجد رسائل بعد.",
+      "emptyAwaiting": "لا توجد رسائل بانتظار الرد.",
+      "loadError": "تعذر تحميل رسائل الدعم.",
+      "genericError": "حدث خطأ ما."
     }
   }
 }

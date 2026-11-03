@@ -26,6 +26,7 @@ export const routes = {
   support: '/support',
   platform: '/platform',
   platformLogin: '/platform/login',
+  platformSupport: '/platform/support',
   publicCustomer: (publicId: string) => `/customer/${publicId}`,
   publicCustomerPay: (publicId: string, contractPublicId: string) =>
     `/customer/${publicId}/contracts/${contractPublicId}/pay`,

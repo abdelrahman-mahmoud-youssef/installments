@@ -970,7 +970,10 @@
     "genericError": "Something went wrong.",
     "previousSubmissions": "Previous submissions",
     "replied": "Replied",
-    "replyLabel": "Reply"
+    "replyLabel": "Reply",
+    "imageLabel": "Image (optional)",
+    "attachImage": "Attach an image, such as a transfer screenshot",
+    "attachedImage": "Attached image"
   },
   "account": {
     "changePassword": "Change password",
@@ -1129,6 +1132,30 @@
       "noResults": "No shops match your search.",
       "noShops": "No shops have signed up yet.",
       "genericError": "Something went wrong. Please try again."
+    },
+    "nav": {
+      "shops": "Shops",
+      "support": "Support"
+    },
+    "support": {
+      "title": "Support inbox",
+      "subtitle": "Messages and receipts sent by shops. Your reply appears on their Support page.",
+      "awaitingReply": "Awaiting reply",
+      "replied": "Replied",
+      "all": "All",
+      "reply": "Reply",
+      "editReply": "Edit reply",
+      "replyTitle": "Reply to {name}",
+      "replyLabel": "Your reply",
+      "sendReply": "Send reply",
+      "sending": "Sending…",
+      "replySent": "Reply sent to {name}.",
+      "yourReply": "Your reply",
+      "attachedImage": "Attached image",
+      "empty": "No messages yet.",
+      "emptyAwaiting": "You're all caught up. No messages are waiting for a reply.",
+      "loadError": "Couldn't load support messages.",
+      "genericError": "Something went wrong."
     }
   }
 }
