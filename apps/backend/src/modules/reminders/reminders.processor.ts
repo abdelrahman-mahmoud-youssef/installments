@@ -19,6 +19,7 @@ export class RemindersProcessor extends WorkerHost {
     }
 
     await this.remindersService.sendRemindersForAllTenants();
+    await this.remindersService.sendMorningSummaryPushForAllTenants();
     await this.remindersService.sendCustomerReminders();
     await this.subscriptionPushService.sendNotices();
   }

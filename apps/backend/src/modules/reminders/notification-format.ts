@@ -1,7 +1,15 @@
 import { NotificationLanguage } from '@prisma/client';
 
+function numberLocale(language: NotificationLanguage): string {
+  return language === NotificationLanguage.AR ? 'ar-EG' : 'en-US';
+}
+
+export function formatCount(count: number, language: NotificationLanguage): string {
+  return new Intl.NumberFormat(numberLocale(language)).format(count);
+}
+
 export function formatMoney(minorUnits: number, language: NotificationLanguage): string {
-  const locale = language === NotificationLanguage.AR ? 'ar-EG' : 'en-US';
+  const locale = numberLocale(language);
   const amount = new Intl.NumberFormat(locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,

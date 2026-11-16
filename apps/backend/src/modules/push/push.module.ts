@@ -8,6 +8,6 @@ import { SubscriptionPushService } from './subscription-push.service';
 @Module({
   controllers: [PushDevicesController],
   providers: [ExpoPushClient, PushService, SubscriptionPushService, PushAnnouncementsService],
-  exports: [SubscriptionPushService, PushAnnouncementsService],
+  exports: [PushService, SubscriptionPushService, PushAnnouncementsService],
 })
 export class PushModule {}

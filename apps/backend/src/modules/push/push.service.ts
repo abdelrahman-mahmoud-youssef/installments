@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma, Role } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuthenticatedUser } from '../../common/decorators/current-user.decorator';
 import { RegisterPushDeviceDto } from './dto/register-push-device.dto';
@@ -28,8 +29,20 @@ export class PushService {
     if (tenantIds.length === 0) {
       return 0;
     }
+    return this.sendToDevices({ tenantId: { in: tenantIds } }, resolveContent, route);
+  }
+
+  sendToTenantAdmins(tenantId: string, resolveContent: PushContentResolver, route: PushRoute): Promise<number> {
+    return this.sendToDevices({ tenantId, user: { role: Role.ADMIN } }, resolveContent, route);
+  }
+
+  private async sendToDevices(
+    where: Prisma.PushDeviceWhereInput,
+    resolveContent: PushContentResolver,
+    route: PushRoute,
+  ): Promise<number> {
     const devices = await this.prisma.pushDevice.findMany({
-      where: { tenantId: { in: tenantIds } },
+      where,
       select: { token: true, language: true },
     });
     const messages: ExpoPushMessage[] = devices.map((device) => ({

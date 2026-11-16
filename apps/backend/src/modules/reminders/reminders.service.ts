@@ -1,11 +1,13 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { BadRequestException, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { InstallmentStatus, NotificationLanguage, ReminderChannel } from '@prisma/client';
+import { InstallmentStatus, NotificationLanguage, ReminderChannel, Role } from '@prisma/client';
 import { Queue } from 'bullmq';
 import { addUtcDays, getUtcToday } from '../../common/date/utc-date';
 import { PrismaService } from '../../prisma/prisma.service';
 import { buildReminderEligibleTenantWhere } from './reminder-eligible-tenant-where';
+import { PushService } from '../push/push.service';
+import { PushRoute } from '../push/push.types';
 import { ShareLinksService } from '../share-links/share-links.service';
 import { TelegramService } from '../telegram/telegram.service';
 import { toWhatsappRecipient } from '../whatsapp/whatsapp-phone';
@@ -13,6 +15,7 @@ import { WhatsappService } from '../whatsapp/whatsapp.service';
 import { CustomerReminderItem, formatCustomerReminderMessage } from './customer-reminder-message';
 import { buildCustomerWhatsappReminderParams } from './customer-whatsapp-reminder-message';
 import { buildEveningSummaryTemplateParams } from './evening-summary-message';
+import { buildMorningSummaryPushContent, hasMorningSummary } from './morning-summary-push';
 import { buildReminderTemplateParams, formatReminderMessage } from './reminder-message';
 
 export const REMINDERS_QUEUE = 'reminders';
@@ -69,6 +72,7 @@ export class RemindersService implements OnModuleInit {
     private readonly telegram: TelegramService,
     private readonly whatsapp: WhatsappService,
     private readonly shareLinks: ShareLinksService,
+    private readonly pushService: PushService,
   ) {}
 
   onModuleInit(): void {
@@ -160,6 +164,33 @@ export class RemindersService implements OnModuleInit {
             `WhatsApp reminder failed for tenant ${tenant.id}: ${error instanceof Error ? error.message : 'Unknown error'}`,
           );
         }
+      }
+    }
+  }
+
+  async sendMorningSummaryPushForAllTenants(): Promise<void> {
+    const tenants = await this.prisma.tenant.findMany({
+      where: {
+        ...buildReminderEligibleTenantWhere(getUtcToday()),
+        pushDevices: { some: { user: { role: Role.ADMIN } } },
+      },
+      select: { id: true },
+    });
+
+    for (const tenant of tenants) {
+      try {
+        const totals = await this.computeReminderTotals(tenant.id);
+        if (hasMorningSummary(totals)) {
+          await this.pushService.sendToTenantAdmins(
+            tenant.id,
+            (language) => buildMorningSummaryPushContent(totals, language),
+            PushRoute.DASHBOARD,
+          );
+        }
+      } catch (error) {
+        this.logger.error(
+          `Morning summary push failed for tenant ${tenant.id}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        );
       }
     }
   }
