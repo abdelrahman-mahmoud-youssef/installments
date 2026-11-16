@@ -1,18 +1,20 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { AuthHeader } from '@/components/auth/auth-header';
 import { AuthShell } from '@/components/auth/auth-shell';
 import { StepIndicator } from '@/components/auth/step-indicator';
+import { FormServerError } from '@/components/auth/form-server-error';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/ui/password-input';
-import { Link, useRouter } from '@/i18n/navigation';
+import { TextLink } from '@/components/ui/text-link';
+import { useRouter } from '@/i18n/navigation';
 import { register as registerBusiness } from '@/lib/api/auth';
 import { ApiError } from '@/lib/api/client';
 import { routes } from '@/lib/routes';
@@ -72,7 +74,12 @@ export default function RegisterPage() {
                     <FormItem>
                       <FormLabel>{t('businessName')}</FormLabel>
                       <FormControl>
-                        <Input autoComplete="organization" placeholder={t('businessNamePlaceholder')} {...field} />
+                        <Input
+                          inputSize="lg"
+                          autoComplete="organization"
+                          placeholder={t('businessNamePlaceholder')}
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -85,13 +92,13 @@ export default function RegisterPage() {
                     <FormItem>
                       <FormLabel>{t('name')}</FormLabel>
                       <FormControl>
-                        <Input autoComplete="name" placeholder={t('namePlaceholder')} {...field} />
+                        <Input inputSize="lg" autoComplete="name" placeholder={t('namePlaceholder')} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <Button type="button" size="lg" className="h-12 w-full text-base" onClick={() => void goToNextStep()}>
+                <Button type="button" size="xl" className="w-full" onClick={() => void goToNextStep()}>
                   {t('next')}
                   <ArrowRight className="size-4 rtl:-scale-x-100" />
                 </Button>
@@ -106,7 +113,9 @@ export default function RegisterPage() {
                       <FormLabel>{t('email')}</FormLabel>
                       <FormControl>
                         <Input
+                          inputSize="lg"
                           type="email"
+                          dir="ltr"
                           autoComplete="email"
                           placeholder={t('emailPlaceholder')}
                           autoFocus
@@ -124,34 +133,30 @@ export default function RegisterPage() {
                     <FormItem>
                       <FormLabel>{t('password')}</FormLabel>
                       <FormControl>
-                        <PasswordInput autoComplete="new-password" placeholder={t('passwordPlaceholder')} {...field} />
+                        <PasswordInput
+                          inputSize="lg"
+                          autoComplete="new-password"
+                          placeholder={t('passwordPlaceholder')}
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                {serverError && (
-                  <p className="rounded-lg bg-danger-soft px-3 py-2 text-sm font-medium text-danger">{serverError}</p>
-                )}
+                {serverError && <FormServerError message={serverError} />}
                 <div className="flex flex-col-reverse gap-3 sm:flex-row">
                   <Button
                     type="button"
-                    size="lg"
+                    size="xl"
                     variant="ghost"
-                    className="h-12 text-base"
                     disabled={form.formState.isSubmitting}
                     onClick={() => setStep(1)}
                   >
                     <ArrowLeft className="size-4 rtl:-scale-x-100" />
                     {t('back')}
                   </Button>
-                  <Button
-                    type="submit"
-                    size="lg"
-                    className="h-12 flex-1 text-base"
-                    disabled={form.formState.isSubmitting}
-                  >
-                    {form.formState.isSubmitting && <Loader2 className="size-4 animate-spin" />}
+                  <Button type="submit" size="xl" className="flex-1" loading={form.formState.isSubmitting}>
                     {form.formState.isSubmitting ? t('submitting') : t('submit')}
                   </Button>
                 </div>
@@ -162,9 +167,9 @@ export default function RegisterPage() {
 
         <p className="text-center text-sm text-muted-foreground">
           {t('haveAccount')}{' '}
-          <Link href={routes.login} className="font-medium text-foreground hover:underline">
+          <TextLink href={routes.login}>
             {t('signIn')}
-          </Link>
+          </TextLink>
         </p>
       </div>
     </AuthShell>

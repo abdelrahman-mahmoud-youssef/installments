@@ -1,12 +1,12 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { AuthHeader } from '@/components/auth/auth-header';
 import { AuthShell } from '@/components/auth/auth-shell';
+import { FormServerError } from '@/components/auth/form-server-error';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -51,7 +51,7 @@ export default function PlatformLoginPage() {
                 <FormItem>
                   <FormLabel>{t('email')}</FormLabel>
                   <FormControl>
-                    <Input type="email" dir="ltr" autoComplete="email" {...field} />
+                    <Input inputSize="lg" type="email" dir="ltr" autoComplete="email" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -64,17 +64,14 @@ export default function PlatformLoginPage() {
                 <FormItem>
                   <FormLabel>{t('password')}</FormLabel>
                   <FormControl>
-                    <PasswordInput autoComplete="current-password" {...field} />
+                    <PasswordInput inputSize="lg" autoComplete="current-password" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            {serverError && (
-              <p className="rounded-lg bg-danger-soft px-3 py-2 text-sm font-medium text-danger">{serverError}</p>
-            )}
-            <Button type="submit" size="lg" className="h-12 w-full text-base" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting && <Loader2 className="size-4 animate-spin" />}
+            {serverError && <FormServerError message={serverError} />}
+            <Button type="submit" size="xl" className="w-full" loading={form.formState.isSubmitting}>
               {form.formState.isSubmitting ? t('submitting') : t('submit')}
             </Button>
           </form>

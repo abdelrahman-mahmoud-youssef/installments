@@ -26,7 +26,7 @@ export function LedgerIllustration({ className }: { className?: string }) {
 
   return (
     <figure
-      className={cn('w-full rounded-3xl bg-card shadow-xl ring-1 ring-border', className)}
+      className={cn('w-full rounded-3xl bg-card text-card-foreground shadow-xl ring-1 ring-border', className)}
       role="img"
       aria-label={t('label')}
     >

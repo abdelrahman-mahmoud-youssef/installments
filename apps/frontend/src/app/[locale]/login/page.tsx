@@ -1,17 +1,18 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { AuthHeader } from '@/components/auth/auth-header';
 import { AuthShell } from '@/components/auth/auth-shell';
+import { FormServerError } from '@/components/auth/form-server-error';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/ui/password-input';
-import { Link, useRouter } from '@/i18n/navigation';
+import { TextLink } from '@/components/ui/text-link';
+import { useRouter } from '@/i18n/navigation';
 import { DEACTIVATED_ACCOUNT_MESSAGE, login, verifyTwoFactor } from '@/lib/api/auth';
 import { ApiError } from '@/lib/api/client';
 import { routes } from '@/lib/routes';
@@ -90,6 +91,7 @@ export default function LoginPage() {
                     <FormLabel>{t('twoFactorCodeLabel')}</FormLabel>
                     <FormControl>
                       <Input
+                        inputSize="lg"
                         dir="ltr"
                         inputMode="numeric"
                         autoComplete="one-time-code"
@@ -101,13 +103,8 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
-              {serverError && (
-                <p className="rounded-lg bg-danger-soft px-3 py-2 text-sm font-medium text-danger">
-                  {serverError}
-                </p>
-              )}
-              <Button type="submit" size="lg" className="h-12 w-full text-base" disabled={codeForm.formState.isSubmitting}>
-                {codeForm.formState.isSubmitting && <Loader2 className="size-4 animate-spin" />}
+              {serverError && <FormServerError message={serverError} />}
+              <Button type="submit" size="xl" className="w-full" loading={codeForm.formState.isSubmitting}>
                 {codeForm.formState.isSubmitting ? t('submitting') : t('twoFactorSubmit')}
               </Button>
             </form>
@@ -122,7 +119,14 @@ export default function LoginPage() {
                   <FormItem>
                     <FormLabel>{t('email')}</FormLabel>
                     <FormControl>
-                      <Input type="email" autoComplete="email" placeholder={t('emailPlaceholder')} {...field} />
+                      <Input
+                        inputSize="lg"
+                        type="email"
+                        dir="ltr"
+                        autoComplete="email"
+                        placeholder={t('emailPlaceholder')}
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -135,27 +139,24 @@ export default function LoginPage() {
                   <FormItem>
                     <div className="flex items-center justify-between gap-2">
                       <FormLabel>{t('password')}</FormLabel>
-                      <Link
-                        href={routes.forgotPassword}
-                        className="text-sm font-medium text-muted-foreground hover:text-foreground hover:underline"
-                      >
+                      <TextLink href={routes.forgotPassword} className="text-sm">
                         {t('forgotPassword')}
-                      </Link>
+                      </TextLink>
                     </div>
                     <FormControl>
-                      <PasswordInput autoComplete="current-password" placeholder={t('passwordPlaceholder')} {...field} />
+                      <PasswordInput
+                        inputSize="lg"
+                        autoComplete="current-password"
+                        placeholder={t('passwordPlaceholder')}
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              {serverError && (
-                <p className="rounded-lg bg-danger-soft px-3 py-2 text-sm font-medium text-danger">
-                  {serverError}
-                </p>
-              )}
-              <Button type="submit" size="lg" className="h-12 w-full text-base" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting && <Loader2 className="size-4 animate-spin" />}
+              {serverError && <FormServerError message={serverError} />}
+              <Button type="submit" size="xl" className="w-full" loading={form.formState.isSubmitting}>
                 {form.formState.isSubmitting ? t('submitting') : t('submit')}
               </Button>
             </form>
@@ -165,9 +166,9 @@ export default function LoginPage() {
         {!challengeToken && (
           <p className="text-center text-sm text-muted-foreground">
             {t('noAccount')}{' '}
-            <Link href={routes.register} className="font-medium text-foreground hover:underline">
+            <TextLink href={routes.register}>
               {t('createOne')}
-            </Link>
+            </TextLink>
           </p>
         )}
       </div>

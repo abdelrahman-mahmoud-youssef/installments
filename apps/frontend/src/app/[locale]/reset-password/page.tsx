@@ -1,13 +1,13 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { AuthHeader } from '@/components/auth/auth-header';
 import { AuthShell } from '@/components/auth/auth-shell';
+import { FormServerError } from '@/components/auth/form-server-error';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { PasswordInput } from '@/components/ui/password-input';
@@ -63,7 +63,7 @@ function ResetPasswordForm() {
           <p className="rounded-lg bg-danger-soft px-3 py-2 text-sm font-medium text-danger">
             {t('missingToken')}
           </p>
-          <Button size="lg" className="h-12 w-full text-base" render={<Link href={routes.forgotPassword} />}>
+          <Button size="xl" className="w-full" render={<Link href={routes.forgotPassword} />}>
             {t('requestNewLink')}
           </Button>
         </div>
@@ -77,7 +77,12 @@ function ResetPasswordForm() {
                 <FormItem>
                   <FormLabel>{t('newPassword')}</FormLabel>
                   <FormControl>
-                    <PasswordInput autoComplete="new-password" placeholder={t('passwordPlaceholder')} {...field} />
+                    <PasswordInput
+                      inputSize="lg"
+                      autoComplete="new-password"
+                      placeholder={t('passwordPlaceholder')}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -90,19 +95,19 @@ function ResetPasswordForm() {
                 <FormItem>
                   <FormLabel>{t('confirmPassword')}</FormLabel>
                   <FormControl>
-                    <PasswordInput autoComplete="new-password" placeholder={t('passwordPlaceholder')} {...field} />
+                    <PasswordInput
+                      inputSize="lg"
+                      autoComplete="new-password"
+                      placeholder={t('passwordPlaceholder')}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            {serverError && (
-              <p className="rounded-lg bg-danger-soft px-3 py-2 text-sm font-medium text-danger">
-                {serverError}
-              </p>
-            )}
-            <Button type="submit" size="lg" className="h-12 w-full text-base" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting && <Loader2 className="size-4 animate-spin" />}
+            {serverError && <FormServerError message={serverError} />}
+            <Button type="submit" size="xl" className="w-full" loading={form.formState.isSubmitting}>
               {form.formState.isSubmitting ? t('submitting') : t('submit')}
             </Button>
           </form>
