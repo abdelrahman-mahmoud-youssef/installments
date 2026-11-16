@@ -27,6 +27,7 @@ COPY --from=deps /repo/node_modules ./node_modules
 COPY --from=deps /repo/apps/frontend/node_modules ./apps/frontend/node_modules
 COPY --from=build /repo/apps/frontend/.next ./apps/frontend/.next
 COPY --from=build /repo/apps/frontend/public ./apps/frontend/public
+COPY --from=build /repo/apps/frontend/assets ./apps/frontend/assets
 COPY apps/frontend/package.json apps/frontend/package.json
 COPY apps/frontend/next.config.ts apps/frontend/next.config.ts
 WORKDIR /repo/apps/frontend

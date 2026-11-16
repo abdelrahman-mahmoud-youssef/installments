@@ -25,6 +25,13 @@
       "prisma",
       "sharp",
       "unrs-resolver"
-    ]
+    ],
+    "packageExtensions": {
+      "@hookform/resolvers": {
+        "peerDependencies": {
+          "zod": "^4.0.0"
+        }
+      }
+    }
   }
 }
