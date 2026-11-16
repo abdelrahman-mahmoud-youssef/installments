@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { ScheduleIllustration } from '@/components/marketing/schedule-illustration';
+import { LedgerIllustration } from '@/components/marketing/ledger-illustration';
 import { LanguageSwitcher } from '@/components/shared/language-switcher';
 import { Logo } from '@/components/shared/logo';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
@@ -23,7 +23,7 @@ function BrandPanel() {
         </h2>
         <p className="mt-4 max-w-md text-lg text-muted-foreground">{t('subhead')}</p>
       </div>
-      <ScheduleIllustration className="relative mx-0" />
+      <LedgerIllustration className="relative" />
     </aside>
   );
 }

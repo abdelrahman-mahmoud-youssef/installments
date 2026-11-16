@@ -36,7 +36,7 @@
   --color-teal: var(--teal);
   --color-teal-soft: var(--teal-soft);
 
-  --text-display: clamp(2.5rem, 1.55rem + 3.9vw, 4.5rem);
+  --text-display: clamp(2.5rem, 1.7rem + 3.2vw, 4rem);
   --text-display--line-height: 1.04;
   --text-headline: clamp(1.875rem, 1.45rem + 1.7vw, 2.75rem);
   --text-headline--line-height: 1.12;

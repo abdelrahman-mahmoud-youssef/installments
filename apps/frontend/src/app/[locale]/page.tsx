@@ -1,11 +1,11 @@
 import { cookies } from 'next/headers';
 import { getLocale } from 'next-intl/server';
+import { FeaturesSection } from '@/components/marketing/features-section';
 import { FinalCtaSection } from '@/components/marketing/final-cta-section';
 import { HeroSection } from '@/components/marketing/hero-section';
 import { HowItWorksSection } from '@/components/marketing/how-it-works-section';
-import { MarketingFooter } from '@/components/marketing/marketing-footer';
-import { MarketingHeader } from '@/components/marketing/marketing-header';
-import { ValuePropsSection } from '@/components/marketing/value-props-section';
+import { MarketingShell } from '@/components/marketing/marketing-shell';
+import { ProductSection } from '@/components/marketing/product-section';
 import { redirect } from '@/i18n/navigation';
 import { config } from '@/lib/config';
 import { routes } from '@/lib/routes';
@@ -20,15 +20,12 @@ export default async function RootPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <MarketingHeader />
-      <main>
-        <HeroSection />
-        <ValuePropsSection />
-        <HowItWorksSection />
-        <FinalCtaSection />
-      </main>
-      <MarketingFooter />
-    </div>
+    <MarketingShell>
+      <HeroSection />
+      <FeaturesSection />
+      <ProductSection />
+      <HowItWorksSection />
+      <FinalCtaSection />
+    </MarketingShell>
   );
 }

@@ -62,38 +62,54 @@
       "menuLabel": "Main"
     },
     "hero": {
-      "eyebrow": "Installment tracking for shops",
-      "title": "Every installment. On time. In one place.",
+      "titleFirst": "Every installment.",
+      "titleSecond": "On time. In one place.",
       "subtitle": "Give each customer a clear payment schedule, automatic reminders, and their own page to check what is left — all under your shop’s name.",
-      "ctaPrimary": "Create your free workspace",
+      "ctaPrimary": "Create your workspace",
       "ctaSecondary": "Sign in",
-      "note": "Free during early access. No card required."
+      "note": "14-day free trial. No card needed."
     },
     "schedule": {
       "label": "An example installment schedule with three of six payments collected",
-      "customer": "Customer",
       "customerName": "Mariam Hassan",
       "product": "Samsung Galaxy A55",
-      "onTrack": "On track",
+      "installmentNumber": "Installment {number}",
+      "statusPaid": "Paid",
+      "statusNext": "Next",
+      "statusUpcoming": "Upcoming",
       "paid": "Paid so far",
       "remaining": "Remaining",
-      "nextDue": "Next due",
-      "installmentOf": "Installment {current} of {total}"
+      "progress": "{paid} of {total} paid"
     },
-    "valueProps": {
-      "eyebrow": "What you get",
-      "title": "Everything a shop needs to run installments — nothing it doesn’t",
+    "product": {
+      "title": "What your customer sees",
+      "description": "Every customer gets a page with your shop’s name on it: what they paid, what is left, and which installment comes next. They open it from a link or a QR code — no app, no account.",
+      "proofNote": "From the same page they can send you a screenshot of a transfer. You approve it, and it is recorded on their schedule.",
+      "frameLabel": "An example of a customer’s page",
+      "previewShop": "Al Amal Mobiles",
+      "previewGreeting": "Hi, Mariam",
+      "previewRemaining": "Remaining on your contract",
+      "previewNext": "Next installment",
+      "previewInstallment": "Installment {current} of {total}",
+      "previewSchedule": "Your schedule"
+    },
+    "features": {
+      "title": "Built for how shops sell on installments",
+      "intro": "In Arabic and English, with right-to-left done properly.",
       "scheduleTitle": "Schedules that build themselves",
-      "scheduleDescription": "Set the price, the down payment, and the number of installments. Every due date and amount is generated for you.",
+      "scheduleDescription": "Set the price, the down payment, and the number of installments — monthly, weekly or every few days. Every due date and amount is calculated for you.",
       "pageTitle": "A page for every customer",
       "pageDescription": "Share a link or a QR code. Customers see exactly what they paid and what is next — no app, no account.",
       "remindersTitle": "Reminders that send themselves",
       "remindersDescription": "Daily Telegram and WhatsApp reminders for what is due and overdue, without anyone having to remember.",
-      "bilingualTitle": "Arabic and English, properly",
-      "bilingualDescription": "Full right-to-left layout across the dashboard and every customer page — because that is how your customers read."
+      "proofsTitle": "Payment proofs in one place",
+      "proofsDescription": "Customers send a transfer screenshot from their page. You approve or decline it, and approved payments land on their schedule.",
+      "walletsTitle": "Every wallet, tracked",
+      "walletsDescription": "Keep Vodafone Cash, InstaPay and your other wallets side by side, each with its own log and an optional monthly limit.",
+      "teamTitle": "Your team and your numbers",
+      "teamDescription": "Add staff accounts, and see what came in today, this month, and which customers are overdue."
     },
     "howItWorks": {
-      "eyebrow": "How it works",
       "title": "Up and running in three steps",
       "step1Title": "Add a customer",
       "step1Description": "Their name and phone number — that is all it takes.",
@@ -104,8 +120,8 @@
     },
     "finalCta": {
       "title": "Ready to stop tracking installments by hand?",
-      "subtitle": "Create your workspace in under a minute.",
-      "cta": "Create your free workspace"
+      "subtitle": "Two short steps: your shop, then your account.",
+      "cta": "Create your workspace"
     },
     "footer": {
       "tagline": "Installment tracking software for shops — not a lender.",
