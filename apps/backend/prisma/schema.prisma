@@ -128,6 +128,7 @@ model Tenant {
   showTelegramOnPublicPage  Boolean                    @default(true)
   showOffersOnPublicPage    Boolean                    @default(true)
   notificationLanguage      NotificationLanguage       @default(AR)
+  isDemo                    Boolean                    @default(false)
   subscriptionExpiresOn     DateTime                   @db.Date
   createdAt                 DateTime                   @default(now())
   users                     User[]
