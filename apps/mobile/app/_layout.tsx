@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { LocaleDirContext } from 'expo-router/react-navigation';
 import * as SplashScreen from 'expo-splash-screen';
@@ -10,6 +10,7 @@ import { SubscriptionGate } from '@/components/subscription/subscription-gate';
 import { LaunchReveal } from '@/components/ui/launch-reveal';
 import { ToastProvider } from '@/components/ui/toast-context';
 import { I18nProvider, useI18n } from '@/i18n/i18n-context';
+import { queryClient } from '@/lib/query-client';
 import { useStackScreenOptions } from '@/navigation/use-stack-screen-options';
 import { PushRegistration } from '@/push/push-registration';
 import { AppLockProvider } from '@/security/app-lock-context';
@@ -17,12 +18,6 @@ import { ThemeProvider, useTheme } from '@/theme/theme-context';
 import { TodayWidgetSync } from '@/widgets/today-widget-sync';
 
 void SplashScreen.preventAutoHideAsync();
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: { retry: 0, staleTime: 30_000 },
-  },
-});
 
 function AuthGate({ children }: { children: ReactNode }) {
   const { isAuthenticated, isReady: authReady } = useAuth();
