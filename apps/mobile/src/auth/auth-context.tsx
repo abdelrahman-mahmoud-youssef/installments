@@ -24,10 +24,15 @@ import {
   setSubscriptionInactiveHandler,
   setUnauthorizedHandler,
 } from '@/api/client';
+import { restoreQueryCache, startQueryCachePersistence, stopQueryCachePersistence } from '@/lib/query-persistence';
 import { preferenceStorage, tokenStorage } from '@/lib/storage';
 import { forgetPushRegistration, unregisterFromPush } from '@/push/push-device';
 import { useTheme } from '@/theme/theme-context';
 import { userSnapshotStorage } from './user-snapshot-storage';
+
+function cacheOwnerKey(user: CurrentUser): string {
+  return `${user.tenantId}:${user.id}`;
+}
 
 export type SignInResult = { status: 'authenticated' } | { status: 'twoFactor'; challengeToken: string };
 
@@ -62,6 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const clearSession = useCallback(async () => {
     setAuthToken(null);
     setUser(null);
+    await stopQueryCachePersistence();
     queryClient.clear();
     await Promise.all([tokenStorage.clear(), userSnapshotStorage.clear()]);
   }, [queryClient]);
@@ -82,6 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setAuthToken(token);
       const snapshot = await userSnapshotStorage.get();
       if (snapshot && snapshot.subscription.status !== 'EXPIRED') {
+        await restoreQueryCache(cacheOwnerKey(snapshot));
         setUser(snapshot);
         getMe()
           .then(setUser)
@@ -92,7 +99,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           });
         return;
       }
-      setUser(await getMe());
+      const currentUser = await getMe();
+      await restoreQueryCache(cacheOwnerKey(currentUser));
+      setUser(currentUser);
     }
 
     restoreSession()
@@ -105,6 +114,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       void userSnapshotStorage.set(user);
     }
   }, [user, isReady]);
+
+  const cacheOwner = user ? cacheOwnerKey(user) : null;
+  useEffect(() => {
+    if (isReady && cacheOwner) {
+      startQueryCachePersistence(cacheOwner);
+    }
+  }, [isReady, cacheOwner]);
 
   const adoptToken = useCallback(async (accessToken: string) => {
     setAuthToken(accessToken);
