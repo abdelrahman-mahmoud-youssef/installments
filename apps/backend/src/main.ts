@@ -2,6 +2,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import compression from 'compression';
 import helmet from 'helmet';
 import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
@@ -18,6 +19,7 @@ async function bootstrap(): Promise<void> {
       crossOriginResourcePolicy: { policy: 'cross-origin' },
     }),
   );
+  app.use(compression());
   app.useBodyParser('json', { limit: '10mb' });
   const config = app.get(ConfigService);
   app.useStaticAssets(getUploadsDir(config), { prefix: '/uploads' });
