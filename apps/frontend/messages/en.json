@@ -108,8 +108,14 @@
       "tagline": "Installment tracking software for shops — not a lender.",
       "rights": "All rights reserved.",
       "privacyLink": "Privacy Policy",
-      "termsLink": "Terms of Service"
+      "termsLink": "Terms of Service",
+      "contactLink": "Contact support"
     }
+  },
+  "contactPage": {
+    "title": "Contact support",
+    "description": "Questions about Qistak or your account? Send us an email and we will get back to you.",
+    "emailLabel": "Email:"
   },
   "legal": {
     "backToHome": "Back to home",

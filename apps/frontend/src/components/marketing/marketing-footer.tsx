@@ -42,6 +42,12 @@ export function MarketingFooter() {
           >
             {tFooter('termsLink')}
           </Link>
+          <Link
+            href={routes.publicContact}
+            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            {tFooter('contactLink')}
+          </Link>
         </nav>
 
         <p className="text-xs text-muted-foreground">
