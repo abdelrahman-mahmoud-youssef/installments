@@ -218,7 +218,7 @@
       "noAccount": "معندكش حساب؟",
       "createOne": "اعمل حساب",
       "genericError": "مقدرناش نسجّلك دخول. جرّب تاني.",
-      "accountDeactivated": "الحساب ده اتوقف. كلّم مسؤول المحل بتاعك.",
+      "accountDeactivated": "الحساب ده اتوقف. تقدر تتواصل مع الدعم.",
       "twoFactorTitle": "التحقق بخطوتين",
       "twoFactorDescription": "اكتب الكود المكوّن من 6 أرقام من تطبيق المصادقة، أو أي كود من أكواد النسخ الاحتياطي بتاعتك.",
       "twoFactorCodeLabel": "الكود",

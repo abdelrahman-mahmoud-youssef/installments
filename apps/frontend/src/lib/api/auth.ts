@@ -1,6 +1,8 @@
 import { SubscriptionStatus } from '@/lib/enums';
 import { apiClient, ApiError, ApiErrorBody, postJson } from './client';
 
+export const DEACTIVATED_ACCOUNT_MESSAGE = 'This account has been deactivated. You can contact support.';
+
 export type Role = 'ADMIN' | 'STAFF';
 
 export interface LoginPayload {

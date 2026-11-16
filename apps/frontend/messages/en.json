@@ -218,7 +218,7 @@
       "noAccount": "Don't have an account?",
       "createOne": "Create one",
       "genericError": "Unable to sign in. Please try again.",
-      "accountDeactivated": "This account has been deactivated. Contact your shop admin.",
+      "accountDeactivated": "This account has been deactivated. You can contact support.",
       "twoFactorTitle": "Two-factor authentication",
       "twoFactorDescription": "Enter the 6-digit code from your authenticator app, or one of your backup codes.",
       "twoFactorCodeLabel": "Code",

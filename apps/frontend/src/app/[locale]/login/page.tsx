@@ -12,7 +12,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/ui/password-input';
 import { Link, useRouter } from '@/i18n/navigation';
-import { login, verifyTwoFactor } from '@/lib/api/auth';
+import { DEACTIVATED_ACCOUNT_MESSAGE, login, verifyTwoFactor } from '@/lib/api/auth';
 import { ApiError } from '@/lib/api/client';
 import { routes } from '@/lib/routes';
 import {
@@ -49,7 +49,7 @@ export default function LoginPage() {
       router.push(routes.dashboard);
       router.refresh();
     } catch (error) {
-      if (error instanceof ApiError && error.message === 'This account has been deactivated.') {
+      if (error instanceof ApiError && error.message === DEACTIVATED_ACCOUNT_MESSAGE) {
         setServerError(t('accountDeactivated'));
       } else {
         setServerError(error instanceof ApiError ? error.message : t('genericError'));
