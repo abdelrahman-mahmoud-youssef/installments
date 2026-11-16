@@ -4,6 +4,7 @@ import { Images } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
+import { thumbnailUrl } from '@/lib/assets';
 import { OfferGalleryDialog } from '@/components/shop/offer-gallery-dialog';
 import type { PublicOffer } from '@/lib/api/public';
 
@@ -20,7 +21,7 @@ export function OfferCard({ offer }: { offer: PublicOffer }) {
           className="relative block aspect-4/3 w-full overflow-hidden"
         >
           <img
-            src={offer.images[0]}
+            src={thumbnailUrl(offer.images[0], 800)}
             alt={offer.title}
             loading="lazy"
             className="size-full object-cover transition-transform duration-300 group-hover:scale-105"

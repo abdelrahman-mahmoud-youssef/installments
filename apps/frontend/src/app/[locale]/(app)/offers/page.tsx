@@ -28,7 +28,7 @@ import {
 } from '@/hooks/use-offers';
 import { ApiError } from '@/lib/api/client';
 import type { Offer } from '@/lib/api/offers';
-import { resolveAssetUrl } from '@/lib/assets';
+import { resolveAssetUrl, thumbnailUrl } from '@/lib/assets';
 
 function OfferCardSkeleton() {
   return <Skeleton className="h-64 w-full rounded-xl" />;
@@ -39,7 +39,8 @@ function AdminOfferCard({ offer }: { offer: Offer }) {
   const setActive = useSetOfferActive();
   const updateOffer = useUpdateOffer(offer.id);
   const deleteOffer = useDeleteOffer();
-  const imageUrl = resolveAssetUrl(offer.images[0] ?? null);
+  const coverUrl = resolveAssetUrl(offer.images[0] ?? null);
+  const imageUrl = coverUrl ? thumbnailUrl(coverUrl, 800) : null;
 
   return (
     <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-xs">

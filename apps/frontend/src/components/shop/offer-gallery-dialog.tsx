@@ -3,6 +3,7 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { thumbnailUrl } from '@/lib/assets';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 
@@ -34,7 +35,7 @@ export function OfferGalleryDialog({
         <DialogTitle className="truncate pe-8">{title}</DialogTitle>
         <div className="relative overflow-hidden rounded-lg bg-muted">
           <img loading="lazy" decoding="async"
-            src={images[index]}
+            src={thumbnailUrl(images[index], 800)}
             alt={title}
             className="aspect-4/3 w-full object-cover"
           />
@@ -76,7 +77,7 @@ export function OfferGalleryDialog({
                   i === index && 'ring-primary',
                 )}
               >
-                <img loading="lazy" decoding="async" src={src} alt="" className="size-full object-cover" />
+                <img loading="lazy" decoding="async" src={thumbnailUrl(src, 200)} alt="" className="size-full object-cover" />
               </button>
             ))}
           </div>

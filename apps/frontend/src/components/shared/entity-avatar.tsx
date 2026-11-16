@@ -1,5 +1,5 @@
 import { InitialAvatar } from '@/components/shared/initial-avatar';
-import { resolveAssetUrl } from '@/lib/assets';
+import { resolveAssetUrl, thumbnailUrl } from '@/lib/assets';
 import { cn } from '@/lib/utils';
 
 export function EntityAvatar({
@@ -11,13 +11,14 @@ export function EntityAvatar({
   photoUrl: string | null | undefined;
   className?: string;
 }) {
-  if (!photoUrl) {
+  const photoSource = resolveAssetUrl(photoUrl ?? null);
+  if (!photoSource) {
     return <InitialAvatar name={name} className={className} />;
   }
 
   return (
     <img loading="lazy" decoding="async"
-      src={resolveAssetUrl(photoUrl) ?? undefined}
+      src={thumbnailUrl(photoSource, 200)}
       alt={name}
       className={cn('shrink-0 rounded-full object-cover', className)}
     />
