@@ -18,10 +18,16 @@ import {
   RegisterInput,
   verifyTwoFactor,
 } from '@/api/auth';
-import { setAuthToken, setSubscriptionInactiveHandler, setUnauthorizedHandler } from '@/api/client';
+import {
+  NetworkError,
+  setAuthToken,
+  setSubscriptionInactiveHandler,
+  setUnauthorizedHandler,
+} from '@/api/client';
 import { preferenceStorage, tokenStorage } from '@/lib/storage';
 import { forgetPushRegistration, unregisterFromPush } from '@/push/push-device';
 import { useTheme } from '@/theme/theme-context';
+import { userSnapshotStorage } from './user-snapshot-storage';
 
 export type SignInResult = { status: 'authenticated' } | { status: 'twoFactor'; challengeToken: string };
 
@@ -57,7 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAuthToken(null);
     setUser(null);
     queryClient.clear();
-    await tokenStorage.clear();
+    await Promise.all([tokenStorage.clear(), userSnapshotStorage.clear()]);
   }, [queryClient]);
 
   useEffect(() => {
@@ -68,19 +74,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [clearSession]);
 
   useEffect(() => {
-    void tokenStorage
-      .get()
-      .then(async (token) => {
-        if (!token) {
-          return;
-        }
-        setAuthToken(token);
-        const currentUser = await getMe();
-        setUser(currentUser);
-      })
-      .catch(() => clearSession())
+    async function restoreSession(): Promise<void> {
+      const token = await tokenStorage.get();
+      if (!token) {
+        return;
+      }
+      setAuthToken(token);
+      const snapshot = await userSnapshotStorage.get();
+      if (snapshot && snapshot.subscription.status !== 'EXPIRED') {
+        setUser(snapshot);
+        getMe()
+          .then(setUser)
+          .catch((error: unknown) => {
+            if (!(error instanceof NetworkError)) {
+              console.warn('Could not refresh the signed-in user', error);
+            }
+          });
+        return;
+      }
+      setUser(await getMe());
+    }
+
+    restoreSession()
+      .catch((error: unknown) => (error instanceof NetworkError ? undefined : clearSession()))
       .finally(() => setIsReady(true));
   }, [clearSession]);
+
+  useEffect(() => {
+    if (isReady && user) {
+      void userSnapshotStorage.set(user);
+    }
+  }, [user, isReady]);
 
   const adoptToken = useCallback(async (accessToken: string) => {
     setAuthToken(accessToken);
