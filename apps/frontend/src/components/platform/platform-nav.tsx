@@ -37,6 +37,7 @@ export function PlatformNav() {
     <nav className="flex items-center gap-1">
       <NavLink href={routes.platform} label={t('shops')} />
       <NavLink href={routes.platformSupport} label={t('support')} badge={awaitingReply?.count} />
+      <NavLink href={routes.platformNotifications} label={t('notifications')} />
     </nav>
   );
 }

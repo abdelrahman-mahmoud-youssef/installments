@@ -1156,7 +1156,32 @@
     },
     "nav": {
       "shops": "Shops",
-      "support": "Support"
+      "support": "Support",
+      "notifications": "Notifications"
+    },
+    "notifications": {
+      "title": "Push notifications",
+      "subtitle": "Send a notification to the shops' phones. Expiry reminders are sent automatically 3 days before and 1 day after a subscription ends.",
+      "formTitle": "New notification",
+      "titleLabel": "Title",
+      "bodyLabel": "Message",
+      "audienceLabel": "Send to",
+      "shopLabel": "Shop",
+      "shopPlaceholder": "Choose a shop",
+      "audience": {
+        "ALL": "All shops",
+        "EXPIRING_SOON": "Shops expiring soon",
+        "EXPIRED": "Expired shops",
+        "SHOP": "One shop"
+      },
+      "send": "Send notification",
+      "sending": "Sending…",
+      "sent": "Sent to {count, plural, one {# device} other {# devices}}.",
+      "historyTitle": "Sent notifications",
+      "recipients": "{count, plural, one {# device} other {# devices}}",
+      "empty": "No notifications sent yet.",
+      "loadError": "Couldn't load notifications.",
+      "genericError": "Something went wrong."
     },
     "support": {
       "title": "Support inbox",

@@ -104,3 +104,39 @@ export function countPlatformSupportAwaitingReply(): Promise<{ count: number }> 
 export function replyToPlatformSupportMessage(messageId: string, reply: string): Promise<PlatformSupportMessage> {
   return platformApiClient.post(`support/${messageId}/reply`, { reply });
 }
+
+export const PUSH_AUDIENCES = ['ALL', 'EXPIRING_SOON', 'EXPIRED', 'SHOP'] as const;
+
+export type PushAudience = (typeof PUSH_AUDIENCES)[number];
+
+export interface PlatformPushAnnouncement {
+  id: string;
+  title: string;
+  body: string;
+  audience: PushAudience | null;
+  recipientCount: number;
+  createdAt: string;
+  shopName: string | null;
+}
+
+export interface SendPlatformPushInput {
+  title: string;
+  body: string;
+  audience: PushAudience;
+  tenantId?: string;
+}
+
+export interface PlatformPushQuery {
+  page: number;
+  limit: number;
+}
+
+export function listPlatformPushAnnouncements(
+  query: PlatformPushQuery,
+): Promise<PaginatedResult<PlatformPushAnnouncement>> {
+  return platformApiClient.get(`push${buildQuery(query)}`);
+}
+
+export function sendPlatformPushAnnouncement(input: SendPlatformPushInput): Promise<PlatformPushAnnouncement> {
+  return platformApiClient.post('push', input);
+}

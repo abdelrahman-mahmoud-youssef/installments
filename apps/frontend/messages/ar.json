@@ -1156,7 +1156,32 @@
     },
     "nav": {
       "shops": "المتاجر",
-      "support": "الدعم"
+      "support": "الدعم",
+      "notifications": "الإشعارات"
+    },
+    "notifications": {
+      "title": "الإشعارات",
+      "subtitle": "أرسل إشعاراً إلى هواتف المتاجر. تُرسل تذكيرات الانتهاء تلقائياً قبل انتهاء الاشتراك بـ 3 أيام وبعده بيوم.",
+      "formTitle": "إشعار جديد",
+      "titleLabel": "العنوان",
+      "bodyLabel": "الرسالة",
+      "audienceLabel": "إرسال إلى",
+      "shopLabel": "المتجر",
+      "shopPlaceholder": "اختر متجراً",
+      "audience": {
+        "ALL": "كل المتاجر",
+        "EXPIRING_SOON": "المتاجر القريبة من الانتهاء",
+        "EXPIRED": "المتاجر المنتهية",
+        "SHOP": "متجر واحد"
+      },
+      "send": "إرسال الإشعار",
+      "sending": "جارٍ الإرسال…",
+      "sent": "تم الإرسال إلى {count, plural, one {# جهاز} other {# أجهزة}}.",
+      "historyTitle": "الإشعارات المرسلة",
+      "recipients": "{count, plural, one {# جهاز} other {# أجهزة}}",
+      "empty": "لم تُرسل إشعارات بعد.",
+      "loadError": "تعذّر تحميل الإشعارات.",
+      "genericError": "حدث خطأ ما."
     },
     "support": {
       "title": "صندوق رسائل الدعم",
