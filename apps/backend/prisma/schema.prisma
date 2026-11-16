@@ -43,6 +43,19 @@ enum NotificationLanguage {
   EN
 }
 
+enum PushNotificationKind {
+  SUBSCRIPTION_EXPIRING
+  SUBSCRIPTION_EXPIRED
+  ANNOUNCEMENT
+}
+
+enum PushAudience {
+  ALL
+  EXPIRING_SOON
+  EXPIRED
+  SHOP
+}
+
 enum ReminderChannel {
   TELEGRAM
   WHATSAPP
@@ -133,13 +146,15 @@ model Tenant {
   counterparties            Counterparty[]
   counterpartyAdjustments   CounterpartyAdjustment[]
   supportMessages           SupportMessage[]
+  pushDevices               PushDevice[]
+  pushNotificationLogs      PushNotificationLog[]
   offers                    Offer[]
   shareLinks                ShareLink[]
   reminderMessageSettings   ReminderMessageSettings?
   subscriptions             TenantSubscription[]
   referredByTenantId        String?
-  referredBy                Tenant?                   @relation("TenantReferrals", fields: [referredByTenantId], references: [id], onDelete: SetNull)
-  referrals                 Tenant[]                  @relation("TenantReferrals")
+  referredBy                Tenant?                    @relation("TenantReferrals", fields: [referredByTenantId], references: [id], onDelete: SetNull)
+  referrals                 Tenant[]                   @relation("TenantReferrals")
 
   @@index([subscriptionExpiresOn])
   @@index([referredByTenantId])
@@ -190,6 +205,7 @@ model User {
   twoFactorBackupCodes  TwoFactorBackupCode[]
   passwordResetTokens   PasswordResetToken[]
   supportMessages       SupportMessage[]
+  pushDevices           PushDevice[]
 
   @@index([tenantId, role])
 }
@@ -564,4 +580,35 @@ model WhatsappMessage {
   receivedAt DateTime @default(now())
 
   @@index([fromPhone, receivedAt])
+}
+
+model PushDevice {
+  id        String               @id @default(cuid())
+  tenantId  String
+  userId    String
+  token     String               @unique
+  language  NotificationLanguage @default(AR)
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+  tenant    Tenant               @relation(fields: [tenantId], references: [id])
+  user      User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([userId])
+}
+
+model PushNotificationLog {
+  id             String               @id @default(cuid())
+  kind           PushNotificationKind
+  audience       PushAudience?
+  tenantId       String?
+  dedupeKey      String?              @unique
+  title          String
+  body           String
+  recipientCount Int                  @default(0)
+  createdAt      DateTime             @default(now())
+  tenant         Tenant?              @relation(fields: [tenantId], references: [id])
+
+  @@index([kind, createdAt])
+  @@index([tenantId])
 }

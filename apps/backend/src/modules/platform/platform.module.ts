@@ -5,7 +5,9 @@ import { PassportModule } from '@nestjs/passport';
 import { PlatformAdminBootstrapService } from './platform-admin-bootstrap.service';
 import { PlatformAuthController } from './platform-auth.controller';
 import { PlatformAuthService } from './platform-auth.service';
+import { PushModule } from '../push/push.module';
 import { PlatformJwtStrategy } from './platform-jwt.strategy';
+import { PlatformPushController } from './platform-push.controller';
 import { PlatformSupportController } from './platform-support.controller';
 import { PlatformSupportService } from './platform-support.service';
 import { PlatformTenantsController } from './platform-tenants.controller';
@@ -13,6 +15,7 @@ import { PlatformTenantsService } from './platform-tenants.service';
 
 @Module({
   imports: [
+    PushModule,
     PassportModule,
     JwtModule.registerAsync({
       inject: [ConfigService],
@@ -24,7 +27,7 @@ import { PlatformTenantsService } from './platform-tenants.service';
       }),
     }),
   ],
-  controllers: [PlatformAuthController, PlatformTenantsController, PlatformSupportController],
+  controllers: [PlatformAuthController, PlatformTenantsController, PlatformSupportController, PlatformPushController],
   providers: [
     PlatformAuthService,
     PlatformTenantsService,

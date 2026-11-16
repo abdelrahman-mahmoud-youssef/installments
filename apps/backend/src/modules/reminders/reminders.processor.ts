@@ -1,10 +1,14 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
+import { SubscriptionPushService } from '../push/subscription-push.service';
 import { EVENING_SUMMARY_JOB_NAME, RemindersService } from './reminders.service';
 
 @Processor('reminders')
 export class RemindersProcessor extends WorkerHost {
-  constructor(private readonly remindersService: RemindersService) {
+  constructor(
+    private readonly remindersService: RemindersService,
+    private readonly subscriptionPushService: SubscriptionPushService,
+  ) {
     super();
   }
 
@@ -16,5 +20,6 @@ export class RemindersProcessor extends WorkerHost {
 
     await this.remindersService.sendRemindersForAllTenants();
     await this.remindersService.sendCustomerReminders();
+    await this.subscriptionPushService.sendNotices();
   }
 }

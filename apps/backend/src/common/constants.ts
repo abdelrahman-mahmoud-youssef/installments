@@ -67,6 +67,18 @@ export const SUBSCRIPTION_TRIAL_DAYS = 14;
 
 export const SUBSCRIPTION_RENEWAL_NOTICE_DAYS = 5;
 
+export const SUBSCRIPTION_PUSH_DAYS_BEFORE_EXPIRY = 3;
+
+export const SUBSCRIPTION_PUSH_DAYS_AFTER_EXPIRY = 1;
+
+export const EXPO_PUSH_URL = 'https://exp.host/--/api/v2/push/send';
+
+export const EXPO_PUSH_BATCH_SIZE = 100;
+
+export const PUSH_TITLE_MAX_LENGTH = 100;
+
+export const PUSH_BODY_MAX_LENGTH = 300;
+
 export const SUBSCRIPTION_PAYMENT_PHONE = '01122662426';
 
 export const SUBSCRIPTION_INACTIVE_ERROR_CODE = 'SUBSCRIPTION_INACTIVE';
