@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { View } from 'react-native';
-import { resolveAssetUrl } from '@/lib/asset-url';
+import { resolveThumbnailUrl } from '@/lib/asset-url';
 import { initialsOf } from '@/lib/initials';
 import { useTheme } from '@/theme/theme-context';
 import { radius } from '@/theme/tokens';
@@ -19,7 +19,7 @@ export function Avatar({ name, size = 44, photoUrl }: AvatarProps) {
   if (photoUrl) {
     return (
       <Image
-        source={{ uri: resolveAssetUrl(photoUrl) }}
+        source={{ uri: resolveThumbnailUrl(photoUrl, 200) }}
         accessibilityLabel={name}
         cachePolicy="disk"
         transition={IMAGE_FADE_IN_MS}

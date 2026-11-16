@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { PressableScale } from '@/components/ui/pressable-scale';
 import { useI18n } from '@/i18n/i18n-context';
-import { resolveAssetUrl } from '@/lib/asset-url';
+import { resolveThumbnailUrl } from '@/lib/asset-url';
 import { formatNumber } from '@/lib/format';
 import { useTheme } from '@/theme/theme-context';
 import { radius, spacing } from '@/theme/tokens';
@@ -31,7 +31,7 @@ export function OfferCard({ offer, onPress }: OfferCardProps) {
         <View style={{ aspectRatio: COVER_ASPECT_RATIO, backgroundColor: colors.surfaceMuted }}>
           {cover ? (
             <Image
-              source={{ uri: resolveAssetUrl(cover) }}
+              source={{ uri: resolveThumbnailUrl(cover, 800) }}
               contentFit="cover"
               cachePolicy="disk"
               style={{ width: '100%', height: '100%', opacity: offer.isActive ? 1 : HIDDEN_COVER_OPACITY }}

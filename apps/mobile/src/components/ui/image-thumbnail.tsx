@@ -4,12 +4,13 @@ import { Modal, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useI18n } from '@/i18n/i18n-context';
-import { resolveAssetUrl } from '@/lib/asset-url';
+import { resolveAssetUrl, resolveThumbnailUrl } from '@/lib/asset-url';
 import { useTheme } from '@/theme/theme-context';
 import { radius, spacing, touchTarget } from '@/theme/tokens';
 import { PressableScale } from './pressable-scale';
 
 const DEFAULT_THUMBNAIL_SIZE = 40;
+const THUMBNAIL_REQUEST_WIDTH = 200;
 const VIEWER_BACKDROP = 'rgba(0,0,0,0.92)';
 const VIEWER_FOREGROUND = '#ffffff';
 
@@ -25,6 +26,7 @@ export function ImageThumbnail({ path, label, size = DEFAULT_THUMBNAIL_SIZE }: I
   const insets = useSafeAreaInsets();
   const [isOpen, setIsOpen] = useState(false);
   const uri = resolveAssetUrl(path);
+  const thumbnailUri = resolveThumbnailUrl(path, THUMBNAIL_REQUEST_WIDTH);
 
   return (
     <>
@@ -41,7 +43,7 @@ export function ImageThumbnail({ path, label, size = DEFAULT_THUMBNAIL_SIZE }: I
           borderColor: colors.border,
         }}
       >
-        <Image source={{ uri }} cachePolicy="disk" transition={150} style={{ width: '100%', height: '100%' }} />
+        <Image source={{ uri: thumbnailUri }} cachePolicy="disk" transition={150} style={{ width: '100%', height: '100%' }} />
       </PressableScale>
       <Modal visible={isOpen} transparent animationType="fade" onRequestClose={() => setIsOpen(false)}>
         <View style={{ flex: 1, direction, backgroundColor: VIEWER_BACKDROP, justifyContent: 'center' }}>
