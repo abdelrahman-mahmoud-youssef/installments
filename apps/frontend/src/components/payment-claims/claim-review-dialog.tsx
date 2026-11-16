@@ -122,7 +122,7 @@ export function ClaimReviewDialog({
 
               <a href={resolveAssetUrl(claim.screenshotUrl) ?? '#'} target="_blank" rel="noopener noreferrer">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <img loading="lazy" decoding="async"
                   src={resolveAssetUrl(claim.screenshotUrl) ?? ''}
                   alt=""
                   className="max-h-80 w-full rounded-lg border border-border object-contain"

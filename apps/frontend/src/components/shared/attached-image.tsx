@@ -10,7 +10,7 @@ export function AttachedImage({ path, alt }: { path: string; alt: string }) {
       alt={alt}
       trigger={
         <button type="button" className="block w-fit">
-          <img src={src} alt={alt} className="h-24 rounded-lg border border-border object-cover" />
+          <img loading="lazy" decoding="async" src={src} alt={alt} className="h-24 rounded-lg border border-border object-cover" />
         </button>
       }
     />

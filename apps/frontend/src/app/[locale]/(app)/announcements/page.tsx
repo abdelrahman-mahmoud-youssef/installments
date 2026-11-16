@@ -130,7 +130,7 @@ export default function AnnouncementsPage() {
             {imagePreview ? (
               <div className="flex items-center gap-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <img loading="lazy" decoding="async"
                   src={imagePreview}
                   alt=""
                   className="size-16 rounded-lg border border-border object-cover"

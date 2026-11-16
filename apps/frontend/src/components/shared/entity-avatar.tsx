@@ -16,7 +16,7 @@ export function EntityAvatar({
   }
 
   return (
-    <img
+    <img loading="lazy" decoding="async"
       src={resolveAssetUrl(photoUrl) ?? undefined}
       alt={name}
       className={cn('shrink-0 rounded-full object-cover', className)}

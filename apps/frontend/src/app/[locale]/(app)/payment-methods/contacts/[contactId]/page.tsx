@@ -193,7 +193,7 @@ export default function ContactDetailPage() {
                           title={t('viewReceipt')}
                           className="size-9 shrink-0 overflow-hidden rounded-lg border border-border transition-transform hover:scale-105 hover:border-primary"
                         >
-                          <img src={resolveAssetUrl(item.receiptUrl) ?? ''} alt={t('viewReceipt')} className="size-full object-cover" />
+                          <img loading="lazy" decoding="async" src={resolveAssetUrl(item.receiptUrl) ?? ''} alt={t('viewReceipt')} className="size-full object-cover" />
                         </button>
                       }
                     />

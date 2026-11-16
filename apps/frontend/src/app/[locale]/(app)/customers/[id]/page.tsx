@@ -250,7 +250,7 @@ export default function CustomerDetailPage() {
                       title={t('viewIdImageFront')}
                       className="overflow-hidden rounded-md border border-border transition-opacity hover:opacity-80"
                     >
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={resolveAssetUrl(customer.idImageFrontUrl) ?? undefined}
                         alt=""
                         className="h-9 w-12 object-cover"
@@ -269,7 +269,7 @@ export default function CustomerDetailPage() {
                       title={t('viewIdImageBack')}
                       className="overflow-hidden rounded-md border border-border transition-opacity hover:opacity-80"
                     >
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={resolveAssetUrl(customer.idImageBackUrl) ?? undefined}
                         alt=""
                         className="h-9 w-12 object-cover"

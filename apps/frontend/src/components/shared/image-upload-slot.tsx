@@ -34,7 +34,7 @@ export function ImageUploadSlot<T extends FieldValues>({
               alt={label}
               trigger={
                 <button type="button" className="block">
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={resolveAssetUrl(existingUrl) ?? undefined}
                     alt={label}
                     className="h-20 rounded-lg border border-border object-cover"

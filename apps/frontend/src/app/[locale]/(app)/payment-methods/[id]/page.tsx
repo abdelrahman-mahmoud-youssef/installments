@@ -264,7 +264,7 @@ export default function PaymentMethodDetailPage() {
                           title={t('viewReceipt')}
                           className="size-9 shrink-0 overflow-hidden rounded-lg border border-border transition-transform hover:scale-105 hover:border-primary"
                         >
-                          <img
+                          <img loading="lazy" decoding="async"
                             src={resolveAssetUrl(transaction.receiptUrl) ?? ''}
                             alt={t('transactionReceipt')}
                             className="size-full object-cover"

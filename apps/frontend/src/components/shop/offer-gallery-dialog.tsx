@@ -33,7 +33,7 @@ export function OfferGalleryDialog({
       <DialogContent className="gap-3 sm:max-w-xl">
         <DialogTitle className="truncate pe-8">{title}</DialogTitle>
         <div className="relative overflow-hidden rounded-lg bg-muted">
-          <img
+          <img loading="lazy" decoding="async"
             src={images[index]}
             alt={title}
             className="aspect-4/3 w-full object-cover"
@@ -76,7 +76,7 @@ export function OfferGalleryDialog({
                   i === index && 'ring-primary',
                 )}
               >
-                <img src={src} alt="" className="size-full object-cover" />
+                <img loading="lazy" decoding="async" src={src} alt="" className="size-full object-cover" />
               </button>
             ))}
           </div>

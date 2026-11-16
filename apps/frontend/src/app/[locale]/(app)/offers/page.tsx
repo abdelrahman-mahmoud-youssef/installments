@@ -45,7 +45,7 @@ function AdminOfferCard({ offer }: { offer: Offer }) {
     <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-xs">
       <div className="relative aspect-4/3 w-full overflow-hidden bg-muted">
         {imageUrl ? (
-          <img src={imageUrl} alt={offer.title} className="size-full object-cover" />
+          <img loading="lazy" decoding="async" src={imageUrl} alt={offer.title} className="size-full object-cover" />
         ) : (
           <div className="grid size-full place-items-center text-muted-foreground">
             <ImageOff className="size-6" />

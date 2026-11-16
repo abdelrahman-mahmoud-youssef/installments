@@ -154,7 +154,7 @@ export function OfferFormDialog({
                           key={typeof image === 'string' ? image : `${image.name}-${index}`}
                           className="relative size-20 overflow-hidden rounded-lg border border-border"
                         >
-                          <img src={imagePreviewUrl(image)} alt="" className="size-full object-cover" />
+                          <img loading="lazy" decoding="async" src={imagePreviewUrl(image)} alt="" className="size-full object-cover" />
                           <button
                             type="button"
                             onClick={() => removeImage(index)}
