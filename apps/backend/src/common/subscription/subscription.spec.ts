@@ -114,8 +114,8 @@ describe('isRenewalDueSoon', () => {
 });
 
 describe('resolveMonthlyPrice', () => {
-  it('charges 500 EGP for the standard price', () => {
-    expect(resolveMonthlyPrice(SubscriptionPricing.STANDARD)).toBe(50_000);
+  it('charges 200 EGP for the standard price', () => {
+    expect(resolveMonthlyPrice(SubscriptionPricing.STANDARD)).toBe(20_000);
   });
 
   it('charges 300 EGP for the referral price', () => {

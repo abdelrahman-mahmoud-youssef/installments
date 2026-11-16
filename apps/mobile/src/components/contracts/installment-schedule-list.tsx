@@ -46,15 +46,15 @@ export function InstallmentScheduleList({ installments }: InstallmentScheduleLis
               </AppText>
               {showBreakdown ? (
                 <AppText variant="label" tone="muted">
-                  {t('contractDetail.paidAndRemaining', {
+                  {t('contractDetail.paidOfTotal', {
                     paid: formatMoney(installment.paidAmount, locale),
-                    remaining: formatMoney(remaining, locale),
+                    total: formatMoney(installment.amount, locale),
                   })}
                 </AppText>
               ) : null}
             </View>
             <View style={{ alignItems: 'flex-end', gap: spacing.xs }}>
-              <MoneyText minorUnits={installment.amount} variant="bodyStrong" />
+              <MoneyText minorUnits={showBreakdown ? remaining : installment.amount} variant="bodyStrong" />
               <Badge label={t(`status.installment.${derivedStatus}`)} tone={installmentStatusTone[derivedStatus]} />
             </View>
           </View>

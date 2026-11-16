@@ -297,6 +297,8 @@
     "activeContracts": "العقود النشطة",
     "totalCustomers": "إجمالي العملاء",
     "overdueBalance": "الرصيد المتأخر",
+    "totalRemainingBalance": "إجمالي المتبقي",
+    "collectedShare": "نسبة المحصّل",
     "pendingPaymentClaims": "مطالبات الدفع المعلّقة",
     "loadError": "معرفناش نحمّل لوحة التحكم",
     "customer": "العميل",

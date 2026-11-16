@@ -297,6 +297,8 @@
     "activeContracts": "Active contracts",
     "totalCustomers": "Total customers",
     "overdueBalance": "Overdue balance",
+    "totalRemainingBalance": "Total remaining balance",
+    "collectedShare": "Collected so far",
     "pendingPaymentClaims": "Pending payment claims",
     "loadError": "Couldn't load the dashboard",
     "customer": "Customer",

@@ -29,6 +29,8 @@ export interface DashboardResponse {
   totalCustomers: number;
   activeContracts: number;
   overdueBalance: number;
+  totalRemainingBalance: number;
+  collectedRatio: number;
   pendingPaymentClaims: number;
 }
 

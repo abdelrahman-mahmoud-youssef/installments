@@ -35,6 +35,8 @@ export interface DashboardResponse {
   totalCustomers: number;
   activeContracts: number;
   overdueBalance: number;
+  totalRemainingBalance: number;
+  collectedRatio: number;
   pendingPaymentClaims: number;
 }
 
@@ -54,6 +56,7 @@ export class DashboardService {
       totalCustomers,
       activeContracts,
       pendingPaymentClaims,
+      scheduledTotals,
     ] = await Promise.all([
       this.findOutstandingInstallments(tenantId, today),
       this.findOutstandingInstallments(tenantId, { lt: today }),
@@ -73,7 +76,14 @@ export class DashboardService {
       this.prisma.customer.count({ where: { tenantId } }),
       this.prisma.contract.count({ where: { tenantId, status: ContractStatus.ACTIVE } }),
       this.prisma.paymentClaim.count({ where: { tenantId, status: PaymentClaimStatus.PENDING } }),
+      this.prisma.installment.aggregate({
+        where: { tenantId, contract: { status: ContractStatus.ACTIVE } },
+        _sum: { amount: true, paidAmount: true },
+      }),
     ]);
+
+    const scheduledTotal = scheduledTotals._sum.amount ?? 0;
+    const collectedTotal = scheduledTotals._sum.paidAmount ?? 0;
 
     return {
       dueToday,
@@ -90,6 +100,8 @@ export class DashboardService {
       totalCustomers,
       activeContracts,
       overdueBalance: overdue.reduce((total, item) => total + (item.amount - item.paidAmount), 0),
+      totalRemainingBalance: scheduledTotal - collectedTotal,
+      collectedRatio: scheduledTotal > 0 ? collectedTotal / scheduledTotal : 0,
       pendingPaymentClaims,
     };
   }
