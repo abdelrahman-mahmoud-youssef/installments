@@ -1,5 +1,6 @@
 import { Image, View } from 'react-native';
 import { resolveAssetUrl } from '@/lib/asset-url';
+import { initialsOf } from '@/lib/initials';
 import { useTheme } from '@/theme/theme-context';
 import { radius } from '@/theme/tokens';
 import { AppText } from './app-text';
@@ -21,12 +22,6 @@ export function Avatar({ name, size = 44, photoUrl }: AvatarProps) {
       />
     );
   }
-  const initials = name
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0] ?? '')
-    .join('');
   return (
     <View
       style={{
@@ -39,7 +34,7 @@ export function Avatar({ name, size = 44, photoUrl }: AvatarProps) {
       }}
     >
       <AppText style={{ color: colors.primary, fontWeight: '700', fontSize: fontSize('md') }}>
-        {initials}
+        {initialsOf(name)}
       </AppText>
     </View>
   );

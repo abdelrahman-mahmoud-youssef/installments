@@ -1,9 +1,5 @@
+import { initialsOf } from '@/lib/initials';
 import { cn } from '@/lib/utils';
-
-function initialsOf(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean).slice(0, 2);
-  return parts.map((part) => part[0]).join('').toUpperCase() || '?';
-}
 
 export function InitialAvatar({ name, className }: { name: string; className?: string }) {
   return (
@@ -14,7 +10,7 @@ export function InitialAvatar({ name, className }: { name: string; className?: s
       )}
       aria-hidden
     >
-      {initialsOf(name)}
+      {initialsOf(name) || '?'}
     </span>
   );
 }
