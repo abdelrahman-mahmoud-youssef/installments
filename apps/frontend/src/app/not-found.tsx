@@ -1,6 +1,7 @@
 import { FileQuestion } from 'lucide-react';
 import Link from 'next/link';
 import { BrandLogo } from '@/components/shared/logo';
+import { buttonVariants } from '@/components/ui/button';
 import { resolveAssetUrl } from '@/lib/assets';
 import { brandColorCssVars } from '@/lib/brand-colors';
 import { getTenantBrandingFromHost } from '@/lib/tenant-branding-from-host';
@@ -14,19 +15,16 @@ export default async function NotFound() {
       {branding && (
         <BrandLogo logoUrl={resolveAssetUrl(branding.logoUrl)} label={branding.displayName} size="lg" />
       )}
-      <div className="grid size-16 place-items-center rounded-full bg-muted text-muted-foreground">
-        <FileQuestion className="size-7" strokeWidth={1.8} />
+      <div className="grid size-14 place-items-center rounded-2xl bg-primary/10 text-primary">
+        <FileQuestion aria-hidden className="size-6" strokeWidth={1.9} />
       </div>
       <div className="space-y-2">
-        <h1 className="font-heading text-2xl font-semibold tracking-tight">Page not found</h1>
-        <p className="mx-auto max-w-sm text-sm text-muted-foreground">
+        <h1 className="font-heading text-headline font-semibold tracking-tight">Page not found</h1>
+        <p className="mx-auto max-w-md text-lead text-muted-foreground">
           This link is invalid or no longer available.
         </p>
       </div>
-      <Link
-        href="/"
-        className="inline-flex h-11 items-center justify-center rounded-xl bg-primary px-6 text-[0.9375rem] font-medium text-primary-foreground shadow-xs hover:bg-primary/90"
-      >
+      <Link href="/" className={buttonVariants({ size: 'xl' })}>
         Back home
       </Link>
     </div>

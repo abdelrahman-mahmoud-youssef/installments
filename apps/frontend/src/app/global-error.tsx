@@ -2,6 +2,7 @@
 
 import { ServerCrash } from 'lucide-react';
 import { useEffect } from 'react';
+import { buttonVariants } from '@/components/ui/button';
 import './globals.css';
 
 export default function GlobalError({
@@ -19,8 +20,8 @@ export default function GlobalError({
     <html lang="en">
       <body className="min-h-full">
         <div className="flex min-h-screen flex-col items-center justify-center gap-5 bg-background px-6 py-10 text-center">
-          <div className="grid size-16 place-items-center rounded-full bg-danger-soft text-danger">
-            <ServerCrash className="size-7" strokeWidth={1.8} />
+          <div className="grid size-14 place-items-center rounded-2xl bg-danger-soft text-danger">
+            <ServerCrash aria-hidden className="size-6" strokeWidth={1.9} />
           </div>
           <div className="space-y-2">
             <h1 className="text-2xl font-semibold tracking-tight">Something went wrong / حصل خطأ</h1>
@@ -30,10 +31,7 @@ export default function GlobalError({
               التطبيق واجه خطأ في السيرفر. جرّب تحمّل الصفحة تاني.
             </p>
           </div>
-          <button
-            onClick={reset}
-            className="inline-flex h-9 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground"
-          >
+          <button onClick={reset} className={buttonVariants({ size: 'xl' })}>
             Reload / تحميل تاني
           </button>
         </div>
