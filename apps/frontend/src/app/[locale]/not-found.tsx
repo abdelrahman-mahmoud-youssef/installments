@@ -31,7 +31,9 @@ export default async function NotFound() {
     <div className="flex min-h-screen flex-col bg-background px-5 py-5 sm:px-10">
       <style>{`:root{${brandColorCssVars(branding.brandColor)}}`}</style>
       <header className="flex items-center justify-between">
-        <BrandLogo logoUrl={resolveAssetUrl(branding.logoUrl)} label={branding.displayName} />
+        <Link href="/" className="rounded-lg outline-none focus-visible:ring-[3px] focus-visible:ring-ring/45">
+          <BrandLogo logoUrl={resolveAssetUrl(branding.logoUrl)} label={branding.displayName} />
+        </Link>
         <div className="flex items-center gap-1">
           <LanguageSwitcher />
           <ThemeToggle />

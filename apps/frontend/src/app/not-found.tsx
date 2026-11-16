@@ -13,7 +13,9 @@ export default async function NotFound() {
     <div className="flex min-h-screen flex-col items-center justify-center gap-5 bg-background px-6 py-10 text-center">
       {branding && <style>{`:root{${brandColorCssVars(branding.brandColor)}}`}</style>}
       {branding && (
-        <BrandLogo logoUrl={resolveAssetUrl(branding.logoUrl)} label={branding.displayName} size="lg" />
+        <Link href="/" className="rounded-lg outline-none focus-visible:ring-[3px] focus-visible:ring-ring/45">
+          <BrandLogo logoUrl={resolveAssetUrl(branding.logoUrl)} label={branding.displayName} size="lg" />
+        </Link>
       )}
       <div className="grid size-14 place-items-center rounded-2xl bg-primary/10 text-primary">
         <FileQuestion aria-hidden className="size-6" strokeWidth={1.9} />
