@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Image, Modal, Pressable, View } from 'react-native';
+import { Image } from 'expo-image';
+import { Modal, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useI18n } from '@/i18n/i18n-context';
@@ -40,11 +41,11 @@ export function ImageThumbnail({ path, label, size = DEFAULT_THUMBNAIL_SIZE }: I
           borderColor: colors.border,
         }}
       >
-        <Image source={{ uri }} style={{ width: '100%', height: '100%' }} />
+        <Image source={{ uri }} cachePolicy="disk" transition={150} style={{ width: '100%', height: '100%' }} />
       </PressableScale>
       <Modal visible={isOpen} transparent animationType="fade" onRequestClose={() => setIsOpen(false)}>
         <View style={{ flex: 1, direction, backgroundColor: VIEWER_BACKDROP, justifyContent: 'center' }}>
-          <Image source={{ uri }} resizeMode="contain" style={{ width: '100%', height: '80%' }} />
+          <Image source={{ uri }} contentFit="contain" cachePolicy="disk" style={{ width: '100%', height: '80%' }} />
           <Pressable
             onPress={() => setIsOpen(false)}
             accessibilityRole="button"

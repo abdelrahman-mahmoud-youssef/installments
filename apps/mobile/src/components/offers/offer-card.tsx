@@ -1,4 +1,5 @@
-import { Image, View } from 'react-native';
+import { Image } from 'expo-image';
+import { View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Offer } from '@/api/offers';
 import { AppText } from '@/components/ui/app-text';
@@ -31,7 +32,8 @@ export function OfferCard({ offer, onPress }: OfferCardProps) {
           {cover ? (
             <Image
               source={{ uri: resolveAssetUrl(cover) }}
-              resizeMode="cover"
+              contentFit="cover"
+              cachePolicy="disk"
               style={{ width: '100%', height: '100%', opacity: offer.isActive ? 1 : HIDDEN_COVER_OPACITY }}
             />
           ) : null}

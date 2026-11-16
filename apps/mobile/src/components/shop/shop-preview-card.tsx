@@ -1,4 +1,5 @@
-import { Image, View } from 'react-native';
+import { Image } from 'expo-image';
+import { View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/app-text';
 import { Avatar } from '@/components/ui/avatar';
@@ -72,7 +73,8 @@ export function ShopPreviewCard({
             {logoUrl ? (
               <Image
                 source={{ uri: resolveAssetUrl(logoUrl) }}
-                resizeMode="cover"
+                contentFit="cover"
+                cachePolicy="disk"
                 style={{ width: LOGO_SIZE, height: LOGO_SIZE, borderRadius: radius.full }}
               />
             ) : (

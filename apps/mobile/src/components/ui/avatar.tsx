@@ -1,9 +1,12 @@
-import { Image, View } from 'react-native';
+import { Image } from 'expo-image';
+import { View } from 'react-native';
 import { resolveAssetUrl } from '@/lib/asset-url';
 import { initialsOf } from '@/lib/initials';
 import { useTheme } from '@/theme/theme-context';
 import { radius } from '@/theme/tokens';
 import { AppText } from './app-text';
+
+const IMAGE_FADE_IN_MS = 150;
 
 interface AvatarProps {
   name: string;
@@ -18,6 +21,8 @@ export function Avatar({ name, size = 44, photoUrl }: AvatarProps) {
       <Image
         source={{ uri: resolveAssetUrl(photoUrl) }}
         accessibilityLabel={name}
+        cachePolicy="disk"
+        transition={IMAGE_FADE_IN_MS}
         style={{ width: size, height: size, borderRadius: radius.full, backgroundColor: colors.surfaceMuted }}
       />
     );
