@@ -31,6 +31,18 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
+  --color-ink: var(--ink);
+  --color-ink-foreground: var(--ink-foreground);
+  --color-teal: var(--teal);
+  --color-teal-soft: var(--teal-soft);
+
+  --text-display: clamp(2.5rem, 1.55rem + 3.9vw, 4.5rem);
+  --text-display--line-height: 1.04;
+  --text-headline: clamp(1.875rem, 1.45rem + 1.7vw, 2.75rem);
+  --text-headline--line-height: 1.12;
+  --text-lead: clamp(1.0625rem, 1rem + 0.3vw, 1.25rem);
+  --text-lead--line-height: 1.6;
+
   --color-success: var(--success);
   --color-success-soft: var(--success-soft);
   --color-warning: var(--warning);
@@ -97,6 +109,11 @@
   --input: oklch(0.916 0.008 260);
   --ring: oklch(0.58 0.19 260);
 
+  --ink: oklch(0.27 0.07 266);
+  --ink-foreground: oklch(0.985 0.006 260);
+  --teal: oklch(0.52 0.095 186);
+  --teal-soft: oklch(0.955 0.03 186);
+
   --success: oklch(0.5 0.13 158);
   --success-soft: oklch(0.95 0.038 160);
   --warning: oklch(0.53 0.11 68);
@@ -148,6 +165,11 @@
   --border: oklch(0.312 0.014 260);
   --input: oklch(1 0 0 / 11%);
   --ring: oklch(0.72 0.16 260);
+
+  --ink: oklch(0.235 0.045 266);
+  --ink-foreground: oklch(0.97 0.008 260);
+  --teal: oklch(0.8 0.1 186);
+  --teal-soft: oklch(0.31 0.05 186);
 
   --success: oklch(0.8 0.14 160);
   --success-soft: oklch(0.32 0.055 162);
@@ -261,8 +283,24 @@
   }
 }
 
+@keyframes ledger-stamp {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .animate-attract {
     animation: attract-pulse 30s ease-in-out infinite;
+  }
+
+  .animate-ledger-stamp {
+    animation: ledger-stamp 0.42s var(--ease-out-soft) both;
+    animation-delay: var(--stamp-delay, 0s);
   }
 }
