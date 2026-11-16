@@ -69,6 +69,12 @@
       "ctaSecondary": "Sign in",
       "note": "14-day free trial. No card needed."
     },
+    "iosApp": {
+      "title": "Qistak for iPhone",
+      "badge": "Coming soon",
+      "betaText": "Want it early? The beta is open to shops on request.",
+      "betaLink": "Contact support"
+    },
     "schedule": {
       "label": "An example installment schedule with three of six payments collected",
       "customerName": "Mariam Hassan",

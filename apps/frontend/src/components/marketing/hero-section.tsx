@@ -1,4 +1,5 @@
 import { useTranslations } from 'next-intl';
+import { IosAppNotice } from '@/components/marketing/ios-app-notice';
 import { LedgerIllustration } from '@/components/marketing/ledger-illustration';
 import { Button } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
@@ -24,6 +25,7 @@ export function HeroSection() {
             </Button>
           </div>
           <p className="text-sm text-muted-foreground">{t('note')}</p>
+          <IosAppNotice />
         </div>
 
         <LedgerIllustration className="mx-auto max-w-md lg:max-w-none" />
