@@ -82,3 +82,5 @@ export const PUSH_BODY_MAX_LENGTH = 300;
 export const SUBSCRIPTION_PAYMENT_PHONE = '01122662426';
 
 export const SUBSCRIPTION_INACTIVE_ERROR_CODE = 'SUBSCRIPTION_INACTIVE';
+
+export const DEACTIVATED_ACCOUNT_MESSAGE = 'This account has been deactivated. You can contact support.';

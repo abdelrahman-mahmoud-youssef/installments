@@ -12,6 +12,7 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
 import {
   APP_NAME,
+  DEACTIVATED_ACCOUNT_MESSAGE,
   PASSWORD_RESET_TOKEN_TTL_MINUTES,
   SUBSCRIPTION_MONTHLY_PRICE,
   SUBSCRIPTION_PAYMENT_PHONE,
@@ -184,7 +185,7 @@ export class AuthService {
     }
 
     if (!user.isActive) {
-      throw new UnauthorizedException('This account has been deactivated.');
+      throw new UnauthorizedException(DEACTIVATED_ACCOUNT_MESSAGE);
     }
 
     if (user.twoFactorEnabled) {
@@ -367,7 +368,7 @@ export class AuthService {
     ]);
   }
 
-  private async resolveTwoFactorCode(user: User, code: string): Promise<{ valid: boolean }> {
+  async resolveTwoFactorCode(user: User, code: string): Promise<{ valid: boolean }> {
     if (user.twoFactorSecret) {
       const secret = decrypt(user.twoFactorSecret, this.twoFactorEncryptionKey());
       if (verifyTotpCode(secret, code)) {

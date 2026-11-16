@@ -1,9 +1,10 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Patch, Post } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { AllowWithoutSubscription } from '../../common/decorators/allow-without-subscription.decorator';
 import { AuthenticatedUser, CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Public } from '../../common/decorators/public.decorator';
 import { Audit } from '../../common/decorators/audit.decorator';
+import { AccountDeletionService } from './account-deletion.service';
 import {
   AuthService,
   CurrentUserResponse,
@@ -13,6 +14,7 @@ import {
   SetupTwoFactorResult,
 } from './auth.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { DeleteAccountDto } from './dto/delete-account.dto';
 import { DisableTwoFactorDto } from './dto/disable-two-factor.dto';
 import { EnableTwoFactorDto } from './dto/enable-two-factor.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
@@ -24,7 +26,10 @@ import { VerifyTwoFactorDto } from './dto/verify-two-factor.dto';
 @AllowWithoutSubscription()
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly accountDeletionService: AccountDeletionService,
+  ) {}
 
   @Public()
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
@@ -69,6 +74,13 @@ export class AuthController {
     @Body() changePasswordDto: ChangePasswordDto,
   ): Promise<void> {
     return this.authService.changePassword(user.userId, changePasswordDto);
+  }
+
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @Delete('account')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  deleteAccount(@CurrentUser() user: AuthenticatedUser, @Body() dto: DeleteAccountDto): Promise<void> {
+    return this.accountDeletionService.deleteAccount(user, dto);
   }
 
   @Public()

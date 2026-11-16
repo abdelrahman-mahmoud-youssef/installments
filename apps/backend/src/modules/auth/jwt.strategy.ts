@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { DEACTIVATED_ACCOUNT_MESSAGE } from '../../common/constants';
 import { AuthenticatedUser } from '../../common/decorators/current-user.decorator';
 import { PrismaService } from '../../prisma/prisma.service';
 import { JwtPayload } from './jwt-payload.interface';
@@ -29,7 +30,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       select: { isActive: true, tenant: { select: { subscriptionExpiresOn: true } } },
     });
     if (!user || !user.isActive) {
-      throw new UnauthorizedException('This account has been deactivated.');
+      throw new UnauthorizedException(DEACTIVATED_ACCOUNT_MESSAGE);
     }
     return {
       userId: payload.sub,
