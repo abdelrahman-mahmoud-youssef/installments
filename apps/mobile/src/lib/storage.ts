@@ -12,6 +12,7 @@ export const tokenStorage = {
 export const preferenceStorage = {
   get: (key: string): Promise<string | null> => AsyncStorage.getItem(key),
   set: (key: string, value: string): Promise<void> => AsyncStorage.setItem(key, value),
+  clear: (): Promise<void> => AsyncStorage.multiRemove(Object.values(preferenceKeys)),
 };
 
 export const preferenceKeys = {

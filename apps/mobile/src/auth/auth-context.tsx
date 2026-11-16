@@ -8,10 +8,19 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { CurrentUser, getMe, login, register, RegisterInput, verifyTwoFactor } from '@/api/auth';
+import {
+  CurrentUser,
+  DeleteAccountInput,
+  deleteAccount as requestAccountDeletion,
+  getMe,
+  login,
+  register,
+  RegisterInput,
+  verifyTwoFactor,
+} from '@/api/auth';
 import { setAuthToken, setSubscriptionInactiveHandler, setUnauthorizedHandler } from '@/api/client';
-import { tokenStorage } from '@/lib/storage';
-import { unregisterFromPush } from '@/push/push-device';
+import { preferenceStorage, tokenStorage } from '@/lib/storage';
+import { forgetPushRegistration, unregisterFromPush } from '@/push/push-device';
 import { useTheme } from '@/theme/theme-context';
 
 export type SignInResult = { status: 'authenticated' } | { status: 'twoFactor'; challengeToken: string };
@@ -26,6 +35,7 @@ interface AuthContextValue {
   register: (input: RegisterInput) => Promise<void>;
   completeTwoFactor: (challengeToken: string, code: string) => Promise<void>;
   signOut: () => Promise<void>;
+  deleteAccount: (input: DeleteAccountInput) => Promise<void>;
   refreshUser: () => Promise<void>;
 }
 
@@ -115,6 +125,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await clearSession();
   }, [clearSession]);
 
+  const deleteAccount = useCallback(
+    async (input: DeleteAccountInput) => {
+      await requestAccountDeletion(input);
+      forgetPushRegistration();
+      await preferenceStorage.clear();
+      await clearSession();
+    },
+    [clearSession],
+  );
+
   const registerAccount = useCallback(
     async (input: RegisterInput) => {
       const result = await register(input);
@@ -134,9 +154,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       register: registerAccount,
       completeTwoFactor,
       signOut,
+      deleteAccount,
       refreshUser,
     }),
-    [user, isReady, signIn, registerAccount, completeTwoFactor, signOut, refreshUser],
+    [user, isReady, signIn, registerAccount, completeTwoFactor, signOut, deleteAccount, refreshUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

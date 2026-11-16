@@ -56,6 +56,11 @@ export interface TwoFactorEnabled {
   backupCodes: string[];
 }
 
+export interface DeleteAccountInput {
+  password: string;
+  code?: string;
+}
+
 export function login(email: string, password: string): Promise<LoginResult> {
   return apiClient.post('auth/login', { email, password });
 }
@@ -86,4 +91,8 @@ export function enableTwoFactor(code: string): Promise<TwoFactorEnabled> {
 
 export function disableTwoFactor(code: string): Promise<void> {
   return apiClient.post('auth/2fa/disable', { code });
+}
+
+export function deleteAccount(input: DeleteAccountInput): Promise<void> {
+  return apiClient.delete('auth/account', input);
 }

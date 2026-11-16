@@ -4,6 +4,7 @@ import { ScrollView, View } from 'react-native';
 import { useAuth } from '@/auth/auth-context';
 import { AppLockCard } from '@/components/security/app-lock-card';
 import { ChangePasswordSheet } from '@/components/security/change-password-sheet';
+import { DeleteAccountSheet } from '@/components/security/delete-account-sheet';
 import { TwoFactorDisableSheet } from '@/components/security/two-factor-disable-sheet';
 import { TwoFactorSetupSheet } from '@/components/security/two-factor-setup-sheet';
 import { AppText } from '@/components/ui/app-text';
@@ -16,7 +17,7 @@ import { useI18n } from '@/i18n/i18n-context';
 import { useTheme } from '@/theme/theme-context';
 import { spacing } from '@/theme/tokens';
 
-type SecuritySheet = 'changePassword' | 'enableTwoFactor' | 'disableTwoFactor';
+type SecuritySheet = 'changePassword' | 'enableTwoFactor' | 'disableTwoFactor' | 'deleteAccount';
 
 export default function SecurityScreen() {
   const { t } = useI18n();
@@ -80,11 +81,29 @@ export default function SecurityScreen() {
             </View>
           </Card>
         </View>
+
+        <View style={{ gap: spacing.sm }}>
+          <SectionHeader title={t('security.deleteAccountSection')} />
+          <Card>
+            <View style={{ gap: spacing.md }}>
+              <AppText variant="caption" tone="muted">
+                {t('security.deleteAccountHint')}
+              </AppText>
+              <Button
+                title={t('security.deleteAccount')}
+                icon="trash-outline"
+                variant="destructive"
+                onPress={() => setOpenSheet('deleteAccount')}
+              />
+            </View>
+          </Card>
+        </View>
       </ScrollView>
 
       <ChangePasswordSheet visible={openSheet === 'changePassword'} onClose={closeSheet} />
       <TwoFactorSetupSheet visible={openSheet === 'enableTwoFactor'} onClose={closeSheet} />
       <TwoFactorDisableSheet visible={openSheet === 'disableTwoFactor'} onClose={closeSheet} />
+      <DeleteAccountSheet visible={openSheet === 'deleteAccount'} onClose={closeSheet} />
     </View>
   );
 }

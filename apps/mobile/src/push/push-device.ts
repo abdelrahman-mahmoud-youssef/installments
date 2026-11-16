@@ -50,6 +50,10 @@ export async function registerForPush(locale: Locale): Promise<void> {
   }
 }
 
+export function forgetPushRegistration(): void {
+  registeredToken = null;
+}
+
 export async function unregisterFromPush(): Promise<void> {
   const token = registeredToken;
   registeredToken = null;
