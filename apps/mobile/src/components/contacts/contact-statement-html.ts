@@ -77,8 +77,8 @@ export function buildContactStatementHtml({
   ${fontFaces}
   @page { size: ${STATEMENT_PAGE_SIZE.width}px ${STATEMENT_PAGE_SIZE.height}px; margin: 0; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { width: ${STATEMENT_PAGE_SIZE.width}px; height: ${STATEMENT_PAGE_SIZE.height}px; background: ${DOCUMENT_COLORS.paper}; -webkit-print-color-adjust: exact; }
-  .page { position: relative; width: ${STATEMENT_PAGE_SIZE.width}px; height: ${STATEMENT_PAGE_SIZE.height}px; padding: 48px 44px 64px; font-family: '${pageFont}'; font-size: 14px; color: ${DOCUMENT_COLORS.ink}; overflow: hidden; }
+  html, body { width: 100%; min-width: ${STATEMENT_PAGE_SIZE.width}px; height: ${STATEMENT_PAGE_SIZE.height}px; background: ${DOCUMENT_COLORS.paper}; -webkit-print-color-adjust: exact; }
+  .page { position: relative; margin: 0 auto; width: ${STATEMENT_PAGE_SIZE.width}px; height: ${STATEMENT_PAGE_SIZE.height}px; padding: 48px 44px 64px; font-family: '${pageFont}'; font-size: 14px; color: ${DOCUMENT_COLORS.ink}; overflow: hidden; }
   .header { display: flex; align-items: center; justify-content: space-between; padding-bottom: 20px; border-bottom: 2px solid ${shop.accentColor}; }
   .brand { display: flex; align-items: center; gap: 12px; flex-shrink: 1; min-width: 0; }
   .logo { width: 44px; height: 44px; border-radius: 6px; object-fit: cover; flex-shrink: 0; }

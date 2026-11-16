@@ -23,10 +23,10 @@ export function ContractCard({ contract, onPress }: ContractCardProps) {
         <View style={{ gap: spacing.md }}>
           <View style={{ gap: 2 }}>
             <AppText variant="bodyStrong" numberOfLines={1}>
-              {contract.productName}
+              {contract.customer.name}
             </AppText>
             <AppText variant="caption" tone="muted" numberOfLines={1}>
-              {contract.customer.name}
+              {contract.productName}
             </AppText>
           </View>
           <View style={{ flexDirection: 'row', gap: spacing.xs, overflow: 'hidden' }}>
