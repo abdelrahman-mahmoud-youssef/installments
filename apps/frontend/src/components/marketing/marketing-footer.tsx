@@ -34,8 +34,8 @@ export function MarketingFooter() {
 
   return (
     <footer className="border-t border-border bg-card/60">
-      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-[1.4fr_repeat(3,1fr)] lg:px-8 lg:py-16">
-        <div className="space-y-4">
+      <div className="mx-auto grid max-w-6xl grid-cols-2 gap-x-6 gap-y-10 px-4 py-12 sm:px-6 md:grid-cols-[1.4fr_repeat(3,1fr)] lg:px-8 lg:py-16">
+        <div className="col-span-2 space-y-4 md:col-span-1">
           <Logo label={tCommon('appName')} />
           <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">{tFooter('tagline')}</p>
           <a href={`mailto:${config.contactEmail}`} dir="ltr" className={FOOTER_LINK_CLASS}>

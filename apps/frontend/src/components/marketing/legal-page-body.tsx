@@ -12,17 +12,23 @@ export function LegalPageBody({ t, sectionCount }: LegalPageBodyProps) {
   const sections = Array.from({ length: sectionCount }, (_, index) => index + 1);
 
   return (
-    <article className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
-      <h1 className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">{t('title')}</h1>
-      <p className="mt-2 text-sm text-muted-foreground">{t('lastUpdated')}</p>
+    <article>
+      <header className="border-b border-border bg-muted/40">
+        <div className="mx-auto max-w-3xl px-4 py-14 sm:px-6 lg:py-20">
+          <h1 className="font-heading text-headline font-semibold tracking-tight text-balance rtl:leading-[1.3] rtl:tracking-normal">
+            {t('title')}
+          </h1>
+          <p className="mt-3 text-sm text-muted-foreground">{t('lastUpdated')}</p>
+        </div>
+      </header>
 
-      <div className="mt-10 space-y-8">
+      <div className="mx-auto max-w-3xl space-y-10 px-4 py-12 sm:px-6 lg:py-16">
         {sections.map((section) => (
-          <section key={section} className="space-y-2">
-            <h2 className="font-heading text-lg font-semibold tracking-tight">
+          <section key={section} className="space-y-3">
+            <h2 className="font-heading text-xl font-semibold tracking-tight rtl:tracking-normal">
               {t(`section${section}Title`)}
             </h2>
-            <p className="text-sm leading-relaxed text-muted-foreground">
+            <p className="max-w-[68ch] text-base leading-relaxed text-foreground/80 rtl:leading-loose">
               {t(`section${section}Body`, { email: config.contactEmail })}
             </p>
           </section>
