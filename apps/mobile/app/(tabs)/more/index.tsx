@@ -1,6 +1,6 @@
 import { Stack, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Linking, ScrollView, View } from 'react-native';
 import { useAuth } from '@/auth/auth-context';
 import { AppText } from '@/components/ui/app-text';
 import { Avatar } from '@/components/ui/avatar';
@@ -13,6 +13,7 @@ import { useDashboard, useSupportMessages } from '@/hooks/queries';
 import { useI18n } from '@/i18n/i18n-context';
 import { useCollapsingLargeTitle } from '@/navigation/use-collapsing-large-title';
 import { formatNumber, isolateLtr } from '@/lib/format';
+import { buildLegalUrl } from '@/lib/share-url';
 import { countUnseenReplies } from '@/lib/support-replies';
 import { useTheme } from '@/theme/theme-context';
 import { spacing } from '@/theme/tokens';
@@ -154,6 +155,18 @@ export default function MoreScreen() {
               trailing={
                 unseenReplies > 0 ? <Badge label={formatNumber(unseenReplies, locale)} tone="danger" /> : undefined
               }
+              showChevron
+            />
+            <ListRow
+              icon="shield-checkmark-outline"
+              title={t('more.privacyPolicy')}
+              onPress={() => void Linking.openURL(buildLegalUrl('privacy', locale))}
+              showChevron
+            />
+            <ListRow
+              icon="document-text-outline"
+              title={t('more.termsOfService')}
+              onPress={() => void Linking.openURL(buildLegalUrl('terms', locale))}
               showChevron
             />
           </Card>

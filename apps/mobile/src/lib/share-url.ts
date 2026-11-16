@@ -1,3 +1,4 @@
+import type { Locale } from '@/i18n/translations';
 import { rootDomain, siteUrl } from './config';
 
 const SHARE_PATH_PREFIX = '/p/';
@@ -5,6 +6,12 @@ const SHARE_PATH_PREFIX = '/p/';
 export function customerPortalPath(customerPublicId: string, contractPublicId?: string): string {
   const customerPath = `/customer/${customerPublicId}`;
   return contractPublicId ? `${customerPath}/contracts/${contractPublicId}` : customerPath;
+}
+
+export type LegalPage = 'privacy' | 'terms';
+
+export function buildLegalUrl(page: LegalPage, locale: Locale): string {
+  return `${siteUrl}/${locale}/${page}`;
 }
 
 export function buildShopUrl(tenantSlug: string): string {
