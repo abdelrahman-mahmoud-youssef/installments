@@ -13,6 +13,7 @@
     "seed": "tsx prisma/seed.ts",
     "seed:demo": "tsx prisma/seed-demo.ts",
     "test": "jest",
+    "test:e2e": "jest --testRegex \".*\\.e2e-spec\\.ts$\" --runInBand",
     "test:watch": "jest --watch"
   },
   "dependencies": {
