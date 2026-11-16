@@ -12,6 +12,7 @@
     "migrate:deploy": "prisma migrate deploy",
     "seed": "tsx prisma/seed.ts",
     "seed:demo": "tsx prisma/seed-demo.ts",
+    "backfill:thumbnails": "tsx prisma/backfill-thumbnails.ts",
     "test": "jest",
     "test:e2e": "jest --testRegex \".*\\.e2e-spec\\.ts$\" --runInBand",
     "test:watch": "jest --watch"
