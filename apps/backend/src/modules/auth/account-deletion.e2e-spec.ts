@@ -13,6 +13,7 @@ import { hashPassword } from '../../common/password';
 import { PrismaService } from '../../prisma/prisma.service';
 import { prepareTestDatabase } from '../../test-support/test-database';
 import { MailService } from '../mail/mail.service';
+import { UsersService } from '../users/users.service';
 import { AccountDeletionService } from './account-deletion.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
@@ -23,6 +24,7 @@ const JWT_SECRET = 'e2e-jwt-secret-that-is-long-enough';
 const TWO_FACTOR_KEY = 'e2e-two-factor-key-that-is-long-enough';
 const PASSWORD = 'correct-horse-battery';
 const TOMORROW_MS = 86_400_000;
+const RECENT_MS = 60_000;
 
 interface ShopFixture {
   tenantId: string;
@@ -36,6 +38,7 @@ describe('DELETE /auth/account', () => {
   let app: INestApplication;
   let prisma: PrismaService;
   let jwt: JwtService;
+  let staffManagement: UsersService;
   let baseUrl: string;
 
   beforeAll(async () => {
@@ -55,6 +58,7 @@ describe('DELETE /auth/account', () => {
         PrismaService,
         AuthService,
         AccountDeletionService,
+        UsersService,
         JwtStrategy,
         { provide: MailService, useValue: {} },
         { provide: APP_GUARD, useClass: JwtAuthGuard },
@@ -67,6 +71,7 @@ describe('DELETE /auth/account', () => {
     baseUrl = await app.getUrl();
     prisma = app.get(PrismaService);
     jwt = app.get(JwtService);
+    staffManagement = app.get(UsersService);
   }, 120_000);
 
   afterAll(async () => {
@@ -196,8 +201,12 @@ describe('DELETE /auth/account', () => {
     const response = await requestDeletion(token, { password: PASSWORD });
 
     expect(response.status).toBe(204);
-    expect((await prisma.user.findUniqueOrThrow({ where: { id: shop.staffId } })).isActive).toBe(false);
-    expect((await prisma.user.findUniqueOrThrow({ where: { id: shop.ownerId } })).isActive).toBe(true);
+    const staff = await prisma.user.findUniqueOrThrow({ where: { id: shop.staffId } });
+    const owner = await prisma.user.findUniqueOrThrow({ where: { id: shop.ownerId } });
+    expect(staff.isActive).toBe(false);
+    expect(Date.now() - (staff.deactivatedAt?.getTime() ?? 0)).toBeLessThan(RECENT_MS);
+    expect(owner.isActive).toBe(true);
+    expect(owner.deactivatedAt).toBeNull();
     expect(await prisma.pushDevice.count({ where: { userId: shop.staffId } })).toBe(0);
     expect(await prisma.pushDevice.count({ where: { userId: shop.ownerId } })).toBe(1);
     const tenant = await prisma.tenant.findUniqueOrThrow({ where: { id: shop.tenantId } });
@@ -216,6 +225,7 @@ describe('DELETE /auth/account', () => {
     const users = await prisma.user.findMany({ where: { tenantId: shop.tenantId } });
     expect(users).toHaveLength(2);
     expect(users.every((user) => !user.isActive)).toBe(true);
+    expect(users.every((user) => Date.now() - (user.deactivatedAt?.getTime() ?? 0) < RECENT_MS)).toBe(true);
     expect(await prisma.pushDevice.count({ where: { tenantId: shop.tenantId } })).toBe(0);
     expect(await prisma.customer.count({ where: { tenantId: shop.tenantId } })).toBe(1);
     const tenant = await prisma.tenant.findUniqueOrThrow({ where: { id: shop.tenantId } });
@@ -233,6 +243,34 @@ describe('DELETE /auth/account', () => {
     const response = await fetch(`${baseUrl}/auth/me`, { headers: { Authorization: `Bearer ${token}` } });
 
     expect(response.status).toBe(401);
+  });
+
+  it('keeps the deactivation time consistent when an owner manages staff', async () => {
+    const shop = await createShop();
+
+    await staffManagement.updateStaff(shop.tenantId, shop.ownerId, shop.staffId, { isActive: false });
+    const deactivated = await prisma.user.findUniqueOrThrow({ where: { id: shop.staffId } });
+    await staffManagement.updateStaff(shop.tenantId, shop.ownerId, shop.staffId, { isActive: false });
+    const deactivatedAgain = await prisma.user.findUniqueOrThrow({ where: { id: shop.staffId } });
+    await staffManagement.updateStaff(shop.tenantId, shop.ownerId, shop.staffId, { isActive: true });
+    const reactivated = await prisma.user.findUniqueOrThrow({ where: { id: shop.staffId } });
+
+    expect(deactivated.deactivatedAt).not.toBeNull();
+    expect(deactivatedAgain.deactivatedAt).toEqual(deactivated.deactivatedAt);
+    expect(reactivated.isActive).toBe(true);
+    expect(reactivated.deactivatedAt).toBeNull();
+  });
+
+  it('keeps the earlier deactivation time of a staff member when the owner later deletes the shop', async () => {
+    const shop = await createShop();
+    await staffManagement.updateStaff(shop.tenantId, shop.ownerId, shop.staffId, { isActive: false });
+    const staffDeactivatedAt = (await prisma.user.findUniqueOrThrow({ where: { id: shop.staffId } })).deactivatedAt;
+    const token = await tokenFor(shop.ownerId, shop.tenantId, Role.ADMIN, shop.ownerEmail);
+
+    await requestDeletion(token, { password: PASSWORD });
+
+    const staff = await prisma.user.findUniqueOrThrow({ where: { id: shop.staffId } });
+    expect(staff.deactivatedAt).toEqual(staffDeactivatedAt);
   });
 
   it('tells a deactivated user to contact support when they try to sign in', async () => {
