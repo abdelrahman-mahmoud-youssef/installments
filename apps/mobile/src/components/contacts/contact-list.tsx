@@ -20,7 +20,7 @@ export function ContactList({ header, search, scrollProps }: ContactListProps) {
   const { t } = useI18n();
   const { colors } = useTheme();
   const router = useRouter();
-  const { data, isPending, isError, error, refetch, isRefetching, fetchNextPage, hasNextPage, isFetchingNextPage } =
+  const { data, isPending, error, refetch, isRefetching, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useCounterparties({ q: search || undefined });
 
   const contacts = useMemo(() => data?.pages.flatMap((page) => page.data) ?? [], [data]);
@@ -52,7 +52,7 @@ export function ContactList({ header, search, scrollProps }: ContactListProps) {
         <View style={{ paddingHorizontal: spacing.xl }}>
           {isPending ? (
             <SkeletonCardList count={4} />
-          ) : isError ? (
+          ) : !data ? (
             <ErrorState error={error} onRetry={() => void refetch()} />
           ) : search ? (
             <EmptyState icon="search-outline" title={t('contacts.emptySearch')} />

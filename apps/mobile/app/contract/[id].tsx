@@ -14,6 +14,7 @@ import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ErrorState } from '@/components/ui/error-state';
+import { DataFreshness } from '@/components/ui/data-freshness';
 import { FloatingActionBar } from '@/components/ui/floating-action-bar';
 import { PressableScale } from '@/components/ui/pressable-scale';
 import { SectionHeader } from '@/components/ui/section-header';
@@ -32,7 +33,7 @@ export default function ContractDetailScreen() {
   const { isAdmin } = useAuth();
   const router = useRouter();
   const { showToast } = useToast();
-  const { data, isPending, isError, error, refetch, isRefetching } = useContract(id);
+  const { data, dataUpdatedAt, isPending, isError, error, refetch, isRefetching } = useContract(id);
   const recordPayment = useRecordPayment(id);
   const [isPaymentSheetOpen, setIsPaymentSheetOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -66,10 +67,11 @@ export default function ContractDetailScreen() {
       >
         {isPending ? (
           <SkeletonCardList count={3} rows={3} />
-        ) : isError ? (
+        ) : !data ? (
           <ErrorState error={error} onRetry={() => void refetch()} />
         ) : data ? (
           <>
+            <DataFreshness updatedAt={dataUpdatedAt} hasRefreshFailed={isError} />
             <ContractSummaryCard contract={data} />
 
             <View style={{ gap: spacing.md }}>

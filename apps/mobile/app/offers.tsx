@@ -49,7 +49,7 @@ export default function OffersScreen() {
   const [pendingRemove, setPendingRemove] = useState<Offer | null>(null);
 
   const query = useOffers({ q: debouncedSearch.trim() || undefined }, isAdmin);
-  const { data, isPending, isError, error, refetch, isRefetching, fetchNextPage, hasNextPage, isFetchingNextPage } =
+  const { data, isPending, error, refetch, isRefetching, fetchNextPage, hasNextPage, isFetchingNextPage } =
     query;
   const branding = useBranding(isAdmin);
   const createMutation = useCreateOffer();
@@ -158,7 +158,7 @@ export default function OffersScreen() {
             </Card>
           ) : isPending ? (
             <SkeletonCardList count={3} rows={2} />
-          ) : isError ? (
+          ) : !data ? (
             <ErrorState error={error} onRetry={() => void refetch()} />
           ) : debouncedSearch.trim() ? (
             <EmptyState icon="search-outline" title={t('offers.emptySearch')} />

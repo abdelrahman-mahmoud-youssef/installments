@@ -19,7 +19,7 @@ export default function SupportScreen() {
   const { t } = useI18n();
   const { colors } = useTheme();
   const [formVisible, setFormVisible] = useState(false);
-  const { data, isPending, isError, error, refetch, isRefetching } = useSupportMessages();
+  const { data, isPending, error, refetch, isRefetching } = useSupportMessages();
   const { mutate: markSeen } = useMarkSupportRepliesSeen();
   const hasRequestedMarkSeen = useRef(false);
 
@@ -56,7 +56,7 @@ export default function SupportScreen() {
         ListEmptyComponent={
           isPending ? (
             <SkeletonCardList count={3} rows={2} />
-          ) : isError ? (
+          ) : !data ? (
             <ErrorState error={error} onRetry={() => void refetch()} />
           ) : (
             <EmptyState icon="chatbubbles-outline" title={t('support.empty')} message={t('support.emptyHint')} />

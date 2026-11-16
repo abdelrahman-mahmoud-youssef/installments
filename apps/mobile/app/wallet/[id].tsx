@@ -80,7 +80,7 @@ export default function WalletDetailScreen() {
     void transactionsQuery.refetch();
   };
 
-  if (!isAdmin || methodsQuery.isPending || methodsQuery.isError || !method) {
+  if (!isAdmin || methodsQuery.isPending || !method) {
     return (
       <DetailFallback
         isAllowed={isAdmin}
@@ -100,7 +100,7 @@ export default function WalletDetailScreen() {
       <MonthSwitcher month={month} onChange={setMonth} />
       {summaryQuery.data ? (
         <WalletMonthSummary summary={summaryQuery.data} />
-      ) : summaryQuery.isError ? (
+      ) : !summaryQuery.data ? (
         <ErrorState error={summaryQuery.error} onRetry={() => void summaryQuery.refetch()} />
       ) : (
         <SkeletonCardList count={1} />
@@ -161,7 +161,7 @@ export default function WalletDetailScreen() {
           <View style={{ paddingHorizontal: spacing.xl }}>
             {transactionsQuery.isPending ? (
               <SkeletonCardList count={3} />
-            ) : transactionsQuery.isError ? (
+            ) : !transactionsQuery.data ? (
               <ErrorState error={transactionsQuery.error} onRetry={() => void transactionsQuery.refetch()} />
             ) : (
               <EmptyState

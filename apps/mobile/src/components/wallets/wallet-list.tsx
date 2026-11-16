@@ -27,7 +27,7 @@ export function WalletList({ header, search, scrollProps }: WalletListProps) {
   const { t } = useI18n();
   const { colors } = useTheme();
   const router = useRouter();
-  const { data, isPending, isError, error, refetch, isRefetching } = usePaymentMethods();
+  const { data, isPending, error, refetch, isRefetching } = usePaymentMethods();
   const [actionMethod, setActionMethod] = useState<PaymentMethod | null>(null);
 
   const methods = useMemo(() => {
@@ -58,7 +58,7 @@ export function WalletList({ header, search, scrollProps }: WalletListProps) {
           <View style={{ paddingHorizontal: spacing.xl }}>
             {isPending ? (
               <SkeletonCardList count={4} />
-            ) : isError ? (
+            ) : !data ? (
               <ErrorState error={error} onRetry={() => void refetch()} />
             ) : search ? (
               <EmptyState icon="search-outline" title={t('wallets.emptySearch')} />

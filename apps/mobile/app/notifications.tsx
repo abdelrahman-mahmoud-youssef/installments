@@ -21,7 +21,7 @@ export default function NotificationsScreen() {
   const { t } = useI18n();
   const { colors } = useTheme();
   const { isAdmin } = useAuth();
-  const { data, isPending, isError, error, refetch, isRefetching } = useNotificationSettings(isAdmin);
+  const { data, isPending, error, refetch, isRefetching } = useNotificationSettings(isAdmin);
   const telegram = useTelegramConnection();
   const [disconnectVisible, setDisconnectVisible] = useState(false);
 
@@ -38,7 +38,7 @@ export default function NotificationsScreen() {
     if (isPending) {
       return <SkeletonCardList count={3} rows={3} />;
     }
-    if (isError || !data) {
+    if (!data) {
       return <ErrorState error={error} onRetry={() => void refetch()} />;
     }
     return (

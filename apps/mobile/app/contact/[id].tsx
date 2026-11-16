@@ -160,7 +160,7 @@ export default function ContactDetailScreen() {
           <View style={{ paddingHorizontal: spacing.xl }}>
             {historyQuery.isPending ? (
               <SkeletonCardList count={3} />
-            ) : historyQuery.isError ? (
+            ) : !historyQuery.data ? (
               <ErrorState error={historyQuery.error} onRetry={() => void historyQuery.refetch()} />
             ) : (
               <EmptyState icon="time-outline" title={t('contacts.emptyHistory')} />

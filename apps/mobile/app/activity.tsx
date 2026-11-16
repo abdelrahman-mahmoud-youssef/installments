@@ -17,7 +17,7 @@ import { spacing } from '@/theme/tokens';
 export default function ActivityScreen() {
   const { t, locale } = useI18n();
   const { colors } = useTheme();
-  const { data, isPending, isError, error, refetch, isRefetching, fetchNextPage, hasNextPage, isFetchingNextPage } =
+  const { data, isPending, error, refetch, isRefetching, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useAuditLogs();
 
   const entries = useMemo(() => data?.pages.flatMap((page) => page.data) ?? [], [data]);
@@ -42,7 +42,7 @@ export default function ActivityScreen() {
         ListEmptyComponent={
           isPending ? (
             <SkeletonCardList count={5} rows={1} />
-          ) : isError ? (
+          ) : !data ? (
             <ErrorState error={error} onRetry={() => void refetch()} />
           ) : (
             <EmptyState icon="time-outline" title={t('activity.empty')} message={t('activity.emptyHint')} />

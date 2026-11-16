@@ -58,7 +58,7 @@ export default function CustomersScreen() {
       setPendingDelete(null);
     }
   };
-  const { data, isPending, isError, error, refetch, isRefetching, fetchNextPage, hasNextPage, isFetchingNextPage } =
+  const { data, isPending, error, refetch, isRefetching, fetchNextPage, hasNextPage, isFetchingNextPage } =
     query;
 
   const customers = useMemo(() => data?.pages.flatMap((page) => page.data) ?? [], [data]);
@@ -106,7 +106,7 @@ export default function CustomersScreen() {
           <View style={{ paddingHorizontal: spacing.xl }}>
             {isPending ? (
               <SkeletonCardList count={5} rows={1} />
-            ) : isError ? (
+            ) : !data ? (
               <ErrorState error={error} onRetry={() => void refetch()} />
             ) : debouncedSearch.trim() ? (
               <EmptyState icon="search-outline" title={t('customers.emptySearch')} />

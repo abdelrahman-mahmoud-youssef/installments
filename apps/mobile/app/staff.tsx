@@ -19,7 +19,7 @@ export default function StaffScreen() {
   const { t } = useI18n();
   const { colors } = useTheme();
   const { showToast } = useToast();
-  const { data, isPending, isError, error, refetch, isRefetching } = useStaff();
+  const { data, isPending, error, refetch, isRefetching } = useStaff();
   const toggleMutation = useSetStaffActive();
   const [formVisible, setFormVisible] = useState(false);
   const [pendingDeactivation, setPendingDeactivation] = useState<StaffMember | null>(null);
@@ -60,7 +60,7 @@ export default function StaffScreen() {
         ListEmptyComponent={
           isPending ? (
             <SkeletonCardList count={3} rows={1} />
-          ) : isError ? (
+          ) : !data ? (
             <ErrorState error={error} onRetry={() => void refetch()} />
           ) : (
             <EmptyState icon="people-outline" title={t('staff.empty')} message={t('staff.emptyHint')} />

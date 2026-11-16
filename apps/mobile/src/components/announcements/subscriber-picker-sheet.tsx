@@ -30,7 +30,7 @@ export function SubscriberPickerSheet({ visible, selectedIds, onToggle, onClose 
   const { height } = useWindowDimensions();
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search.trim());
-  const { data, isPending, isError, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
+  const { data, isPending, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useAnnouncementSubscribers({ q: debouncedSearch || undefined }, visible);
 
   const subscribers = useMemo(() => data?.pages.flatMap((page) => page.data) ?? [], [data]);
@@ -60,7 +60,7 @@ export function SubscriberPickerSheet({ visible, selectedIds, onToggle, onClose 
         ListEmptyComponent={
           isPending ? (
             <SkeletonCardList count={2} rows={1} />
-          ) : isError ? (
+          ) : !data ? (
             <ErrorState error={error} onRetry={() => void refetch()} />
           ) : (
             <EmptyState

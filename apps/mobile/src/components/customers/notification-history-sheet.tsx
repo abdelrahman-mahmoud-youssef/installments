@@ -34,7 +34,7 @@ export function NotificationHistorySheet({ visible, customerId, onClose }: Notif
     <BottomSheet visible={visible} onClose={onClose} title={t('customerActions.notificationHistory')}>
       {query.isPending ? (
         <ActivityIndicator color={colors.textMuted} style={{ paddingVertical: spacing.xxl }} />
-      ) : query.isError ? (
+      ) : !query.data ? (
         <ErrorState error={query.error} onRetry={() => void query.refetch()} />
       ) : notifications.length === 0 ? (
         <AppText variant="caption" tone="muted" align="center">

@@ -4,6 +4,12 @@ const en = {
   common: {
     appName: 'Qistak',
     retry: 'Try again',
+    dataUpdated: {
+      minutes: 'Updated {count} min ago',
+      hours: 'Updated {count} h ago',
+      days: 'Updated {count} d ago',
+    },
+    dataRefreshFailed: "Couldn't refresh, showing saved data",
     cancel: 'Cancel',
     save: 'Save',
     add: 'Add',
@@ -834,6 +840,12 @@ const ar: typeof en = {
   common: {
     appName: 'قسطك',
     retry: 'إعادة المحاولة',
+    dataUpdated: {
+      minutes: 'آخر تحديث منذ {count} دقيقة',
+      hours: 'آخر تحديث منذ {count} ساعة',
+      days: 'آخر تحديث منذ {count} يوم',
+    },
+    dataRefreshFailed: 'تعذر التحديث، نعرض آخر بيانات محفوظة',
     cancel: 'إلغاء',
     save: 'حفظ',
     add: 'إضافة',

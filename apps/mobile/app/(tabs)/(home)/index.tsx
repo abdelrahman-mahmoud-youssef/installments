@@ -9,6 +9,7 @@ import { SubscriptionRenewalCard } from '@/components/subscription/subscription-
 import { UpcomingCollectionsChart } from '@/components/dashboard/upcoming-collections-chart';
 import { AppText } from '@/components/ui/app-text';
 import { ErrorState } from '@/components/ui/error-state';
+import { DataFreshness } from '@/components/ui/data-freshness';
 import { SkeletonCardList } from '@/components/ui/skeleton';
 import { useDashboard } from '@/hooks/queries';
 import { useI18n } from '@/i18n/i18n-context';
@@ -21,7 +22,7 @@ export default function DashboardScreen() {
   const { t } = useI18n();
   const { colors } = useTheme();
   const router = useRouter();
-  const { data, isPending, isError, error, refetch, isRefetching } = useDashboard();
+  const { data, dataUpdatedAt, isPending, isError, error, refetch, isRefetching } = useDashboard();
   const { headerOptions, largeTitle, scrollProps } = useCollapsingLargeTitle(t('dashboard.title'));
 
   const openContract = (contractId: string) => router.push(`/contract/${contractId}`);
@@ -47,10 +48,11 @@ export default function DashboardScreen() {
         <SubscriptionRenewalCard />
         {isPending ? (
           <SkeletonCardList count={4} />
-        ) : isError ? (
+        ) : !data ? (
           <ErrorState error={error} onRetry={() => void refetch()} />
         ) : (
           <>
+            <DataFreshness updatedAt={dataUpdatedAt} hasRefreshFailed={isError} />
             <DashboardSummaryStats dashboard={data} />
             {data.pendingPaymentClaims > 0 ? (
               <PendingClaimsCard count={data.pendingPaymentClaims} onPress={() => router.push('/payment-claims')} />

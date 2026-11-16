@@ -36,7 +36,7 @@ export default function ContractsScreen() {
     delayedOnly: filter === 'delayed' || undefined,
     tag: tag ?? undefined,
   });
-  const { data, isPending, isError, error, refetch, isRefetching, fetchNextPage, hasNextPage, isFetchingNextPage } =
+  const { data, isPending, error, refetch, isRefetching, fetchNextPage, hasNextPage, isFetchingNextPage } =
     query;
 
   const contracts = useMemo(() => data?.pages.flatMap((page) => page.data) ?? [], [data]);
@@ -93,7 +93,7 @@ export default function ContractsScreen() {
           <View style={{ paddingHorizontal: spacing.xl }}>
             {isPending ? (
               <SkeletonCardList count={5} />
-            ) : isError ? (
+            ) : !data ? (
               <ErrorState error={error} onRetry={() => void refetch()} />
             ) : (
               <EmptyState

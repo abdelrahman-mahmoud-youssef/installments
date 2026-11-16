@@ -22,7 +22,7 @@ export default function PaymentClaimsScreen() {
   const [selectedClaimId, setSelectedClaimId] = useState<string | null>(null);
 
   const query = usePaymentClaims({ status: filter === 'ALL' ? undefined : filter });
-  const { data, isPending, isError, error, refetch, isRefetching, fetchNextPage, hasNextPage, isFetchingNextPage } =
+  const { data, isPending, error, refetch, isRefetching, fetchNextPage, hasNextPage, isFetchingNextPage } =
     query;
   const claims = useMemo(() => data?.pages.flatMap((page) => page.data) ?? [], [data]);
   const selectedClaim = claims.find((claim) => claim.id === selectedClaimId) ?? null;
@@ -61,7 +61,7 @@ export default function PaymentClaimsScreen() {
         ListEmptyComponent={
           isPending ? (
             <SkeletonCardList count={4} />
-          ) : isError ? (
+          ) : !data ? (
             <ErrorState error={error} onRetry={() => void refetch()} />
           ) : (
             <EmptyState

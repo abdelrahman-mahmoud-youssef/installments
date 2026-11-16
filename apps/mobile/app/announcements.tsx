@@ -19,7 +19,7 @@ export default function AnnouncementsScreen() {
   const { colors } = useTheme();
   const { isAdmin } = useAuth();
   const router = useRouter();
-  const { data, isPending, isError, error, refetch, isRefetching, fetchNextPage, hasNextPage, isFetchingNextPage } =
+  const { data, isPending, error, refetch, isRefetching, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useAnnouncements();
 
   const announcements = useMemo(() => data?.pages.flatMap((page) => page.data) ?? [], [data]);
@@ -54,7 +54,7 @@ export default function AnnouncementsScreen() {
         ListEmptyComponent={
           isPending ? (
             <SkeletonCardList count={3} rows={2} />
-          ) : isError ? (
+          ) : !data ? (
             <ErrorState error={error} onRetry={() => void refetch()} />
           ) : (
             <EmptyState

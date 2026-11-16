@@ -5,6 +5,7 @@ import { CurrentReportStats } from '@/components/reports/current-report-stats';
 import { MonthlyReportStats } from '@/components/reports/monthly-report-stats';
 import { OverdueCustomersSection } from '@/components/reports/overdue-customers-section';
 import { ErrorState } from '@/components/ui/error-state';
+import { DataFreshness } from '@/components/ui/data-freshness';
 import { MonthSwitcher } from '@/components/ui/month-switcher';
 import { SkeletonCardList } from '@/components/ui/skeleton';
 import { useReports } from '@/hooks/queries';
@@ -20,7 +21,7 @@ export default function ReportsScreen() {
   const { colors } = useTheme();
   const router = useRouter();
   const [month, setMonth] = useState(currentMonthKey());
-  const { data, isPending, isError, error, refetch, isRefetching, isPlaceholderData } = useReports(month);
+  const { data, dataUpdatedAt, isPending, isError, error, refetch, isRefetching, isPlaceholderData } = useReports(month);
 
   return (
     <ScrollView
@@ -36,10 +37,11 @@ export default function ReportsScreen() {
         <MonthSwitcher month={month} onChange={setMonth} />
         {isPending ? (
           <SkeletonCardList count={4} />
-        ) : isError ? (
+        ) : !data ? (
           <ErrorState error={error} onRetry={() => void refetch()} />
         ) : (
           <>
+            <DataFreshness updatedAt={dataUpdatedAt} hasRefreshFailed={isError} />
             <View style={{ opacity: isPlaceholderData ? PLACEHOLDER_OPACITY : 1 }}>
               <MonthlyReportStats report={data} />
             </View>

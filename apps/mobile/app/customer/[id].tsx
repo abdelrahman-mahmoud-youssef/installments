@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ConfirmSheet } from '@/components/ui/confirm-sheet';
 import { ErrorState } from '@/components/ui/error-state';
+import { DataFreshness } from '@/components/ui/data-freshness';
 import { FloatingActionBar } from '@/components/ui/floating-action-bar';
 import { ImageThumbnail } from '@/components/ui/image-thumbnail';
 import { ListRow } from '@/components/ui/list-row';
@@ -42,7 +43,7 @@ export default function CustomerDetailScreen() {
   const { colors } = useTheme();
   const { showToast } = useToast();
   const router = useRouter();
-  const { data, isPending, isError, error, refetch, isRefetching } = useCustomer(id);
+  const { data, dataUpdatedAt, isPending, isError, error, refetch, isRefetching } = useCustomer(id);
   const updateCustomer = useUpdateCustomer(id);
   const deleteCustomer = useDeleteCustomer();
   const [openSheet, setOpenSheet] = useState<OpenSheet>(null);
@@ -96,10 +97,11 @@ export default function CustomerDetailScreen() {
       >
         {isPending ? (
           <SkeletonCardList count={3} />
-        ) : isError ? (
+        ) : !data ? (
           <ErrorState error={error} onRetry={() => void refetch()} />
         ) : data ? (
           <>
+            <DataFreshness updatedAt={dataUpdatedAt} hasRefreshFailed={isError} />
             <Card>
               <View style={{ alignItems: 'center', gap: spacing.lg }}>
                 <Avatar name={data.name} photoUrl={data.photoUrl} size={HERO_AVATAR_SIZE} />
