@@ -8,10 +8,12 @@ import {
   Logger,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Public } from '../../common/decorators/public.decorator';
 import { PrismaService } from '../../prisma/prisma.service';
+import { WhatsappSignatureGuard } from './whatsapp-signature.guard';
 import { WhatsappService } from './whatsapp.service';
 
 const AUTO_REPLY_COOLDOWN_MS = 60_000;
@@ -63,6 +65,7 @@ export class WhatsappWebhookController {
   }
 
   @Public()
+  @UseGuards(WhatsappSignatureGuard)
   @Post('webhook')
   @HttpCode(HttpStatus.OK)
   async receiveMessage(@Body() payload: WhatsappWebhookPayload): Promise<{ received: true }> {

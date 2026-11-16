@@ -9,7 +9,7 @@ import { AppModule } from './app.module';
 import { getUploadsDir } from './config/uploads-dir';
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true, rawBody: true });
   app.useLogger(app.get(Logger));
   app.use(
     helmet({

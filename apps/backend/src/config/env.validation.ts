@@ -35,6 +35,7 @@ export const envValidationSchema = Joi.object({
   WHATSAPP_PHONE_NUMBER_ID: Joi.string().allow('').optional(),
   WHATSAPP_ACCESS_TOKEN: Joi.string().allow('').optional(),
   WHATSAPP_WEBHOOK_VERIFY_TOKEN: Joi.string().allow('').optional(),
+  WHATSAPP_APP_SECRET: Joi.string().allow('').optional(),
   REMINDER_HOUR: Joi.number().integer().min(0).max(23).default(8),
   EVENING_SUMMARY_HOUR: Joi.number().integer().min(0).max(23).default(20),
   UPLOADS_DIR: Joi.string().default('./uploads'),
