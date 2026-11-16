@@ -1,7 +1,17 @@
 'use client';
 
-import { AlertTriangle, CalendarClock, CalendarDays, FileText, TrendingUp, Users, Wallet } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import {
+  AlertTriangle,
+  CalendarClock,
+  CalendarDays,
+  FileText,
+  Landmark,
+  PieChart,
+  TrendingUp,
+  Users,
+  Wallet,
+} from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
 import { DataTable, type Column } from '@/components/shared/data-table';
 import { EmptyState } from '@/components/shared/empty-state';
 import { InitialAvatar } from '@/components/shared/initial-avatar';
@@ -19,6 +29,7 @@ import { routes } from '@/lib/routes';
 export default function ReportsPage() {
   const t = useTranslations('reports');
   const tCommon = useTranslations('common');
+  const locale = useLocale();
   const { data, isLoading, isError } = useReports();
 
   const header = <PageHeader title={t('title')} description={t('subtitle')} />;
@@ -117,6 +128,26 @@ export default function ReportsPage() {
       <FadeIn delay={0.05} className="space-y-3">
         <h2 className="font-heading text-sm font-semibold">{t('overview')}</h2>
         <Stagger className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <StaggerItem className="sm:col-span-1 lg:col-span-2">
+            <MetricCard
+              label={t('totalRemainingBalance')}
+              value={<Money minorUnits={data.totalRemainingBalance} />}
+              icon={Landmark}
+              tone="primary"
+              emphasis
+            />
+          </StaggerItem>
+          <StaggerItem className="sm:col-span-1 lg:col-span-2">
+            <MetricCard
+              label={t('collectedShare')}
+              value={new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 0 }).format(
+                data.collectedRatio,
+              )}
+              icon={PieChart}
+              tone="success"
+              emphasis
+            />
+          </StaggerItem>
           <StaggerItem>
             <MetricCard label={t('totalContracts')} value={data.totalContracts} icon={FileText} tone="primary" />
           </StaggerItem>

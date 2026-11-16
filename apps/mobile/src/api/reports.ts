@@ -12,6 +12,8 @@ export interface ReportsResponse {
   todayCollections: number;
   monthlyCollections: number;
   overdueBalance: number;
+  totalRemainingBalance: number;
+  collectedRatio: number;
   overdueCustomers: OverdueCustomerSummary[];
   totalContracts: number;
   activeContracts: number;

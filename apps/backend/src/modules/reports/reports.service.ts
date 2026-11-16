@@ -22,6 +22,8 @@ export interface ReportsResponse {
   todayCollections: number;
   monthlyCollections: number;
   overdueBalance: number;
+  totalRemainingBalance: number;
+  collectedRatio: number;
   overdueCustomers: OverdueCustomerSummary[];
   totalContracts: number;
   activeContracts: number;
@@ -47,6 +49,7 @@ export class ReportsService {
       activeContracts,
       totalCustomers,
       installmentsThisMonth,
+      scheduledTotals,
     ] = await Promise.all([
       this.prisma.payment.aggregate({
         where: { tenantId, paidAt: { gte: today, lt: tomorrow } },
@@ -74,12 +77,21 @@ export class ReportsService {
       this.prisma.installment.count({
         where: { tenantId, dueDate: { gte: monthStart, lt: monthEnd } },
       }),
+      this.prisma.installment.aggregate({
+        where: { tenantId, contract: { status: ContractStatus.ACTIVE } },
+        _sum: { amount: true, paidAmount: true },
+      }),
     ]);
+
+    const scheduledTotal = scheduledTotals._sum.amount ?? 0;
+    const collectedTotal = scheduledTotals._sum.paidAmount ?? 0;
 
     return {
       todayCollections: todayPayments._sum.amount ?? 0,
       monthlyCollections: monthlyPayments._sum.amount ?? 0,
       overdueBalance: overdueInstallments.reduce((total, row) => total + (row.amount - row.paidAmount), 0),
+      totalRemainingBalance: scheduledTotal - collectedTotal,
+      collectedRatio: scheduledTotal > 0 ? collectedTotal / scheduledTotal : 0,
       overdueCustomers: this.groupOverdueByCustomer(overdueInstallments),
       totalContracts,
       activeContracts,

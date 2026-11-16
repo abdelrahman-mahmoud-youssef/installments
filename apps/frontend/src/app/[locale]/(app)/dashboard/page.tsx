@@ -7,8 +7,6 @@ import {
   CalendarRange,
   FileText,
   FileWarning,
-  Landmark,
-  PieChart,
   Plus,
   Users,
   Wallet,
@@ -142,26 +140,6 @@ export default function DashboardPage() {
       <FadeIn>{header}</FadeIn>
 
       <Stagger className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StaggerItem className="lg:col-span-2">
-          <MetricCard
-            label={t('totalRemainingBalance')}
-            value={<Money minorUnits={data.totalRemainingBalance} />}
-            icon={Landmark}
-            tone="primary"
-            emphasis
-          />
-        </StaggerItem>
-        <StaggerItem className="lg:col-span-2">
-          <MetricCard
-            label={t('collectedShare')}
-            value={new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 0 }).format(
-              data.collectedRatio,
-            )}
-            icon={PieChart}
-            tone="success"
-            emphasis
-          />
-        </StaggerItem>
         <StaggerItem>
           <MetricCard
             label={t('expectedToday')}

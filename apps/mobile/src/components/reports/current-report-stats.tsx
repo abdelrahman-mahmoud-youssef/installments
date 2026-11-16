@@ -3,7 +3,7 @@ import { ReportsResponse } from '@/api/reports';
 import { SectionHeader } from '@/components/ui/section-header';
 import { StatCard } from '@/components/ui/stat-card';
 import { useI18n } from '@/i18n/i18n-context';
-import { formatMoney, formatNumber } from '@/lib/format';
+import { formatMoney, formatNumber, formatPercent } from '@/lib/format';
 import { spacing } from '@/theme/tokens';
 
 interface CurrentReportStatsProps {
@@ -30,6 +30,19 @@ export function CurrentReportStats({ report }: CurrentReportStatsProps) {
         />
       </View>
       <SectionHeader title={t('reports.portfolioSection')} />
+      <View style={{ flexDirection: 'row', gap: spacing.md }}>
+        <StatCard
+          icon="wallet"
+          label={t('reports.totalRemainingBalance')}
+          value={formatMoney(report.totalRemainingBalance, locale)}
+        />
+        <StatCard
+          icon="pie-chart"
+          label={t('reports.collectedShare')}
+          value={formatPercent(report.collectedRatio, locale)}
+          tone="success"
+        />
+      </View>
       <View style={{ flexDirection: 'row', gap: spacing.md }}>
         <StatCard
           icon="document-text"

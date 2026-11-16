@@ -2,7 +2,7 @@ import { View } from 'react-native';
 import { DashboardResponse } from '@/api/dashboard';
 import { StatCard } from '@/components/ui/stat-card';
 import { useI18n } from '@/i18n/i18n-context';
-import { formatMoney, formatNumber, formatPercent } from '@/lib/format';
+import { formatMoney, formatNumber } from '@/lib/format';
 import { spacing } from '@/theme/tokens';
 
 interface DashboardSummaryStatsProps {
@@ -13,19 +13,6 @@ export function DashboardSummaryStats({ dashboard }: DashboardSummaryStatsProps)
   const { t, locale } = useI18n();
   return (
     <View style={{ gap: spacing.md }}>
-      <View style={{ flexDirection: 'row', gap: spacing.md }}>
-        <StatCard
-          icon="wallet"
-          label={t('dashboard.totalRemainingBalance')}
-          value={formatMoney(dashboard.totalRemainingBalance, locale)}
-        />
-        <StatCard
-          icon="pie-chart"
-          label={t('dashboard.collectedShare')}
-          value={formatPercent(dashboard.collectedRatio, locale)}
-          tone="success"
-        />
-      </View>
       <View style={{ flexDirection: 'row', gap: spacing.md }}>
         <StatCard
           icon="trending-up"
