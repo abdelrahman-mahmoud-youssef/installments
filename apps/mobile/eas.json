@@ -9,7 +9,7 @@
       "distribution": "internal",
       "env": {
         "EXPO_PUBLIC_API_URL": "https://api.qistak.com",
-        "EXPO_PUBLIC_SITE_URL": "https://qistak.com",
+        "EXPO_PUBLIC_SITE_URL": "https://app.qistak.com",
         "EXPO_PUBLIC_ROOT_DOMAIN": "qistak.com"
       }
     },
@@ -18,7 +18,7 @@
       "channel": "preview",
       "env": {
         "EXPO_PUBLIC_API_URL": "https://api.qistak.com",
-        "EXPO_PUBLIC_SITE_URL": "https://qistak.com",
+        "EXPO_PUBLIC_SITE_URL": "https://app.qistak.com",
         "EXPO_PUBLIC_ROOT_DOMAIN": "qistak.com"
       }
     },
@@ -27,7 +27,7 @@
       "channel": "production",
       "env": {
         "EXPO_PUBLIC_API_URL": "https://api.qistak.com",
-        "EXPO_PUBLIC_SITE_URL": "https://qistak.com",
+        "EXPO_PUBLIC_SITE_URL": "https://app.qistak.com",
         "EXPO_PUBLIC_ROOT_DOMAIN": "qistak.com"
       }
     }
