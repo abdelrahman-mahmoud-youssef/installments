@@ -20,4 +20,5 @@ export const preferenceKeys = {
   fontScale: 'qistak.font-scale',
   brandColor: 'qistak.brand-color',
   arabicFont: 'qistak.arabic-font',
+  appLock: 'qistak.app-lock',
 } as const;

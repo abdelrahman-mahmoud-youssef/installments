@@ -5,12 +5,14 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { ReactNode, useEffect } from 'react';
 import { useAuth, AuthProvider } from '@/auth/auth-context';
+import { AppLockGate } from '@/components/security/app-lock-gate';
 import { SubscriptionGate } from '@/components/subscription/subscription-gate';
 import { LaunchReveal } from '@/components/ui/launch-reveal';
 import { ToastProvider } from '@/components/ui/toast-context';
 import { I18nProvider, useI18n } from '@/i18n/i18n-context';
 import { useStackScreenOptions } from '@/navigation/use-stack-screen-options';
 import { PushRegistration } from '@/push/push-registration';
+import { AppLockProvider } from '@/security/app-lock-context';
 import { ThemeProvider, useTheme } from '@/theme/theme-context';
 import { TodayWidgetSync } from '@/widgets/today-widget-sync';
 
@@ -66,6 +68,7 @@ function ThemedNavigator() {
         <LaunchReveal />
         <TodayWidgetSync />
         <PushRegistration />
+        <AppLockGate />
       </AuthGate>
     </LocaleDirContext.Provider>
   );
@@ -78,7 +81,9 @@ export default function RootLayout() {
         <ThemeProvider>
           <ToastProvider>
             <AuthProvider>
-              <ThemedNavigator />
+              <AppLockProvider>
+                <ThemedNavigator />
+              </AppLockProvider>
             </AuthProvider>
           </ToastProvider>
         </ThemeProvider>

@@ -34,6 +34,12 @@
       ],
       "expo-secure-store",
       "expo-notifications",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Qistak uses Face ID to keep your shop data private."
+        }
+      ],
       "expo-localization",
       "expo-updates",
       [

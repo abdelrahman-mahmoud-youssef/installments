@@ -2,6 +2,7 @@ import { Stack } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useAuth } from '@/auth/auth-context';
+import { AppLockCard } from '@/components/security/app-lock-card';
 import { ChangePasswordSheet } from '@/components/security/change-password-sheet';
 import { TwoFactorDisableSheet } from '@/components/security/two-factor-disable-sheet';
 import { TwoFactorSetupSheet } from '@/components/security/two-factor-setup-sheet';
@@ -32,6 +33,11 @@ export default function SecurityScreen() {
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={{ padding: spacing.xl, gap: spacing.lg, paddingBottom: spacing.xxxl }}
       >
+        <View style={{ gap: spacing.sm }}>
+          <SectionHeader title={t('security.appLockSection')} />
+          <AppLockCard />
+        </View>
+
         <View style={{ gap: spacing.sm }}>
           <SectionHeader title={t('security.passwordSection')} />
           <Card>
