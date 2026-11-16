@@ -23,7 +23,7 @@ export class AccountDeletionService {
       return;
     }
     await this.prisma.$transaction([
-      this.prisma.user.update({ where: { id: user.id }, data: { isActive: false } }),
+      this.prisma.user.update({ where: { id: user.id }, data: { isActive: false, deactivatedAt: new Date() } }),
       this.prisma.pushDevice.deleteMany({ where: { userId: user.id } }),
     ]);
   }
@@ -46,7 +46,10 @@ export class AccountDeletionService {
 
   private async deactivateShop(tenantId: string): Promise<void> {
     await this.prisma.$transaction([
-      this.prisma.user.updateMany({ where: { tenantId }, data: { isActive: false } }),
+      this.prisma.user.updateMany({
+        where: { tenantId, isActive: true },
+        data: { isActive: false, deactivatedAt: new Date() },
+      }),
       this.prisma.pushDevice.deleteMany({ where: { tenantId } }),
       this.prisma.tenant.update({ where: { id: tenantId }, data: { subscriptionExpiresOn: getUtcToday() } }),
     ]);

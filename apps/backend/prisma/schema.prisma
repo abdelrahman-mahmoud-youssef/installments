@@ -195,6 +195,7 @@ model User {
   passwordHash          String
   role                  Role                  @default(ADMIN)
   isActive              Boolean               @default(true)
+  deactivatedAt         DateTime?
   twoFactorSecret       String?
   twoFactorEnabled      Boolean               @default(false)
   failedLoginAttempts   Int                   @default(0)

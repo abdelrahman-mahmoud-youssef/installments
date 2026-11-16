@@ -76,7 +76,7 @@ export class UsersService {
 
     const user = await this.prisma.user.update({
       where: { id },
-      data: { isActive: dto.isActive },
+      data: { isActive: dto.isActive, deactivatedAt: dto.isActive ? null : (target.deactivatedAt ?? new Date()) },
       select: STAFF_SELECT,
     });
     return toStaffMember(user);
