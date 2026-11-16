@@ -1,4 +1,4 @@
-const PUSH_ROUTES = { support: '/support', dashboard: '/' } as const;
+const PUSH_ROUTES = { support: '/support', dashboard: '/', activity: '/activity' } as const;
 
 type PushRouteKey = keyof typeof PUSH_ROUTES;
 
