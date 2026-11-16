@@ -24,11 +24,13 @@ export function DataTable<T>({
   rows,
   keyOf,
   href,
+  onRowIntent,
 }: {
   columns: Column<T>[];
   rows: T[];
   keyOf: (row: T) => string;
   href?: (row: T) => string;
+  onRowIntent?: (row: T) => void;
 }) {
   const router = useRouter();
   const detailColumns = columns.filter((column) => (column.role ?? 'detail') === 'detail');
@@ -39,6 +41,13 @@ export function DataTable<T>({
     if (href) {
       router.push(href(row));
     }
+  }
+
+  function prepareToOpen(row: T) {
+    if (href) {
+      router.prefetch(href(row));
+    }
+    onRowIntent?.(row);
   }
 
   return (
@@ -67,6 +76,8 @@ export function DataTable<T>({
                 key={keyOf(row)}
                 data-slot="table-row"
                 onClick={() => navigate(row)}
+                onMouseEnter={() => prepareToOpen(row)}
+                onFocus={() => prepareToOpen(row)}
                 className={cn(
                   'border-b border-border last:border-0',
                   href && 'cursor-pointer transition-colors hover:bg-accent/50',
@@ -91,6 +102,7 @@ export function DataTable<T>({
           <div
             key={keyOf(row)}
             onClick={() => navigate(row)}
+            onTouchStart={() => prepareToOpen(row)}
             className={cn(
               'rounded-xl border border-border bg-card p-4 shadow-xs',
               href && 'cursor-pointer transition-colors active:bg-accent/50',

@@ -34,6 +34,13 @@ export function useContract(id: string) {
   });
 }
 
+export function usePrefetchContract() {
+  const queryClient = useQueryClient();
+  return (id: string) => {
+    void queryClient.prefetchQuery({ queryKey: contractKeys.detail(id), queryFn: () => getContract(id) });
+  };
+}
+
 export function useCreateContract() {
   const queryClient = useQueryClient();
   return useMutation({

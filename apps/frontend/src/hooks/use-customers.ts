@@ -20,6 +20,13 @@ export const customerKeys = {
     [...customerKeys.all, 'notifications', id, params] as const,
 };
 
+export function usePrefetchCustomer() {
+  const queryClient = useQueryClient();
+  return (id: string) => {
+    void queryClient.prefetchQuery({ queryKey: customerKeys.detail(id), queryFn: () => getCustomer(id) });
+  };
+}
+
 export function useCustomers(params: CustomerListParams) {
   return useQuery({
     queryKey: customerKeys.list(params),

@@ -20,7 +20,7 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Link } from '@/i18n/navigation';
 import type { ContractListItem } from '@/lib/api/contracts';
-import { useContracts, useContractTags } from '@/hooks/use-contracts';
+import { useContracts, useContractTags, usePrefetchContract } from '@/hooks/use-contracts';
 import { ContractStatus, CONTRACT_STATUSES } from '@/lib/enums';
 import { routes } from '@/lib/routes';
 
@@ -36,6 +36,7 @@ export default function ContractsPage() {
   const [page, setPage] = useState(1);
 
   const { data: tags } = useContractTags();
+  const prefetchContract = usePrefetchContract();
   const { data, isLoading, isError } = useContracts({
     status,
     delayedOnly: delayedOnly || undefined,
@@ -194,6 +195,7 @@ export default function ContractsPage() {
               rows={data.data}
               keyOf={(contract) => contract.id}
               href={(contract) => routes.contract(contract.id)}
+              onRowIntent={(contract) => prefetchContract(contract.id)}
             />
             <PaginationControls page={data.page} totalPages={data.totalPages} onPageChange={setPage} />
           </div>

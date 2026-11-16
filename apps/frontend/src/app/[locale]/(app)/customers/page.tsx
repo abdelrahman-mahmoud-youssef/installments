@@ -22,7 +22,7 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Link } from '@/i18n/navigation';
 import type { CustomerListItem } from '@/lib/api/customers';
-import { useCreateCustomer, useCustomers, useDeleteCustomer } from '@/hooks/use-customers';
+import { useCreateCustomer, useCustomers, useDeleteCustomer, usePrefetchCustomer } from '@/hooks/use-customers';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { ApiError } from '@/lib/api/client';
 import { CUSTOMER_STATUSES, CustomerStatus } from '@/lib/enums';
@@ -38,6 +38,7 @@ export default function CustomersPage() {
   const [page, setPage] = useState(1);
   const debouncedSearch = useDebouncedValue(search, 300);
 
+  const prefetchCustomer = usePrefetchCustomer();
   const { data, isLoading, isError } = useCustomers({
     q: debouncedSearch || undefined,
     status,
@@ -204,6 +205,7 @@ export default function CustomersPage() {
               rows={data.data}
               keyOf={(customer) => customer.id}
               href={(customer) => routes.customer(customer.id)}
+              onRowIntent={(customer) => prefetchCustomer(customer.id)}
             />
             <PaginationControls page={data.page} totalPages={data.totalPages} onPageChange={setPage} />
           </div>
