@@ -197,7 +197,7 @@ export class ContractsService {
 
   private async saveContractImage(tenantId: string, image: string): Promise<string> {
     const { buffer, extension } = decodeImageUpload(image, MAX_CONTRACT_IMAGE_UPLOAD_BYTES);
-    return this.storage.saveKeyedImage(`contracts/${tenantId}/${randomUUID()}.${extension}`, buffer);
+    return this.storage.saveImageWithThumbnails(`contracts/${tenantId}/${randomUUID()}.${extension}`, buffer);
   }
 
   private async buildReminderMessage(

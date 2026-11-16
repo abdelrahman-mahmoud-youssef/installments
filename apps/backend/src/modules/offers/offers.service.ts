@@ -125,7 +125,7 @@ export class OffersService {
 
   private async saveOfferImage(tenantId: string, image: string): Promise<string> {
     const { buffer, extension } = decodeImageUpload(image, MAX_OFFER_IMAGE_UPLOAD_BYTES);
-    return this.storage.saveKeyedImage(`offer-images/${tenantId}/${randomUUID()}.${extension}`, buffer);
+    return this.storage.saveImageWithThumbnails(`offer-images/${tenantId}/${randomUUID()}.${extension}`, buffer);
   }
 
   private async findOwned(tenantId: string, id: string): Promise<Offer> {

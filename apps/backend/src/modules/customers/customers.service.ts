@@ -194,6 +194,6 @@ export class CustomersService {
 
   private async savePhoto(tenantId: string, photo: string): Promise<string> {
     const { buffer, extension } = decodeImageUpload(photo, MAX_CUSTOMER_PHOTO_UPLOAD_BYTES);
-    return this.storage.saveKeyedImage(`customer-photos/${tenantId}/${randomUUID()}.${extension}`, buffer);
+    return this.storage.saveImageWithThumbnails(`customer-photos/${tenantId}/${randomUUID()}.${extension}`, buffer);
   }
 }

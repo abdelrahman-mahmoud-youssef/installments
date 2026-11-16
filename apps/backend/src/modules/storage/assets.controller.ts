@@ -9,6 +9,7 @@ const PUBLIC_SHORT_CACHE_CONTROL = 'public, max-age=3600';
 const PUBLIC_IMMUTABLE_CACHE_CONTROL = 'public, max-age=31536000, immutable';
 const PRIVATE_IMMUTABLE_CACHE_CONTROL = 'private, max-age=31536000, immutable';
 const PRIVATE_DAILY_CACHE_CONTROL = 'private, max-age=86400';
+const FALLBACK_CACHE_CONTROL = 'private, max-age=300';
 
 const CACHE_CONTROL_BY_KEY_PREFIX: readonly { prefix: string; cacheControl: string }[] = [
   { prefix: 'logos/', cacheControl: PUBLIC_SHORT_CACHE_CONTROL },
@@ -38,9 +39,9 @@ export class AssetsController {
     const cacheControl = cacheControlFor(key);
 
     if (cacheControl) {
-      const { buffer, contentType } = await this.storage.getAssetBytes(key);
+      const { buffer, contentType, isFallback } = await this.storage.getAssetBytes(key);
       res.setHeader('Content-Type', contentType);
-      res.setHeader('Cache-Control', cacheControl);
+      res.setHeader('Cache-Control', isFallback ? FALLBACK_CACHE_CONTROL : cacheControl);
       res.send(buffer);
       return;
     }

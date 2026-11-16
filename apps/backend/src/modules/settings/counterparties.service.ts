@@ -228,7 +228,7 @@ export class CounterpartiesService {
 
   private async savePhoto(tenantId: string, photo: string): Promise<string> {
     const { buffer, extension } = decodeImageUpload(photo, MAX_CONTACT_PHOTO_UPLOAD_BYTES);
-    return this.storage.saveKeyedImage(`contact-photos/${tenantId}/${randomUUID()}.${extension}`, buffer);
+    return this.storage.saveImageWithThumbnails(`contact-photos/${tenantId}/${randomUUID()}.${extension}`, buffer);
   }
 
   private isForeignKeyRestrictionError(error: unknown): boolean {
