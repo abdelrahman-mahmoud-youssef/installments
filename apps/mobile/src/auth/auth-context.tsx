@@ -11,6 +11,7 @@ import {
 import { CurrentUser, getMe, login, register, RegisterInput, verifyTwoFactor } from '@/api/auth';
 import { setAuthToken, setSubscriptionInactiveHandler, setUnauthorizedHandler } from '@/api/client';
 import { tokenStorage } from '@/lib/storage';
+import { unregisterFromPush } from '@/push/push-device';
 import { useTheme } from '@/theme/theme-context';
 
 export type SignInResult = { status: 'authenticated' } | { status: 'twoFactor'; challengeToken: string };
@@ -109,6 +110,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [adoptToken],
   );
 
+  const signOut = useCallback(async () => {
+    await unregisterFromPush();
+    await clearSession();
+  }, [clearSession]);
+
   const registerAccount = useCallback(
     async (input: RegisterInput) => {
       const result = await register(input);
@@ -127,10 +133,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signIn,
       register: registerAccount,
       completeTwoFactor,
-      signOut: clearSession,
+      signOut,
       refreshUser,
     }),
-    [user, isReady, signIn, registerAccount, completeTwoFactor, clearSession, refreshUser],
+    [user, isReady, signIn, registerAccount, completeTwoFactor, signOut, refreshUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
