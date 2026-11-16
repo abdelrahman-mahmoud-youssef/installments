@@ -5,17 +5,25 @@ import { Public } from '../../common/decorators/public.decorator';
 import { StorageService } from './storage.service';
 
 const ASSETS_PREFIX = '/assets/';
-const LOGO_CACHE_CONTROL = 'public, max-age=3600';
-const ABOUT_IMAGE_CACHE_CONTROL = 'public, max-age=31536000, immutable';
+const PUBLIC_SHORT_CACHE_CONTROL = 'public, max-age=3600';
+const PUBLIC_IMMUTABLE_CACHE_CONTROL = 'public, max-age=31536000, immutable';
+const PRIVATE_IMMUTABLE_CACHE_CONTROL = 'private, max-age=31536000, immutable';
+const PRIVATE_DAILY_CACHE_CONTROL = 'private, max-age=86400';
+
+const CACHE_CONTROL_BY_KEY_PREFIX: readonly { prefix: string; cacheControl: string }[] = [
+  { prefix: 'logos/', cacheControl: PUBLIC_SHORT_CACHE_CONTROL },
+  { prefix: 'about-images/', cacheControl: PUBLIC_IMMUTABLE_CACHE_CONTROL },
+  { prefix: 'offer-images/', cacheControl: PUBLIC_IMMUTABLE_CACHE_CONTROL },
+  { prefix: 'customer-photos/', cacheControl: PRIVATE_IMMUTABLE_CACHE_CONTROL },
+  { prefix: 'contact-photos/', cacheControl: PRIVATE_IMMUTABLE_CACHE_CONTROL },
+  { prefix: 'contracts/', cacheControl: PRIVATE_IMMUTABLE_CACHE_CONTROL },
+  { prefix: 'payment-claims/', cacheControl: PRIVATE_DAILY_CACHE_CONTROL },
+  { prefix: 'payment-method-transactions/', cacheControl: PRIVATE_DAILY_CACHE_CONTROL },
+  { prefix: 'support-images/', cacheControl: PRIVATE_DAILY_CACHE_CONTROL },
+];
 
 export function cacheControlFor(key: string): string | null {
-  if (key.startsWith('logos/')) {
-    return LOGO_CACHE_CONTROL;
-  }
-  if (key.startsWith('about-images/') || key.startsWith('offer-images/')) {
-    return ABOUT_IMAGE_CACHE_CONTROL;
-  }
-  return null;
+  return CACHE_CONTROL_BY_KEY_PREFIX.find(({ prefix }) => key.startsWith(prefix))?.cacheControl ?? null;
 }
 
 @Public()
