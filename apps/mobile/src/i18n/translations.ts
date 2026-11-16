@@ -35,6 +35,7 @@ const en = {
   auth: {
     welcomeTitle: 'Welcome back',
     welcomeSubtitle: 'Sign in to manage your installments',
+    accountDeactivated: 'This account has been deactivated. You can contact support.',
     email: 'Email',
     password: 'Password',
     signIn: 'Sign in',
@@ -862,6 +863,7 @@ const ar: typeof en = {
   auth: {
     welcomeTitle: 'مرحباً بعودتك',
     welcomeSubtitle: 'سجّل الدخول لإدارة أقساطك',
+    accountDeactivated: 'تم إيقاف هذا الحساب. يمكنك التواصل مع الدعم.',
     email: 'البريد الإلكتروني',
     password: 'كلمة المرور',
     signIn: 'تسجيل الدخول',
