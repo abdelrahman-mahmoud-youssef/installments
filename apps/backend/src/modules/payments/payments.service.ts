@@ -3,7 +3,7 @@ import { ContractStatus, InstallmentStatus, Prisma } from '@prisma/client';
 import { buildPaginatedResult, PaginatedResult } from '../../common/pagination/paginated-result.interface';
 import { PrismaService } from '../../prisma/prisma.service';
 import { PaymentMethodLimitService } from '../settings/payment-method-limit.service';
-import { allocateManually, allocateOldestFirst, AllocationResult } from './allocation';
+import { allocateManually, allocateOldestFirst, AllocationResult, assertFullyAllocated } from './allocation';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { PaymentQueryDto } from './dto/payment-query.dto';
 
@@ -34,6 +34,7 @@ export class PaymentsService {
     }
 
     const paymentId = await this.prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT "id" FROM "Contract" WHERE "id" = ${createPaymentDto.contractId} AND "tenantId" = ${tenantId} FOR UPDATE`;
       const outstandingInstallments = await tx.installment.findMany({
         where: {
           contractId: createPaymentDto.contractId,
@@ -145,7 +146,9 @@ export class PaymentsService {
           outstandingInstallmentsOldestFirst,
         );
       }
-      return allocateOldestFirst(createPaymentDto.amount, outstandingInstallmentsOldestFirst);
+      const allocationResult = allocateOldestFirst(createPaymentDto.amount, outstandingInstallmentsOldestFirst);
+      assertFullyAllocated(allocationResult);
+      return allocationResult;
     } catch (error) {
       throw new BadRequestException(error instanceof Error ? error.message : 'Invalid payment allocation.');
     }

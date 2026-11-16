@@ -1,4 +1,4 @@
-import { allocateManually, allocateOldestFirst } from './allocation';
+import { allocateManually, allocateOldestFirst, assertFullyAllocated } from './allocation';
 
 describe('allocateOldestFirst', () => {
   it('records a partial payment against a single installment', () => {
@@ -98,5 +98,29 @@ describe('allocateManually', () => {
     expect(() =>
       allocateManually(100, [{ installmentId: 'unknown', amount: 100 }], outstanding),
     ).toThrow();
+  });
+});
+
+describe('assertFullyAllocated', () => {
+  it('accepts a payment that is fully applied to installments', () => {
+    const result = allocateOldestFirst(1_500, [{ id: 'i1', amount: 1_500, paidAmount: 0 }]);
+
+    expect(() => assertFullyAllocated(result)).not.toThrow();
+  });
+
+  it('rejects a payment larger than the remaining balance and says by how much', () => {
+    const result = allocateOldestFirst(800, [{ id: 'i1', amount: 500, paidAmount: 0 }]);
+
+    expect(() => assertFullyAllocated(result)).toThrow('The payment is 3.00 more than the remaining balance of this contract.');
+  });
+
+  it('rejects any payment on a contract with nothing left to pay', () => {
+    const result = allocateOldestFirst(100, [{ id: 'paid', amount: 500, paidAmount: 500 }]);
+
+    expect(() => assertFullyAllocated(result)).toThrow('This contract has no remaining balance.');
+  });
+
+  it('rejects a payment with no installments at all', () => {
+    expect(() => assertFullyAllocated(allocateOldestFirst(100, []))).toThrow('This contract has no remaining balance.');
   });
 });

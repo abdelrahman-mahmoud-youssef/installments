@@ -19,6 +19,12 @@ export interface AllocationResult {
   unallocatedAmount: number;
 }
 
+const MINOR_UNITS_PER_MAJOR_UNIT = 100;
+
+function formatMajorUnits(minorUnits: number): string {
+  return (minorUnits / MINOR_UNITS_PER_MAJOR_UNIT).toFixed(2);
+}
+
 function remainingBalance(installment: OutstandingInstallment): number {
   return installment.amount - installment.paidAmount;
 }
@@ -44,6 +50,18 @@ export function allocateOldestFirst(
   }
 
   return { allocations, unallocatedAmount: remainingPayment };
+}
+
+export function assertFullyAllocated(result: AllocationResult): void {
+  if (result.unallocatedAmount <= 0) {
+    return;
+  }
+  if (result.allocations.length === 0) {
+    throw new Error('This contract has no remaining balance.');
+  }
+  throw new Error(
+    `The payment is ${formatMajorUnits(result.unallocatedAmount)} more than the remaining balance of this contract.`,
+  );
 }
 
 export function allocateManually(
