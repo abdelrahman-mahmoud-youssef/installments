@@ -29,7 +29,9 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Qistak uses your photos for offer images and your shop logo."
+          "photosPermission": "Qistak uses your photos for offer images and your shop logo.",
+          "cameraPermission": false,
+          "microphonePermission": false
         }
       ],
       "expo-secure-store",
