@@ -21,7 +21,9 @@
     "showPassword": "اظهار كلمة السر",
     "hidePassword": "اخفاء كلمة السر",
     "pickDate": "اختار تاريخ",
-    "pickFromContacts": "اختار من جهات الاتصال"
+    "pickFromContacts": "اختار من جهات الاتصال",
+    "otherLanguage": "English",
+    "skipToContent": "انتقل للمحتوى"
   },
   "theme": {
     "toggle": "تغيير الشكل"
@@ -56,7 +58,8 @@
       "features": "المميزات",
       "howItWorks": "إزاي بيشتغل",
       "login": "تسجيل الدخول",
-      "cta": "ابدأ دلوقتي"
+      "cta": "ابدأ دلوقتي",
+      "menuLabel": "القائمة الرئيسية"
     },
     "hero": {
       "eyebrow": "متابعة الأقساط للمحلات",
@@ -109,7 +112,10 @@
       "rights": "كل الحقوق محفوظة.",
       "privacyLink": "سياسة الخصوصية",
       "termsLink": "شروط الاستخدام",
-      "contactLink": "تواصل مع الدعم"
+      "contactLink": "تواصل مع الدعم",
+      "productHeading": "المنتج",
+      "legalHeading": "قانوني",
+      "helpHeading": "المساعدة"
     }
   },
   "contactPage": {

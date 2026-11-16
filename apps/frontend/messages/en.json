@@ -21,7 +21,9 @@
     "showPassword": "Show password",
     "hidePassword": "Hide password",
     "pickDate": "Pick a date",
-    "pickFromContacts": "Pick from contacts"
+    "pickFromContacts": "Pick from contacts",
+    "otherLanguage": "عربي",
+    "skipToContent": "Skip to content"
   },
   "theme": {
     "toggle": "Toggle theme"
@@ -56,7 +58,8 @@
       "features": "Features",
       "howItWorks": "How it works",
       "login": "Sign in",
-      "cta": "Get started"
+      "cta": "Get started",
+      "menuLabel": "Main"
     },
     "hero": {
       "eyebrow": "Installment tracking for shops",
@@ -109,7 +112,10 @@
       "rights": "All rights reserved.",
       "privacyLink": "Privacy Policy",
       "termsLink": "Terms of Service",
-      "contactLink": "Contact support"
+      "contactLink": "Contact support",
+      "productHeading": "Product",
+      "legalHeading": "Legal",
+      "helpHeading": "Help"
     }
   },
   "contactPage": {
