@@ -206,7 +206,7 @@ export default function WalletDetailScreen() {
 
 function WalletHero({ method }: { method: PaymentMethod }) {
   const { t } = useI18n();
-  const preset = resolvePaymentMethodPreset(method.presetKey);
+  const preset = resolvePaymentMethodPreset(method.presetKey, method.iconKey);
 
   return (
     <Card>

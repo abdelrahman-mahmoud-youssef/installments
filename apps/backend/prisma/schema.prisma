@@ -437,6 +437,7 @@ model PaymentMethod {
   label               String
   details             String
   presetKey           String?
+  iconKey             String?
   isActive            Boolean                    @default(true)
   sortOrder           Int                        @default(0)
   monthlyLimit        Int?

@@ -48,6 +48,7 @@ export interface PublicPaymentMethod {
   label: string;
   details: string;
   presetKey: string | null;
+  iconKey: string | null;
 }
 
 export interface PublicContractSummary {
@@ -167,7 +168,7 @@ export class PublicService {
     const paymentMethods = await this.prisma.paymentMethod.findMany({
       where: { tenantId: customer.tenant.id, isActive: true },
       orderBy: { sortOrder: 'asc' },
-      select: { id: true, label: true, details: true, presetKey: true },
+      select: { id: true, label: true, details: true, presetKey: true, iconKey: true },
     });
 
     return {
@@ -253,7 +254,7 @@ export class PublicService {
       this.prisma.paymentMethod.findMany({
         where: { tenantId: customer.tenant.id, isActive: true },
         orderBy: { sortOrder: 'asc' },
-        select: { id: true, label: true, details: true, presetKey: true },
+        select: { id: true, label: true, details: true, presetKey: true, iconKey: true },
       }),
     ]);
 
@@ -457,7 +458,7 @@ export class PublicService {
     const paymentMethods = await this.prisma.paymentMethod.findMany({
       where: { tenantId: customer.tenant.id, isActive: true },
       orderBy: { sortOrder: 'asc' },
-      select: { id: true, label: true, details: true, presetKey: true },
+      select: { id: true, label: true, details: true, presetKey: true, iconKey: true },
     });
 
     const today = getUtcToday();

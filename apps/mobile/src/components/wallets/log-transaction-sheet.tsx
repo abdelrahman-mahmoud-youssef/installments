@@ -150,7 +150,7 @@ export function LogTransactionSheet({ visible, onClose, paymentMethodId, counter
             ) : (
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
                 {activeMethods.map((method) => {
-                  const preset = resolvePaymentMethodPreset(method.presetKey);
+                  const preset = resolvePaymentMethodPreset(method.presetKey, method.iconKey);
                   const isSelected = selectedMethodId === method.id;
                   return (
                     <PressableScale

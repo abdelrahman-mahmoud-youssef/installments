@@ -3,12 +3,14 @@ import { cn } from '@/lib/utils';
 
 export function PaymentMethodIcon({
   presetKey,
+  iconKey = null,
   className,
 }: {
   presetKey: string | null;
+  iconKey?: string | null;
   className?: string;
 }) {
-  const preset = getPaymentMethodPreset(presetKey);
+  const preset = getPaymentMethodPreset(presetKey, iconKey);
 
   if (preset.iconSrc) {
     return (

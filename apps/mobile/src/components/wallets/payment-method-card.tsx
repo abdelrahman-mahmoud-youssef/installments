@@ -21,7 +21,7 @@ interface PaymentMethodCardProps {
 
 export function PaymentMethodCard({ method, isPrimary, onPress, onLongPress }: PaymentMethodCardProps) {
   const { t, locale } = useI18n();
-  const preset = resolvePaymentMethodPreset(method.presetKey);
+  const preset = resolvePaymentMethodPreset(method.presetKey, method.iconKey);
   const usageRatio = method.monthlyLimit ? method.monthToDateUsage / method.monthlyLimit : 0;
   const usageTone = usageRatio >= 1 ? 'danger' : usageRatio >= 0.8 ? 'warning' : 'primary';
 

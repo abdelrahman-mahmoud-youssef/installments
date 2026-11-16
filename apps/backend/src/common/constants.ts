@@ -46,6 +46,19 @@ export const PASSWORD_RESET_TOKEN_TTL_MINUTES = 30;
 
 export const SHARE_LINK_TARGET_PATH_PATTERN = /^(\/(en|ar))?\/customer\/[^/]+(\/contracts\/[^/]+(\/pay)?)?$/;
 
+export const PAYMENT_METHOD_ICON_KEYS = [
+  'wallet',
+  'card',
+  'cash',
+  'bank',
+  'phone',
+  'gift',
+  'cart',
+  'store',
+  'briefcase',
+  'globe',
+] as const;
+
 export const SUBSCRIPTION_MONTHLY_PRICE = 20_000;
 
 export const SUBSCRIPTION_REFERRAL_MONTHLY_PRICE = 30_000;

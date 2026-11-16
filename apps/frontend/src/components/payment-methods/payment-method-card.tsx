@@ -44,7 +44,7 @@ export function PaymentMethodCard({ method }: { method: PaymentMethod }) {
     <Card className={!method.isActive ? 'opacity-60' : undefined}>
       <CardHeader>
         <div className="flex items-center gap-3">
-          <PaymentMethodIcon presetKey={method.presetKey} className="size-10" />
+          <PaymentMethodIcon presetKey={method.presetKey} iconKey={method.iconKey} className="size-10" />
           <div className="min-w-0">
             <CardTitle className="truncate">{method.label}</CardTitle>
             <CardDescription dir="ltr" className="truncate text-left">

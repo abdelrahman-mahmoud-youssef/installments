@@ -1,4 +1,5 @@
-import { IsInt, IsOptional, IsPositive, IsString, MaxLength, MinLength } from 'class-validator';
+import { IsIn, IsInt, IsOptional, IsPositive, IsString, MaxLength, MinLength } from 'class-validator';
+import { PAYMENT_METHOD_ICON_KEYS } from '../../../common/constants';
 
 export class CreatePaymentMethodDto {
   @IsString()
@@ -15,6 +16,10 @@ export class CreatePaymentMethodDto {
   @IsString()
   @MaxLength(50)
   presetKey?: string;
+
+  @IsOptional()
+  @IsIn(PAYMENT_METHOD_ICON_KEYS)
+  iconKey?: string;
 
   @IsOptional()
   @IsInt()

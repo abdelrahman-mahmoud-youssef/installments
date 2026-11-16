@@ -158,7 +158,7 @@ export function RecordPaymentDialog({
                         <SelectItem value="">{t('cash')}</SelectItem>
                         {activePaymentMethods.map((method) => (
                           <SelectItem key={method.id} value={method.id}>
-                            <PaymentMethodIcon presetKey={method.presetKey} className="size-5" />
+                            <PaymentMethodIcon presetKey={method.presetKey} iconKey={method.iconKey} className="size-5" />
                             {method.label}
                           </SelectItem>
                         ))}

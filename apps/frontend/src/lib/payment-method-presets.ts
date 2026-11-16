@@ -1,4 +1,16 @@
-import { Banknote, Landmark, Smartphone, Wallet, type LucideIcon } from 'lucide-react';
+import {
+  Banknote,
+  Briefcase,
+  CreditCard,
+  Gift,
+  Globe,
+  Landmark,
+  ShoppingCart,
+  Smartphone,
+  Store,
+  Wallet,
+  type LucideIcon,
+} from 'lucide-react';
 
 export interface PaymentMethodPreset {
   key: string;
@@ -55,6 +67,21 @@ export const PAYMENT_METHOD_PRESETS: PaymentMethodPreset[] = [
   { key: 'aman', label: 'Aman', color: '#ef5a28', icon: Banknote, iconSrc: '/payment-methods/aman.png' },
 ];
 
+export const PAYMENT_METHOD_ICON_OPTIONS: { key: string; icon: LucideIcon }[] = [
+  { key: 'wallet', icon: Wallet },
+  { key: 'card', icon: CreditCard },
+  { key: 'cash', icon: Banknote },
+  { key: 'bank', icon: Landmark },
+  { key: 'phone', icon: Smartphone },
+  { key: 'gift', icon: Gift },
+  { key: 'cart', icon: ShoppingCart },
+  { key: 'store', icon: Store },
+  { key: 'briefcase', icon: Briefcase },
+  { key: 'globe', icon: Globe },
+];
+
+const ICON_BY_KEY = new Map(PAYMENT_METHOD_ICON_OPTIONS.map((option) => [option.key, option.icon]));
+
 const PRESET_BY_KEY = new Map(PAYMENT_METHOD_PRESETS.map((preset) => [preset.key, preset]));
 
 const FALLBACK_PRESET: PaymentMethodPreset = {
@@ -64,9 +91,14 @@ const FALLBACK_PRESET: PaymentMethodPreset = {
   icon: Wallet,
 };
 
-export function getPaymentMethodPreset(presetKey: string | null): PaymentMethodPreset {
-  if (!presetKey) {
-    return FALLBACK_PRESET;
+export function getPaymentMethodPreset(
+  presetKey: string | null,
+  iconKey: string | null = null,
+): PaymentMethodPreset {
+  const preset = presetKey ? PRESET_BY_KEY.get(presetKey) : undefined;
+  if (preset) {
+    return preset;
   }
-  return PRESET_BY_KEY.get(presetKey) ?? FALLBACK_PRESET;
+  const icon = iconKey ? ICON_BY_KEY.get(iconKey) : undefined;
+  return icon ? { ...FALLBACK_PRESET, icon } : FALLBACK_PRESET;
 }

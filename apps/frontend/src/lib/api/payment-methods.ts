@@ -6,6 +6,7 @@ export interface PaymentMethod {
   label: string;
   details: string;
   presetKey: string | null;
+  iconKey: string | null;
   isActive: boolean;
   sortOrder: number;
   monthlyLimit: number | null;
@@ -17,6 +18,7 @@ export interface CreatePaymentMethodInput {
   label: string;
   details: string;
   presetKey?: string;
+  iconKey?: string;
   monthlyLimit?: number;
 }
 

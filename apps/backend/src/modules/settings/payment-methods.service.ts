@@ -71,6 +71,7 @@ export class PaymentMethodsService {
           label: dto.label,
           details: dto.details,
           presetKey: dto.presetKey,
+          iconKey: dto.presetKey ? undefined : dto.iconKey,
           monthlyLimit: dto.monthlyLimit,
           sortOrder: count,
         },

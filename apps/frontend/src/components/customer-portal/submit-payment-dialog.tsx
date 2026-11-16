@@ -113,7 +113,7 @@ export function SubmitPaymentDialog({
                           className="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-border p-3 text-sm has-data-checked:border-primary has-data-checked:bg-primary/5"
                         >
                           <span className="flex min-w-0 items-center gap-2.5">
-                            <PaymentMethodIcon presetKey={method.presetKey} />
+                            <PaymentMethodIcon presetKey={method.presetKey} iconKey={method.iconKey} />
                             <span className="min-w-0">
                               <span className="block font-medium">{method.label}</span>
                               <span className="block text-xs text-muted-foreground" dir="ltr">

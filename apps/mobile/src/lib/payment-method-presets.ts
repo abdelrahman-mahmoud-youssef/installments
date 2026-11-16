@@ -23,6 +23,19 @@ export const PAYMENT_METHOD_PRESETS: PaymentMethodPreset[] = [
 
 export const CUSTOM_PRESET_KEY = 'custom';
 
+export const PAYMENT_METHOD_ICON_OPTIONS: { key: string; icon: IoniconName }[] = [
+  { key: 'wallet', icon: 'wallet-outline' },
+  { key: 'card', icon: 'card-outline' },
+  { key: 'cash', icon: 'cash-outline' },
+  { key: 'bank', icon: 'business-outline' },
+  { key: 'phone', icon: 'phone-portrait-outline' },
+  { key: 'gift', icon: 'gift-outline' },
+  { key: 'cart', icon: 'cart-outline' },
+  { key: 'store', icon: 'storefront-outline' },
+  { key: 'briefcase', icon: 'briefcase-outline' },
+  { key: 'globe', icon: 'globe-outline' },
+];
+
 const FALLBACK_PRESET: PaymentMethodPreset = {
   key: CUSTOM_PRESET_KEY,
   label: 'Custom',
@@ -32,6 +45,16 @@ const FALLBACK_PRESET: PaymentMethodPreset = {
 
 const PRESET_BY_KEY = new Map(PAYMENT_METHOD_PRESETS.map((preset) => [preset.key, preset]));
 
-export function resolvePaymentMethodPreset(presetKey: string | null): PaymentMethodPreset {
-  return (presetKey && PRESET_BY_KEY.get(presetKey)) || FALLBACK_PRESET;
+const ICON_BY_KEY = new Map(PAYMENT_METHOD_ICON_OPTIONS.map((option) => [option.key, option.icon]));
+
+export function resolvePaymentMethodPreset(
+  presetKey: string | null,
+  iconKey: string | null = null,
+): PaymentMethodPreset {
+  const preset = presetKey ? PRESET_BY_KEY.get(presetKey) : undefined;
+  if (preset) {
+    return preset;
+  }
+  const icon = iconKey ? ICON_BY_KEY.get(iconKey) : undefined;
+  return icon ? { ...FALLBACK_PRESET, icon } : FALLBACK_PRESET;
 }

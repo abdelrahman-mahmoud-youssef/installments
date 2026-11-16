@@ -22,8 +22,9 @@ import { Input } from '@/components/ui/input';
 import { useCreatePaymentMethod, useUpdatePaymentMethod } from '@/hooks/use-payment-methods';
 import { ApiError } from '@/lib/api/client';
 import { PaymentMethod } from '@/lib/api/payment-methods';
-import { getPaymentMethodPreset } from '@/lib/payment-method-presets';
+import { getPaymentMethodPreset, PAYMENT_METHOD_ICON_OPTIONS } from '@/lib/payment-method-presets';
 import { PaymentMethodInput, paymentMethodSchema } from '@/lib/schemas/payment-method';
+import { cn } from '@/lib/utils';
 
 export function PaymentMethodFormDialog({
   trigger,
@@ -100,6 +101,40 @@ export function PaymentMethodFormDialog({
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-4">
+            {!method && !presetKey ? (
+              <FormField
+                control={form.control}
+                name="iconKey"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('paymentMethodIconOptional')}</FormLabel>
+                    <div className="flex flex-wrap gap-2">
+                      {PAYMENT_METHOD_ICON_OPTIONS.map(({ key, icon: Icon }) => {
+                        const isSelected = field.value === key;
+                        return (
+                          <button
+                            key={key}
+                            type="button"
+                            aria-pressed={isSelected}
+                            aria-label={t(`paymentMethodIcons.${key}`)}
+                            onClick={() => field.onChange(isSelected ? undefined : key)}
+                            className={cn(
+                              'grid size-10 place-items-center rounded-lg border transition-colors',
+                              isSelected
+                                ? 'border-primary bg-primary/10 text-primary'
+                                : 'border-border text-muted-foreground hover:bg-accent',
+                            )}
+                          >
+                            <Icon className="size-5" />
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            ) : null}
             <FormField
               control={form.control}
               name="label"

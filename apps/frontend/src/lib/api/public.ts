@@ -37,6 +37,7 @@ export interface PublicPaymentMethod {
   label: string;
   details: string;
   presetKey: string | null;
+  iconKey: string | null;
 }
 
 export interface PublicContractPayInfo {

@@ -141,7 +141,7 @@ export default function PaymentMethodDetailPage() {
       </FadeIn>
 
       <FadeIn delay={0.08} className="flex items-center gap-3">
-        <PaymentMethodIcon presetKey={method.presetKey} className="size-9" />
+        <PaymentMethodIcon presetKey={method.presetKey} iconKey={method.iconKey} className="size-9" />
         <MonthSwitcher month={month} onChange={setMonth} />
       </FadeIn>
 

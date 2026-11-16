@@ -10,7 +10,12 @@ import { PressableScale } from '@/components/ui/pressable-scale';
 import { TextField } from '@/components/ui/text-field';
 import { useI18n } from '@/i18n/i18n-context';
 import { parseAmountInput, toMajorUnitsText, toMinorUnits } from '@/lib/format';
-import { CUSTOM_PRESET_KEY, PAYMENT_METHOD_PRESETS, resolvePaymentMethodPreset } from '@/lib/payment-method-presets';
+import {
+  CUSTOM_PRESET_KEY,
+  PAYMENT_METHOD_ICON_OPTIONS,
+  PAYMENT_METHOD_PRESETS,
+  resolvePaymentMethodPreset,
+} from '@/lib/payment-method-presets';
 import { useTheme } from '@/theme/theme-context';
 import { radius, spacing } from '@/theme/tokens';
 
@@ -27,6 +32,7 @@ export interface PaymentMethodFormValues {
   label: string;
   details: string;
   presetKey?: string;
+  iconKey?: string;
   monthlyLimit: number | null;
 }
 
@@ -54,6 +60,7 @@ export function PaymentMethodFormSheet({
   const [presetKey, setPresetKey] = useState(CUSTOM_PRESET_KEY);
   const [label, setLabel] = useState('');
   const [details, setDetails] = useState('');
+  const [iconKey, setIconKey] = useState<string | null>(null);
   const [monthlyLimit, setMonthlyLimit] = useState('');
   const [errors, setErrors] = useState<{ label?: string; details?: string; api?: string }>({});
 
@@ -62,6 +69,7 @@ export function PaymentMethodFormSheet({
       return;
     }
     setErrors({});
+    setIconKey(null);
     if (method) {
       setPresetKey(method.presetKey ?? CUSTOM_PRESET_KEY);
       setLabel(method.label);
@@ -105,6 +113,7 @@ export function PaymentMethodFormSheet({
         label: label.trim(),
         details: details.trim(),
         presetKey: presetKey !== CUSTOM_PRESET_KEY ? presetKey : undefined,
+        iconKey: presetKey === CUSTOM_PRESET_KEY ? (iconKey ?? undefined) : undefined,
         monthlyLimit: parsedLimit !== null ? toMinorUnits(parsedLimit) : null,
       });
     } catch (error) {
@@ -152,6 +161,40 @@ export function PaymentMethodFormSheet({
                   >
                     <Ionicons name={preset.icon} size={14} color={preset.color} />
                     <AppText variant="caption">{preset.label}</AppText>
+                  </PressableScale>
+                );
+              })}
+            </View>
+          </View>
+        ) : null}
+
+        {!method && presetKey === CUSTOM_PRESET_KEY ? (
+          <View style={{ gap: spacing.xs }}>
+            <AppText variant="caption" tone="muted">
+              {t('wallets.iconOptional')}
+            </AppText>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+              {PAYMENT_METHOD_ICON_OPTIONS.map((option) => {
+                const isSelected = iconKey === option.key;
+                return (
+                  <PressableScale
+                    key={option.key}
+                    onPress={() => setIconKey(isSelected ? null : option.key)}
+                    accessibilityRole="button"
+                    accessibilityLabel={t(`wallets.icons.${option.key}`)}
+                    accessibilityState={{ selected: isSelected }}
+                    style={{
+                      width: 44,
+                      height: 44,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderWidth: 1.5,
+                      borderColor: isSelected ? colors.primary : colors.border,
+                      backgroundColor: isSelected ? colors.primaryMuted : colors.surface,
+                      borderRadius: radius.md,
+                    }}
+                  >
+                    <Ionicons name={option.icon} size={20} color={isSelected ? colors.primary : colors.textMuted} />
                   </PressableScale>
                 );
               })}

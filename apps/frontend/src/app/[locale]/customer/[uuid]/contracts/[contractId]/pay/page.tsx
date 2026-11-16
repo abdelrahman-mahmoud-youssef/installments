@@ -79,7 +79,7 @@ export default async function ContractPayPage({
                   key={method.id}
                   className="flex items-center gap-2.5 rounded-lg border border-border p-3 text-sm"
                 >
-                  <PaymentMethodIcon presetKey={method.presetKey} />
+                  <PaymentMethodIcon presetKey={method.presetKey} iconKey={method.iconKey} />
                   <span className="min-w-0">
                     <span className="block font-medium">{method.label}</span>
                     <span className="block text-xs text-muted-foreground" dir="ltr">
