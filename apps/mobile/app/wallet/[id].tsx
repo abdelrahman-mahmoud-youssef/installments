@@ -2,6 +2,7 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, RefreshControl, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { WalletIcon } from '@/components/wallets/wallet-icon';
 import { PaymentMethodTransaction } from '@/api/payment-method-transactions';
 import { PaymentMethod } from '@/api/payment-methods';
 import { useAuth } from '@/auth/auth-context';
@@ -211,18 +212,7 @@ function WalletHero({ method }: { method: PaymentMethod }) {
   return (
     <Card>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.lg }}>
-        <View
-          style={{
-            width: HERO_ICON_SIZE,
-            height: HERO_ICON_SIZE,
-            borderRadius: radius.lg,
-            backgroundColor: `${preset.color}1f`,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Ionicons name={preset.icon} size={28} color={preset.color} />
-        </View>
+        <WalletIcon preset={preset} size={HERO_ICON_SIZE} borderRadius={radius.lg} />
         <View style={{ flex: 1, gap: spacing.xs }}>
           <AppText variant="heading" numberOfLines={1}>
             {method.label}

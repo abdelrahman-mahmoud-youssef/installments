@@ -1,4 +1,4 @@
-import { View } from 'react-native';
+import { Image, ImageSourcePropType, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { selectionHaptic } from '@/lib/haptics';
 import { useTheme } from '@/theme/theme-context';
@@ -10,6 +10,7 @@ export interface ChoiceOption<T extends string> {
   value: T;
   label: string;
   icon?: keyof typeof Ionicons.glyphMap;
+  image?: ImageSourcePropType;
   color?: string;
 }
 
@@ -47,7 +48,11 @@ export function ChoiceChips<T extends string>({ options, selected, onSelect }: C
               paddingVertical: spacing.sm,
             }}
           >
-            {option.icon ? <Ionicons name={option.icon} size={14} color={accent} /> : null}
+            {option.image ? (
+              <Image source={option.image} style={{ width: 20, height: 20, borderRadius: radius.full }} />
+            ) : option.icon ? (
+              <Ionicons name={option.icon} size={14} color={accent} />
+            ) : null}
             <AppText variant="caption" style={{ color: isSelected ? accent : colors.text }}>
               {option.label}
             </AppText>

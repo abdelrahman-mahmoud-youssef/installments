@@ -74,7 +74,7 @@ export function RecordPaymentSheet({
       .filter((method) => method.isActive)
       .map((method) => {
         const preset = resolvePaymentMethodPreset(method.presetKey, method.iconKey);
-        return { value: method.id, label: method.label, icon: preset.icon, color: preset.color };
+        return { value: method.id, label: method.label, icon: preset.icon, image: preset.image, color: preset.color };
       }),
   ];
 

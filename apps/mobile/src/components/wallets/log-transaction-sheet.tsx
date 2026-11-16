@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Image, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { WalletIcon } from './wallet-icon';
 import { ApiError } from '@/api/client';
 import { Counterparty } from '@/api/counterparties';
 import { MoneyDirection } from '@/api/payment-method-transactions';
@@ -170,7 +171,7 @@ export function LogTransactionSheet({ visible, onClose, paymentMethodId, counter
                         paddingVertical: spacing.sm,
                       }}
                     >
-                      <Ionicons name={preset.icon} size={14} color={preset.color} />
+                      <WalletIcon preset={preset} size={20} borderRadius={radius.full} />
                       <AppText variant="caption">{method.label}</AppText>
                     </PressableScale>
                   );

@@ -6,6 +6,7 @@ import { useI18n } from '@/i18n/i18n-context';
 import { PAYMENT_METHOD_PRESETS } from '@/lib/payment-method-presets';
 import { useTheme } from '@/theme/theme-context';
 import { radius, spacing } from '@/theme/tokens';
+import { WalletIcon } from './wallet-icon';
 
 const PRESET_ICON_SIZE = 44;
 
@@ -35,19 +36,8 @@ export function PresetQuickAdd({ onSelect }: PresetQuickAddProps) {
             accessibilityLabel={`${t('wallets.addMethod')}: ${preset.label}`}
             style={{ alignItems: 'center', gap: spacing.xs, width: PRESET_ICON_SIZE + spacing.xxl }}
           >
-            <View
-              style={{
-                width: PRESET_ICON_SIZE,
-                height: PRESET_ICON_SIZE,
-                borderRadius: radius.full,
-                backgroundColor: `${preset.color}1f`,
-                borderWidth: 1,
-                borderColor: `${preset.color}33`,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Ionicons name={preset.icon} size={20} color={preset.color} />
+            <View style={{ width: PRESET_ICON_SIZE, height: PRESET_ICON_SIZE }}>
+              <WalletIcon preset={preset} size={PRESET_ICON_SIZE} borderRadius={radius.full} />
               <View
                 style={{
                   position: 'absolute',

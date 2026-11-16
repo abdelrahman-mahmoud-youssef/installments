@@ -1,5 +1,4 @@
 import { View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { PaymentMethod } from '@/api/payment-methods';
 import { AppText } from '@/components/ui/app-text';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +10,7 @@ import { formatMoney } from '@/lib/format';
 import { resolvePaymentMethodPreset } from '@/lib/payment-method-presets';
 import { radius, spacing } from '@/theme/tokens';
 import { MaskedAccountDetails } from './masked-account-details';
+import { WalletIcon } from './wallet-icon';
 
 interface PaymentMethodCardProps {
   method: PaymentMethod;
@@ -35,18 +35,7 @@ export function PaymentMethodCard({ method, isPrimary, onPress, onLongPress }: P
       <Card style={{ opacity: method.isActive ? 1 : 0.6 }}>
         <View style={{ gap: spacing.md }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-            <View
-              style={{
-                width: 44,
-                height: 44,
-                borderRadius: radius.md,
-                backgroundColor: `${preset.color}1f`,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Ionicons name={preset.icon} size={22} color={preset.color} />
-            </View>
+            <WalletIcon preset={preset} size={44} borderRadius={radius.md} />
             <View style={{ flex: 1, gap: 2 }}>
               <AppText variant="bodyStrong" numberOfLines={1}>
                 {method.label}

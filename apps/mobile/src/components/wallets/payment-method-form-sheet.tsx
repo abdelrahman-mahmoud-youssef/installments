@@ -18,6 +18,7 @@ import {
 } from '@/lib/payment-method-presets';
 import { useTheme } from '@/theme/theme-context';
 import { radius, spacing } from '@/theme/tokens';
+import { WalletIcon } from './wallet-icon';
 
 interface PaymentMethodFormSheetProps {
   visible: boolean;
@@ -159,7 +160,7 @@ export function PaymentMethodFormSheet({
                       paddingVertical: spacing.sm,
                     }}
                   >
-                    <Ionicons name={preset.icon} size={14} color={preset.color} />
+                    <WalletIcon preset={preset} size={20} borderRadius={radius.full} />
                     <AppText variant="caption">{preset.label}</AppText>
                   </PressableScale>
                 );
