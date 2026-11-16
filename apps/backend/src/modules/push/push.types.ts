@@ -10,6 +10,7 @@ export type PushContentResolver = (language: NotificationLanguage) => PushConten
 export const PushRoute = {
   SUPPORT: 'support',
   DASHBOARD: 'dashboard',
+  ACTIVITY: 'activity',
 } as const;
 
 export type PushRoute = (typeof PushRoute)[keyof typeof PushRoute];

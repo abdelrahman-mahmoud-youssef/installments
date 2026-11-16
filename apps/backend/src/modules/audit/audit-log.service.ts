@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, Role } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
+import { StaffActivityPushService } from '../push/staff-activity-push.service';
 import { AuditLogQueryDto } from './dto/audit-log-query.dto';
 import { PaginatedResult, buildPaginatedResult } from '../../common/pagination/paginated-result.interface';
 
@@ -8,32 +9,37 @@ export interface AuditActor {
   id: string;
   name: string;
   email: string;
+  role: Role;
 }
 
 @Injectable()
 export class AuditLogService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly staffActivityPush: StaffActivityPushService,
+  ) {}
 
-  record(
+  async record(
     tenantId: string,
     actor: AuditActor,
     action: string,
     entityType: string,
     entityId: string | null,
   ): Promise<void> {
-    return this.prisma.auditLog
-      .create({
-        data: {
-          tenantId,
-          userId: actor.id,
-          userName: actor.name,
-          userEmail: actor.email,
-          action,
-          entityType,
-          entityId,
-        },
-      })
-      .then(() => undefined);
+    await this.prisma.auditLog.create({
+      data: {
+        tenantId,
+        userId: actor.id,
+        userName: actor.name,
+        userEmail: actor.email,
+        action,
+        entityType,
+        entityId,
+      },
+    });
+    if (actor.role === Role.STAFF) {
+      await this.staffActivityPush.notifyAdmins(tenantId, actor.name, action);
+    }
   }
 
   async findAll(tenantId: string, query: AuditLogQueryDto): Promise<PaginatedResult<Prisma.AuditLogGetPayload<object>>> {

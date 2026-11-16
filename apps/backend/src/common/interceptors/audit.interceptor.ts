@@ -30,7 +30,12 @@ export class AuditInterceptor implements NestInterceptor {
         this.auditLogService
           .record(
             request.user.tenantId,
-            { id: request.user.userId, name: request.user.name ?? request.user.email, email: request.user.email },
+            {
+              id: request.user.userId,
+              name: request.user.name ?? request.user.email,
+              email: request.user.email,
+              role: request.user.role,
+            },
             metadata.action,
             metadata.entityType,
             entityId,
