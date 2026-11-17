@@ -4,6 +4,7 @@ import { FlatList, RefreshControl, View } from 'react-native';
 import { StaffMember } from '@/api/staff';
 import { StaffCard } from '@/components/staff/staff-card';
 import { StaffFormSheet } from '@/components/staff/staff-form-sheet';
+import { StaffWalletAccessSheet } from '@/components/staff/staff-wallet-access-sheet';
 import { Button } from '@/components/ui/button';
 import { ConfirmSheet } from '@/components/ui/confirm-sheet';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -23,6 +24,7 @@ export default function StaffScreen() {
   const toggleMutation = useSetStaffActive();
   const [formVisible, setFormVisible] = useState(false);
   const [pendingDeactivation, setPendingDeactivation] = useState<StaffMember | null>(null);
+  const [walletAccessMember, setWalletAccessMember] = useState<StaffMember | null>(null);
 
   const setActive = (member: StaffMember, isActive: boolean) => {
     toggleMutation.mutate(
@@ -71,11 +73,14 @@ export default function StaffScreen() {
             member={item}
             disabled={toggleMutation.isPending}
             onToggleActive={(isActive) => requestToggle(item, isActive)}
+            onManageWallets={() => setWalletAccessMember(item)}
           />
         )}
       />
 
       <StaffFormSheet visible={formVisible} onClose={() => setFormVisible(false)} />
+
+      <StaffWalletAccessSheet member={walletAccessMember} onClose={() => setWalletAccessMember(null)} />
 
       <ConfirmSheet
         visible={pendingDeactivation !== null}

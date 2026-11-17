@@ -99,7 +99,14 @@ import {
 import { CreatePaymentInput, createPayment } from '@/api/payments';
 import { createShareLink } from '@/api/share-links';
 import { getReports } from '@/api/reports';
-import { CreateStaffInput, createStaff, listStaff, setStaffActive } from '@/api/staff';
+import {
+  CreateStaffInput,
+  createStaff,
+  listStaff,
+  setStaffActive,
+  setStaffWalletAccess,
+  StaffWalletAccessInput,
+} from '@/api/staff';
 import {
   CreateSupportMessageInput,
   createSupportMessage,
@@ -326,6 +333,14 @@ export function useSetStaffActive() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) => setStaffActive(id, isActive),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.staff }),
+  });
+}
+
+export function useSetStaffWalletAccess() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, input }: { id: string; input: StaffWalletAccessInput }) => setStaffWalletAccess(id, input),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.staff }),
   });
 }
