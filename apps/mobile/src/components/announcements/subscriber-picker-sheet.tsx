@@ -10,7 +10,7 @@ import { TextField } from '@/components/ui/text-field';
 import { useAnnouncementSubscribers } from '@/hooks/queries';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useI18n } from '@/i18n/i18n-context';
-import { formatNumber } from '@/lib/format';
+import { formatNumber, toLatinDigits } from '@/lib/format';
 import { useTheme } from '@/theme/theme-context';
 import { spacing } from '@/theme/tokens';
 import { SubscriberRow } from './subscriber-row';
@@ -29,7 +29,7 @@ export function SubscriberPickerSheet({ visible, selectedIds, onToggle, onClose 
   const { colors } = useTheme();
   const { height } = useWindowDimensions();
   const [search, setSearch] = useState('');
-  const debouncedSearch = useDebouncedValue(search.trim());
+  const debouncedSearch = useDebouncedValue(toLatinDigits(search.trim()));
   const { data, isPending, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useAnnouncementSubscribers({ q: debouncedSearch || undefined }, visible);
 

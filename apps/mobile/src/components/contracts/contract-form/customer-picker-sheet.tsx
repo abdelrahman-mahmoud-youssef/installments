@@ -13,7 +13,7 @@ import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useI18n } from '@/i18n/i18n-context';
 import { useTheme } from '@/theme/theme-context';
 import { radius, spacing } from '@/theme/tokens';
-import { isolateLtr } from '@/lib/format';
+import { isolateLtr, toLatinDigits } from '@/lib/format';
 
 interface CustomerPickerSheetProps {
   visible: boolean;
@@ -27,7 +27,7 @@ export function CustomerPickerSheet({ visible, selectedId, onClose, onSelect, on
   const { t } = useI18n();
   const { colors } = useTheme();
   const [search, setSearch] = useState('');
-  const debouncedSearch = useDebouncedValue(search.trim());
+  const debouncedSearch = useDebouncedValue(toLatinDigits(search.trim()));
   const query = useCustomers({ q: debouncedSearch || undefined, status: 'ACTIVE' });
   const customers = useMemo(() => query.data?.pages.flatMap((page) => page.data) ?? [], [query.data]);
 
