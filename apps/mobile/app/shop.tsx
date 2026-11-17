@@ -143,8 +143,8 @@ export default function ShopScreen() {
   };
 
   const changeLogo = async () => {
-    setLogoSheetVisible(false);
     const [picked] = await pickImages({ limit: 1, square: true });
+    setLogoSheetVisible(false);
     if (!picked) {
       return;
     }
