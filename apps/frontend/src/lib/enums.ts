@@ -13,6 +13,9 @@ export type CustomerStatus = (typeof CUSTOMER_STATUSES)[number];
 export const SUBSCRIPTION_STATUSES = ['TRIAL', 'ACTIVE', 'EXPIRED'] as const;
 export type SubscriptionStatus = (typeof SUBSCRIPTION_STATUSES)[number];
 
+export const WALLET_ACCESS_LEVELS = ['NONE', 'ALL', 'SELECTED'] as const;
+export type WalletAccess = (typeof WALLET_ACCESS_LEVELS)[number];
+
 export const INSTALLMENT_STATUSES = ['PENDING', 'PARTIALLY_PAID', 'PAID', 'CANCELLED'] as const;
 export type InstallmentStatus = (typeof INSTALLMENT_STATUSES)[number];
 

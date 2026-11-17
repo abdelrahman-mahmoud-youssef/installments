@@ -10,6 +10,8 @@ import { EmptyState } from '@/components/shared/empty-state';
 import { FadeIn } from '@/components/shared/motion';
 import { PageHeader } from '@/components/shared/page-header';
 import { TableSkeleton } from '@/components/shared/skeletons';
+import { StaffWalletAccessDialog } from '@/components/staff/staff-wallet-access-dialog';
+import { StaffWalletAccessSummary } from '@/components/staff/staff-wallet-access-summary';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -166,8 +168,10 @@ export default function StaffPage() {
                     <p className="text-xs text-muted-foreground">
                       {t('staffCreatedAt', { date: formatDate(member.createdAt) })}
                     </p>
+                    <StaffWalletAccessSummary member={member} />
                   </div>
                   <div className="flex shrink-0 items-center gap-3">
+                    <StaffWalletAccessDialog member={member} />
                     <Badge variant={member.isActive ? 'secondary' : 'outline'}>
                       {member.isActive ? t('staffActive') : t('staffInactive')}
                     </Badge>
