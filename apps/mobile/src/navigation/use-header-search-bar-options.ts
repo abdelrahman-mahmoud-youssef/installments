@@ -1,5 +1,6 @@
 import type { SearchBarProps } from 'react-native-screens';
 import { useI18n } from '@/i18n/i18n-context';
+import { toLatinDigits } from '@/lib/format';
 import { useTheme } from '@/theme/theme-context';
 
 interface HeaderSearchBarConfig {
@@ -22,6 +23,6 @@ export function useHeaderSearchBarOptions({ placeholder, onSearch }: HeaderSearc
     tintColor: colors.primary,
     hintTextColor: colors.textFaint,
     headerIconColor: colors.textMuted,
-    onChangeText: (event) => onSearch(event.nativeEvent.text),
+    onChangeText: (event) => onSearch(toLatinDigits(event.nativeEvent.text)),
   };
 }

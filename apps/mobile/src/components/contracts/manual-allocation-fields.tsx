@@ -3,7 +3,7 @@ import { Installment } from '@/api/contracts';
 import { AppText } from '@/components/ui/app-text';
 import { MoneyText } from '@/components/ui/money-text';
 import { useI18n } from '@/i18n/i18n-context';
-import { formatMoney, formatNumber } from '@/lib/format';
+import { formatMoney, formatNumber, toLatinDigits } from '@/lib/format';
 import { remainingOf } from '@/lib/installment-balance';
 import { useTheme } from '@/theme/theme-context';
 import { logicalTextAlign, radius, spacing, touchTarget } from '@/theme/tokens';
@@ -43,7 +43,7 @@ export function ManualAllocationFields({
           </View>
           <TextInput
             value={values[installment.id] ?? ''}
-            onChangeText={(text) => onChange(installment.id, text)}
+            onChangeText={(text) => onChange(installment.id, toLatinDigits(text))}
             keyboardType="decimal-pad"
             placeholder="0"
             placeholderTextColor={colors.textFaint}

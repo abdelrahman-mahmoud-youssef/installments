@@ -1,10 +1,19 @@
 import { forwardRef, useState } from 'react';
-import { Pressable, TextInput, TextInputProps, View } from 'react-native';
+import { KeyboardTypeOptions, Pressable, TextInput, TextInputProps, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useI18n } from '@/i18n/i18n-context';
+import { toLatinDigits } from '@/lib/format';
 import { useTheme } from '@/theme/theme-context';
 import { logicalTextAlign, radius, spacing, touchTarget } from '@/theme/tokens';
 import { AppText } from './app-text';
+
+const NUMERIC_KEYBOARDS: ReadonlySet<KeyboardTypeOptions> = new Set<KeyboardTypeOptions>([
+  'number-pad',
+  'decimal-pad',
+  'numeric',
+  'phone-pad',
+  'numbers-and-punctuation',
+]);
 
 interface TextFieldProps extends TextInputProps {
   label: string;
@@ -16,7 +25,19 @@ interface TextFieldProps extends TextInputProps {
 }
 
 export const TextField = forwardRef<TextInput, TextFieldProps>(function TextField(
-  { label, error, hint, optional = false, secureToggle = false, ltr, style, multiline, secureTextEntry, ...rest },
+  {
+    label,
+    error,
+    hint,
+    optional = false,
+    secureToggle = false,
+    ltr,
+    style,
+    multiline,
+    secureTextEntry,
+    onChangeText,
+    ...rest
+  },
   ref,
 ) {
   const { colors, fontSize } = useTheme();
@@ -24,6 +45,7 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
   const [isFocused, setIsFocused] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
+  const isNumeric = rest.keyboardType !== undefined && NUMERIC_KEYBOARDS.has(rest.keyboardType);
   const borderColor = error ? colors.danger : isFocused ? colors.primary : colors.border;
   const forceLtr =
     ltr ??
@@ -46,6 +68,7 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
           ref={ref}
           {...rest}
           secureTextEntry={secureToggle ? !isPasswordVisible : secureTextEntry}
+          onChangeText={isNumeric && onChangeText ? (text) => onChangeText(toLatinDigits(text)) : onChangeText}
           multiline={multiline}
           onFocus={(event) => {
             setIsFocused(true);
