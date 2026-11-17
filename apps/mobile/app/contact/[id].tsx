@@ -48,15 +48,15 @@ export default function ContactDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t, locale } = useI18n();
   const { colors } = useTheme();
-  const { isAdmin } = useAuth();
+  const { isAdmin, canSeeWallets } = useAuth();
   const { showToast } = useToast();
   const router = useRouter();
   const { shareStatement, canShare } = useShareStatement();
   const [month, setMonth] = useState(currentMonthKey());
   const [openSheet, setOpenSheet] = useState<OpenSheet>(null);
 
-  const contactQuery = useCounterparty(id, isAdmin);
-  const historyQuery = useCounterpartyHistory(id, { month }, isAdmin && contactQuery.data !== undefined);
+  const contactQuery = useCounterparty(id, canSeeWallets);
+  const historyQuery = useCounterpartyHistory(id, { month }, canSeeWallets && contactQuery.data !== undefined);
   const updateMutation = useUpdateCounterparty();
   const deleteMutation = useDeleteCounterparty();
   const pinMutation = useSetCounterpartyPinned();
@@ -102,10 +102,10 @@ export default function ContactDetailScreen() {
       },
     );
 
-  if (!isAdmin || !contact) {
+  if (!canSeeWallets || !contact) {
     return (
       <DetailFallback
-        isAllowed={isAdmin}
+        isAllowed={canSeeWallets}
         notAllowedMessage={t('wallets.adminOnly')}
         isPending={contactQuery.isPending}
         error={contactQuery.error}
@@ -122,8 +122,8 @@ export default function ContactDetailScreen() {
         contact={contact}
         onCall={contact.phone ? () => void Linking.openURL(`tel:${contact.phone}`) : undefined}
         onShare={canShare ? () => void shareStatement(contact) : undefined}
-        onAdjust={() => setOpenSheet('adjust')}
-        onEdit={() => setOpenSheet('edit')}
+        onAdjust={isAdmin ? () => setOpenSheet('adjust') : undefined}
+        onEdit={isAdmin ? () => setOpenSheet('edit') : undefined}
       />
       <MonthSwitcher month={month} onChange={setMonth} />
       <View style={{ flexDirection: 'row', gap: spacing.md }}>
@@ -149,18 +149,19 @@ export default function ContactDetailScreen() {
       <Stack.Screen
         options={{
           title: contact.name,
-          headerRight: () => (
-            <PressableScale
-              onPress={() => togglePinned(!contact.isPinned)}
-              disabled={pinMutation.isPending}
-              accessibilityRole="button"
-              accessibilityLabel={t(contact.isPinned ? 'contacts.unpin' : 'contacts.pin')}
-              accessibilityState={{ selected: contact.isPinned }}
-              hitSlop={spacing.sm}
-            >
-              <Ionicons name={contact.isPinned ? 'pin' : 'pin-outline'} size={24} color={colors.primary} />
-            </PressableScale>
-          ),
+          headerRight: () =>
+            isAdmin ? (
+              <PressableScale
+                onPress={() => togglePinned(!contact.isPinned)}
+                disabled={pinMutation.isPending}
+                accessibilityRole="button"
+                accessibilityLabel={t(contact.isPinned ? 'contacts.unpin' : 'contacts.pin')}
+                accessibilityState={{ selected: contact.isPinned }}
+                hitSlop={spacing.sm}
+              >
+                <Ionicons name={contact.isPinned ? 'pin' : 'pin-outline'} size={24} color={colors.primary} />
+              </PressableScale>
+            ) : null,
         }}
       />
       <FlatList
@@ -202,12 +203,14 @@ export default function ContactDetailScreen() {
         ListFooterComponent={
           <View style={{ paddingHorizontal: spacing.xl, paddingTop: spacing.xl, gap: spacing.lg }}>
             {historyQuery.isFetchingNextPage ? <ActivityIndicator color={colors.textMuted} /> : null}
-            <Button
-              title={t('contacts.removeAction')}
-              variant="destructive"
-              icon="trash-outline"
-              onPress={() => setOpenSheet('remove')}
-            />
+            {isAdmin ? (
+              <Button
+                title={t('contacts.removeAction')}
+                variant="destructive"
+                icon="trash-outline"
+                onPress={() => setOpenSheet('remove')}
+              />
+            ) : null}
           </View>
         }
         renderItem={({ item }) => (
@@ -257,8 +260,8 @@ interface ContactHeroProps {
   contact: Counterparty;
   onCall?: () => void;
   onShare?: () => void;
-  onAdjust: () => void;
-  onEdit: () => void;
+  onAdjust?: () => void;
+  onEdit?: () => void;
 }
 
 function ContactHero({ contact, onCall, onShare, onAdjust, onEdit }: ContactHeroProps) {
@@ -293,8 +296,8 @@ function ContactHero({ contact, onCall, onShare, onAdjust, onEdit }: ContactHero
         <View style={{ flexDirection: 'row', justifyContent: 'center', gap: spacing.lg }}>
           {onCall ? <QuickAction icon="call" label={t('contacts.call')} onPress={onCall} /> : null}
           <QuickAction icon="share-outline" label={t('contacts.share')} onPress={onShare} />
-          <QuickAction icon="scale-outline" label={t('contacts.adjust')} onPress={onAdjust} />
-          <QuickAction icon="create-outline" label={t('contacts.edit')} onPress={onEdit} />
+          {onAdjust ? <QuickAction icon="scale-outline" label={t('contacts.adjust')} onPress={onAdjust} /> : null}
+          {onEdit ? <QuickAction icon="create-outline" label={t('contacts.edit')} onPress={onEdit} /> : null}
         </View>
       </View>
     </Card>

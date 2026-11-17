@@ -39,7 +39,7 @@ export default function WalletDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t, locale } = useI18n();
   const { colors } = useTheme();
-  const { isAdmin } = useAuth();
+  const { isAdmin, canSeeWallets } = useAuth();
   const router = useRouter();
   const [month, setMonth] = useState(currentMonthKey());
   const [search, setSearch] = useState('');
@@ -53,7 +53,7 @@ export default function WalletDetailScreen() {
 
   const methodsQuery = usePaymentMethods();
   const method = methodsQuery.data?.find((item) => item.id === id);
-  const isEnabled = isAdmin && method !== undefined;
+  const isEnabled = canSeeWallets && method !== undefined;
   const summaryQuery = usePaymentMethodMonthlySummary(id, month, isEnabled);
   const transactionsQuery = usePaymentMethodTransactions(id, { month, q: debouncedSearch || undefined }, isEnabled);
 
@@ -80,10 +80,10 @@ export default function WalletDetailScreen() {
     void transactionsQuery.refetch();
   };
 
-  if (!isAdmin || methodsQuery.isPending || !method) {
+  if (!canSeeWallets || methodsQuery.isPending || !method) {
     return (
       <DetailFallback
-        isAllowed={isAdmin}
+        isAllowed={canSeeWallets}
         notAllowedMessage={t('wallets.adminOnly')}
         isPending={methodsQuery.isPending}
         error={methodsQuery.error}
@@ -125,16 +125,17 @@ export default function WalletDetailScreen() {
         options={{
           title: method.label,
           headerSearchBarOptions: searchBarOptions,
-          headerRight: () => (
-            <PressableScale
-              onPress={() => setIsActionsOpen(true)}
-              accessibilityRole="button"
-              accessibilityLabel={t('wallets.moreActions')}
-              hitSlop={spacing.sm}
-            >
-              <Ionicons name="ellipsis-horizontal-circle" size={26} color={colors.primary} />
-            </PressableScale>
-          ),
+          headerRight: () =>
+            isAdmin ? (
+              <PressableScale
+                onPress={() => setIsActionsOpen(true)}
+                accessibilityRole="button"
+                accessibilityLabel={t('wallets.moreActions')}
+                hitSlop={spacing.sm}
+              >
+                <Ionicons name="ellipsis-horizontal-circle" size={26} color={colors.primary} />
+              </PressableScale>
+            ) : null,
         }}
       />
       <FlatList

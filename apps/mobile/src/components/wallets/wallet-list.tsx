@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import { ReactElement, useMemo, useState } from 'react';
 import { FlatList, RefreshControl, ScrollViewProps, View } from 'react-native';
 import { PaymentMethod } from '@/api/payment-methods';
+import { useAuth } from '@/auth/auth-context';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { SkeletonCardList } from '@/components/ui/skeleton';
@@ -27,6 +28,7 @@ export function WalletList({ header, search, scrollProps }: WalletListProps) {
   const { t } = useI18n();
   const { colors } = useTheme();
   const router = useRouter();
+  const { isAdmin } = useAuth();
   const { data, isPending, error, refetch, isRefetching } = usePaymentMethods();
   const [actionMethod, setActionMethod] = useState<PaymentMethod | null>(null);
 
@@ -73,7 +75,7 @@ export function WalletList({ header, search, scrollProps }: WalletListProps) {
               method={item}
               isPrimary={item.id === primaryMethodId}
               onPress={() => router.push(`/wallet/${item.id}`)}
-              onLongPress={() => setActionMethod(item)}
+              onLongPress={isAdmin ? () => setActionMethod(item) : undefined}
             />
           </View>
         )}

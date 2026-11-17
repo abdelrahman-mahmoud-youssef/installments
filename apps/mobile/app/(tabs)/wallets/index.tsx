@@ -1,13 +1,12 @@
 import { Stack } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { View } from 'react-native';
 import { useAuth } from '@/auth/auth-context';
 import { ContactFormSheet } from '@/components/contacts/contact-form-sheet';
 import { ContactList } from '@/components/contacts/contact-list';
 import { AppText } from '@/components/ui/app-text';
 import { Button } from '@/components/ui/button';
 import { FloatingActionBar } from '@/components/ui/floating-action-bar';
-import { Card } from '@/components/ui/card';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { useToast } from '@/components/ui/toast-context';
 import { PaymentMethodFormSheet } from '@/components/wallets/payment-method-form-sheet';
@@ -58,35 +57,20 @@ export default function WalletsScreen() {
           {isWallets ? t('wallets.subtitle') : t('contacts.emptyHint')}
         </AppText>
       </View>
-      {isWallets && !debouncedSearch ? <PresetQuickAdd onSelect={setNewWalletPreset} /> : null}
+      {isAdmin && isWallets && !debouncedSearch ? <PresetQuickAdd onSelect={setNewWalletPreset} /> : null}
     </View>
   );
 
   return (
     <>
-      <Stack.Screen
-        options={{ ...headerOptions, headerSearchBarOptions: isAdmin ? searchBarOptions : undefined }}
-      />
-      {!isAdmin ? (
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          contentContainerStyle={{ padding: spacing.xl, gap: spacing.lg }}
-          {...scrollProps}
-        >
-          {largeTitle}
-          <Card>
-            <AppText variant="caption" tone="muted">
-              {t('wallets.adminOnly')}
-            </AppText>
-          </Card>
-        </ScrollView>
-      ) : isWallets ? (
+      <Stack.Screen options={{ ...headerOptions, headerSearchBarOptions: searchBarOptions }} />
+      {isWallets ? (
         <WalletList header={header} search={debouncedSearch} scrollProps={scrollProps} />
       ) : (
         <ContactList header={header} search={debouncedSearch} scrollProps={scrollProps} />
       )}
 
-      {isAdmin ? (
+      {isAdmin || !isWallets ? (
         <FloatingActionBar>
           <Button
             variant="glass"

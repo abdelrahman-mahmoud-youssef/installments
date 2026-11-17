@@ -21,12 +21,15 @@ export interface CurrentUserSubscription {
   isRenewalDueSoon: boolean;
 }
 
+export type WalletAccess = 'NONE' | 'ALL' | 'SELECTED';
+
 export interface CurrentUser {
   id: string;
   name: string;
   email: string;
   tenantId: string;
   role: Role;
+  walletAccess: WalletAccess;
   twoFactorEnabled: boolean;
   tenant: CurrentUserTenant;
   subscription: CurrentUserSubscription;

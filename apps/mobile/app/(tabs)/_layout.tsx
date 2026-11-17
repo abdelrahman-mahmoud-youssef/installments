@@ -1,5 +1,6 @@
 import { NativeTabs, SFSymbolIcon } from 'expo-router/unstable-native-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '@/auth/auth-context';
 import { useI18n } from '@/i18n/i18n-context';
 import { useTheme } from '@/theme/theme-context';
 
@@ -11,6 +12,8 @@ interface TabDefinition {
   symbol: TabSymbol;
   ionicon: keyof typeof Ionicons.glyphMap;
 }
+
+const WALLETS_TAB = 'wallets';
 
 const TABS: TabDefinition[] = [
   {
@@ -32,7 +35,7 @@ const TABS: TabDefinition[] = [
     ionicon: 'people',
   },
   {
-    name: 'wallets',
+    name: WALLETS_TAB,
     labelKey: 'tabs.wallets',
     symbol: { default: 'creditcard', selected: 'creditcard.fill' },
     ionicon: 'wallet',
@@ -48,11 +51,12 @@ const TABS: TabDefinition[] = [
 export default function TabsLayout() {
   const { colors } = useTheme();
   const { t, direction } = useI18n();
+  const { canSeeWallets } = useAuth();
 
   return (
     <NativeTabs tintColor={colors.primary} minimizeBehavior="onScrollDown" unstable_nativeProps={{ direction }}>
       {TABS.map((tab) => (
-        <NativeTabs.Trigger key={tab.name} name={tab.name}>
+        <NativeTabs.Trigger key={tab.name} name={tab.name} hidden={tab.name === WALLETS_TAB && !canSeeWallets}>
           <NativeTabs.Trigger.Icon
             sf={tab.symbol}
             src={<NativeTabs.Trigger.VectorIcon family={Ionicons} name={tab.ionicon} />}

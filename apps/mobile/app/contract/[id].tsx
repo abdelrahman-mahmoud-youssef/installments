@@ -30,7 +30,7 @@ export default function ContractDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useI18n();
   const { colors } = useTheme();
-  const { isAdmin } = useAuth();
+  const { isAdmin, canSeeWallets } = useAuth();
   const router = useRouter();
   const { showToast } = useToast();
   const { data, dataUpdatedAt, isPending, isError, error, refetch, isRefetching } = useContract(id);
@@ -103,7 +103,7 @@ export default function ContractDetailScreen() {
 
             <View style={{ gap: spacing.md }}>
               <SectionHeader title={t('contracts.paymentsSection')} />
-              <ContractPaymentsList payments={data.payments} canSeeWallets={isAdmin} />
+              <ContractPaymentsList payments={data.payments} canSeeWallets={canSeeWallets} />
             </View>
           </>
         ) : null}

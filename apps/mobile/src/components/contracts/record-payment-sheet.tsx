@@ -42,8 +42,8 @@ export function RecordPaymentSheet({
 }: RecordPaymentSheetProps) {
   const { t, locale } = useI18n();
   const { colors } = useTheme();
-  const { isAdmin } = useAuth();
-  const { data: paymentMethods } = usePaymentMethods(isAdmin);
+  const { canSeeWallets } = useAuth();
+  const { data: paymentMethods } = usePaymentMethods(canSeeWallets);
   const [amount, setAmount] = useState('');
   const [note, setNote] = useState('');
   const [paidAt, setPaidAt] = useState(todayIsoDate());

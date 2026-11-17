@@ -8,6 +8,7 @@ import {
   useMemo,
   useState,
 } from 'react';
+import { AppState } from 'react-native';
 import {
   CurrentUser,
   DeleteAccountInput,
@@ -41,6 +42,7 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   isReady: boolean;
   isAdmin: boolean;
+  canSeeWallets: boolean;
   isSubscriptionExpired: boolean;
   signIn: (email: string, password: string) => Promise<SignInResult>;
   register: (input: RegisterInput) => Promise<void>;
@@ -140,6 +142,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => setSubscriptionInactiveHandler(null);
   }, [refreshUser]);
 
+  const isSignedIn = user !== null;
+  useEffect(() => {
+    if (!isSignedIn) {
+      return;
+    }
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') {
+        refreshUser().catch(() => undefined);
+      }
+    });
+    return () => subscription.remove();
+  }, [isSignedIn, refreshUser]);
+
   const signIn = useCallback(
     async (email: string, password: string): Promise<SignInResult> => {
       const result = await login(email, password);
@@ -189,6 +204,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAuthenticated: user !== null,
       isReady,
       isAdmin: user?.role === 'ADMIN',
+      canSeeWallets: user?.walletAccess === 'ALL' || user?.walletAccess === 'SELECTED',
       isSubscriptionExpired: user?.subscription.status === 'EXPIRED',
       signIn,
       register: registerAccount,
