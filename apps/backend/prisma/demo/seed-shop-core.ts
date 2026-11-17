@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { Prisma } from '@prisma/client';
+import { Prisma, SubscriptionPaymentMethod, SubscriptionSource } from '@prisma/client';
 import { addUtcDays } from '../../src/common/date/utc-date';
 import { egp } from './demo-amounts';
 import { atTime, daysBefore } from './demo-dates';
@@ -56,11 +56,17 @@ function buildSubscriptionRows(context: DemoShopContext): Prisma.TenantSubscript
     const periodsFromEnd = PAID_MONTH_COUNT - 1 - index;
     const periodEnd = addUtcDays(currentPeriodEnd, -periodsFromEnd * DAYS_PER_SUBSCRIPTION_PERIOD);
     const periodStart = addUtcDays(periodEnd, -DAYS_PER_SUBSCRIPTION_PERIOD);
+    const amount = periodsFromEnd < CURRENT_PRICE_PERIOD_COUNT ? CURRENT_MONTHLY_PRICE : LEGACY_MONTHLY_PRICE;
     return {
       tenantId: context.tenantId,
       periodStart,
       periodEnd,
-      amount: periodsFromEnd < CURRENT_PRICE_PERIOD_COUNT ? CURRENT_MONTHLY_PRICE : LEGACY_MONTHLY_PRICE,
+      months: 1,
+      source: SubscriptionSource.MANUAL,
+      listPrice: amount,
+      amount,
+      paidAt: periodStart,
+      paymentMethod: SubscriptionPaymentMethod.INSTAPAY,
       createdAt: atTime(periodStart, 10, 5),
     };
   });

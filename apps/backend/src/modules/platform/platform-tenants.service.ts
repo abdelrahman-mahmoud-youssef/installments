@@ -1,17 +1,15 @@
-import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Prisma, Role } from '@prisma/client';
 import { AuthenticatedPlatformAdmin } from '../../common/decorators/current-platform-admin.decorator';
 import { getUtcToday } from '../../common/date/utc-date';
 import { buildPaginatedResult, PaginatedResult } from '../../common/pagination/paginated-result.interface';
 import { buildActiveSubscriptionWhere } from '../../common/subscription/active-subscription-where';
-import {
-  calculateNextSubscriptionPeriod,
-  resolveMonthlyPrice,
-  resolveSubscriptionStatus,
-  SubscriptionPricing,
-  SubscriptionStatus,
-} from '../../common/subscription/subscription';
+import { resolveSubscriptionStatus, SubscriptionStatus } from '../../common/subscription/subscription';
 import { PrismaService } from '../../prisma/prisma.service';
+import { toActivationItem, toPaymentDetails } from './billing/activation-request';
+import { SubscriptionActivationService } from './billing/subscription-activation.service';
+import { SUBSCRIPTION_RECORD_SELECT, SubscriptionRecord } from './billing/subscription-record';
+import { ActivateTenantDto } from './dto/activate-tenant.dto';
 import { PlatformTenantQueryDto } from './dto/platform-tenant-query.dto';
 import { PlatformTenantSubscriptionQueryDto } from './dto/platform-tenant-subscription-query.dto';
 import { buildSubscriptionStatusWhere, buildTenantSearchWhere } from './platform-tenant-where';
@@ -59,20 +57,15 @@ export interface PlatformTenantSummary {
   invitedShopsCount: number;
 }
 
-export interface PlatformTenantSubscriptionRecord {
-  id: string;
-  periodStart: Date;
-  periodEnd: Date;
-  amount: number;
-  createdAt: Date;
-  activatedBy: { name: string } | null;
-}
 
 @Injectable()
 export class PlatformTenantsService {
   private readonly logger = new Logger(PlatformTenantsService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly activation: SubscriptionActivationService,
+  ) {}
 
   async findAll(query: PlatformTenantQueryDto): Promise<PaginatedResult<PlatformTenantSummary>> {
     const today = getUtcToday();
@@ -105,38 +98,18 @@ export class PlatformTenantsService {
   async activate(
     admin: AuthenticatedPlatformAdmin,
     tenantId: string,
-    pricing: SubscriptionPricing,
+    dto: ActivateTenantDto,
   ): Promise<PlatformTenantSummary> {
-    await this.prisma.$transaction(async (tx) => {
-      const tenant = await tx.tenant.findUnique({
-        where: { id: tenantId },
-        select: { subscriptionExpiresOn: true },
-      });
-      if (!tenant) {
-        throw new NotFoundException('Tenant not found.');
-      }
+    const subscription = await this.activation.activate(
+      tenantId,
+      toActivationItem(dto),
+      toPaymentDetails(dto, getUtcToday()),
+      admin.platformAdminId,
+    );
 
-      const period = calculateNextSubscriptionPeriod(tenant.subscriptionExpiresOn, getUtcToday());
-      const { count } = await tx.tenant.updateMany({
-        where: { id: tenantId, subscriptionExpiresOn: tenant.subscriptionExpiresOn },
-        data: { subscriptionExpiresOn: period.periodEnd },
-      });
-      if (count === 0) {
-        throw new ConflictException('This shop was updated at the same time. Refresh and try again.');
-      }
-
-      await tx.tenantSubscription.create({
-        data: {
-          tenantId,
-          periodStart: period.periodStart,
-          periodEnd: period.periodEnd,
-          amount: resolveMonthlyPrice(pricing),
-          activatedById: admin.platformAdminId,
-        },
-      });
-    });
-
-    this.logger.log(`Platform admin ${admin.email} activated a ${pricing} month for tenant ${tenantId}`);
+    this.logger.log(
+      `Platform admin ${admin.email} activated ${subscription.months} month(s) (${subscription.source}) for tenant ${tenantId}`,
+    );
     return this.findSummary(tenantId);
   }
 
@@ -154,22 +127,15 @@ export class PlatformTenantsService {
   async findSubscriptions(
     tenantId: string,
     query: PlatformTenantSubscriptionQueryDto,
-  ): Promise<PaginatedResult<PlatformTenantSubscriptionRecord>> {
+  ): Promise<PaginatedResult<SubscriptionRecord>> {
     await this.findSummary(tenantId);
     const where: Prisma.TenantSubscriptionWhereInput = { tenantId };
 
     const [records, total] = await Promise.all([
       this.prisma.tenantSubscription.findMany({
         where,
-        select: {
-          id: true,
-          periodStart: true,
-          periodEnd: true,
-          amount: true,
-          createdAt: true,
-          activatedBy: { select: { name: true } },
-        },
-        orderBy: { createdAt: 'desc' },
+        select: SUBSCRIPTION_RECORD_SELECT,
+        orderBy: [{ paidAt: 'desc' }, { createdAt: 'desc' }],
         skip: (query.page - 1) * query.limit,
         take: query.limit,
       }),

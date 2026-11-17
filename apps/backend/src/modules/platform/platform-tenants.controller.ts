@@ -4,7 +4,6 @@ import {
   CurrentPlatformAdmin,
 } from '../../common/decorators/current-platform-admin.decorator';
 import { PlatformRoute } from '../../common/decorators/platform-route.decorator';
-import { SubscriptionPricing } from '../../common/subscription/subscription';
 import { ActivateTenantDto } from './dto/activate-tenant.dto';
 import { PlatformTenantQueryDto } from './dto/platform-tenant-query.dto';
 import { PlatformTenantSubscriptionQueryDto } from './dto/platform-tenant-subscription-query.dto';
@@ -27,7 +26,7 @@ export class PlatformTenantsController {
     @Param('tenantId') tenantId: string,
     @Body() dto: ActivateTenantDto,
   ) {
-    return this.platformTenantsService.activate(admin, tenantId, dto.pricing ?? SubscriptionPricing.STANDARD);
+    return this.platformTenantsService.activate(admin, tenantId, dto);
   }
 
   @Post(':tenantId/deactivate')

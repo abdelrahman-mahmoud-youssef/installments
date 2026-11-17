@@ -89,6 +89,20 @@ enum WalletAccess {
   SELECTED
 }
 
+enum SubscriptionSource {
+  PLAN
+  OFFER
+  MANUAL
+  REFERRAL_REWARD
+}
+
+enum SubscriptionPaymentMethod {
+  INSTAPAY
+  CASH
+  OTHER
+  FREE
+}
+
 enum PaymentClaimStatus {
   PENDING
   APPROVED
@@ -179,18 +193,65 @@ model PlatformAdmin {
   activatedSubscriptions TenantSubscription[]
 }
 
+model SubscriptionPlan {
+  id            String               @id @default(cuid())
+  nameEn        String
+  nameAr        String
+  months        Int
+  price         Int
+  isActive      Boolean              @default(true)
+  sortOrder     Int                  @default(0)
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  subscriptions TenantSubscription[]
+
+  @@index([isActive, sortOrder])
+}
+
+model SubscriptionOffer {
+  id            String               @id @default(cuid())
+  nameEn        String
+  nameAr        String
+  months        Int
+  price         Int
+  regularPrice  Int
+  startsOn      DateTime             @db.Date
+  endsOn        DateTime             @db.Date
+  isActive      Boolean              @default(true)
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  subscriptions TenantSubscription[]
+
+  @@index([isActive, startsOn, endsOn])
+}
+
 model TenantSubscription {
-  id            String         @id @default(cuid())
+  id            String                    @id @default(cuid())
   tenantId      String
-  periodStart   DateTime       @db.Date
-  periodEnd     DateTime       @db.Date
+  periodStart   DateTime                  @db.Date
+  periodEnd     DateTime                  @db.Date
+  months        Int
+  source        SubscriptionSource
+  planId        String?
+  offerId       String?
+  listPrice     Int
   amount        Int
+  paidAt        DateTime                  @db.Date
+  paymentMethod SubscriptionPaymentMethod
+  reference     String?
+  note          String?
   activatedById String?
-  createdAt     DateTime       @default(now())
-  tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Restrict)
-  activatedBy   PlatformAdmin? @relation(fields: [activatedById], references: [id], onDelete: SetNull)
+  createdAt     DateTime                  @default(now())
+  tenant        Tenant                    @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  plan          SubscriptionPlan?         @relation(fields: [planId], references: [id], onDelete: Restrict)
+  offer         SubscriptionOffer?        @relation(fields: [offerId], references: [id], onDelete: Restrict)
+  activatedBy   PlatformAdmin?            @relation(fields: [activatedById], references: [id], onDelete: SetNull)
 
   @@index([tenantId, createdAt])
+  @@index([tenantId, paidAt])
+  @@index([paidAt])
+  @@index([planId])
+  @@index([offerId, tenantId])
   @@index([activatedById])
 }
 

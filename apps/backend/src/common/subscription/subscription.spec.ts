@@ -2,11 +2,12 @@ import {
   calculateDaysRemaining,
   calculateNextSubscriptionPeriod,
   calculateTrialExpiry,
+  isOfferValidOn,
   isRenewalDueSoon,
   isSubscriptionActive,
-  resolveMonthlyPrice,
+  resolveOfferStatus,
   resolveSubscriptionStatus,
-  SubscriptionPricing,
+  SubscriptionOfferStatus,
   SubscriptionStatus,
 } from './subscription';
 
@@ -62,23 +63,75 @@ describe('calculateTrialExpiry', () => {
 
 describe('calculateNextSubscriptionPeriod', () => {
   it('starts today when the subscription has already expired', () => {
-    const period = calculateNextSubscriptionPeriod(utcDate('2026-10-20'), utcDate('2026-11-03'));
+    const period = calculateNextSubscriptionPeriod(utcDate('2026-10-20'), utcDate('2026-11-03'), 1);
 
     expect(isoDate(period.periodStart)).toBe('2026-11-03');
     expect(isoDate(period.periodEnd)).toBe('2026-12-03');
   });
 
   it('extends from the current expiry when renewed early so no paid days are lost', () => {
-    const period = calculateNextSubscriptionPeriod(utcDate('2026-11-20'), utcDate('2026-11-03'));
+    const period = calculateNextSubscriptionPeriod(utcDate('2026-11-20'), utcDate('2026-11-03'), 1);
 
     expect(isoDate(period.periodStart)).toBe('2026-11-20');
     expect(isoDate(period.periodEnd)).toBe('2026-12-20');
   });
 
   it('clamps to the last day of a shorter month', () => {
-    const period = calculateNextSubscriptionPeriod(utcDate('2026-01-31'), utcDate('2026-01-31'));
+    const period = calculateNextSubscriptionPeriod(utcDate('2026-01-31'), utcDate('2026-01-31'), 1);
 
     expect(isoDate(period.periodEnd)).toBe('2026-02-28');
+  });
+
+  it('adds a whole year from the anchor day in one step', () => {
+    const period = calculateNextSubscriptionPeriod(utcDate('2026-01-31'), utcDate('2026-01-31'), 12);
+
+    expect(isoDate(period.periodEnd)).toBe('2027-01-31');
+  });
+
+  it('clamps a leap day to the end of February a year later', () => {
+    const period = calculateNextSubscriptionPeriod(utcDate('2028-02-29'), utcDate('2028-02-29'), 12);
+
+    expect(isoDate(period.periodEnd)).toBe('2029-02-28');
+  });
+
+  it('adds several months after the current expiry when renewed early', () => {
+    const period = calculateNextSubscriptionPeriod(utcDate('2026-11-30'), utcDate('2026-11-18'), 3);
+
+    expect(isoDate(period.periodStart)).toBe('2026-11-30');
+    expect(isoDate(period.periodEnd)).toBe('2027-02-28');
+  });
+});
+
+describe('resolveOfferStatus', () => {
+  const offer = { isActive: true, startsOn: utcDate('2026-12-25'), endsOn: utcDate('2027-01-07') };
+
+  it('is scheduled before its first day', () => {
+    expect(resolveOfferStatus(offer, utcDate('2026-12-24'))).toBe(SubscriptionOfferStatus.SCHEDULED);
+  });
+
+  it('runs from its first day through its last day', () => {
+    expect(resolveOfferStatus(offer, utcDate('2026-12-25'))).toBe(SubscriptionOfferStatus.RUNNING);
+    expect(resolveOfferStatus(offer, utcDate('2027-01-07'))).toBe(SubscriptionOfferStatus.RUNNING);
+  });
+
+  it('has ended the day after its last day', () => {
+    expect(resolveOfferStatus(offer, utcDate('2027-01-08'))).toBe(SubscriptionOfferStatus.ENDED);
+  });
+
+  it('is off whenever it is switched off', () => {
+    expect(resolveOfferStatus({ ...offer, isActive: false }, utcDate('2026-12-30'))).toBe(SubscriptionOfferStatus.OFF);
+  });
+});
+
+describe('isOfferValidOn', () => {
+  const offer = { isActive: true, startsOn: utcDate('2026-12-25'), endsOn: utcDate('2027-01-07') };
+
+  it('accepts a payment made while the offer was running even if checked later', () => {
+    expect(isOfferValidOn(offer, utcDate('2027-01-07'))).toBe(true);
+  });
+
+  it('rejects a payment made outside the offer dates', () => {
+    expect(isOfferValidOn(offer, utcDate('2027-01-08'))).toBe(false);
   });
 });
 
@@ -110,15 +163,5 @@ describe('isRenewalDueSoon', () => {
 
   it('is not due soon once expired', () => {
     expect(isRenewalDueSoon(utcDate('2026-12-01'), utcDate('2026-12-01'))).toBe(false);
-  });
-});
-
-describe('resolveMonthlyPrice', () => {
-  it('charges 200 EGP for the standard price', () => {
-    expect(resolveMonthlyPrice(SubscriptionPricing.STANDARD)).toBe(20_000);
-  });
-
-  it('charges 300 EGP for the referral price', () => {
-    expect(resolveMonthlyPrice(SubscriptionPricing.REFERRAL)).toBe(30_000);
   });
 });

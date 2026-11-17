@@ -1,9 +1,4 @@
-import {
-  SUBSCRIPTION_MONTHLY_PRICE,
-  SUBSCRIPTION_REFERRAL_MONTHLY_PRICE,
-  SUBSCRIPTION_RENEWAL_NOTICE_DAYS,
-  SUBSCRIPTION_TRIAL_DAYS,
-} from '../constants';
+import { SUBSCRIPTION_RENEWAL_NOTICE_DAYS, SUBSCRIPTION_TRIAL_DAYS } from '../constants';
 import { addUtcDays, addUtcMonthsClamped, differenceInUtcDays } from '../date/utc-date';
 
 export const SubscriptionStatus = {
@@ -14,20 +9,19 @@ export const SubscriptionStatus = {
 
 export type SubscriptionStatus = (typeof SubscriptionStatus)[keyof typeof SubscriptionStatus];
 
-export const SubscriptionPricing = {
-  STANDARD: 'STANDARD',
-  REFERRAL: 'REFERRAL',
+export const SubscriptionOfferStatus = {
+  OFF: 'OFF',
+  SCHEDULED: 'SCHEDULED',
+  RUNNING: 'RUNNING',
+  ENDED: 'ENDED',
 } as const;
 
-export type SubscriptionPricing = (typeof SubscriptionPricing)[keyof typeof SubscriptionPricing];
+export type SubscriptionOfferStatus = (typeof SubscriptionOfferStatus)[keyof typeof SubscriptionOfferStatus];
 
-const MONTHLY_PRICE_BY_PRICING: Record<SubscriptionPricing, number> = {
-  [SubscriptionPricing.STANDARD]: SUBSCRIPTION_MONTHLY_PRICE,
-  [SubscriptionPricing.REFERRAL]: SUBSCRIPTION_REFERRAL_MONTHLY_PRICE,
-};
-
-export function resolveMonthlyPrice(pricing: SubscriptionPricing): number {
-  return MONTHLY_PRICE_BY_PRICING[pricing];
+export interface SubscriptionOfferWindow {
+  isActive: boolean;
+  startsOn: Date;
+  endsOn: Date;
 }
 
 export interface SubscriptionPeriod {
@@ -80,7 +74,25 @@ export function calculateTrialExpiry(today: Date): Date {
   return addUtcDays(today, SUBSCRIPTION_TRIAL_DAYS);
 }
 
-export function calculateNextSubscriptionPeriod(currentExpiresOn: Date, today: Date): SubscriptionPeriod {
+export function calculateNextSubscriptionPeriod(
+  currentExpiresOn: Date,
+  today: Date,
+  months: number,
+): SubscriptionPeriod {
   const periodStart = isSubscriptionActive(currentExpiresOn, today) ? currentExpiresOn : today;
-  return { periodStart, periodEnd: addUtcMonthsClamped(periodStart, 1) };
+  return { periodStart, periodEnd: addUtcMonthsClamped(periodStart, months) };
+}
+
+export function resolveOfferStatus(offer: SubscriptionOfferWindow, today: Date): SubscriptionOfferStatus {
+  if (!offer.isActive) {
+    return SubscriptionOfferStatus.OFF;
+  }
+  if (today.getTime() < offer.startsOn.getTime()) {
+    return SubscriptionOfferStatus.SCHEDULED;
+  }
+  return today.getTime() > offer.endsOn.getTime() ? SubscriptionOfferStatus.ENDED : SubscriptionOfferStatus.RUNNING;
+}
+
+export function isOfferValidOn(offer: SubscriptionOfferWindow, date: Date): boolean {
+  return resolveOfferStatus(offer, date) === SubscriptionOfferStatus.RUNNING;
 }

@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { SubscriptionActivationService } from './billing/subscription-activation.service';
 import { PlatformAdminBootstrapService } from './platform-admin-bootstrap.service';
 import { PlatformAuthController } from './platform-auth.controller';
 import { PlatformAuthService } from './platform-auth.service';
@@ -34,6 +35,7 @@ import { PlatformTenantsService } from './platform-tenants.service';
     PlatformSupportService,
     PlatformJwtStrategy,
     PlatformAdminBootstrapService,
+    SubscriptionActivationService,
   ],
 })
 export class PlatformModule {}
