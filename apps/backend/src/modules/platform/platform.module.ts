@@ -3,6 +3,10 @@ import { ConfigService } from '@nestjs/config';
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { SubscriptionActivationService } from './billing/subscription-activation.service';
+import { SubscriptionOffersController } from './billing/subscription-offers.controller';
+import { SubscriptionOffersService } from './billing/subscription-offers.service';
+import { SubscriptionPlansController } from './billing/subscription-plans.controller';
+import { SubscriptionPlansService } from './billing/subscription-plans.service';
 import { PlatformAdminBootstrapService } from './platform-admin-bootstrap.service';
 import { PlatformAuthController } from './platform-auth.controller';
 import { PlatformAuthService } from './platform-auth.service';
@@ -28,7 +32,14 @@ import { PlatformTenantsService } from './platform-tenants.service';
       }),
     }),
   ],
-  controllers: [PlatformAuthController, PlatformTenantsController, PlatformSupportController, PlatformPushController],
+  controllers: [
+    PlatformAuthController,
+    PlatformTenantsController,
+    PlatformSupportController,
+    PlatformPushController,
+    SubscriptionPlansController,
+    SubscriptionOffersController,
+  ],
   providers: [
     PlatformAuthService,
     PlatformTenantsService,
@@ -36,6 +47,8 @@ import { PlatformTenantsService } from './platform-tenants.service';
     PlatformJwtStrategy,
     PlatformAdminBootstrapService,
     SubscriptionActivationService,
+    SubscriptionPlansService,
+    SubscriptionOffersService,
   ],
 })
 export class PlatformModule {}
