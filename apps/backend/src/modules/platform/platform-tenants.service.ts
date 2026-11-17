@@ -12,7 +12,7 @@ import { SUBSCRIPTION_RECORD_SELECT, SubscriptionRecord } from './billing/subscr
 import { ActivateTenantDto } from './dto/activate-tenant.dto';
 import { PlatformTenantQueryDto } from './dto/platform-tenant-query.dto';
 import { PlatformTenantSubscriptionQueryDto } from './dto/platform-tenant-subscription-query.dto';
-import { buildSubscriptionStatusWhere, buildTenantSearchWhere } from './platform-tenant-where';
+import { buildTenantFilterWhere, buildTenantSearchWhere } from './platform-tenant-where';
 
 const TENANT_SUMMARY_SELECT = {
   id: true,
@@ -29,6 +29,18 @@ const TENANT_SUMMARY_SELECT = {
     select: { name: true, email: true },
   },
   referredBy: { select: { name: true, displayName: true, slug: true } },
+  subscriptions: {
+    orderBy: [{ paidAt: 'desc' }, { createdAt: 'desc' }],
+    take: 1,
+    select: {
+      paidAt: true,
+      months: true,
+      amount: true,
+      source: true,
+      plan: { select: { nameEn: true, nameAr: true } },
+      offer: { select: { nameEn: true, nameAr: true } },
+    },
+  },
   _count: { select: { subscriptions: true, referrals: true } },
 } satisfies Prisma.TenantSelect;
 
@@ -44,6 +56,8 @@ export interface PlatformTenantReferrer {
   slug: string;
 }
 
+export type PlatformTenantLastPayment = TenantSummaryRow['subscriptions'][number];
+
 export interface PlatformTenantSummary {
   id: string;
   name: string;
@@ -55,6 +69,7 @@ export interface PlatformTenantSummary {
   owner: PlatformTenantOwner | null;
   referredBy: PlatformTenantReferrer | null;
   invitedShopsCount: number;
+  lastPayment: PlatformTenantLastPayment | null;
 }
 
 
@@ -72,7 +87,7 @@ export class PlatformTenantsService {
     const where: Prisma.TenantWhereInput = {
       AND: [
         query.q ? buildTenantSearchWhere(query.q) : {},
-        query.status ? buildSubscriptionStatusWhere(query.status, today) : {},
+        query.status ? buildTenantFilterWhere(query.status, today) : {},
       ],
     };
 
@@ -170,6 +185,7 @@ export class PlatformTenantsService {
         ? { name: row.referredBy.displayName ?? row.referredBy.name, slug: row.referredBy.slug }
         : null,
       invitedShopsCount: row._count.referrals,
+      lastPayment: row.subscriptions[0] ?? null,
     };
   }
 }

@@ -5,6 +5,8 @@ import { PassportModule } from '@nestjs/passport';
 import { SubscriptionActivationService } from './billing/subscription-activation.service';
 import { SubscriptionOffersController } from './billing/subscription-offers.controller';
 import { SubscriptionOffersService } from './billing/subscription-offers.service';
+import { SubscriptionPaymentsController } from './billing/subscription-payments.controller';
+import { SubscriptionPaymentsService } from './billing/subscription-payments.service';
 import { SubscriptionPlansController } from './billing/subscription-plans.controller';
 import { SubscriptionPlansService } from './billing/subscription-plans.service';
 import { PlatformAdminBootstrapService } from './platform-admin-bootstrap.service';
@@ -39,6 +41,7 @@ import { PlatformTenantsService } from './platform-tenants.service';
     PlatformPushController,
     SubscriptionPlansController,
     SubscriptionOffersController,
+    SubscriptionPaymentsController,
   ],
   providers: [
     PlatformAuthService,
@@ -49,6 +52,7 @@ import { PlatformTenantsService } from './platform-tenants.service';
     SubscriptionActivationService,
     SubscriptionPlansService,
     SubscriptionOffersService,
+    SubscriptionPaymentsService,
   ],
 })
 export class PlatformModule {}
