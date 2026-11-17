@@ -122,6 +122,16 @@ describe('SubscriptionActivationService', () => {
     expect(record).toMatchObject({ listPrice: 20_000, amount: 15_000 });
   });
 
+  it('refuses an amount above the full price', async () => {
+    const tenantId = await createShop(today);
+    const plan = await createPlan(1, 20_000);
+
+    await expect(
+      activation.activate(tenantId, { source: 'PLAN', planId: plan.id }, { ...instapayToday, amount: 25_000 }, adminId),
+    ).rejects.toThrow('The amount paid cannot be more than the full price.');
+    expect(await prisma.tenantSubscription.count({ where: { tenantId } })).toBe(0);
+  });
+
   it('applies an offer paid while it was running, even after it has ended', async () => {
     const tenantId = await createShop(today);
     const offer = await createOffer(addUtcDays(today, -20), addUtcDays(today, -2));

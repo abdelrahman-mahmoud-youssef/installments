@@ -13,6 +13,7 @@ const FUTURE_PAID_DATE_ERROR = 'The paid date cannot be in the future.';
 const PLAN_UNAVAILABLE_ERROR = 'This plan is not available.';
 const OFFER_NOT_RUNNING_ERROR = 'This offer was not running on the paid date.';
 const OFFER_ALREADY_USED_ERROR = 'This shop has already used this offer.';
+const AMOUNT_ABOVE_FULL_PRICE_ERROR = 'The amount paid cannot be more than the full price.';
 const CONCURRENT_UPDATE_ERROR = 'This shop was updated at the same time. Refresh and try again.';
 
 @Injectable()
@@ -40,6 +41,9 @@ export class SubscriptionActivationService {
       }
 
       const resolved = await this.resolveItem(tx, tenantId, item, payment.paidAt);
+      if (payment.amount !== undefined && payment.amount > resolved.listPrice) {
+        throw new BadRequestException(AMOUNT_ABOVE_FULL_PRICE_ERROR);
+      }
       const period = calculateNextSubscriptionPeriod(tenant.subscriptionExpiresOn, today, resolved.months);
       const { count } = await tx.tenant.updateMany({
         where: { id: tenantId, subscriptionExpiresOn: tenant.subscriptionExpiresOn },
