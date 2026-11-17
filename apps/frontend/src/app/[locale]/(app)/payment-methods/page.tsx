@@ -13,10 +13,12 @@ import { PaymentMethodFormDialog } from '@/components/payment-methods/payment-me
 import { PaymentMethodPresetPicker } from '@/components/payment-methods/payment-method-preset-picker';
 import { PaymentMethodsTabs } from '@/components/payment-methods/payment-methods-tabs';
 import { usePaymentMethods } from '@/hooks/use-payment-methods';
+import { useWalletAccess } from '@/hooks/use-wallet-access';
 
 export default function PaymentMethodsPage() {
   const t = useTranslations('paymentMethods');
   const { data: paymentMethods, isLoading } = usePaymentMethods();
+  const { canManageWallets } = useWalletAccess();
 
   return (
     <div className="space-y-6">
@@ -25,15 +27,17 @@ export default function PaymentMethodsPage() {
           title={t('title')}
           description={t('subtitle')}
           actions={
-            <PaymentMethodFormDialog
-              defaultLabel=""
-              trigger={
-                <Button size="sm" variant="outline">
-                  <Plus className="size-4" />
-                  {t('addCustomPaymentMethod')}
-                </Button>
-              }
-            />
+            canManageWallets && (
+              <PaymentMethodFormDialog
+                defaultLabel=""
+                trigger={
+                  <Button size="sm" variant="outline">
+                    <Plus className="size-4" />
+                    {t('addCustomPaymentMethod')}
+                  </Button>
+                }
+              />
+            )
           }
         />
       </FadeIn>
@@ -42,9 +46,11 @@ export default function PaymentMethodsPage() {
         <PaymentMethodsTabs />
       </FadeIn>
 
-      <FadeIn delay={0.1}>
-        <PaymentMethodPresetPicker />
-      </FadeIn>
+      {canManageWallets && (
+        <FadeIn delay={0.1}>
+          <PaymentMethodPresetPicker />
+        </FadeIn>
+      )}
 
       {isLoading ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

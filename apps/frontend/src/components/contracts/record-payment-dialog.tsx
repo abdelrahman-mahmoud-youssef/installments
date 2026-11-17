@@ -25,6 +25,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { usePaymentMethods } from '@/hooks/use-payment-methods';
+import { useWalletAccess } from '@/hooks/use-wallet-access';
 import { ApiError } from '@/lib/api/client';
 import { Installment } from '@/lib/api/contracts';
 import { toMinorUnits, toMajorUnits, todayIso } from '@/lib/format';
@@ -44,7 +45,8 @@ export function RecordPaymentDialog({
   const [open, setOpen] = useState(false);
   const [isManual, setIsManual] = useState(false);
   const [manualAmounts, setManualAmounts] = useState<Record<string, string>>({});
-  const { data: paymentMethods } = usePaymentMethods();
+  const { canViewWallets } = useWalletAccess();
+  const { data: paymentMethods } = usePaymentMethods({ enabled: canViewWallets });
   const activePaymentMethods = (paymentMethods ?? []).filter((method) => method.isActive);
 
   const form = useForm<PaymentInput>({

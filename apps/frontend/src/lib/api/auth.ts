@@ -1,4 +1,4 @@
-import { SubscriptionStatus } from '@/lib/enums';
+import { SubscriptionStatus, WalletAccess } from '@/lib/enums';
 import { apiClient, ApiError, ApiErrorBody, postJson } from './client';
 
 export const DEACTIVATED_ACCOUNT_MESSAGE = 'This account has been deactivated. You can contact support.';
@@ -38,6 +38,7 @@ export interface CurrentUser {
   email: string;
   tenantId: string;
   role: Role;
+  walletAccess: WalletAccess;
   twoFactorEnabled: boolean;
   tenant: CurrentUserTenant;
   subscription: CurrentUserSubscription;

@@ -29,10 +29,11 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useLogout } from '@/hooks/use-logout';
 import { usePaymentClaims } from '@/hooks/use-payment-claims';
 import { useSupportMessages } from '@/hooks/use-support';
+import { useWalletAccess } from '@/hooks/use-wallet-access';
 import { Link, usePathname } from '@/i18n/navigation';
 import { AdminArabicFontProvider } from '@/lib/admin-arabic-font';
 import { AdminFontSizeProvider } from '@/lib/admin-font-size';
-import { navigationItems } from '@/lib/navigation';
+import { NavigationAudience, navigationItems } from '@/lib/navigation';
 import { getShopUrl } from '@/lib/root-domain';
 import { routes } from '@/lib/routes';
 import { cn } from '@/lib/utils';
@@ -49,7 +50,13 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   );
   const { data: supportMessages } = useSupportMessages({ refetchInterval: PENDING_CLAIMS_POLL_INTERVAL_MS });
   const unseenReplyCount = (supportMessages ?? []).filter((message) => message.adminReply && !message.seenAt).length;
-  const visibleItems = navigationItems.filter((item) => !item.adminOnly || currentUser?.role === 'ADMIN');
+  const { canViewWallets } = useWalletAccess();
+  const isVisibleToAudience: Record<NavigationAudience, boolean> = {
+    everyone: true,
+    admins: currentUser?.role === 'ADMIN',
+    walletViewers: canViewWallets,
+  };
+  const visibleItems = navigationItems.filter((item) => isVisibleToAudience[item.audience]);
 
   return (
     <nav className="flex flex-col gap-0.5">

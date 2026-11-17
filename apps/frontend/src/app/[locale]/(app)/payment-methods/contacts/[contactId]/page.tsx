@@ -24,6 +24,7 @@ import { Section } from '@/components/shared/section';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCounterparty, useCounterpartyHistory, useDeleteCounterparty, useUpdateCounterparty } from '@/hooks/use-counterparties';
+import { useWalletAccess } from '@/hooks/use-wallet-access';
 import { useRouter } from '@/i18n/navigation';
 import { ApiError } from '@/lib/api/client';
 import { resolveAssetUrl } from '@/lib/assets';
@@ -42,6 +43,7 @@ export default function ContactDetailPage() {
   const { data: history, isLoading: isLoadingHistory } = useCounterpartyHistory(contactId, { month, page, limit: 20 });
   const updateContact = useUpdateCounterparty(contactId);
   const deleteContact = useDeleteCounterparty();
+  const { canManageWallets } = useWalletAccess();
 
   async function handleDelete() {
     try {
@@ -87,29 +89,33 @@ export default function ContactDetailPage() {
           actions={
             <>
               <ContactStatementShareButton contact={contact} />
-              <ContactFormDialog
-                contact={contact}
-                trigger={
-                  <Button type="button" variant="outline" size="sm">
-                    <Pencil className="size-4" />
-                    {t('edit')}
-                  </Button>
-                }
-                onSubmit={(input) => updateContact.mutateAsync(input)}
-              />
-              <ConfirmDialog
-                trigger={
-                  <Button type="button" variant="outline" size="sm">
-                    <Trash2 className="size-4" />
-                    {tList('delete')}
-                  </Button>
-                }
-                title={tList('deleteTitle')}
-                description={tList('deleteDescription', { name: contact.name })}
-                confirmLabel={tList('delete')}
-                destructive
-                onConfirm={handleDelete}
-              />
+              {canManageWallets && (
+                <>
+                  <ContactFormDialog
+                    contact={contact}
+                    trigger={
+                      <Button type="button" variant="outline" size="sm">
+                        <Pencil className="size-4" />
+                        {t('edit')}
+                      </Button>
+                    }
+                    onSubmit={(input) => updateContact.mutateAsync(input)}
+                  />
+                  <ConfirmDialog
+                    trigger={
+                      <Button type="button" variant="outline" size="sm">
+                        <Trash2 className="size-4" />
+                        {tList('delete')}
+                      </Button>
+                    }
+                    title={tList('deleteTitle')}
+                    description={tList('deleteDescription', { name: contact.name })}
+                    confirmLabel={tList('delete')}
+                    destructive
+                    onConfirm={handleDelete}
+                  />
+                </>
+              )}
             </>
           }
         />
@@ -129,16 +135,18 @@ export default function ContactDetailPage() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="font-heading text-sm font-semibold">{t('history')}</h2>
           <div className="flex items-center gap-2">
-            <AddAdjustmentDialog
-              counterpartyId={contactId}
-              currentBalance={contact.balance}
-              trigger={
-                <Button size="sm" variant="outline">
-                  <Scale className="size-4" />
-                  {t('addAdjustment')}
-                </Button>
-              }
-            />
+            {canManageWallets && (
+              <AddAdjustmentDialog
+                counterpartyId={contactId}
+                currentBalance={contact.balance}
+                trigger={
+                  <Button size="sm" variant="outline">
+                    <Scale className="size-4" />
+                    {t('addAdjustment')}
+                  </Button>
+                }
+              />
+            )}
             <LogTransactionDialog
               counterparty={{ id: contact.id, name: contact.name, phone: contact.phone }}
               trigger={

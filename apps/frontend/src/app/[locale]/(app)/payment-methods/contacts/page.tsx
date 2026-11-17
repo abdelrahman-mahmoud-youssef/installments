@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 import { useCreateCounterparty, useCounterparties, useDeleteCounterparty } from '@/hooks/use-counterparties';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
+import { useWalletAccess } from '@/hooks/use-wallet-access';
 import { ApiError } from '@/lib/api/client';
 import type { Counterparty } from '@/lib/api/counterparties';
 import { routes } from '@/lib/routes';
@@ -35,6 +36,7 @@ export default function ContactsPage() {
   const { data, isLoading, isError } = useCounterparties({ q: debouncedSearch || undefined, page, limit: 20 });
   const createContact = useCreateCounterparty();
   const deleteContact = useDeleteCounterparty();
+  const { canManageWallets } = useWalletAccess();
 
   const columns: Column<Counterparty>[] = [
     {
@@ -100,6 +102,7 @@ export default function ContactsPage() {
       ),
     },
   ];
+  const visibleColumns = canManageWallets ? columns : columns.filter((column) => column.role !== 'action');
 
   return (
     <div className="space-y-6">
@@ -153,7 +156,7 @@ export default function ContactsPage() {
         ) : (
           <div className="space-y-4">
             <DataTable
-              columns={columns}
+              columns={visibleColumns}
               rows={data.data}
               keyOf={(contact) => contact.id}
               href={(contact) => routes.contact(contact.id)}

@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { useDeletePaymentMethod, useUpdatePaymentMethod } from '@/hooks/use-payment-methods';
+import { useWalletAccess } from '@/hooks/use-wallet-access';
 import { Link } from '@/i18n/navigation';
 import { ApiError } from '@/lib/api/client';
 import { PaymentMethod } from '@/lib/api/payment-methods';
@@ -20,6 +21,7 @@ export function PaymentMethodCard({ method }: { method: PaymentMethod }) {
   const t = useTranslations('paymentMethods');
   const updatePaymentMethod = useUpdatePaymentMethod();
   const deletePaymentMethod = useDeletePaymentMethod();
+  const { canManageWallets } = useWalletAccess();
 
   async function handleToggleActive(next: boolean) {
     try {
@@ -52,14 +54,16 @@ export function PaymentMethodCard({ method }: { method: PaymentMethod }) {
             </CardDescription>
           </div>
         </div>
-        <CardAction>
-          <Switch
-            checked={method.isActive}
-            onCheckedChange={handleToggleActive}
-            disabled={updatePaymentMethod.isPending}
-            aria-label={t('paymentMethodActive')}
-          />
-        </CardAction>
+        {canManageWallets && (
+          <CardAction>
+            <Switch
+              checked={method.isActive}
+              onCheckedChange={handleToggleActive}
+              disabled={updatePaymentMethod.isPending}
+              aria-label={t('paymentMethodActive')}
+            />
+          </CardAction>
+        )}
       </CardHeader>
       <CardContent>
         {method.monthlyLimit != null ? (
@@ -84,29 +88,31 @@ export function PaymentMethodCard({ method }: { method: PaymentMethod }) {
           {t('viewDetails')}
           <ChevronRight className="size-3.5 rtl:rotate-180" />
         </Button>
-        <div className="flex items-center gap-1">
-          <PaymentMethodFormDialog
-            method={method}
-            defaultLabel={method.label}
-            trigger={
-              <Button type="button" variant="ghost" size="icon-sm" aria-label={t('editPaymentMethod')}>
-                <Pencil className="size-4" />
-              </Button>
-            }
-          />
-          <ConfirmDialog
-            trigger={
-              <Button type="button" variant="ghost" size="icon-sm">
-                <Trash2 className="size-4" />
-              </Button>
-            }
-            title={t('deletePaymentMethodTitle')}
-            description={t('deletePaymentMethodDescription', { label: method.label })}
-            confirmLabel={t('delete')}
-            destructive
-            onConfirm={handleDelete}
-          />
-        </div>
+        {canManageWallets && (
+          <div className="flex items-center gap-1">
+            <PaymentMethodFormDialog
+              method={method}
+              defaultLabel={method.label}
+              trigger={
+                <Button type="button" variant="ghost" size="icon-sm" aria-label={t('editPaymentMethod')}>
+                  <Pencil className="size-4" />
+                </Button>
+              }
+            />
+            <ConfirmDialog
+              trigger={
+                <Button type="button" variant="ghost" size="icon-sm">
+                  <Trash2 className="size-4" />
+                </Button>
+              }
+              title={t('deletePaymentMethodTitle')}
+              description={t('deletePaymentMethodDescription', { label: method.label })}
+              confirmLabel={t('delete')}
+              destructive
+              onConfirm={handleDelete}
+            />
+          </div>
+        )}
       </CardFooter>
     </Card>
   );

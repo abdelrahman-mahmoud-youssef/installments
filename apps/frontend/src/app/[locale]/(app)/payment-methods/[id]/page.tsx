@@ -27,6 +27,7 @@ import { Switch } from '@/components/ui/switch';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { usePaymentMethodMonthlySummary, usePaymentMethodTransactions } from '@/hooks/use-payment-method-transactions';
 import { useDeletePaymentMethod, usePaymentMethods, useUpdatePaymentMethod } from '@/hooks/use-payment-methods';
+import { useWalletAccess } from '@/hooks/use-wallet-access';
 import { useRouter } from '@/i18n/navigation';
 import { ApiError } from '@/lib/api/client';
 import { resolveAssetUrl } from '@/lib/assets';
@@ -53,6 +54,7 @@ export default function PaymentMethodDetailPage() {
 
   const updatePaymentMethod = useUpdatePaymentMethod();
   const deletePaymentMethod = useDeletePaymentMethod();
+  const { canManageWallets } = useWalletAccess();
 
   async function handleToggleActive(next: boolean) {
     try {
@@ -105,37 +107,39 @@ export default function PaymentMethodDetailPage() {
             </span>
           }
           actions={
-            <>
-              <Switch
-                checked={method.isActive}
-                onCheckedChange={handleToggleActive}
-                disabled={updatePaymentMethod.isPending}
-                aria-label={t('paymentMethodActive')}
-              />
-              <PaymentMethodFormDialog
-                method={method}
-                defaultLabel={method.label}
-                trigger={
-                  <Button type="button" variant="outline" size="sm">
-                    <Pencil className="size-4" />
-                    {t('editPaymentMethod')}
-                  </Button>
-                }
-              />
-              <ConfirmDialog
-                trigger={
-                  <Button type="button" variant="outline" size="sm">
-                    <Trash2 className="size-4" />
-                    {t('delete')}
-                  </Button>
-                }
-                title={t('deletePaymentMethodTitle')}
-                description={t('deletePaymentMethodDescription', { label: method.label })}
-                confirmLabel={t('delete')}
-                destructive
-                onConfirm={handleDelete}
-              />
-            </>
+            canManageWallets && (
+              <>
+                <Switch
+                  checked={method.isActive}
+                  onCheckedChange={handleToggleActive}
+                  disabled={updatePaymentMethod.isPending}
+                  aria-label={t('paymentMethodActive')}
+                />
+                <PaymentMethodFormDialog
+                  method={method}
+                  defaultLabel={method.label}
+                  trigger={
+                    <Button type="button" variant="outline" size="sm">
+                      <Pencil className="size-4" />
+                      {t('editPaymentMethod')}
+                    </Button>
+                  }
+                />
+                <ConfirmDialog
+                  trigger={
+                    <Button type="button" variant="outline" size="sm">
+                      <Trash2 className="size-4" />
+                      {t('delete')}
+                    </Button>
+                  }
+                  title={t('deletePaymentMethodTitle')}
+                  description={t('deletePaymentMethodDescription', { label: method.label })}
+                  confirmLabel={t('delete')}
+                  destructive
+                  onConfirm={handleDelete}
+                />
+              </>
+            )
           }
         />
       </FadeIn>

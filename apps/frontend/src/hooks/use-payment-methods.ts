@@ -13,8 +13,8 @@ export const paymentMethodKeys = {
   all: ['payment-methods'] as const,
 };
 
-export function usePaymentMethods() {
-  return useQuery({ queryKey: paymentMethodKeys.all, queryFn: listPaymentMethods });
+export function usePaymentMethods({ enabled = true }: { enabled?: boolean } = {}) {
+  return useQuery({ queryKey: paymentMethodKeys.all, queryFn: listPaymentMethods, enabled });
 }
 
 export function useCreatePaymentMethod() {
