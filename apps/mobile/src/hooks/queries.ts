@@ -28,6 +28,7 @@ import {
   getCounterpartyHistory,
   listCounterparties,
   SaveCounterpartyInput,
+  setCounterpartyPinned,
   updateCounterparty,
 } from '@/api/counterparties';
 import {
@@ -489,6 +490,14 @@ export function useUpdateCounterparty() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, input }: { id: string; input: SaveCounterpartyInput }) => updateCounterparty(id, input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.counterpartiesRoot }),
+  });
+}
+
+export function useSetCounterpartyPinned() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, isPinned }: { id: string; isPinned: boolean }) => setCounterpartyPinned(id, isPinned),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.counterpartiesRoot }),
   });
 }

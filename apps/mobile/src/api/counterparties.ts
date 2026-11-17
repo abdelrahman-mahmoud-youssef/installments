@@ -8,6 +8,7 @@ export interface Counterparty {
   notes: string | null;
   photoUrl: string | null;
   balance: number;
+  isPinned: boolean;
   createdAt: string;
 }
 
@@ -66,6 +67,10 @@ export function createCounterparty(input: SaveCounterpartyInput): Promise<Counte
 
 export function updateCounterparty(id: string, input: SaveCounterpartyInput): Promise<Counterparty> {
   return apiClient.patch(`settings/counterparties/${id}`, input);
+}
+
+export function setCounterpartyPinned(id: string, isPinned: boolean): Promise<Counterparty> {
+  return apiClient.patch(`settings/counterparties/${id}`, { isPinned });
 }
 
 export function deleteCounterparty(id: string): Promise<void> {

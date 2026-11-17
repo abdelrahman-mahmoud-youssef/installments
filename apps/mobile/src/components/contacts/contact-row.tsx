@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { View } from 'react-native';
 import { Counterparty } from '@/api/counterparties';
 import { AppText } from '@/components/ui/app-text';
@@ -6,6 +7,7 @@ import { Card } from '@/components/ui/card';
 import { MoneyText } from '@/components/ui/money-text';
 import { PressableScale } from '@/components/ui/pressable-scale';
 import { useI18n } from '@/i18n/i18n-context';
+import { useTheme } from '@/theme/theme-context';
 import { balanceStatus, balanceTone } from '@/lib/counterparty-balance';
 import { spacing } from '@/theme/tokens';
 import { isolateLtr } from '@/lib/format';
@@ -17,17 +19,27 @@ interface ContactRowProps {
 
 export function ContactRow({ contact, onPress }: ContactRowProps) {
   const { t } = useI18n();
+  const { colors, fontSize } = useTheme();
   const status = balanceStatus(contact.balance);
 
   return (
-    <PressableScale onPress={onPress} accessibilityRole="button" accessibilityLabel={contact.name}>
+    <PressableScale
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={contact.isPinned ? `${contact.name}, ${t('contacts.pinnedLabel')}` : contact.name}
+    >
       <Card>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
           <Avatar name={contact.name} photoUrl={contact.photoUrl} />
           <View style={{ flex: 1, gap: 2 }}>
-            <AppText variant="bodyStrong" numberOfLines={1}>
-              {contact.name}
-            </AppText>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
+              {contact.isPinned ? (
+                <Ionicons name="pin" size={fontSize('sm')} color={colors.primary} />
+              ) : null}
+              <AppText variant="bodyStrong" numberOfLines={1} style={{ flexShrink: 1 }}>
+                {contact.name}
+              </AppText>
+            </View>
             {contact.phone ? (
               <AppText variant="caption" tone="muted" numberOfLines={1}>
                 {isolateLtr(contact.phone)}

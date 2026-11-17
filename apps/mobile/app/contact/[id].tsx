@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, Linking, RefreshControl, View } from 'react-native';
@@ -17,6 +18,7 @@ import { ErrorState } from '@/components/ui/error-state';
 import { FloatingActionBar } from '@/components/ui/floating-action-bar';
 import { MoneyText } from '@/components/ui/money-text';
 import { MonthSwitcher } from '@/components/ui/month-switcher';
+import { PressableScale } from '@/components/ui/pressable-scale';
 import { QuickAction } from '@/components/ui/quick-action';
 import { SectionHeader } from '@/components/ui/section-header';
 import { SkeletonCardList } from '@/components/ui/skeleton';
@@ -28,6 +30,7 @@ import {
   useCounterparty,
   useCounterpartyHistory,
   useDeleteCounterparty,
+  useSetCounterpartyPinned,
   useUpdateCounterparty,
 } from '@/hooks/queries';
 import { useI18n } from '@/i18n/i18n-context';
@@ -56,6 +59,7 @@ export default function ContactDetailScreen() {
   const historyQuery = useCounterpartyHistory(id, { month }, isAdmin && contactQuery.data !== undefined);
   const updateMutation = useUpdateCounterparty();
   const deleteMutation = useDeleteCounterparty();
+  const pinMutation = useSetCounterpartyPinned();
 
   const history = useMemo(() => historyQuery.data?.pages.flatMap((page) => page.data) ?? [], [historyQuery.data]);
   const totals = historyQuery.data?.pages[0];
@@ -88,6 +92,15 @@ export default function ContactDetailScreen() {
       showToast(t('common.genericError'), 'error');
     }
   };
+
+  const togglePinned = (isPinned: boolean) =>
+    pinMutation.mutate(
+      { id, isPinned },
+      {
+        onSuccess: () => showToast(t(isPinned ? 'contacts.pinnedToast' : 'contacts.unpinnedToast')),
+        onError: () => showToast(t('common.genericError'), 'error'),
+      },
+    );
 
   if (!isAdmin || !contact) {
     return (
@@ -133,7 +146,23 @@ export default function ContactDetailScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <Stack.Screen options={{ title: contact.name }} />
+      <Stack.Screen
+        options={{
+          title: contact.name,
+          headerRight: () => (
+            <PressableScale
+              onPress={() => togglePinned(!contact.isPinned)}
+              disabled={pinMutation.isPending}
+              accessibilityRole="button"
+              accessibilityLabel={t(contact.isPinned ? 'contacts.unpin' : 'contacts.pin')}
+              accessibilityState={{ selected: contact.isPinned }}
+              hitSlop={spacing.sm}
+            >
+              <Ionicons name={contact.isPinned ? 'pin' : 'pin-outline'} size={24} color={colors.primary} />
+            </PressableScale>
+          ),
+        }}
+      />
       <FlatList
         data={history}
         keyExtractor={(item) => `${item.kind}-${item.id}`}
