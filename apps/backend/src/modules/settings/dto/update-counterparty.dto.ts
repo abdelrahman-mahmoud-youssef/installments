@@ -1,4 +1,4 @@
-import { IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import { IsBoolean, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 import { MAX_CONTACT_PHOTO_UPLOAD_BYTES } from '../../../common/constants';
 
 export class UpdateCounterpartyDto {
@@ -22,4 +22,8 @@ export class UpdateCounterpartyDto {
   @IsString()
   @MaxLength(Math.ceil((MAX_CONTACT_PHOTO_UPLOAD_BYTES * 4) / 3))
   photo?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  isPinned?: boolean;
 }

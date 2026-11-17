@@ -61,7 +61,7 @@ export class CounterpartiesService {
     const [data, total] = await Promise.all([
       this.prisma.counterparty.findMany({
         where,
-        orderBy: { name: 'asc' },
+        orderBy: [{ isPinned: 'desc' }, { name: 'asc' }],
         skip: (query.page - 1) * query.limit,
         take: query.limit,
       }),
@@ -91,7 +91,13 @@ export class CounterpartiesService {
     const photoUrl = dto.photo ? await this.savePhoto(tenantId, dto.photo) : undefined;
     return this.prisma.counterparty.update({
       where: { id },
-      data: { name: dto.name, phone: dto.phone, notes: dto.notes, ...(photoUrl && { photoUrl }) },
+      data: {
+        name: dto.name,
+        phone: dto.phone,
+        notes: dto.notes,
+        isPinned: dto.isPinned,
+        ...(photoUrl && { photoUrl }),
+      },
     });
   }
 

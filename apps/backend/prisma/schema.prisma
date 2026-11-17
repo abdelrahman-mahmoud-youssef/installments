@@ -525,6 +525,7 @@ model Counterparty {
   phone        String?
   notes        String?
   photoUrl     String?
+  isPinned     Boolean                    @default(false)
   createdAt    DateTime                   @default(now())
   tenant       Tenant                     @relation(fields: [tenantId], references: [id])
   transactions PaymentMethodTransaction[]
