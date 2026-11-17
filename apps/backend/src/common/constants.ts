@@ -30,6 +30,8 @@ export const MAX_OFFERS = 20;
 
 export const MAX_OFFER_IMAGES = 6;
 
+export const MAX_STAFF_WALLET_GRANTS = 100;
+
 export const ABOUT_MAX_LENGTH = 20_000;
 
 export const RESERVED_SUBDOMAINS = ['www', 'app', 'api', 'admin'];

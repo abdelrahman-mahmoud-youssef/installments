@@ -16,7 +16,11 @@ export class PaymentsService {
     private readonly paymentMethodLimitService: PaymentMethodLimitService,
   ) {}
 
-  async create(tenantId: string, createPaymentDto: CreatePaymentDto): Promise<PaymentDetail> {
+  async create(
+    tenantId: string,
+    createPaymentDto: CreatePaymentDto,
+    selectablePaymentMethodWhere: Prisma.PaymentMethodWhereInput = { tenantId },
+  ): Promise<PaymentDetail> {
     const contract = await this.prisma.contract.findFirst({
       where: { id: createPaymentDto.contractId, tenantId },
     });
@@ -26,7 +30,7 @@ export class PaymentsService {
 
     if (createPaymentDto.paymentMethodId) {
       const paymentMethod = await this.prisma.paymentMethod.findFirst({
-        where: { id: createPaymentDto.paymentMethodId, tenantId, isActive: true },
+        where: { id: createPaymentDto.paymentMethodId, isActive: true, ...selectablePaymentMethodWhere },
       });
       if (!paymentMethod) {
         throw new NotFoundException('Payment method not found.');

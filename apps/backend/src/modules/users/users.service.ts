@@ -1,30 +1,46 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma, Role } from '@prisma/client';
+import { Prisma, Role, WalletAccess } from '@prisma/client';
 import { hashPassword } from '../../common/password';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateStaffDto } from './dto/create-staff.dto';
 import { UpdateStaffDto } from './dto/update-staff.dto';
+import { UpdateStaffWalletAccessDto } from './dto/update-staff-wallet-access.dto';
 
 export interface StaffMember {
   id: string;
   name: string;
   email: string;
   isActive: boolean;
+  walletAccess: WalletAccess;
+  paymentMethodIds: string[];
   createdAt: Date;
 }
 
 const EMAIL_TAKEN_ERROR = 'This email is already in use.';
+const UNKNOWN_WALLET_ERROR = 'One or more selected wallets no longer exist.';
 
-const STAFF_SELECT = { id: true, name: true, email: true, isActive: true, createdAt: true } as const;
+const STAFF_SELECT = {
+  id: true,
+  name: true,
+  email: true,
+  isActive: true,
+  walletAccess: true,
+  createdAt: true,
+  walletGrants: { select: { paymentMethodId: true }, orderBy: { createdAt: 'asc' } },
+} as const satisfies Prisma.UserSelect;
 
-function toStaffMember(user: {
-  id: string;
-  name: string;
-  email: string;
-  isActive: boolean;
-  createdAt: Date;
-}): StaffMember {
-  return { id: user.id, name: user.name, email: user.email, isActive: user.isActive, createdAt: user.createdAt };
+type StaffRecord = Prisma.UserGetPayload<{ select: typeof STAFF_SELECT }>;
+
+function toStaffMember(user: StaffRecord): StaffMember {
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    isActive: user.isActive,
+    walletAccess: user.walletAccess,
+    paymentMethodIds: user.walletGrants.map((grant) => grant.paymentMethodId),
+    createdAt: user.createdAt,
+  };
 }
 
 @Injectable()
@@ -62,6 +78,41 @@ export class UsersService {
     id: string,
     dto: UpdateStaffDto,
   ): Promise<StaffMember> {
+    const target = await this.findManagedStaff(tenantId, requestingUserId, id);
+    const user = await this.prisma.user.update({
+      where: { id },
+      data: { isActive: dto.isActive, deactivatedAt: dto.isActive ? null : (target.deactivatedAt ?? new Date()) },
+      select: STAFF_SELECT,
+    });
+    return toStaffMember(user);
+  }
+
+  async updateStaffWalletAccess(
+    tenantId: string,
+    requestingUserId: string,
+    id: string,
+    dto: UpdateStaffWalletAccessDto,
+  ): Promise<StaffMember> {
+    await this.findManagedStaff(tenantId, requestingUserId, id);
+    const paymentMethodIds = dto.walletAccess === WalletAccess.SELECTED ? dto.paymentMethodIds : [];
+    const ownedWalletCount = await this.prisma.paymentMethod.count({
+      where: { tenantId, id: { in: paymentMethodIds } },
+    });
+    if (ownedWalletCount !== paymentMethodIds.length) {
+      throw new BadRequestException(UNKNOWN_WALLET_ERROR);
+    }
+
+    const [, , user] = await this.prisma.$transaction([
+      this.prisma.staffWalletGrant.deleteMany({ where: { tenantId, userId: id } }),
+      this.prisma.staffWalletGrant.createMany({
+        data: paymentMethodIds.map((paymentMethodId) => ({ tenantId, userId: id, paymentMethodId })),
+      }),
+      this.prisma.user.update({ where: { id }, data: { walletAccess: dto.walletAccess }, select: STAFF_SELECT }),
+    ]);
+    return toStaffMember(user);
+  }
+
+  private async findManagedStaff(tenantId: string, requestingUserId: string, id: string) {
     if (id === requestingUserId) {
       throw new BadRequestException('You cannot change your own account here.');
     }
@@ -73,12 +124,6 @@ export class UsersService {
     if (target.role !== Role.STAFF) {
       throw new BadRequestException('Admin accounts cannot be managed here.');
     }
-
-    const user = await this.prisma.user.update({
-      where: { id },
-      data: { isActive: dto.isActive, deactivatedAt: dto.isActive ? null : (target.deactivatedAt ?? new Date()) },
-      select: STAFF_SELECT,
-    });
-    return toStaffMember(user);
+    return target;
   }
 }

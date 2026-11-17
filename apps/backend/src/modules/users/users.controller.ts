@@ -5,6 +5,7 @@ import { AuthenticatedUser, CurrentUser } from '../../common/decorators/current-
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CreateStaffDto } from './dto/create-staff.dto';
 import { UpdateStaffDto } from './dto/update-staff.dto';
+import { UpdateStaffWalletAccessDto } from './dto/update-staff-wallet-access.dto';
 import { UsersService } from './users.service';
 
 @Controller('staff')
@@ -31,5 +32,15 @@ export class UsersController {
     @Body() dto: UpdateStaffDto,
   ) {
     return this.usersService.updateStaff(user.tenantId, user.userId, id, dto);
+  }
+
+  @Patch(':id/wallet-access')
+  @Audit('staff.update_wallet_access', 'User')
+  updateStaffWalletAccess(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() dto: UpdateStaffWalletAccessDto,
+  ) {
+    return this.usersService.updateStaffWalletAccess(user.tenantId, user.userId, id, dto);
   }
 }

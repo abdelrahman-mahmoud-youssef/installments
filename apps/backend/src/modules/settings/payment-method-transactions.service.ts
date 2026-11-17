@@ -11,6 +11,7 @@ import { PaymentMethodLimitService } from './payment-method-limit.service';
 import { CreatePaymentMethodTransactionDto } from './dto/create-payment-method-transaction.dto';
 import { PaymentMethodTransactionQueryDto } from './dto/payment-method-transaction-query.dto';
 import { getPaymentMethodMonthlyUsage, PaymentMethodMonthlyUsage } from './payment-method-usage.util';
+import { buildViewablePaymentMethodWhere, WalletViewer } from './wallet-access/wallet-access';
 
 export interface PaymentMethodTransactionListResult extends PaginatedResult<PaymentMethodTransaction> {
   totalIn: number;
@@ -26,11 +27,12 @@ export class PaymentMethodTransactionsService {
   ) {}
 
   async create(
-    tenantId: string,
+    viewer: WalletViewer,
     paymentMethodId: string,
     dto: CreatePaymentMethodTransactionDto,
   ): Promise<PaymentMethodTransaction> {
-    await this.findOwnedMethod(tenantId, paymentMethodId);
+    const { tenantId } = viewer;
+    await this.findViewableMethod(viewer, paymentMethodId);
 
     const counterparty = dto.counterpartyId
       ? await this.findOwnedCounterparty(tenantId, dto.counterpartyId)
@@ -59,11 +61,12 @@ export class PaymentMethodTransactionsService {
   }
 
   async findAll(
-    tenantId: string,
+    viewer: WalletViewer,
     paymentMethodId: string,
     query: PaymentMethodTransactionQueryDto,
   ): Promise<PaymentMethodTransactionListResult> {
-    await this.findOwnedMethod(tenantId, paymentMethodId);
+    const { tenantId } = viewer;
+    await this.findViewableMethod(viewer, paymentMethodId);
 
     const where: Prisma.PaymentMethodTransactionWhereInput = {
       tenantId,
@@ -99,13 +102,13 @@ export class PaymentMethodTransactionsService {
   }
 
   async getMonthlySummary(
-    tenantId: string,
+    viewer: WalletViewer,
     paymentMethodId: string,
     month?: string,
   ): Promise<PaymentMethodMonthlyUsage & { monthlyLimit: number | null }> {
-    const method = await this.findOwnedMethod(tenantId, paymentMethodId);
+    const method = await this.findViewableMethod(viewer, paymentMethodId);
     const monthStart = resolveMonthStart(month, getUtcToday());
-    const usage = await getPaymentMethodMonthlyUsage(this.prisma, tenantId, paymentMethodId, monthStart);
+    const usage = await getPaymentMethodMonthlyUsage(this.prisma, viewer.tenantId, paymentMethodId, monthStart);
     return { ...usage, monthlyLimit: method.monthlyLimit };
   }
 
@@ -114,8 +117,10 @@ export class PaymentMethodTransactionsService {
     return this.storage.saveKeyedImage(`payment-method-transactions/${tenantId}/${randomUUID()}.${extension}`, buffer);
   }
 
-  private async findOwnedMethod(tenantId: string, paymentMethodId: string) {
-    const method = await this.prisma.paymentMethod.findFirst({ where: { id: paymentMethodId, tenantId } });
+  private async findViewableMethod(viewer: WalletViewer, paymentMethodId: string) {
+    const method = await this.prisma.paymentMethod.findFirst({
+      where: { id: paymentMethodId, ...buildViewablePaymentMethodWhere(viewer) },
+    });
     if (!method) {
       throw new NotFoundException('Payment method not found.');
     }

@@ -83,6 +83,12 @@ enum Role {
   STAFF
 }
 
+enum WalletAccess {
+  NONE
+  ALL
+  SELECTED
+}
+
 enum PaymentClaimStatus {
   PENDING
   APPROVED
@@ -151,6 +157,7 @@ model Tenant {
   pushNotificationLogs      PushNotificationLog[]
   offers                    Offer[]
   shareLinks                ShareLink[]
+  staffWalletGrants         StaffWalletGrant[]
   reminderMessageSettings   ReminderMessageSettings?
   subscriptions             TenantSubscription[]
   referredByTenantId        String?
@@ -196,6 +203,7 @@ model User {
   role                  Role                  @default(ADMIN)
   isActive              Boolean               @default(true)
   deactivatedAt         DateTime?
+  walletAccess          WalletAccess          @default(NONE)
   twoFactorSecret       String?
   twoFactorEnabled      Boolean               @default(false)
   failedLoginAttempts   Int                   @default(0)
@@ -208,6 +216,7 @@ model User {
   passwordResetTokens   PasswordResetToken[]
   supportMessages       SupportMessage[]
   pushDevices           PushDevice[]
+  walletGrants          StaffWalletGrant[]
 
   @@index([tenantId, role])
 }
@@ -465,6 +474,7 @@ model PaymentMethod {
   claims              PaymentClaim[]
   payments            Payment[]
   transactions        PaymentMethodTransaction[]
+  staffGrants         StaffWalletGrant[]
 
   @@unique([tenantId, presetKey, details])
   @@index([tenantId, isActive])
@@ -583,6 +593,20 @@ model WhatsappMessage {
   receivedAt DateTime @default(now())
 
   @@index([fromPhone, receivedAt])
+}
+
+model StaffWalletGrant {
+  userId          String
+  paymentMethodId String
+  tenantId        String
+  createdAt       DateTime      @default(now())
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  paymentMethod   PaymentMethod @relation(fields: [paymentMethodId], references: [id], onDelete: Cascade)
+  tenant          Tenant        @relation(fields: [tenantId], references: [id])
+
+  @@id([userId, paymentMethodId])
+  @@index([paymentMethodId])
+  @@index([tenantId])
 }
 
 model PushDevice {

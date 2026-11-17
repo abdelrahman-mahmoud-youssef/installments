@@ -27,7 +27,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     const user = await this.prisma.user.findUnique({
       where: { id: payload.sub },
-      select: { isActive: true, tenant: { select: { subscriptionExpiresOn: true } } },
+      select: { isActive: true, walletAccess: true, tenant: { select: { subscriptionExpiresOn: true } } },
     });
     if (!user || !user.isActive) {
       throw new UnauthorizedException(DEACTIVATED_ACCOUNT_MESSAGE);
@@ -38,6 +38,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       role: payload.role,
       email: payload.email,
       name: payload.name ?? payload.email,
+      walletAccess: user.walletAccess,
       subscriptionExpiresOn: user.tenant.subscriptionExpiresOn,
     };
   }

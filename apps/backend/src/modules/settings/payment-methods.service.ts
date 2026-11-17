@@ -4,6 +4,7 @@ import { getUtcToday, startOfUtcMonth } from '../../common/date/utc-date';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreatePaymentMethodDto } from './dto/create-payment-method.dto';
 import { UpdatePaymentMethodDto } from './dto/update-payment-method.dto';
+import { buildViewablePaymentMethodWhere, WalletViewer } from './wallet-access/wallet-access';
 
 const PRESET_ALREADY_ADDED_ERROR = 'This payment method has already been added.';
 const IN_USE_ERROR =
@@ -15,9 +16,9 @@ export type PaymentMethodWithUsage = PaymentMethod & { monthToDateUsage: number 
 export class PaymentMethodsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async listPaymentMethods(tenantId: string): Promise<PaymentMethodWithUsage[]> {
+  async listPaymentMethods(viewer: WalletViewer): Promise<PaymentMethodWithUsage[]> {
     const methods = await this.prisma.paymentMethod.findMany({
-      where: { tenantId },
+      where: buildViewablePaymentMethodWhere(viewer),
       orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
     });
 
@@ -26,7 +27,7 @@ export class PaymentMethodsService {
       return methods.map((method) => ({ ...method, monthToDateUsage: 0 }));
     }
 
-    const usageByMethodId = await this.getMonthToDateUsageByMethod(tenantId, limitedMethodIds);
+    const usageByMethodId = await this.getMonthToDateUsageByMethod(viewer.tenantId, limitedMethodIds);
     return methods.map((method) => ({ ...method, monthToDateUsage: usageByMethodId.get(method.id) ?? 0 }));
   }
 

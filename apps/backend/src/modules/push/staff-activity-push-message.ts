@@ -42,6 +42,7 @@ export const STAFF_ACTIVITY_LABELS: Record<string, ActivityLabel> = {
   'settings.notifications.update_reminder_message': { EN: 'Updated reminder message', AR: 'عدّل رسالة التذكير' },
   'staff.create': { EN: 'Added staff account', AR: 'أضاف حساب موظف' },
   'staff.update_status': { EN: 'Updated staff account', AR: 'عدّل حساب موظف' },
+  'staff.update_wallet_access': { EN: 'Changed staff wallet access', AR: 'غيّر صلاحية المحافظ لموظف' },
 };
 
 const FALLBACK_LABEL: ActivityLabel = { EN: 'Made a change', AR: 'عمل تعديل' };

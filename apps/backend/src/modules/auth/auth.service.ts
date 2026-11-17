@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { User } from '@prisma/client';
+import { User, WalletAccess } from '@prisma/client';
 import {
   APP_NAME,
   DEACTIVATED_ACCOUNT_MESSAGE,
@@ -35,6 +35,7 @@ import {
 } from '../../common/subscription/subscription';
 import { PrismaService } from '../../prisma/prisma.service';
 import { MailService } from '../mail/mail.service';
+import { resolveEffectiveWalletAccess } from '../settings/wallet-access/wallet-access';
 import { buildPasswordChangedEmail } from '../mail/templates/password-changed-email';
 import { buildPasswordResetEmail } from '../mail/templates/password-reset-email';
 import { ChangePasswordDto } from './dto/change-password.dto';
@@ -95,6 +96,7 @@ export interface CurrentUserResponse {
   email: string;
   tenantId: string;
   role: User['role'];
+  walletAccess: WalletAccess;
   twoFactorEnabled: boolean;
   tenant: CurrentUserTenant;
   subscription: CurrentUserSubscription;
@@ -118,10 +120,11 @@ export class AuthService {
     tenantId: string;
     role: User['role'];
   }): Promise<CurrentUserResponse> {
-    const { twoFactorEnabled, tenant } = await this.prisma.user.findUniqueOrThrow({
+    const { twoFactorEnabled, walletAccess, tenant } = await this.prisma.user.findUniqueOrThrow({
       where: { id: user.userId },
       select: {
         twoFactorEnabled: true,
+        walletAccess: true,
         tenant: {
           select: {
             slug: true,
@@ -141,6 +144,7 @@ export class AuthService {
       email: user.email,
       tenantId: user.tenantId,
       role: user.role,
+      walletAccess: resolveEffectiveWalletAccess({ role: user.role, walletAccess }),
       twoFactorEnabled,
       tenant: {
         slug: tenant.slug,

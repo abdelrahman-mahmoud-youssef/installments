@@ -12,6 +12,7 @@ import { CounterpartyQueryDto } from './dto/counterparty-query.dto';
 import { CreateCounterpartyAdjustmentDto } from './dto/create-counterparty-adjustment.dto';
 import { CreateCounterpartyDto } from './dto/create-counterparty.dto';
 import { UpdateCounterpartyDto } from './dto/update-counterparty.dto';
+import { buildViewablePaymentMethodWhere, WalletViewer } from './wallet-access/wallet-access';
 
 const IN_USE_ERROR = 'This contact has transaction or adjustment history and can’t be deleted.';
 
@@ -132,10 +133,11 @@ export class CounterpartiesService {
   }
 
   async getHistory(
-    tenantId: string,
+    viewer: WalletViewer,
     counterpartyId: string,
     query: CounterpartyHistoryQueryDto,
   ): Promise<CounterpartyHistoryResult> {
+    const { tenantId } = viewer;
     await this.findOwned(tenantId, counterpartyId);
 
     const occurredAt = query.month
@@ -147,7 +149,12 @@ export class CounterpartiesService {
 
     const [transactions, adjustments] = await Promise.all([
       this.prisma.paymentMethodTransaction.findMany({
-        where: { tenantId, counterpartyId, ...(occurredAt && { occurredAt }) },
+        where: {
+          tenantId,
+          counterpartyId,
+          paymentMethod: buildViewablePaymentMethodWhere(viewer),
+          ...(occurredAt && { occurredAt }),
+        },
         include: { paymentMethod: { select: { label: true } } },
       }),
       this.prisma.counterpartyAdjustment.findMany({

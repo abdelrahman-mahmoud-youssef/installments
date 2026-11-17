@@ -9,6 +9,7 @@ import { CounterpartyQueryDto } from './dto/counterparty-query.dto';
 import { CreateCounterpartyAdjustmentDto } from './dto/create-counterparty-adjustment.dto';
 import { CreateCounterpartyDto } from './dto/create-counterparty.dto';
 import { UpdateCounterpartyDto } from './dto/update-counterparty.dto';
+import { WalletRoute } from './wallet-access/wallet-route.decorator';
 
 @Controller('settings/counterparties')
 @Roles(Role.ADMIN)
@@ -16,28 +17,32 @@ export class CounterpartiesController {
   constructor(private readonly counterpartiesService: CounterpartiesService) {}
 
   @Get()
+  @WalletRoute()
   findAll(@CurrentUser() user: AuthenticatedUser, @Query() query: CounterpartyQueryDto) {
     return this.counterpartiesService.findAll(user.tenantId, query);
   }
 
   @Post()
+  @WalletRoute()
   @Audit('counterparty.create', 'Counterparty')
   create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateCounterpartyDto) {
     return this.counterpartiesService.create(user.tenantId, dto);
   }
 
   @Get(':id')
+  @WalletRoute()
   findOne(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.counterpartiesService.findOne(user.tenantId, id);
   }
 
   @Get(':id/history')
+  @WalletRoute()
   getHistory(
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
     @Query() query: CounterpartyHistoryQueryDto,
   ) {
-    return this.counterpartiesService.getHistory(user.tenantId, id, query);
+    return this.counterpartiesService.getHistory(user, id, query);
   }
 
   @Patch(':id')

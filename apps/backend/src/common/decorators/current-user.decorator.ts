@@ -1,5 +1,5 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { Role } from '@prisma/client';
+import { Role, WalletAccess } from '@prisma/client';
 
 export interface AuthenticatedUser {
   userId: string;
@@ -7,6 +7,7 @@ export interface AuthenticatedUser {
   role: Role;
   email: string;
   name: string;
+  walletAccess: WalletAccess;
   subscriptionExpiresOn: Date;
 }
 

@@ -1,6 +1,6 @@
 import { ExecutionContext, HttpException, HttpStatus } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Role } from '@prisma/client';
+import { Role, WalletAccess } from '@prisma/client';
 import { SUBSCRIPTION_INACTIVE_ERROR_CODE } from '../constants';
 import { addUtcDays, getUtcToday } from '../date/utc-date';
 import { ALLOW_WITHOUT_SUBSCRIPTION_KEY } from '../decorators/allow-without-subscription.decorator';
@@ -16,6 +16,7 @@ function buildUser(subscriptionExpiresOn: Date): AuthenticatedUser {
     role: Role.ADMIN,
     email: 'admin@shop.test',
     name: 'Admin',
+    walletAccess: WalletAccess.NONE,
     subscriptionExpiresOn,
   };
 }
