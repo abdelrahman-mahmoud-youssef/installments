@@ -1,4 +1,4 @@
-import { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import { ReactNode, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   Animated,
   KeyboardAvoidingView,
@@ -14,6 +14,7 @@ import { useTheme } from '@/theme/theme-context';
 import { radius, spacing } from '@/theme/tokens';
 import { AppText } from './app-text';
 import { GlassSurface } from './glass-surface';
+import { canPresentSheet, holdSheetClosing, useCanPresentSheet } from './sheet-presentation';
 
 const ANIMATION_DURATION = 240;
 
@@ -29,28 +30,62 @@ export function BottomSheet({ visible, onClose, title, children, scrollable = tr
   const { colors } = useTheme();
   const { direction } = useI18n();
   const insets = useSafeAreaInsets();
-  const [isMounted, setIsMounted] = useState(visible);
+  const canPresent = useCanPresentSheet();
+  const [isMounted, setIsMounted] = useState(false);
   const progress = useRef(new Animated.Value(0)).current;
+  const releaseClosingRef = useRef<(() => void) | null>(null);
+
+  const releaseClosing = useCallback(() => {
+    releaseClosingRef.current?.();
+    releaseClosingRef.current = null;
+  }, []);
 
   const animate = useCallback(
-    (toValue: number, onDone?: () => void) => {
+    (toValue: number, onFinished?: () => void) => {
       Animated.timing(progress, {
         toValue,
         duration: ANIMATION_DURATION,
         useNativeDriver: true,
-      }).start(onDone);
+      }).start(({ finished }) => {
+        if (finished) {
+          onFinished?.();
+        }
+      });
     },
     [progress],
   );
 
+  useLayoutEffect(() => {
+    if (!visible && isMounted) {
+      releaseClosingRef.current ??= holdSheetClosing();
+    }
+  }, [visible, isMounted]);
+
   useEffect(() => {
-    if (visible) {
+    if (visible && !isMounted && canPresent && canPresentSheet()) {
       setIsMounted(true);
+    }
+  }, [visible, isMounted, canPresent]);
+
+  useEffect(() => {
+    if (!isMounted) {
+      return;
+    }
+    if (visible) {
+      releaseClosing();
       animate(1);
-    } else if (isMounted) {
+    } else {
       animate(0, () => setIsMounted(false));
     }
-  }, [visible, isMounted, animate]);
+  }, [visible, isMounted, animate, releaseClosing]);
+
+  useEffect(() => {
+    if (!isMounted) {
+      releaseClosing();
+    }
+  }, [isMounted, releaseClosing]);
+
+  useEffect(() => releaseClosing, [releaseClosing]);
 
   if (!isMounted) {
     return null;
