@@ -69,24 +69,17 @@ export default function ContractsScreen() {
         ListHeaderComponent={
           <View style={{ gap: spacing.md }}>
             <View style={{ paddingHorizontal: spacing.xl }}>{largeTitle}</View>
-            <View style={{ flexDirection: 'row', alignItems: 'center', paddingEnd: spacing.xl }}>
-              <View style={{ flex: 1 }}>
-                <FilterChips
-                  options={[
-                    { value: 'all', label: t('contracts.filterAll') },
-                    { value: 'ACTIVE', label: t('contracts.filterActive') },
-                    { value: 'delayed', label: t('contracts.filterDelayed') },
-                    { value: 'COMPLETED', label: t('contracts.filterCompleted') },
-                    { value: 'CANCELLED', label: t('contracts.filterCancelled') },
-                  ]}
-                  selected={filter}
-                  onSelect={setFilter}
-                />
-              </View>
-              {tags.length > 0 ? (
-                <ContractTagFilterButton isFiltering={tag !== null} onPress={() => setIsTagFilterOpen(true)} />
-              ) : null}
-            </View>
+            <FilterChips
+              options={[
+                { value: 'all', label: t('contracts.filterAll') },
+                { value: 'ACTIVE', label: t('contracts.filterActive') },
+                { value: 'delayed', label: t('contracts.filterDelayed') },
+                { value: 'COMPLETED', label: t('contracts.filterCompleted') },
+                { value: 'CANCELLED', label: t('contracts.filterCancelled') },
+              ]}
+              selected={filter}
+              onSelect={setFilter}
+            />
           </View>
         }
         ListEmptyComponent={
@@ -118,7 +111,18 @@ export default function ContractsScreen() {
         )}
       />
       <FloatingActionBar>
-        <Button variant="glass" title={t('contractForm.title')} icon="add-circle-outline" onPress={openNewContract} />
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+          <Button
+            variant="glass"
+            title={t('contractForm.title')}
+            icon="add-circle-outline"
+            onPress={openNewContract}
+            style={{ flex: 1 }}
+          />
+          {tags.length > 0 ? (
+            <ContractTagFilterButton isFiltering={tag !== null} onPress={() => setIsTagFilterOpen(true)} />
+          ) : null}
+        </View>
       </FloatingActionBar>
       <ContractTagFilterSheet
         visible={isTagFilterOpen}

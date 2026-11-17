@@ -1,11 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
+import { GlassSurface } from '@/components/ui/glass-surface';
 import { PressableScale } from '@/components/ui/pressable-scale';
 import { useI18n } from '@/i18n/i18n-context';
 import { useTheme } from '@/theme/theme-context';
 import { radius, touchTarget } from '@/theme/tokens';
 
-const ICON_SIZE = 18;
-const BUTTON_SIZE = touchTarget.minHeight - 8;
+const BUTTON_SIZE = touchTarget.minHeight + 4;
 
 interface ContractTagFilterButtonProps {
   isFiltering: boolean;
@@ -14,29 +14,35 @@ interface ContractTagFilterButtonProps {
 
 export function ContractTagFilterButton({ isFiltering, onPress }: ContractTagFilterButtonProps) {
   const { t } = useI18n();
-  const { colors } = useTheme();
+  const { colors, fontSize } = useTheme();
+  const surfaceColor = isFiltering ? colors.primary : colors.surface;
+
   return (
     <PressableScale
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={t('contracts.filterByTag')}
       accessibilityState={{ selected: isFiltering }}
-      style={{
-        width: BUTTON_SIZE,
-        height: BUTTON_SIZE,
-        borderRadius: radius.full,
-        borderWidth: 1,
-        borderColor: isFiltering ? colors.text : colors.border,
-        backgroundColor: isFiltering ? colors.text : colors.surface,
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
     >
-      <Ionicons
-        name={isFiltering ? 'funnel' : 'funnel-outline'}
-        size={ICON_SIZE}
-        color={isFiltering ? colors.background : colors.textMuted}
-      />
+      <GlassSurface
+        tint={isFiltering ? colors.primary : undefined}
+        interactive
+        elevated
+        fallbackColor={surfaceColor}
+        style={{
+          width: BUTTON_SIZE,
+          height: BUTTON_SIZE,
+          borderRadius: radius.full,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Ionicons
+          name={isFiltering ? 'funnel' : 'funnel-outline'}
+          size={fontSize('lg')}
+          color={isFiltering ? colors.onPrimary : colors.text}
+        />
+      </GlassSurface>
     </PressableScale>
   );
 }
