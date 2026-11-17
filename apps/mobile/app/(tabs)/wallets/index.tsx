@@ -27,7 +27,7 @@ export default function WalletsScreen() {
   const { t } = useI18n();
   const { isAdmin } = useAuth();
   const { showToast } = useToast();
-  const [segment, setSegment] = useState<Segment>('wallets');
+  const [segment, setSegment] = useState<Segment>('contacts');
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search.trim());
   const searchBarOptions = useHeaderSearchBarOptions({
@@ -48,8 +48,8 @@ export default function WalletsScreen() {
         {largeTitle}
         <SegmentedControl
           options={[
-            { value: 'wallets', label: t('wallets.walletsSegment'), icon: 'wallet-outline' },
             { value: 'contacts', label: t('wallets.contactsSegment'), icon: 'people-outline' },
+            { value: 'wallets', label: t('wallets.walletsSegment'), icon: 'wallet-outline' },
           ]}
           selected={segment}
           onSelect={setSegment}
