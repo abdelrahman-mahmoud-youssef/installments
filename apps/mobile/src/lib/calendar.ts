@@ -1,5 +1,5 @@
 import type { Locale } from '@/i18n/translations';
-import { intlLocale, toIsoDate } from './format';
+import { intlLocale, toIsoDate, toLatinDigits } from './format';
 
 function monthKeyOf(date: Date): string {
   return toIsoDate(date).slice(0, 7);
@@ -26,8 +26,8 @@ export function shiftMonthKey(monthKey: string, months: number): string {
 }
 
 export function formatMonthKey(monthKey: string, locale: Locale): string {
-  return new Intl.DateTimeFormat(intlLocale(locale), { month: 'long', year: 'numeric' }).format(
-    parseMonthKey(monthKey),
+  return toLatinDigits(
+    new Intl.DateTimeFormat(intlLocale(locale), { month: 'long', year: 'numeric' }).format(parseMonthKey(monthKey)),
   );
 }
 
