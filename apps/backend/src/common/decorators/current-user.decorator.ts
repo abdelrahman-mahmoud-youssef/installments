@@ -9,6 +9,7 @@ export interface AuthenticatedUser {
   name: string;
   walletAccess: WalletAccess;
   subscriptionExpiresOn: Date;
+  jameyaEnabled: boolean;
 }
 
 export const CurrentUser = createParamDecorator(

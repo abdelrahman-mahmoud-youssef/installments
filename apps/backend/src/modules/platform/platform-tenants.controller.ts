@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, Query } from '@nestjs/common';
 import {
   AuthenticatedPlatformAdmin,
   CurrentPlatformAdmin,
@@ -7,6 +7,7 @@ import { PlatformRoute } from '../../common/decorators/platform-route.decorator'
 import { ActivateTenantDto } from './dto/activate-tenant.dto';
 import { PlatformTenantQueryDto } from './dto/platform-tenant-query.dto';
 import { PlatformTenantSubscriptionQueryDto } from './dto/platform-tenant-subscription-query.dto';
+import { UpdateTenantFeaturesDto } from './dto/update-tenant-features.dto';
 import { PlatformTenantsService } from './platform-tenants.service';
 
 @PlatformRoute()
@@ -33,6 +34,15 @@ export class PlatformTenantsController {
   @HttpCode(HttpStatus.OK)
   deactivate(@CurrentPlatformAdmin() admin: AuthenticatedPlatformAdmin, @Param('tenantId') tenantId: string) {
     return this.platformTenantsService.deactivate(admin, tenantId);
+  }
+
+  @Patch(':tenantId/features')
+  updateFeatures(
+    @CurrentPlatformAdmin() admin: AuthenticatedPlatformAdmin,
+    @Param('tenantId') tenantId: string,
+    @Body() dto: UpdateTenantFeaturesDto,
+  ) {
+    return this.platformTenantsService.updateFeatures(admin, tenantId, dto);
   }
 
   @Get(':tenantId/subscriptions')

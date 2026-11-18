@@ -82,6 +82,7 @@ export interface CurrentUserTenant {
   displayName: string;
   brandColor: string;
   logoUrl: string | null;
+  jameyaEnabled: boolean;
 }
 
 export interface CurrentUserSubscription extends SubscriptionSummary {
@@ -133,6 +134,7 @@ export class AuthService {
             brandColor: true,
             logoUrl: true,
             subscriptionExpiresOn: true,
+            jameyaEnabled: true,
             _count: { select: { subscriptions: true } },
           },
         },
@@ -151,6 +153,7 @@ export class AuthService {
         displayName: tenant.displayName ?? tenant.name,
         brandColor: tenant.brandColor,
         logoUrl: tenant.logoUrl,
+        jameyaEnabled: tenant.jameyaEnabled,
       },
       subscription: {
         ...summarizeSubscription(

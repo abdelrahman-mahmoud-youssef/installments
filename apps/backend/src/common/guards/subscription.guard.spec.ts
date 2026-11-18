@@ -18,6 +18,7 @@ function buildUser(subscriptionExpiresOn: Date): AuthenticatedUser {
     name: 'Admin',
     walletAccess: WalletAccess.NONE,
     subscriptionExpiresOn,
+    jameyaEnabled: false,
   };
 }
 

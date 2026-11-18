@@ -12,6 +12,7 @@ import { SUBSCRIPTION_RECORD_SELECT, SubscriptionRecord } from './billing/subscr
 import { ActivateTenantDto } from './dto/activate-tenant.dto';
 import { PlatformTenantQueryDto } from './dto/platform-tenant-query.dto';
 import { PlatformTenantSubscriptionQueryDto } from './dto/platform-tenant-subscription-query.dto';
+import { UpdateTenantFeaturesDto } from './dto/update-tenant-features.dto';
 import { buildTenantFilterWhere, buildTenantSearchWhere } from './platform-tenant-where';
 
 const TENANT_SUMMARY_SELECT = {
@@ -22,6 +23,7 @@ const TENANT_SUMMARY_SELECT = {
   phone: true,
   createdAt: true,
   subscriptionExpiresOn: true,
+  jameyaEnabled: true,
   users: {
     where: { role: Role.ADMIN },
     orderBy: { createdAt: 'asc' },
@@ -66,6 +68,7 @@ export interface PlatformTenantSummary {
   createdAt: Date;
   subscriptionExpiresOn: Date;
   subscriptionStatus: SubscriptionStatus;
+  jameyaEnabled: boolean;
   owner: PlatformTenantOwner | null;
   referredBy: PlatformTenantReferrer | null;
   invitedShopsCount: number;
@@ -139,6 +142,19 @@ export class PlatformTenantsService {
     return this.findSummary(tenantId);
   }
 
+  async updateFeatures(
+    admin: AuthenticatedPlatformAdmin,
+    tenantId: string,
+    dto: UpdateTenantFeaturesDto,
+  ): Promise<PlatformTenantSummary> {
+    await this.prisma.tenant.updateMany({ where: { id: tenantId }, data: { jameyaEnabled: dto.jameyaEnabled } });
+
+    this.logger.log(
+      `Platform admin ${admin.email} turned jameya ${dto.jameyaEnabled ? 'on' : 'off'} for tenant ${tenantId}`,
+    );
+    return this.findSummary(tenantId);
+  }
+
   async findSubscriptions(
     tenantId: string,
     query: PlatformTenantSubscriptionQueryDto,
@@ -180,6 +196,7 @@ export class PlatformTenantsService {
         { expiresOn: row.subscriptionExpiresOn, hasPaidPeriod: row._count.subscriptions > 0 },
         today,
       ),
+      jameyaEnabled: row.jameyaEnabled,
       owner: row.users[0] ?? null,
       referredBy: row.referredBy
         ? { name: row.referredBy.displayName ?? row.referredBy.name, slug: row.referredBy.slug }
