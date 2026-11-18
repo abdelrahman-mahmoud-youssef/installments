@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { Role } from '@prisma/client';
 import { Audit } from '../../common/decorators/audit.decorator';
 import { AuthenticatedUser, CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -27,6 +27,12 @@ export class JameyasController {
   @Audit('jameya.create', 'Jameya')
   create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateJameyaDto) {
     return this.jameyasService.create(user.tenantId, dto);
+  }
+
+  @Post('preview')
+  @HttpCode(HttpStatus.OK)
+  preview(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateJameyaDto) {
+    return this.jameyasService.preview(user.tenantId, dto);
   }
 
   @Get()

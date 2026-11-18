@@ -6,10 +6,10 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { CreateJameyaDto } from './dto/create-jameya.dto';
 import { JameyaQueryDto } from './dto/jameya-query.dto';
 import { UpdateJameyaDto } from './dto/update-jameya.dto';
-import { calculatePot, HALVES_PER_SHARE } from './jameya-amounts';
+import { calculateEntitlement, calculatePot, HALVES_PER_SHARE } from './jameya-amounts';
 import { buildJameyaDetail, JAMEYA_DETAIL_INCLUDE, JameyaDetail } from './jameya-detail';
 import { lateJameyaDueWhere } from './jameya-due-where';
-import { buildJameyaSchedule } from './jameya-schedule';
+import { buildJameyaSchedule, JameyaSchedule, PlannedDueAmount } from './jameya-schedule';
 
 function buildListSelect(today: Date) {
   return {
@@ -40,26 +40,44 @@ export type JameyaListItem = Omit<JameyaListRow, 'cycles' | '_count'> & {
   lateDueCount: number;
 };
 
+export interface JameyaPreviewCycle {
+  sequence: number;
+  dueDate: Date;
+  lateAfter: Date;
+  holders: { customerId: string; halves: number; entitlementAmount: number }[];
+}
+
+export interface JameyaPreview {
+  potAmount: number;
+  cycles: JameyaPreviewCycle[];
+  dueAmounts: PlannedDueAmount[];
+}
+
 @Injectable()
 export class JameyasService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(tenantId: string, dto: CreateJameyaDto): Promise<JameyaDetail> {
-    const memberCount = await this.prisma.customer.count({
-      where: { id: { in: dto.customerIds }, tenantId, status: CustomerStatus.ACTIVE },
-    });
-    if (memberCount !== dto.customerIds.length) {
-      throw new NotFoundException('Customer not found.');
-    }
+  async preview(tenantId: string, dto: CreateJameyaDto): Promise<JameyaPreview> {
+    const schedule = await this.planSchedule(tenantId, dto);
+    const potAmount = calculatePot(dto.shareAmount, schedule.cycles.length);
+    return {
+      potAmount,
+      cycles: schedule.cycles.map((cycle) => ({
+        sequence: cycle.sequence,
+        dueDate: cycle.dueDate,
+        lateAfter: cycle.lateAfter,
+        holders: cycle.holders.map((holder) => ({
+          ...holder,
+          entitlementAmount: calculateEntitlement(potAmount, holder.halves),
+        })),
+      })),
+      dueAmounts: schedule.dueAmounts,
+    };
+  }
 
+  async create(tenantId: string, dto: CreateJameyaDto): Promise<JameyaDetail> {
+    const schedule = await this.planSchedule(tenantId, dto);
     const firstDueDate = new Date(dto.firstDueDate);
-    const schedule = buildJameyaSchedule({
-      shareAmount: dto.shareAmount,
-      recurrenceType: dto.recurrenceType,
-      firstDueDate,
-      graceDays: dto.graceDays,
-      turns: dto.customerIds.map((customerId) => [{ customerId, halves: HALVES_PER_SHARE }]),
-    });
 
     const jameyaId = await this.prisma.$transaction(async (tx) => {
       const jameya = await tx.jameya.create({
@@ -113,6 +131,22 @@ export class JameyasService {
     });
 
     return this.findOne(tenantId, jameyaId);
+  }
+
+  private async planSchedule(tenantId: string, dto: CreateJameyaDto): Promise<JameyaSchedule> {
+    const memberCount = await this.prisma.customer.count({
+      where: { id: { in: dto.customerIds }, tenantId, status: CustomerStatus.ACTIVE },
+    });
+    if (memberCount !== dto.customerIds.length) {
+      throw new NotFoundException('Customer not found.');
+    }
+    return buildJameyaSchedule({
+      shareAmount: dto.shareAmount,
+      recurrenceType: dto.recurrenceType,
+      firstDueDate: new Date(dto.firstDueDate),
+      graceDays: dto.graceDays,
+      turns: dto.customerIds.map((customerId) => [{ customerId, halves: HALVES_PER_SHARE }]),
+    });
   }
 
   async findAll(tenantId: string, query: JameyaQueryDto): Promise<PaginatedResult<JameyaListItem>> {

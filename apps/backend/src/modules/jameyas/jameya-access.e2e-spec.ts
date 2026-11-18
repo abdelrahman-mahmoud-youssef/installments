@@ -110,15 +110,19 @@ describe('Jameya routes access', () => {
     };
   }
 
-  async function createJameya(shop: ShopAccounts): Promise<{ id: string; cycleId: string }> {
-    const response = await request(shop.adminToken, 'POST', '/jameyas', {
+  function jameyaBody(shop: ShopAccounts) {
+    return {
       name: 'Circle',
       shareAmount: 100_000,
       recurrenceType: 'MONTHLY',
       firstDueDate: addUtcDays(today, -1).toISOString().slice(0, 10),
-      graceDays: 0,
+      graceDays: 2,
       customerIds: shop.customerIds,
-    });
+    };
+  }
+
+  async function createJameya(shop: ShopAccounts): Promise<{ id: string; cycleId: string }> {
+    const response = await request(shop.adminToken, 'POST', '/jameyas', jameyaBody(shop));
     expect(response.status).toBe(201);
     const jameya = (await response.json()) as { id: string; cycles: { id: string }[] };
     return { id: jameya.id, cycleId: jameya.cycles[0].id };
@@ -137,6 +141,29 @@ describe('Jameya routes access', () => {
       ],
     ] as const;
   }
+
+  it('previews the frozen schedule without writing anything', async () => {
+    const shop = await createShop(true);
+
+    const response = await request(shop.staffToken, 'POST', '/jameyas/preview', jameyaBody(shop));
+
+    expect(response.status).toBe(200);
+    const firstDueDate = addUtcDays(today, -1);
+    expect(await response.json()).toMatchObject({
+      potAmount: 200_000,
+      cycles: [
+        {
+          sequence: 1,
+          dueDate: firstDueDate.toISOString(),
+          lateAfter: addUtcDays(firstDueDate, 2).toISOString(),
+          holders: [{ customerId: shop.customerIds[0], halves: 2, entitlementAmount: 200_000 }],
+        },
+        { sequence: 2, holders: [{ customerId: shop.customerIds[1], halves: 2, entitlementAmount: 200_000 }] },
+      ],
+      dueAmounts: shop.customerIds.map((customerId) => ({ customerId, amount: 100_000 })),
+    });
+    expect(await prisma.jameya.count({ where: { tenantId: shop.tenantId } })).toBe(0);
+  });
 
   it('lets staff record payments but not pay out or edit', async () => {
     const shop = await createShop(true);
@@ -188,11 +215,12 @@ describe('Jameya routes access', () => {
     const responses = await Promise.all([
       request(shop.adminToken, 'GET', '/jameyas'),
       request(shop.adminToken, 'POST', '/jameyas', {}),
+      request(shop.adminToken, 'POST', '/jameyas/preview', jameyaBody(shop)),
       ...routesFor(jameya, enabledShop.customerIds[0]).map(([method, path, body]) =>
         request(shop.adminToken, method, path, body),
       ),
     ]);
-    expect(responses.map((response) => response.status)).toEqual([403, 403, 403, 403, 403, 403, 403]);
+    expect(responses.map((response) => response.status)).toEqual([403, 403, 403, 403, 403, 403, 403, 403]);
 
     const platformAdmin = await prisma.platformAdmin.create({
       data: { name: 'Owner', email: `platform-${randomUUID()}@example.com`, passwordHash: 'x' },

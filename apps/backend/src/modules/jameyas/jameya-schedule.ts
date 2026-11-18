@@ -29,8 +29,14 @@ export interface PlannedDue {
   amount: number;
 }
 
+export interface PlannedDueAmount {
+  customerId: string;
+  amount: number;
+}
+
 export interface JameyaSchedule {
   cycles: PlannedCycle[];
+  dueAmounts: PlannedDueAmount[];
   dues: PlannedDue[];
 }
 
@@ -77,5 +83,5 @@ export function buildJameyaSchedule(input: JameyaScheduleInput): JameyaSchedule 
   }));
   const dues = cycles.flatMap((cycle) => dueAmounts.map((due) => ({ sequence: cycle.sequence, ...due })));
 
-  return { cycles, dues };
+  return { cycles, dueAmounts, dues };
 }
