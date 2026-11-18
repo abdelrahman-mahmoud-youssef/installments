@@ -6,6 +6,7 @@ import { getUtcToday } from '../../common/date/utc-date';
 import { MAX_CONTRACT_IMAGE_UPLOAD_BYTES } from '../../common/constants';
 import { decodeImageUpload } from '../../common/decode-image-upload';
 import { overdueInstallmentWhere } from '../../common/installments/overdue-where';
+import { generateDueDates } from '../../common/installments/recurrence';
 import { buildPaginatedResult, PaginatedResult } from '../../common/pagination/paginated-result.interface';
 import { TenantLocation } from '../../common/tenant-branding';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -15,7 +16,6 @@ import { StorageService } from '../storage/storage.service';
 import { formatContractReminderMessage } from './contract-reminder-message';
 import { ContractQueryDto } from './dto/contract-query.dto';
 import { CreateContractDto } from './dto/create-contract.dto';
-import { generateDueDates } from './installments/recurrence';
 import { calculateInstallmentSchedule } from './installments/schedule';
 
 type ContractListItem = Prisma.ContractGetPayload<{

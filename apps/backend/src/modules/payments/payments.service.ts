@@ -1,9 +1,14 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { ContractStatus, InstallmentStatus, Prisma } from '@prisma/client';
+import {
+  allocateManually,
+  allocateOldestFirst,
+  AllocationResult,
+  assertFullyAllocated,
+} from '../../common/installments/allocation';
 import { buildPaginatedResult, PaginatedResult } from '../../common/pagination/paginated-result.interface';
 import { PrismaService } from '../../prisma/prisma.service';
 import { PaymentMethodLimitService } from '../settings/payment-method-limit.service';
-import { allocateManually, allocateOldestFirst, AllocationResult, assertFullyAllocated } from './allocation';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { PaymentQueryDto } from './dto/payment-query.dto';
 

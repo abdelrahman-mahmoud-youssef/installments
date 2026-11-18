@@ -12,7 +12,7 @@ import {
 import bcrypt from 'bcryptjs';
 import { slugify } from '../src/common/slugify';
 import { calculateTrialExpiry } from '../src/common/subscription/subscription';
-import { generateDueDates } from '../src/modules/contracts/installments/recurrence';
+import { generateDueDates } from '../src/common/installments/recurrence';
 import { calculateInstallmentSchedule } from '../src/modules/contracts/installments/schedule';
 
 const prisma = new PrismaClient();

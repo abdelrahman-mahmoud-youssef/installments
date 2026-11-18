@@ -1,5 +1,5 @@
 import { RecurrenceType } from '@prisma/client';
-import { addUtcDays, addUtcMonthsClamped, toUtcMidnight } from '../../../common/date/utc-date';
+import { addUtcDays, addUtcMonthsClamped, toUtcMidnight } from '../date/utc-date';
 
 export interface GenerateDueDatesInput {
   firstPaymentDate: Date;

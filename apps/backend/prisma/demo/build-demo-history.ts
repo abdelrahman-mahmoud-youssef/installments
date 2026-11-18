@@ -7,7 +7,7 @@ import {
   RecurrenceType,
 } from '@prisma/client';
 import { addUtcDays, addUtcMonthsClamped } from '../../src/common/date/utc-date';
-import { generateDueDates } from '../../src/modules/contracts/installments/recurrence';
+import { generateDueDates } from '../../src/common/installments/recurrence';
 import { calculateInstallmentSchedule } from '../../src/modules/contracts/installments/schedule';
 import { egp, roundToStep } from './demo-amounts';
 import { atTime, daysBefore } from './demo-dates';
