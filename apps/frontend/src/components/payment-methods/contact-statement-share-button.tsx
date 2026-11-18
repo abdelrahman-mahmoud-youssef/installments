@@ -11,23 +11,7 @@ import { useBranding } from '@/hooks/use-branding';
 import { Counterparty } from '@/lib/api/counterparties';
 import { resolveAssetUrl } from '@/lib/assets';
 import { formatDateTime } from '@/lib/format';
-
-function downloadBlob(blob: Blob, fileName: string) {
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = fileName;
-  link.click();
-  URL.revokeObjectURL(url);
-}
-
-const INVALID_FILENAME_CHARS_PATTERN = /[<>:"/\\|?*\x00-\x1f]/g;
-const WHITESPACE_PATTERN = /\s+/g;
-
-function sanitizeFileName(name: string): string {
-  const sanitized = name.replace(INVALID_FILENAME_CHARS_PATTERN, '').replace(WHITESPACE_PATTERN, ' ').trim();
-  return sanitized.length > 0 ? sanitized : 'statement';
-}
+import { isShareAbort, sanitizeFileName, shareOrDownloadPdf } from '@/lib/share-file';
 
 export function ContactStatementShareButton({ contact }: { contact: Counterparty }) {
   const t = useTranslations('contacts');
@@ -64,21 +48,16 @@ export function ContactStatementShareButton({ contact }: { contact: Counterparty
       />
     );
     const blob = await pdf(doc).toBlob();
-    return { blob, fileName: `${sanitizeFileName(branding.displayName)}.pdf` };
+    return { blob, fileName: `${sanitizeFileName(branding.displayName, 'statement')}.pdf` };
   }
 
   async function handleShare() {
     setIsGenerating(true);
     try {
       const { blob, fileName } = await generateStatement();
-      const file = new File([blob], fileName, { type: 'application/pdf' });
-      if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], title: t('detail.pdfTitle') });
-        return;
-      }
-      downloadBlob(blob, fileName);
+      await shareOrDownloadPdf(blob, fileName, t('detail.pdfTitle'));
     } catch (error) {
-      if (!(error instanceof DOMException && error.name === 'AbortError')) {
+      if (!isShareAbort(error)) {
         console.error(error);
         toast.error(t('detail.shareError'));
       }
