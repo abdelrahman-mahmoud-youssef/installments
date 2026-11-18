@@ -1,0 +1,233 @@
+import { JameyaDueStatus, Prisma } from '@prisma/client';
+import { calculateEntitlement, calculateExposure, calculatePot } from './jameya-amounts';
+import { isJameyaDueLate } from './jameya-due-where';
+
+export const JameyaCycleState = {
+  UPCOMING: 'UPCOMING',
+  DUE: 'DUE',
+  LATE: 'LATE',
+  PARTIALLY_PAID_OUT: 'PARTIALLY_PAID_OUT',
+  PAID_OUT: 'PAID_OUT',
+  SETTLED: 'SETTLED',
+} as const;
+
+export type JameyaCycleState = (typeof JameyaCycleState)[keyof typeof JameyaCycleState];
+
+export const JAMEYA_PAYOUT_SELECT = {
+  id: true,
+  cycleId: true,
+  customerId: true,
+  amount: true,
+  collectedAmount: true,
+  coveredAmount: true,
+  paidAt: true,
+  note: true,
+  createdAt: true,
+} satisfies Prisma.JameyaPayoutSelect;
+
+export const JAMEYA_DETAIL_INCLUDE = {
+  cycles: {
+    orderBy: { sequence: 'asc' },
+    select: {
+      id: true,
+      sequence: true,
+      dueDate: true,
+      lateAfter: true,
+      payouts: { orderBy: [{ paidAt: 'asc' }, { createdAt: 'asc' }], select: JAMEYA_PAYOUT_SELECT },
+    },
+  },
+  shares: {
+    orderBy: { cycle: { sequence: 'asc' } },
+    select: {
+      cycleId: true,
+      customerId: true,
+      halves: true,
+      cycle: { select: { sequence: true } },
+      customer: { select: { name: true, phone: true, photoUrl: true } },
+    },
+  },
+  dues: { select: { id: true, cycleId: true, customerId: true, amount: true, paidAmount: true, status: true } },
+} satisfies Prisma.JameyaInclude;
+
+type JameyaDetailRow = Prisma.JameyaGetPayload<{ include: typeof JAMEYA_DETAIL_INCLUDE }>;
+type JameyaDueRow = JameyaDetailRow['dues'][number];
+type JameyaShareRow = JameyaDetailRow['shares'][number];
+type JameyaCycleRow = JameyaDetailRow['cycles'][number];
+export type JameyaPayoutRecord = JameyaCycleRow['payouts'][number];
+
+export interface JameyaDueCell extends JameyaDueRow {
+  isLate: boolean;
+}
+
+export interface JameyaCycleHolder {
+  customerId: string;
+  halves: number;
+  entitlementAmount: number;
+  paidOutAmount: number;
+  remainingAmount: number;
+}
+
+export interface JameyaCycleSummary {
+  id: string;
+  sequence: number;
+  dueDate: Date;
+  lateAfter: Date;
+  state: JameyaCycleState;
+  potAmount: number;
+  collectedAmount: number;
+  paidOutAmount: number;
+  exposureAmount: number;
+  holders: JameyaCycleHolder[];
+  payouts: JameyaPayoutRecord[];
+}
+
+export interface JameyaMemberSummary {
+  customerId: string;
+  name: string;
+  phone: string;
+  photoUrl: string | null;
+  turnSequences: number[];
+  dueAmount: number;
+  paidAmount: number;
+  remainingAmount: number;
+  lateAmount: number;
+  lateDueCount: number;
+  receivedAmount: number;
+}
+
+export type JameyaDetail = Omit<JameyaDetailRow, 'cycles' | 'shares' | 'dues'> & {
+  potAmount: number;
+  collectedAmount: number;
+  paidOutAmount: number;
+  exposureAmount: number;
+  members: JameyaMemberSummary[];
+  cycles: JameyaCycleSummary[];
+  dues: JameyaDueCell[];
+};
+
+function sumBy<T>(items: T[], amountOf: (item: T) => number): number {
+  return items.reduce((total, item) => total + amountOf(item), 0);
+}
+
+interface CycleStateInput {
+  dueDate: Date;
+  holders: JameyaCycleHolder[];
+  dues: JameyaDueCell[];
+}
+
+export function deriveCycleState({ dueDate, holders, dues }: CycleStateInput, today: Date): JameyaCycleState {
+  const duesSettled = dues.every((due) => due.status === JameyaDueStatus.PAID);
+  if (holders.every((holder) => holder.remainingAmount === 0)) {
+    return duesSettled ? JameyaCycleState.SETTLED : JameyaCycleState.PAID_OUT;
+  }
+  if (holders.some((holder) => holder.paidOutAmount > 0)) {
+    return JameyaCycleState.PARTIALLY_PAID_OUT;
+  }
+  if (dueDate > today) {
+    return JameyaCycleState.UPCOMING;
+  }
+  return dues.some((due) => due.isLate) ? JameyaCycleState.LATE : JameyaCycleState.DUE;
+}
+
+function buildCycleSummary(
+  cycle: JameyaCycleRow,
+  shares: JameyaShareRow[],
+  dues: JameyaDueCell[],
+  potAmount: number,
+  today: Date,
+): JameyaCycleSummary {
+  const holders = shares.map((share) => {
+    const entitlementAmount = calculateEntitlement(potAmount, share.halves);
+    const paidOutAmount = sumBy(
+      cycle.payouts.filter((payout) => payout.customerId === share.customerId),
+      (payout) => payout.amount,
+    );
+    return {
+      customerId: share.customerId,
+      halves: share.halves,
+      entitlementAmount,
+      paidOutAmount,
+      remainingAmount: entitlementAmount - paidOutAmount,
+    };
+  });
+  const collectedAmount = sumBy(dues, (due) => due.paidAmount);
+  const paidOutAmount = sumBy(cycle.payouts, (payout) => payout.amount);
+
+  return {
+    id: cycle.id,
+    sequence: cycle.sequence,
+    dueDate: cycle.dueDate,
+    lateAfter: cycle.lateAfter,
+    state: deriveCycleState({ dueDate: cycle.dueDate, holders, dues }, today),
+    potAmount,
+    collectedAmount,
+    paidOutAmount,
+    exposureAmount: calculateExposure(paidOutAmount, collectedAmount),
+    holders,
+    payouts: cycle.payouts,
+  };
+}
+
+function buildMemberSummaries(
+  shares: JameyaShareRow[],
+  dues: JameyaDueCell[],
+  cycles: JameyaCycleSummary[],
+): JameyaMemberSummary[] {
+  const customerIds = [...new Set(shares.map((share) => share.customerId))];
+  return customerIds.map((customerId) => {
+    const customerShares = shares.filter((share) => share.customerId === customerId);
+    const memberDues = dues.filter((due) => due.customerId === customerId);
+    const lateDues = memberDues.filter((due) => due.isLate);
+    const dueAmount = sumBy(memberDues, (due) => due.amount);
+    const paidAmount = sumBy(memberDues, (due) => due.paidAmount);
+    return {
+      customerId,
+      name: customerShares[0].customer.name,
+      phone: customerShares[0].customer.phone,
+      photoUrl: customerShares[0].customer.photoUrl,
+      turnSequences: customerShares.map((share) => share.cycle.sequence),
+      dueAmount,
+      paidAmount,
+      remainingAmount: dueAmount - paidAmount,
+      lateAmount: sumBy(lateDues, (due) => due.amount - due.paidAmount),
+      lateDueCount: lateDues.length,
+      receivedAmount: sumBy(
+        cycles.flatMap((cycle) => cycle.holders).filter((holder) => holder.customerId === customerId),
+        (holder) => holder.paidOutAmount,
+      ),
+    };
+  });
+}
+
+export function buildJameyaDetail(row: JameyaDetailRow, today: Date): JameyaDetail {
+  const { cycles, shares, dues, ...jameya } = row;
+  const potAmount = calculatePot(jameya.shareAmount, jameya.shareCount);
+  const dueCellsByCycle = cycles.map((cycle) =>
+    dues
+      .filter((due) => due.cycleId === cycle.id)
+      .map((due) => ({ ...due, isLate: isJameyaDueLate(due.status, cycle.lateAfter, today) })),
+  );
+  const dueCells = dueCellsByCycle.flat();
+  const cycleSummaries = cycles.map((cycle, index) =>
+    buildCycleSummary(
+      cycle,
+      shares.filter((share) => share.cycleId === cycle.id),
+      dueCellsByCycle[index],
+      potAmount,
+      today,
+    ),
+  );
+  const collectedAmount = sumBy(cycleSummaries, (cycle) => cycle.collectedAmount);
+  const paidOutAmount = sumBy(cycleSummaries, (cycle) => cycle.paidOutAmount);
+
+  return {
+    ...jameya,
+    potAmount,
+    collectedAmount,
+    paidOutAmount,
+    exposureAmount: sumBy(cycleSummaries, (cycle) => cycle.exposureAmount),
+    members: buildMemberSummaries(shares, dueCells, cycleSummaries),
+    cycles: cycleSummaries,
+    dues: dueCells,
+  };
+}

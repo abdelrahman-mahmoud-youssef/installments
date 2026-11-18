@@ -98,3 +98,15 @@ export const SUBSCRIPTION_PAYMENT_PHONE = '01122662426';
 export const SUBSCRIPTION_INACTIVE_ERROR_CODE = 'SUBSCRIPTION_INACTIVE';
 
 export const DEACTIVATED_ACCOUNT_MESSAGE = 'This account has been deactivated. You can contact support.';
+
+export const JAMEYA_MIN_TURNS = 2;
+
+export const JAMEYA_MAX_TURNS = 60;
+
+export const JAMEYA_MAX_SHARE_AMOUNT = 10_000_000;
+
+export const JAMEYA_MAX_GRACE_DAYS = 60;
+
+export const JAMEYA_NAME_MAX_LENGTH = 60;
+
+export const JAMEYA_NOTE_MAX_LENGTH = 500;

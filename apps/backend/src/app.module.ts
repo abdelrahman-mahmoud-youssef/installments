@@ -18,6 +18,7 @@ import { ContractsModule } from './modules/contracts/contracts.module';
 import { CustomersModule } from './modules/customers/customers.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { HealthModule } from './modules/health/health.module';
+import { JameyasModule } from './modules/jameyas/jameyas.module';
 import { OffersModule } from './modules/offers/offers.module';
 import { PaymentClaimsModule } from './modules/payment-claims/payment-claims.module';
 import { PaymentsModule } from './modules/payments/payments.module';
@@ -57,6 +58,7 @@ import { PrismaModule } from './prisma/prisma.module';
     ContractsModule,
     PaymentsModule,
     PaymentClaimsModule,
+    JameyasModule,
     DashboardModule,
     ReportsModule,
     PublicModule,
