@@ -13,3 +13,4 @@ async function proxyPlatformRequest(request: NextRequest, context: RouteContext)
 
 export const GET = proxyPlatformRequest;
 export const POST = proxyPlatformRequest;
+export const PATCH = proxyPlatformRequest;
