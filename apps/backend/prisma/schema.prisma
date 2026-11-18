@@ -114,6 +114,18 @@ enum PaymentDirection {
   OUT
 }
 
+enum JameyaStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum JameyaDueStatus {
+  PENDING
+  PARTIALLY_PAID
+  PAID
+}
+
 enum BrandColor {
   emerald
   teal
@@ -147,6 +159,7 @@ model Tenant {
   telegramChatId            String?
   showTelegramOnPublicPage  Boolean                    @default(true)
   showOffersOnPublicPage    Boolean                    @default(true)
+  jameyaEnabled             Boolean                    @default(false)
   notificationLanguage      NotificationLanguage       @default(AR)
   isDemo                    Boolean                    @default(false)
   subscriptionExpiresOn     DateTime                   @db.Date
@@ -174,6 +187,12 @@ model Tenant {
   staffWalletGrants         StaffWalletGrant[]
   reminderMessageSettings   ReminderMessageSettings?
   subscriptions             TenantSubscription[]
+  jameyas                   Jameya[]
+  jameyaCycles              JameyaCycle[]
+  jameyaShares              JameyaShare[]
+  jameyaDues                JameyaDue[]
+  jameyaPayments            JameyaPayment[]
+  jameyaPayouts             JameyaPayout[]
   referredByTenantId        String?
   referredBy                Tenant?                    @relation("TenantReferrals", fields: [referredByTenantId], references: [id], onDelete: SetNull)
   referrals                 Tenant[]                   @relation("TenantReferrals")
@@ -374,6 +393,10 @@ model Customer {
   updatedAt                    DateTime                  @updatedAt
   tenant                       Tenant                    @relation(fields: [tenantId], references: [id])
   contracts                    Contract[]
+  jameyaShares                 JameyaShare[]
+  jameyaDues                   JameyaDue[]
+  jameyaPayments               JameyaPayment[]
+  jameyaPayouts                JameyaPayout[]
 
   @@index([tenantId, name])
   @@index([tenantId, phone])
@@ -699,4 +722,139 @@ model PushNotificationLog {
 
   @@index([kind, createdAt])
   @@index([tenantId])
+}
+
+model Jameya {
+  id             String          @id @default(cuid())
+  tenantId       String
+  name           String
+  shareAmount    Int
+  shareCount     Int
+  recurrenceType RecurrenceType
+  firstDueDate   DateTime        @db.Date
+  graceDays      Int             @default(0)
+  status         JameyaStatus    @default(ACTIVE)
+  notes          String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  tenant         Tenant          @relation(fields: [tenantId], references: [id])
+  cycles         JameyaCycle[]
+  shares         JameyaShare[]
+  dues           JameyaDue[]
+  payments       JameyaPayment[]
+  payouts        JameyaPayout[]
+
+  @@index([tenantId, status])
+}
+
+model JameyaCycle {
+  id        String         @id @default(cuid())
+  tenantId  String
+  jameyaId  String
+  sequence  Int
+  dueDate   DateTime       @db.Date
+  lateAfter DateTime       @db.Date
+  tenant    Tenant         @relation(fields: [tenantId], references: [id])
+  jameya    Jameya         @relation(fields: [jameyaId], references: [id])
+  shares    JameyaShare[]
+  dues      JameyaDue[]
+  payouts   JameyaPayout[]
+
+  @@unique([jameyaId, sequence])
+  @@index([tenantId, dueDate])
+  @@index([tenantId, lateAfter])
+}
+
+model JameyaShare {
+  id         String      @id @default(cuid())
+  tenantId   String
+  jameyaId   String
+  cycleId    String
+  customerId String
+  halves     Int
+  tenant     Tenant      @relation(fields: [tenantId], references: [id])
+  jameya     Jameya      @relation(fields: [jameyaId], references: [id])
+  cycle      JameyaCycle @relation(fields: [cycleId], references: [id])
+  customer   Customer    @relation(fields: [customerId], references: [id])
+
+  @@unique([cycleId, customerId])
+  @@index([jameyaId, customerId])
+  @@index([tenantId, customerId])
+}
+
+model JameyaDue {
+  id          String                    @id @default(cuid())
+  tenantId    String
+  jameyaId    String
+  cycleId     String
+  customerId  String
+  amount      Int
+  paidAmount  Int                       @default(0)
+  status      JameyaDueStatus           @default(PENDING)
+  tenant      Tenant                    @relation(fields: [tenantId], references: [id])
+  jameya      Jameya                    @relation(fields: [jameyaId], references: [id])
+  cycle       JameyaCycle               @relation(fields: [cycleId], references: [id])
+  customer    Customer                  @relation(fields: [customerId], references: [id])
+  allocations JameyaPaymentAllocation[]
+
+  @@unique([cycleId, customerId])
+  @@index([jameyaId, customerId, status])
+  @@index([tenantId, status])
+}
+
+model JameyaPayment {
+  id              String                    @id @default(cuid())
+  tenantId        String
+  jameyaId        String
+  customerId      String
+  amount          Int
+  paidAt          DateTime                  @default(now())
+  note            String?
+  clientRequestId String
+  createdAt       DateTime                  @default(now())
+  tenant          Tenant                    @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  jameya          Jameya                    @relation(fields: [jameyaId], references: [id], onDelete: Restrict)
+  customer        Customer                  @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  allocations     JameyaPaymentAllocation[]
+
+  @@unique([tenantId, clientRequestId])
+  @@index([tenantId, paidAt])
+  @@index([jameyaId, customerId])
+}
+
+model JameyaPaymentAllocation {
+  id        String        @id @default(cuid())
+  tenantId  String
+  paymentId String
+  dueId     String
+  amount    Int
+  payment   JameyaPayment @relation(fields: [paymentId], references: [id], onDelete: Restrict)
+  due       JameyaDue     @relation(fields: [dueId], references: [id], onDelete: Restrict)
+
+  @@index([paymentId])
+  @@index([dueId])
+  @@index([tenantId])
+}
+
+model JameyaPayout {
+  id              String      @id @default(cuid())
+  tenantId        String
+  jameyaId        String
+  cycleId         String
+  customerId      String
+  amount          Int
+  collectedAmount Int
+  coveredAmount   Int
+  paidAt          DateTime    @default(now())
+  note            String?
+  clientRequestId String
+  createdAt       DateTime    @default(now())
+  tenant          Tenant      @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  jameya          Jameya      @relation(fields: [jameyaId], references: [id], onDelete: Restrict)
+  cycle           JameyaCycle @relation(fields: [cycleId], references: [id], onDelete: Restrict)
+  customer        Customer    @relation(fields: [customerId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, clientRequestId])
+  @@index([cycleId, customerId])
+  @@index([tenantId, paidAt])
 }
