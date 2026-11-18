@@ -7,6 +7,16 @@ export type RecurrenceType = (typeof RECURRENCE_TYPES)[number];
 export const CONTRACT_STATUSES = ['ACTIVE', 'COMPLETED', 'CANCELLED'] as const;
 export type ContractStatus = (typeof CONTRACT_STATUSES)[number];
 
+export const JAMEYA_STATUSES = ['ACTIVE', 'COMPLETED', 'CANCELLED'] as const;
+export type JameyaStatus = (typeof JAMEYA_STATUSES)[number];
+
+export const JAMEYA_RECURRENCE_TYPES = ['MONTHLY', 'WEEKLY'] as const;
+export type JameyaRecurrenceType = (typeof JAMEYA_RECURRENCE_TYPES)[number];
+
+export type JameyaDueStatus = 'PENDING' | 'PARTIALLY_PAID' | 'PAID';
+
+export type JameyaCycleState = 'UPCOMING' | 'DUE' | 'LATE' | 'PARTIALLY_PAID_OUT' | 'PAID_OUT' | 'SETTLED';
+
 export const CUSTOMER_STATUSES = ['ACTIVE', 'DELETED'] as const;
 export type CustomerStatus = (typeof CUSTOMER_STATUSES)[number];
 

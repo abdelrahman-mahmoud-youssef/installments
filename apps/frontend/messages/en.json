@@ -216,7 +216,8 @@
     "settings": "Settings",
     "support": "Support",
     "logout": "Log out",
-    "account": "Account"
+    "account": "Account",
+    "jameyas": "Jameyas"
   },
   "status": {
     "PENDING": "Pending",
@@ -228,7 +229,13 @@
     "COMPLETED": "Completed",
     "DELETED": "Deleted",
     "TRIAL": "Trial",
-    "EXPIRED": "Expired"
+    "EXPIRED": "Expired",
+    "UPCOMING": "Upcoming",
+    "DUE": "Due",
+    "LATE": "Late",
+    "PARTIALLY_PAID_OUT": "Partly handed over",
+    "PAID_OUT": "Handed over",
+    "SETTLED": "Settled"
   },
   "calculationMethod": {
     "FIXED_COUNT": "Number of installments",
@@ -1102,7 +1109,11 @@
     "action_paymentMethod_update": "Updated payment method",
     "action_paymentMethod_delete": "Deleted payment method",
     "action_auth_2fa_enable": "Enabled two-factor authentication",
-    "action_auth_2fa_disable": "Disabled two-factor authentication"
+    "action_auth_2fa_disable": "Disabled two-factor authentication",
+    "action_jameya_create": "Created jameya",
+    "action_jameya_update": "Updated jameya",
+    "action_jameyaPayment_create": "Recorded jameya payment",
+    "action_jameyaPayout_create": "Handed over jameya payout"
   },
   "paymentClaims": {
     "title": "Payment claims",
@@ -1203,7 +1214,11 @@
       "invitedBy": "Invited by {name}",
       "activateReferral": "Add 1 month at the referral price",
       "activateReferralTitle": "Add one referral-price month for {name}?",
-      "activateReferralDescription": "This shop invited {count, plural, one {# shop} other {# shops}}. Only confirm after the InstaPay payment has arrived."
+      "activateReferralDescription": "This shop invited {count, plural, one {# shop} other {# shops}}. Only confirm after the InstaPay payment has arrived.",
+      "jameya": "Jameya",
+      "jameyaToggle": "Jameya for {name}",
+      "jameyaTurnedOn": "Jameya is now on for {name}.",
+      "jameyaTurnedOff": "Jameya is now off for {name}."
     },
     "nav": {
       "shops": "Shops",
@@ -1261,5 +1276,190 @@
     "inviteLink": "Your invite link",
     "copyInviteLink": "Copy invite link",
     "inviteLinkCopied": "Invite link copied."
+  },
+  "jameyas": {
+    "title": "Jameyas",
+    "subtitle": "Track who paid, who is late, and whose turn it is to receive.",
+    "newJameya": "New jameya",
+    "list": {
+      "name": "Jameya",
+      "pot": "Pot per turn",
+      "members": "Members",
+      "nextCycle": "Next turn",
+      "nextCycleValue": "Turn {sequence}",
+      "status": "Status",
+      "lateCount": "{count, plural, one {# late payment} other {# late payments}}",
+      "searchPlaceholder": "Search by name",
+      "loadError": "Couldn't load jameyas.",
+      "empty": "No jameyas here yet",
+      "createPrompt": "Start a jameya with your customers and track every turn."
+    },
+    "customerSection": {
+      "title": "Jameyas",
+      "empty": "This customer is not in any jameya."
+    },
+    "new": {
+      "title": "New jameya",
+      "description": "Set the share, add the members, then choose who receives each turn.",
+      "steps": {
+        "details": "Details",
+        "members": "Members",
+        "order": "Turn order",
+        "review": "Review"
+      },
+      "name": "Name",
+      "namePlaceholder": "For example: Family jameya",
+      "shareAmount": "Share per turn (EGP)",
+      "recurrence": "Every",
+      "firstDueDate": "First payment date",
+      "graceDays": "Grace days",
+      "graceDaysHint": "A payment counts as late only after this many days.",
+      "notes": "Notes",
+      "membersHint": "Add between {min} and {max} members. Each member holds one turn.",
+      "loadingCustomers": "Loading customers…",
+      "addMember": "Add a customer",
+      "noMembers": "No members added yet.",
+      "removeMember": "Remove {name}",
+      "memberCount": "{count, plural, one {# member} other {# members}}",
+      "orderHint": "The first member receives the first turn. Move members or shuffle them.",
+      "randomOrder": "Random order",
+      "turnNumber": "Turn {sequence}",
+      "moveUp": "Move {name} up",
+      "moveDown": "Move {name} down",
+      "review": {
+        "turn": "Turn",
+        "holder": "Receives",
+        "dueDate": "Due date",
+        "lateAfter": "Late after",
+        "receives": "Amount",
+        "pot": "Pot per turn",
+        "perMember": "Each member pays per turn",
+        "cycles": "Turns"
+      },
+      "back": "Back",
+      "next": "Next",
+      "toReview": "Review",
+      "create": "Create jameya",
+      "created": "Jameya created.",
+      "createError": "Couldn't create the jameya.",
+      "previewError": "Couldn't prepare the schedule."
+    },
+    "detail": {
+      "notFound": "Jameya not found",
+      "summaryLine": "{members} members · {recurrence}",
+      "perShare": "per share",
+      "pot": "Pot per turn",
+      "collected": "Collected",
+      "paidOut": "Handed over",
+      "shopCovered": "Covered by the shop",
+      "shopCoveredHint": "Still not collected",
+      "grid": "Who paid",
+      "cycles": "Turns",
+      "turnLabel": "Turn {sequence}",
+      "lateAfter": "late after",
+      "holder": "Receives",
+      "entitlement": "Entitled to",
+      "remainingForTurn": "Still owed",
+      "payoutCovered": "Shop covered",
+      "handOverPayout": "Hand over payout",
+      "currentCycle": "Current turn",
+      "currentCycleTitle": "Current turn: {sequence}",
+      "allSettled": "Every turn is settled.",
+      "dueOn": "Due",
+      "holderIs": "Receives: {name}",
+      "recordPayment": "Record payment",
+      "paymentHistory": "Payments",
+      "paymentsLoadError": "Couldn't load payments.",
+      "noPayments": "No payments yet"
+    },
+    "grid": {
+      "member": "Member",
+      "turn": "Turn {sequence}",
+      "receivedAndLate": "Received and late",
+      "cellTitle": "Paid {paid} of {amount}",
+      "ownTurn": "Their turn",
+      "cell": {
+        "paid": "Paid",
+        "partial": "Partial",
+        "late": "Late",
+        "due": "Due",
+        "upcoming": "Upcoming"
+      }
+    },
+    "paymentDialog": {
+      "title": "Record payment",
+      "description": "Cash received for {name}. It goes to the oldest unpaid turns first.",
+      "member": "Member",
+      "selectMember": "Select a member",
+      "stillOwes": "Still owes",
+      "amount": "Amount (EGP)",
+      "paidAt": "Paid on",
+      "owesAfterPayment": "Will still owe",
+      "note": "Note",
+      "submit": "Record payment",
+      "submitting": "Recording…",
+      "recorded": "Payment recorded.",
+      "recordError": "Couldn't record the payment."
+    },
+    "payoutDialog": {
+      "title": "Hand over turn {sequence}",
+      "description": "You can hand it over in parts. Add a note each time.",
+      "holder": "Receives",
+      "stillOwedForTurn": "Still owed for this turn",
+      "availableCash": "Collected and not handed over yet",
+      "amount": "Amount (EGP)",
+      "fromShopMoneyPrefix": "Of this amount,",
+      "fromShopMoneySuffix": "comes from the shop's own money because it hasn't been collected yet.",
+      "paidAt": "Handed over on",
+      "note": "Note",
+      "notePlaceholder": "For example: the rest next week",
+      "submit": "Hand over",
+      "submitting": "Saving…",
+      "payoutError": "Couldn't save the payout.",
+      "handedOver": "Handed over to {name}.",
+      "shopCovered": "Covered by the shop",
+      "done": "Done"
+    },
+    "editDialog": {
+      "trigger": "Edit",
+      "title": "Edit jameya",
+      "name": "Name",
+      "notes": "Notes",
+      "save": "Save",
+      "saved": "Jameya updated.",
+      "saveError": "Couldn't save the changes."
+    },
+    "receipt": {
+      "documentLabel": "RECEIPT",
+      "paymentTitle": "Jameya payment receipt",
+      "payoutTitle": "Jameya payout receipt",
+      "issuedOn": "Issued on {date}",
+      "amountPaid": "Amount paid",
+      "amountReceived": "Amount received",
+      "member": "Member",
+      "holder": "Received by",
+      "jameya": "Jameya",
+      "turn": "Turn",
+      "turnValue": "Turn {sequence} · {date}",
+      "paidOn": "Date",
+      "note": "Note",
+      "stillOwed": "Still owed as of {date}",
+      "stillOwedForTurn": "Still owed for this turn",
+      "footerPrefix": "Issued by",
+      "download": "Receipt",
+      "shareError": "Couldn't create the receipt."
+    },
+    "validation": {
+      "nameRequired": "Enter a name.",
+      "nameTooLong": "Keep the name under 60 characters.",
+      "shareAmountPositive": "Enter a share amount greater than zero.",
+      "firstDueDateRequired": "Pick the first payment date.",
+      "graceDaysRange": "Grace days must be a whole number from 0 to 60.",
+      "noteTooLong": "Keep the note under 500 characters.",
+      "memberRequired": "Select a member.",
+      "amountPositive": "Enter an amount greater than zero.",
+      "amountAboveLimit": "This is more than what is still owed.",
+      "dateRequired": "Pick a date."
+    }
   }
 }

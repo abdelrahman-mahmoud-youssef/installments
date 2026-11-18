@@ -216,7 +216,8 @@
     "settings": "الإعدادات",
     "support": "الدعم",
     "logout": "تسجيل الخروج",
-    "account": "الحساب"
+    "account": "الحساب",
+    "jameyas": "الجمعيات"
   },
   "status": {
     "PENDING": "معلّق",
@@ -228,7 +229,13 @@
     "COMPLETED": "مكتمل",
     "DELETED": "محذوف",
     "TRIAL": "تجريبي",
-    "EXPIRED": "منتهي"
+    "EXPIRED": "منتهي",
+    "UPCOMING": "لسه",
+    "DUE": "مستحق",
+    "LATE": "متأخر",
+    "PARTIALLY_PAID_OUT": "اتقبض جزء",
+    "PAID_OUT": "اتقبض",
+    "SETTLED": "خالص"
   },
   "calculationMethod": {
     "FIXED_COUNT": "عدد الأقساط",
@@ -1102,7 +1109,11 @@
     "action_paymentMethod_update": "عدّل وسيلة دفع",
     "action_paymentMethod_delete": "حذف وسيلة دفع",
     "action_auth_2fa_enable": "فعّل التحقق بخطوتين",
-    "action_auth_2fa_disable": "أوقف التحقق بخطوتين"
+    "action_auth_2fa_disable": "أوقف التحقق بخطوتين",
+    "action_jameya_create": "أنشأ جمعية",
+    "action_jameya_update": "عدّل جمعية",
+    "action_jameyaPayment_create": "سجّل دفعة جمعية",
+    "action_jameyaPayout_create": "سلّم قبض جمعية"
   },
   "paymentClaims": {
     "title": "مطالبات الدفع",
@@ -1203,7 +1214,11 @@
       "invitedBy": "بدعوة من {name}",
       "activateReferral": "إضافة شهر بسعر الدعوة",
       "activateReferralTitle": "إضافة شهر بسعر الدعوة لـ {name}؟",
-      "activateReferralDescription": "دعا هذا المتجر {count, plural, one {متجرًا واحدًا} two {متجرين} few {# متاجر} many {# متجرًا} other {# متجر}}. أكّد فقط بعد وصول التحويل عبر إنستاباي."
+      "activateReferralDescription": "دعا هذا المتجر {count, plural, one {متجرًا واحدًا} two {متجرين} few {# متاجر} many {# متجرًا} other {# متجر}}. أكّد فقط بعد وصول التحويل عبر إنستاباي.",
+      "jameya": "الجمعيات",
+      "jameyaToggle": "الجمعيات لـ {name}",
+      "jameyaTurnedOn": "الجمعيات اشتغلت لـ {name}.",
+      "jameyaTurnedOff": "الجمعيات اتقفلت لـ {name}."
     },
     "nav": {
       "shops": "المتاجر",
@@ -1261,5 +1276,190 @@
     "inviteLink": "رابط الدعوة الخاص بك",
     "copyInviteLink": "نسخ رابط الدعوة",
     "inviteLinkCopied": "تم نسخ رابط الدعوة."
+  },
+  "jameyas": {
+    "title": "الجمعيات",
+    "subtitle": "تابع مين دفع، ومين متأخر، والدور على مين يقبض.",
+    "newJameya": "جمعية جديدة",
+    "list": {
+      "name": "الجمعية",
+      "pot": "القبض في كل دور",
+      "members": "الأعضاء",
+      "nextCycle": "الدور الجاي",
+      "nextCycleValue": "الدور {sequence}",
+      "status": "الحالة",
+      "lateCount": "{count, plural, one {دفعة متأخرة} two {دفعتين متأخرين} few {# دفعات متأخرة} many {# دفعة متأخرة} other {# دفعة متأخرة}}",
+      "searchPlaceholder": "دوّر بالاسم",
+      "loadError": "معرفناش نحمّل الجمعيات.",
+      "empty": "مفيش جمعيات هنا لسه",
+      "createPrompt": "ابدأ جمعية مع عملائك وتابع كل دور."
+    },
+    "customerSection": {
+      "title": "الجمعيات",
+      "empty": "العميل ده مش في أي جمعية."
+    },
+    "new": {
+      "title": "جمعية جديدة",
+      "description": "حدد قيمة السهم، وضيف الأعضاء، وبعدين اختار مين يقبض في كل دور.",
+      "steps": {
+        "details": "البيانات",
+        "members": "الأعضاء",
+        "order": "ترتيب الأدوار",
+        "review": "المراجعة"
+      },
+      "name": "الاسم",
+      "namePlaceholder": "مثلًا: جمعية العيلة",
+      "shareAmount": "قيمة السهم في كل دور (ج.م)",
+      "recurrence": "كل",
+      "firstDueDate": "تاريخ أول دفعة",
+      "graceDays": "أيام السماح",
+      "graceDaysHint": "الدفعة تبقى متأخرة بعد عدد الأيام ده بس.",
+      "notes": "ملاحظات",
+      "membersHint": "ضيف من {min} لـ {max} عضو. كل عضو له دور واحد.",
+      "loadingCustomers": "بنحمّل العملاء…",
+      "addMember": "ضيف عميل",
+      "noMembers": "لسه مضفتش أعضاء.",
+      "removeMember": "شيل {name}",
+      "memberCount": "{count, plural, one {عضو واحد} two {عضوين} few {# أعضاء} many {# عضو} other {# عضو}}",
+      "orderHint": "أول عضو يقبض أول دور. حرّك الأعضاء أو رتّبهم عشوائي.",
+      "randomOrder": "ترتيب عشوائي",
+      "turnNumber": "الدور {sequence}",
+      "moveUp": "طلّع {name} لفوق",
+      "moveDown": "نزّل {name} لتحت",
+      "review": {
+        "turn": "الدور",
+        "holder": "اللي يقبض",
+        "dueDate": "ميعاد الدفع",
+        "lateAfter": "يتأخر بعد",
+        "receives": "المبلغ",
+        "pot": "القبض في كل دور",
+        "perMember": "كل عضو يدفع في الدور",
+        "cycles": "الأدوار"
+      },
+      "back": "رجوع",
+      "next": "التالي",
+      "toReview": "مراجعة",
+      "create": "أنشئ الجمعية",
+      "created": "الجمعية اتعملت.",
+      "createError": "معرفناش نعمل الجمعية.",
+      "previewError": "معرفناش نجهّز الجدول."
+    },
+    "detail": {
+      "notFound": "الجمعية مش موجودة",
+      "summaryLine": "{members} عضو · {recurrence}",
+      "perShare": "للسهم",
+      "pot": "القبض في كل دور",
+      "collected": "اتجمع",
+      "paidOut": "اتسلّم",
+      "shopCovered": "المحل غطّاه",
+      "shopCoveredHint": "لسه متجمعش",
+      "grid": "مين دفع",
+      "cycles": "الأدوار",
+      "turnLabel": "الدور {sequence}",
+      "lateAfter": "يتأخر بعد",
+      "holder": "اللي يقبض",
+      "entitlement": "من حقه",
+      "remainingForTurn": "لسه ليه",
+      "payoutCovered": "المحل غطّى",
+      "handOverPayout": "سلّم القبض",
+      "currentCycle": "الدور الحالي",
+      "currentCycleTitle": "الدور الحالي: {sequence}",
+      "allSettled": "كل الأدوار خلصت.",
+      "dueOn": "ميعاده",
+      "holderIs": "اللي يقبض: {name}",
+      "recordPayment": "سجّل دفعة",
+      "paymentHistory": "المدفوعات",
+      "paymentsLoadError": "معرفناش نحمّل المدفوعات.",
+      "noPayments": "مفيش مدفوعات لسه"
+    },
+    "grid": {
+      "member": "العضو",
+      "turn": "الدور {sequence}",
+      "receivedAndLate": "قبض ومتأخر",
+      "cellTitle": "دفع {paid} من {amount}",
+      "ownTurn": "دوره",
+      "cell": {
+        "paid": "دفع",
+        "partial": "جزء",
+        "late": "متأخر",
+        "due": "مستحق",
+        "upcoming": "لسه"
+      }
+    },
+    "paymentDialog": {
+      "title": "سجّل دفعة",
+      "description": "فلوس كاش اتاستلمت لـ {name}. بتتحسب على أقدم أدوار مش مدفوعة الأول.",
+      "member": "العضو",
+      "selectMember": "اختار عضو",
+      "stillOwes": "لسه عليه",
+      "amount": "المبلغ (ج.م)",
+      "paidAt": "اتدفع يوم",
+      "owesAfterPayment": "هيفضل عليه",
+      "note": "ملاحظة",
+      "submit": "سجّل الدفعة",
+      "submitting": "بنسجّل…",
+      "recorded": "الدفعة اتسجلت.",
+      "recordError": "معرفناش نسجّل الدفعة."
+    },
+    "payoutDialog": {
+      "title": "سلّم قبض الدور {sequence}",
+      "description": "ممكن تسلّمه على أجزاء. اكتب ملاحظة كل مرة.",
+      "holder": "اللي يقبض",
+      "stillOwedForTurn": "لسه ليه في الدور ده",
+      "availableCash": "اتجمع ولسه متسلّمش",
+      "amount": "المبلغ (ج.م)",
+      "fromShopMoneyPrefix": "من المبلغ ده،",
+      "fromShopMoneySuffix": "هيطلع من فلوس المحل لأنه لسه متجمعش.",
+      "paidAt": "اتسلّم يوم",
+      "note": "ملاحظة",
+      "notePlaceholder": "مثلًا: الباقي الأسبوع الجاي",
+      "submit": "سلّم",
+      "submitting": "بنحفظ…",
+      "payoutError": "معرفناش نحفظ القبض.",
+      "handedOver": "اتسلّم لـ {name}.",
+      "shopCovered": "المحل غطّى",
+      "done": "تمام"
+    },
+    "editDialog": {
+      "trigger": "تعديل",
+      "title": "تعديل الجمعية",
+      "name": "الاسم",
+      "notes": "ملاحظات",
+      "save": "احفظ",
+      "saved": "الجمعية اتعدّلت.",
+      "saveError": "معرفناش نحفظ التعديلات."
+    },
+    "receipt": {
+      "documentLabel": "إيصال",
+      "paymentTitle": "إيصال دفعة جمعية",
+      "payoutTitle": "إيصال قبض جمعية",
+      "issuedOn": "اتعمل يوم {date}",
+      "amountPaid": "المبلغ المدفوع",
+      "amountReceived": "المبلغ المستلم",
+      "member": "العضو",
+      "holder": "استلمه",
+      "jameya": "الجمعية",
+      "turn": "الدور",
+      "turnValue": "الدور {sequence} · {date}",
+      "paidOn": "التاريخ",
+      "note": "ملاحظة",
+      "stillOwed": "لسه عليه لحد {date}",
+      "stillOwedForTurn": "لسه ليه في الدور ده",
+      "footerPrefix": "صادر من",
+      "download": "إيصال",
+      "shareError": "معرفناش نعمل الإيصال."
+    },
+    "validation": {
+      "nameRequired": "اكتب اسم.",
+      "nameTooLong": "الاسم لازم يكون أقل من 60 حرف.",
+      "shareAmountPositive": "اكتب قيمة سهم أكبر من صفر.",
+      "firstDueDateRequired": "اختار تاريخ أول دفعة.",
+      "graceDaysRange": "أيام السماح لازم تكون رقم صحيح من 0 لـ 60.",
+      "noteTooLong": "الملاحظة لازم تكون أقل من 500 حرف.",
+      "memberRequired": "اختار عضو.",
+      "amountPositive": "اكتب مبلغ أكبر من صفر.",
+      "amountAboveLimit": "المبلغ ده أكبر من اللي لسه عليه.",
+      "dateRequired": "اختار تاريخ."
+    }
   }
 }

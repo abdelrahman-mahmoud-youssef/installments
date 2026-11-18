@@ -9,6 +9,7 @@ import {
   PlatformTenantSubscription,
   PlatformTenantSubscriptionQuery,
   SubscriptionPricing,
+  updatePlatformTenantFeatures,
 } from '@/lib/api/platform';
 
 export const platformTenantKeys = {
@@ -46,6 +47,15 @@ export function useDeactivatePlatformTenant() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (tenantId: string) => deactivatePlatformTenant(tenantId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: platformTenantKeys.all }),
+  });
+}
+
+export function useUpdatePlatformTenantFeatures() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ tenantId, jameyaEnabled }: { tenantId: string; jameyaEnabled: boolean }) =>
+      updatePlatformTenantFeatures(tenantId, jameyaEnabled),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: platformTenantKeys.all }),
   });
 }

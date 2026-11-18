@@ -6,6 +6,7 @@ import { DateText } from '@/components/shared/date-text';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { PlatformTenant } from '@/hooks/use-platform-tenants';
 import { TenantActions } from './tenant-actions';
+import { TenantJameyaSwitch } from './tenant-jameya-switch';
 
 export function PlatformTenantsTable({ tenants }: { tenants: PlatformTenant[] }) {
   const t = useTranslations('platform.tenants');
@@ -62,6 +63,11 @@ export function PlatformTenantsTable({ tenants }: { tenants: PlatformTenant[] })
       id: 'expiresOn',
       header: t('expiresOn'),
       cell: (tenant) => <DateText value={tenant.subscriptionExpiresOn} className="tabular-nums" />,
+    },
+    {
+      id: 'jameya',
+      header: t('jameya'),
+      cell: (tenant) => <TenantJameyaSwitch tenant={tenant} />,
     },
     {
       id: 'actions',

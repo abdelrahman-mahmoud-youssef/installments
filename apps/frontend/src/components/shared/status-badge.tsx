@@ -14,6 +14,12 @@ const STATUS_TONE: Record<string, string> = {
   DELETED: 'bg-muted text-muted-foreground',
   TRIAL: 'bg-warning-soft text-warning',
   EXPIRED: 'bg-danger-soft text-danger',
+  UPCOMING: 'bg-muted text-muted-foreground',
+  DUE: 'bg-info-soft text-info',
+  LATE: 'bg-danger-soft text-danger',
+  PARTIALLY_PAID_OUT: 'bg-warning-soft text-warning',
+  PAID_OUT: 'bg-info-soft text-info',
+  SETTLED: 'bg-success-soft text-success',
 };
 
 export function StatusBadge({

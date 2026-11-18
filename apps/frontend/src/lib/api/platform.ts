@@ -17,6 +17,7 @@ export interface PlatformTenant {
   owner: { name: string; email: string } | null;
   referredBy: { name: string; slug: string } | null;
   invitedShopsCount: number;
+  jameyaEnabled: boolean;
 }
 
 export type SubscriptionPricing = 'STANDARD' | 'REFERRAL';
@@ -82,6 +83,10 @@ export function activatePlatformTenant(tenantId: string, pricing: SubscriptionPr
 
 export function deactivatePlatformTenant(tenantId: string): Promise<PlatformTenant> {
   return platformApiClient.post(`tenants/${tenantId}/deactivate`);
+}
+
+export function updatePlatformTenantFeatures(tenantId: string, jameyaEnabled: boolean): Promise<PlatformTenant> {
+  return platformApiClient.patch(`tenants/${tenantId}/features`, { jameyaEnabled });
 }
 
 export function listPlatformTenantSubscriptions(

@@ -30,6 +30,7 @@ export interface CurrentUserSubscription {
 export interface CurrentUserTenant {
   slug: string;
   displayName: string;
+  jameyaEnabled: boolean;
 }
 
 export interface CurrentUser {

@@ -22,6 +22,7 @@ import { toast } from 'sonner';
 import { CustomerFormDialog } from '@/components/customers/customer-form-dialog';
 import { CustomerNotificationHistoryDialog } from '@/components/customers/customer-notification-history-dialog';
 import { CustomerQrDialog } from '@/components/customers/customer-qr-dialog';
+import { CustomerJameyasSection } from '@/components/jameyas/customer-jameyas-section';
 import { BackLink } from '@/components/shared/back-link';
 import { DataTable, type Column } from '@/components/shared/data-table';
 import { DateText } from '@/components/shared/date-text';
@@ -319,6 +320,10 @@ export default function CustomerDetailPage() {
             href={(contract) => routes.contract(contract.id)}
           />
         )}
+      </FadeIn>
+
+      <FadeIn delay={0.12}>
+        <CustomerJameyasSection customerId={customer.id} />
       </FadeIn>
 
       <CustomerQrDialog

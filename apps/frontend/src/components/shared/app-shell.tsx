@@ -29,6 +29,7 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useLogout } from '@/hooks/use-logout';
 import { usePaymentClaims } from '@/hooks/use-payment-claims';
 import { useSupportMessages } from '@/hooks/use-support';
+import { useJameyaAccess } from '@/hooks/use-jameya-access';
 import { useWalletAccess } from '@/hooks/use-wallet-access';
 import { Link, usePathname } from '@/i18n/navigation';
 import { AdminArabicFontProvider } from '@/lib/admin-arabic-font';
@@ -51,10 +52,12 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   const { data: supportMessages } = useSupportMessages({ refetchInterval: PENDING_CLAIMS_POLL_INTERVAL_MS });
   const unseenReplyCount = (supportMessages ?? []).filter((message) => message.adminReply && !message.seenAt).length;
   const { canViewWallets } = useWalletAccess();
+  const { isJameyaEnabled } = useJameyaAccess();
   const isVisibleToAudience: Record<NavigationAudience, boolean> = {
     everyone: true,
     admins: currentUser?.role === 'ADMIN',
     walletViewers: canViewWallets,
+    jameyaUsers: isJameyaEnabled,
   };
   const visibleItems = navigationItems.filter((item) => isVisibleToAudience[item.audience]);
 
