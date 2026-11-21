@@ -1,7 +1,7 @@
 import { JameyaDueStatus, Prisma } from '@prisma/client';
 import { calculateEntitlement, calculateExposure, calculatePot } from './jameya-amounts';
 import { isJameyaDueLate } from './jameya-late-where';
-import { formatJameyaReminderMessage } from './jameya-reminder-message';
+import { formatJameyaReminderMessage, JameyaReminderStatus } from './jameya-reminder-message';
 
 export const JameyaCycleState = {
   UPCOMING: 'UPCOMING',
@@ -132,17 +132,15 @@ export function deriveCycleState({ dueDate, holders, dues }: CycleStateInput, to
   return dues.some((due) => due.isLate) ? JameyaCycleState.LATE : JameyaCycleState.DUE;
 }
 
-function buildCycleSummary(
-  cycle: JameyaCycleRow,
-  shares: JameyaShareRow[],
-  dues: JameyaDueCell[],
+export function buildCycleHolders(
+  shares: { customerId: string; halves: number }[],
+  payouts: { customerId: string; amount: number }[],
   potAmount: number,
-  today: Date,
-): JameyaCycleSummary {
-  const holders = shares.map((share) => {
+): JameyaCycleHolder[] {
+  return shares.map((share) => {
     const entitlementAmount = calculateEntitlement(potAmount, share.halves);
     const paidOutAmount = sumBy(
-      cycle.payouts.filter((payout) => payout.customerId === share.customerId),
+      payouts.filter((payout) => payout.customerId === share.customerId),
       (payout) => payout.amount,
     );
     return {
@@ -153,6 +151,16 @@ function buildCycleSummary(
       remainingAmount: entitlementAmount - paidOutAmount,
     };
   });
+}
+
+function buildCycleSummary(
+  cycle: JameyaCycleRow,
+  shares: JameyaShareRow[],
+  dues: JameyaDueCell[],
+  potAmount: number,
+  today: Date,
+): JameyaCycleSummary {
+  const holders = buildCycleHolders(shares, cycle.payouts, potAmount);
   const collectedAmount = sumBy(dues, (due) => due.paidAmount);
   const paidOutAmount = sumBy(cycle.payouts, (payout) => payout.amount);
 
@@ -175,6 +183,13 @@ interface ReminderContext {
   businessName: string;
   jameyaName: string;
   today: Date;
+}
+
+function resolveReminderStatus(reminderDues: { due: JameyaDueCell; dueDate: Date }[], today: Date) {
+  if (reminderDues.some(({ due }) => due.isLate)) {
+    return JameyaReminderStatus.LATE;
+  }
+  return reminderDues[0].dueDate <= today ? JameyaReminderStatus.DUE : JameyaReminderStatus.UPCOMING;
 }
 
 function buildMemberReminder(
@@ -200,7 +215,7 @@ function buildMemberReminder(
       jameyaName: context.jameyaName,
       amountDue: sumBy(reminderDues, ({ due }) => due.amount - due.paidAmount),
       dueDate: reminderDues[0].dueDate,
-      isLate: reminderDues.some(({ due }) => due.isLate),
+      status: resolveReminderStatus(reminderDues, context.today),
     },
     share.customer.notificationLanguage,
   );

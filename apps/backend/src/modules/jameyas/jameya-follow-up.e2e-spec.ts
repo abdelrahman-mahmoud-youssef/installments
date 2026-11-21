@@ -147,20 +147,41 @@ describe('Jameya follow-up', () => {
     expect(reminders.get(paidUp)).toBeNull();
     expect(reminders.get(owing)).toContain('is late');
     expect(reminders.get(owing)).toContain(`Shop `);
+
+    const inGrace = await jameyas.create(shop.tenantId, {
+      name: 'Grace',
+      shareAmount: 100_000,
+      recurrenceType: RecurrenceType.MONTHLY,
+      firstDueDate: addUtcDays(today, -2).toISOString().slice(0, 10),
+      graceDays: 5,
+      customerIds: shop.customerIds,
+    });
+    expect(inGrace.members[0].reminderMessage).toContain('has been due since');
+    expect(inGrace.members[0].reminderMessage).not.toMatch(/late|next payment/);
   });
 
-  it('counts dues today, late dues and payouts due today only for shops with jameya on', async () => {
+  it('counts dues today, late dues and pending payouts only for shops with jameya on', async () => {
     const shop = await createShop(2);
     await createJameya(shop, today);
     const late = await createJameya(shop, addUtcDays(today, -40));
     await pay(shop, late.id, shop.customerIds[0], 100_000);
+    await payouts.create(shop.tenantId, late.id, late.cycles[0].id, {
+      customerId: shop.customerIds[0],
+      amount: 200_000,
+      clientRequestId: randomUUID(),
+    });
+    await payouts.create(shop.tenantId, late.id, late.cycles[1].id, {
+      customerId: shop.customerIds[1],
+      amount: 50_000,
+      clientRequestId: randomUUID(),
+    });
     const switchedOff = await createShop(2, false);
     await createJameya(switchedOff, today);
 
     expect(await computeJameyaSummaryTotals(prisma, { id: shop.tenantId, jameyaEnabled: true }, today)).toEqual({
       dueTodayCount: 2,
       lateCount: 3,
-      payoutsDueTodayCount: 1,
+      payoutsPendingCount: 2,
     });
     expect(await computeJameyaSummaryTotals(prisma, { id: switchedOff.tenantId, jameyaEnabled: false }, today)).toBe(
       undefined,

@@ -4,24 +4,24 @@ import { JameyaSummaryTotals } from '../jameyas/jameya-summary-totals';
 interface JameyaSummaryCopy {
   dueToday: (count: string) => string;
   late: (count: string) => string;
-  payoutsDueToday: (count: string) => string;
+  payoutsPending: (count: string) => string;
 }
 
 const JAMEYA_SUMMARY_COPY: Record<NotificationLanguage, JameyaSummaryCopy> = {
   [NotificationLanguage.EN]: {
     dueToday: (count) => `Jameya payments due today: ${count}`,
     late: (count) => `Late jameya payments: ${count}`,
-    payoutsDueToday: (count) => `Jameya payouts due today: ${count}`,
+    payoutsPending: (count) => `Jameya payouts pending: ${count}`,
   },
   [NotificationLanguage.AR]: {
     dueToday: (count) => `دفعات جمعيات مستحقة النهاردة: ${count}`,
     late: (count) => `دفعات جمعيات متأخرة: ${count}`,
-    payoutsDueToday: (count) => `قبض جمعيات النهاردة: ${count}`,
+    payoutsPending: (count) => `قبض جمعيات لسه متسلّمش: ${count}`,
   },
 };
 
 export function hasJameyaSummary(totals: JameyaSummaryTotals | undefined): boolean {
-  return Boolean(totals && (totals.dueTodayCount > 0 || totals.lateCount > 0 || totals.payoutsDueTodayCount > 0));
+  return Boolean(totals && (totals.dueTodayCount > 0 || totals.lateCount > 0 || totals.payoutsPendingCount > 0));
 }
 
 export function formatJameyaSummaryLines(
@@ -40,8 +40,8 @@ export function formatJameyaSummaryLines(
   if (totals.lateCount > 0) {
     lines.push(copy.late(formatNumber(totals.lateCount)));
   }
-  if (totals.payoutsDueTodayCount > 0) {
-    lines.push(copy.payoutsDueToday(formatNumber(totals.payoutsDueTodayCount)));
+  if (totals.payoutsPendingCount > 0) {
+    lines.push(copy.payoutsPending(formatNumber(totals.payoutsPendingCount)));
   }
   return lines;
 }

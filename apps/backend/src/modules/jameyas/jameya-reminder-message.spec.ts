@@ -1,17 +1,17 @@
 import { NotificationLanguage } from '@prisma/client';
 import { formatDate, formatMoney } from '../reminders/notification-format';
-import { formatJameyaReminderMessage, JameyaReminderData } from './jameya-reminder-message';
+import { formatJameyaReminderMessage, JameyaReminderData, JameyaReminderStatus } from './jameya-reminder-message';
 
 const dueDate = new Date('2026-11-10');
 
-function reminder(isLate: boolean): JameyaReminderData {
+function reminder(status: JameyaReminderStatus): JameyaReminderData {
   return {
     memberName: 'Mona',
     businessName: 'Acme Shop',
     jameyaName: 'Family circle',
     amountDue: 150_000,
     dueDate,
-    isLate,
+    status,
   };
 }
 
@@ -20,7 +20,7 @@ describe('formatJameyaReminderMessage', () => {
     const money = formatMoney(150_000, NotificationLanguage.EN);
     const date = formatDate(dueDate, NotificationLanguage.EN);
 
-    expect(formatJameyaReminderMessage(reminder(true), NotificationLanguage.EN)).toBe(
+    expect(formatJameyaReminderMessage(reminder(JameyaReminderStatus.LATE), NotificationLanguage.EN)).toBe(
       [
         'Hi Mona 👋',
         'This is Acme Shop about your "Family circle" jameya.',
@@ -32,8 +32,22 @@ describe('formatJameyaReminderMessage', () => {
     );
   });
 
+  it('writes a reminder for a payment past its date but inside the grace days as due since that date', () => {
+    const money = formatMoney(150_000, NotificationLanguage.EN);
+    const date = formatDate(dueDate, NotificationLanguage.EN);
+    const english = formatJameyaReminderMessage(reminder(JameyaReminderStatus.DUE), NotificationLanguage.EN);
+    const arabic = formatJameyaReminderMessage(reminder(JameyaReminderStatus.DUE), NotificationLanguage.AR);
+
+    expect(english).toContain(`⏳ Your payment of ${money} has been due since ${date}.`);
+    expect(english).not.toMatch(/late|next payment/);
+    expect(arabic).toContain(
+      `⏳ عليك دفعة مستحقة من يوم ${formatDate(dueDate, NotificationLanguage.AR)}: ${formatMoney(150_000, NotificationLanguage.AR)}`,
+    );
+    expect(arabic).not.toMatch(/متأخرة|الجاية/);
+  });
+
   it('writes an upcoming English reminder without calling it late', () => {
-    const message = formatJameyaReminderMessage(reminder(false), NotificationLanguage.EN);
+    const message = formatJameyaReminderMessage(reminder(JameyaReminderStatus.UPCOMING), NotificationLanguage.EN);
 
     const money = formatMoney(150_000, NotificationLanguage.EN);
     const date = formatDate(dueDate, NotificationLanguage.EN);
@@ -46,7 +60,7 @@ describe('formatJameyaReminderMessage', () => {
     const money = formatMoney(150_000, NotificationLanguage.AR);
     const date = formatDate(dueDate, NotificationLanguage.AR);
 
-    expect(formatJameyaReminderMessage(reminder(true), NotificationLanguage.AR)).toBe(
+    expect(formatJameyaReminderMessage(reminder(JameyaReminderStatus.LATE), NotificationLanguage.AR)).toBe(
       [
         'مرحباً Mona 👋',
         'معاك Acme Shop بخصوص جمعية "Family circle".',
@@ -59,7 +73,7 @@ describe('formatJameyaReminderMessage', () => {
   });
 
   it('writes an upcoming Arabic reminder without calling it late', () => {
-    const message = formatJameyaReminderMessage(reminder(false), NotificationLanguage.AR);
+    const message = formatJameyaReminderMessage(reminder(JameyaReminderStatus.UPCOMING), NotificationLanguage.AR);
 
     const money = formatMoney(150_000, NotificationLanguage.AR);
     const date = formatDate(dueDate, NotificationLanguage.AR);
