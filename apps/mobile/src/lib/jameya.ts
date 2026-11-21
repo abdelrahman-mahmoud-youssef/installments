@@ -72,6 +72,12 @@ export function resolveTurnStatus(cycle: JameyaCycle, current: JameyaCycle | und
   return paidOutAmount > 0 ? { kind: 'partlyPaidOut', paidOutAmount, owedAmount } : { kind: 'later' };
 }
 
+export function suggestedPaymentOf(jameya: Pick<JameyaDetail, 'dues' | 'members'>, customerId: string): number {
+  const perTurnAmount = jameya.dues.find((due) => due.customerId === customerId)?.amount ?? 0;
+  const remainingAmount = jameya.members.find((member) => member.customerId === customerId)?.remainingAmount ?? 0;
+  return Math.min(perTurnAmount, remainingAmount);
+}
+
 export function holderNamesOf(jameya: Pick<JameyaDetail, 'members'>, cycle: JameyaCycle): string {
   return cycle.holders.map((holder) => jameyaMemberName(jameya, holder.customerId)).join(' · ');
 }

@@ -10,9 +10,9 @@ import { TextField } from '@/components/ui/text-field';
 import { useToast } from '@/components/ui/toast-context';
 import { useRecordJameyaPayment } from '@/hooks/queries';
 import { useI18n } from '@/i18n/i18n-context';
-import { formatMoney, todayIsoDate } from '@/lib/format';
+import { todayIsoDate } from '@/lib/format';
+import { suggestedPaymentOf } from '@/lib/jameya';
 import { spacing } from '@/theme/tokens';
-import { JameyaFigures } from './jameya-figures';
 import { JAMEYA_NOTE_MAX_LENGTH } from './jameya-limits';
 import { useJameyaMoneyEntry } from './use-jameya-money-entry';
 
@@ -23,11 +23,15 @@ interface JameyaPaymentSheetProps {
 }
 
 export function JameyaPaymentSheet({ visible, jameya, onClose }: JameyaPaymentSheetProps) {
-  const { t, locale } = useI18n();
+  const { t } = useI18n();
   const { showToast } = useToast();
   const recordPayment = useRecordJameyaPayment(jameya.id);
   const owingMembers = jameya.members.filter((member) => member.remainingAmount > 0);
-  const entry = useJameyaMoneyEntry(visible, { customerId: owingMembers[0]?.customerId ?? '', amount: 0 });
+  const firstCustomerId = owingMembers[0]?.customerId ?? '';
+  const entry = useJameyaMoneyEntry(visible, {
+    customerId: firstCustomerId,
+    amount: firstCustomerId ? suggestedPaymentOf(jameya, firstCustomerId) : 0,
+  });
   const selectedMember = jameya.members.find((member) => member.customerId === entry.customerId);
   const owed = selectedMember?.remainingAmount ?? 0;
 
@@ -59,7 +63,10 @@ export function JameyaPaymentSheet({ visible, jameya, onClose }: JameyaPaymentSh
           <ChoiceChips
             options={owingMembers.map((member) => ({ value: member.customerId, label: member.name }))}
             selected={entry.customerId || null}
-            onSelect={entry.setCustomerId}
+            onSelect={(customerId) => {
+              entry.setCustomerId(customerId);
+              entry.setAmount(suggestedPaymentOf(jameya, customerId));
+            }}
           />
         </View>
 
@@ -69,13 +76,6 @@ export function JameyaPaymentSheet({ visible, jameya, onClose }: JameyaPaymentSh
           </AppText>
         ) : null}
 
-        <JameyaFigures
-          figures={[
-            { label: t('jameyas.paymentDialog.stillOwes'), minorUnits: owed },
-            { label: t('jameyas.paymentDialog.owesAfterPayment'), minorUnits: Math.max(owed - entry.amount, 0) },
-          ]}
-        />
-
         <TextField
           label={t('jameyas.paymentDialog.amount')}
           value={entry.amountText}
@@ -84,14 +84,6 @@ export function JameyaPaymentSheet({ visible, jameya, onClose }: JameyaPaymentSh
           placeholder="0"
           error={entry.error ?? undefined}
         />
-        {owed > 0 ? (
-          <ChoiceChips
-            options={[{ value: 'owed', label: formatMoney(owed, locale), icon: 'checkmark-done-outline' }]}
-            selected={null}
-            onSelect={() => entry.setAmount(owed)}
-          />
-        ) : null}
-
         <DateStepper
           label={t('jameyas.paymentDialog.paidAt')}
           value={entry.paidAt}
