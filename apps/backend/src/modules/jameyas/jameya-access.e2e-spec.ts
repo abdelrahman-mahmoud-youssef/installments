@@ -10,6 +10,7 @@ import { PLATFORM_TOKEN_SCOPE } from '../../common/decorators/current-platform-a
 import { addUtcDays, getUtcToday } from '../../common/date/utc-date';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { PrismaService } from '../../prisma/prisma.service';
+import { StorageService } from '../storage/storage.service';
 import { prepareTestDatabase } from '../../test-support/test-database';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { JwtStrategy } from '../auth/jwt.strategy';
@@ -51,6 +52,7 @@ describe('Jameya routes access', () => {
         PrismaService,
         JameyasService,
         JameyaPaymentsService,
+        { provide: StorageService, useValue: {} },
         JameyaPayoutsService,
         PlatformTenantsService,
         SubscriptionActivationService,

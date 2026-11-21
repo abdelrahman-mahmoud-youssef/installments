@@ -811,6 +811,7 @@ model JameyaPayment {
   balanceAfter    Int
   paidAt          DateTime                  @default(now())
   note            String?
+  receiptUrl      String?
   clientRequestId String
   createdAt       DateTime                  @default(now())
   tenant          Tenant                    @relation(fields: [tenantId], references: [id], onDelete: Restrict)

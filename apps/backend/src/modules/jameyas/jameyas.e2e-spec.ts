@@ -4,6 +4,7 @@ import { JameyaDueStatus, JameyaStatus, RecurrenceType } from '@prisma/client';
 import { randomUUID } from 'node:crypto';
 import { addUtcDays, getUtcToday } from '../../common/date/utc-date';
 import { PrismaService } from '../../prisma/prisma.service';
+import { StorageService } from '../storage/storage.service';
 import { prepareTestDatabase } from '../../test-support/test-database';
 import { DashboardService } from '../dashboard/dashboard.service';
 import { ReportsService } from '../reports/reports.service';
@@ -19,6 +20,7 @@ describe('Jameyas', () => {
   let reports: ReportsService;
   let dashboard: DashboardService;
   const today = getUtcToday();
+  const storage = { saveKeyedImage: jest.fn(async (key: string) => `/uploads/${key}`) };
 
   beforeAll(async () => {
     prepareTestDatabase();
@@ -27,6 +29,7 @@ describe('Jameyas', () => {
         PrismaService,
         JameyasService,
         JameyaPaymentsService,
+        { provide: StorageService, useValue: storage },
         JameyaPayoutsService,
         ReportsService,
         DashboardService,
@@ -380,5 +383,31 @@ describe('Jameyas', () => {
     expect(dueNowOf(partial)).toBe(50_000);
     expect(dueNowOf(unpaid)).toBe(200_000);
     expect(detail.members.find((member) => member.customerId === unpaid)!.remainingAmount).toBe(300_000);
+  });
+
+  it('stores a receipt image with a payment once, even when the request is repeated', async () => {
+    const shop = await createShop(2);
+    const jameya = await createJameya(shop, 100_000, today);
+    const clientRequestId = randomUUID();
+    const image = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00]).toString('base64');
+    storage.saveKeyedImage.mockClear();
+
+    const payment = await payments.create(shop.tenantId, jameya.id, {
+      customerId: shop.customerIds[0],
+      amount: 50_000,
+      image,
+      note: 'Sent on InstaPay',
+      clientRequestId,
+    });
+    const repeated = await payments.create(shop.tenantId, jameya.id, {
+      customerId: shop.customerIds[0],
+      amount: 50_000,
+      image,
+      clientRequestId,
+    });
+
+    expect(payment.receiptUrl).toMatch(new RegExp(`^/uploads/jameya-payments/${shop.tenantId}/.+\\.jpg$`));
+    expect(repeated.id).toBe(payment.id);
+    expect(storage.saveKeyedImage).toHaveBeenCalledTimes(1);
   });
 });

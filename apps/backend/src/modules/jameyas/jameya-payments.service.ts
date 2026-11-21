@@ -1,9 +1,13 @@
+import { randomUUID } from 'node:crypto';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { JameyaDueStatus, Prisma } from '@prisma/client';
+import { JAMEYA_RECEIPT_IMAGE_MAX_UPLOAD_BYTES } from '../../common/constants';
+import { decodeImageUpload } from '../../common/decode-image-upload';
 import { allocateOldestFirst } from '../../common/installments/allocation';
 import { PaginationQueryDto } from '../../common/pagination/pagination-query.dto';
 import { buildPaginatedResult, PaginatedResult } from '../../common/pagination/paginated-result.interface';
 import { PrismaService } from '../../prisma/prisma.service';
+import { StorageService } from '../storage/storage.service';
 import { CreateJameyaPaymentDto } from './dto/create-jameya-payment.dto';
 import { assertJameyaActive, completeJameyaIfFinished, lockJameya } from './jameya-transaction';
 
@@ -15,6 +19,7 @@ const JAMEYA_PAYMENT_SELECT = {
   balanceAfter: true,
   paidAt: true,
   note: true,
+  receiptUrl: true,
   clientRequestId: true,
   createdAt: true,
   allocations: { select: { dueId: true, amount: true } },
@@ -24,9 +29,13 @@ export type JameyaPaymentRecord = Prisma.JameyaPaymentGetPayload<{ select: typeo
 
 @Injectable()
 export class JameyaPaymentsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storage: StorageService,
+  ) {}
 
   async create(tenantId: string, jameyaId: string, dto: CreateJameyaPaymentDto): Promise<JameyaPaymentRecord> {
+    const receiptUrl = await this.saveReceiptImage(tenantId, jameyaId, dto);
     const paymentId = await this.prisma.$transaction(async (tx) => {
       const jameya = await lockJameya(tx, tenantId, jameyaId);
       const replayed = await tx.jameyaPayment.findFirst({
@@ -62,6 +71,7 @@ export class JameyaPaymentsService {
           balanceAfter: owedBefore - dto.amount,
           paidAt: dto.paidAt ? new Date(dto.paidAt) : undefined,
           note: dto.note,
+          receiptUrl,
           clientRequestId: dto.clientRequestId,
         },
       });
@@ -118,5 +128,24 @@ export class JameyaPaymentsService {
       this.prisma.jameyaPayment.count({ where }),
     ]);
     return buildPaginatedResult(data, total, query.page, query.limit);
+  }
+
+  private async saveReceiptImage(
+    tenantId: string,
+    jameyaId: string,
+    dto: CreateJameyaPaymentDto,
+  ): Promise<string | undefined> {
+    if (!dto.image) {
+      return undefined;
+    }
+    const replayed = await this.prisma.jameyaPayment.findFirst({
+      where: { tenantId, jameyaId, clientRequestId: dto.clientRequestId },
+      select: { id: true },
+    });
+    if (replayed) {
+      return undefined;
+    }
+    const { buffer, extension } = decodeImageUpload(dto.image, JAMEYA_RECEIPT_IMAGE_MAX_UPLOAD_BYTES);
+    return this.storage.saveKeyedImage(`jameya-payments/${tenantId}/${randomUUID()}.${extension}`, buffer);
   }
 }

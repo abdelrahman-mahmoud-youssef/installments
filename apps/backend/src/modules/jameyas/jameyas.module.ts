@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
+import { StorageModule } from '../storage/storage.module';
 import { JameyaPaymentsService } from './jameya-payments.service';
 import { JameyaPayoutsService } from './jameya-payouts.service';
 import { JameyasController } from './jameyas.controller';
 import { JameyasService } from './jameyas.service';
 
 @Module({
+  imports: [StorageModule],
   controllers: [JameyasController],
   providers: [JameyasService, JameyaPaymentsService, JameyaPayoutsService],
 })

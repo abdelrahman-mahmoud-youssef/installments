@@ -3,6 +3,7 @@ import { NotificationLanguage, RecurrenceType } from '@prisma/client';
 import { randomUUID } from 'node:crypto';
 import { addUtcDays, getUtcToday } from '../../common/date/utc-date';
 import { PrismaService } from '../../prisma/prisma.service';
+import { StorageService } from '../storage/storage.service';
 import { prepareTestDatabase } from '../../test-support/test-database';
 import { JameyaPaymentsService } from './jameya-payments.service';
 import { JameyaPayoutsService } from './jameya-payouts.service';
@@ -19,7 +20,8 @@ describe('Jameya follow-up', () => {
   beforeAll(async () => {
     prepareTestDatabase();
     const moduleRef = await Test.createTestingModule({
-      providers: [PrismaService, JameyasService, JameyaPaymentsService, JameyaPayoutsService],
+      providers: [PrismaService, JameyasService, JameyaPaymentsService,
+        { provide: StorageService, useValue: {} }, JameyaPayoutsService],
     }).compile();
     prisma = moduleRef.get(PrismaService);
     jameyas = moduleRef.get(JameyasService);
