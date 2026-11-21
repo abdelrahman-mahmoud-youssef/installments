@@ -2,7 +2,6 @@ import { RecurrenceType } from '@prisma/client';
 import {
   ArrayMaxSize,
   ArrayMinSize,
-  ArrayUnique,
   IsArray,
   IsDateString,
   IsIn,
@@ -56,7 +55,6 @@ export class CreateJameyaDto {
   @IsArray()
   @ArrayMinSize(JAMEYA_MIN_TURNS)
   @ArrayMaxSize(JAMEYA_MAX_TURNS)
-  @ArrayUnique()
   @IsString({ each: true })
   customerIds!: string[];
 }

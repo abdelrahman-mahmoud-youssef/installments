@@ -90,13 +90,13 @@ describe('Jameya follow-up', () => {
     const byId = new Map(list.data.map((item) => [item.id, item.member]));
 
     expect(byId.get(lateJameya.id)).toEqual({
-      turnSequence: 2,
+      turnSequences: [2],
       remainingAmount: 250_000,
       lateAmount: 150_000,
       receivedAmount: 120_000,
     });
     expect(byId.get(futureJameya.id)).toEqual({
-      turnSequence: 1,
+      turnSequences: [1],
       remainingAmount: 300_000,
       lateAmount: 0,
       receivedAmount: 0,

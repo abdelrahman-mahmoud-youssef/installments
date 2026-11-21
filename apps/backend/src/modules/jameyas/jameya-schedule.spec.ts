@@ -97,6 +97,33 @@ describe('buildJameyaSchedule', () => {
     ]);
   });
 
+  it.each([
+    ['adjacent turns', ['repeat', 'repeat', 'b', 'c']],
+    ['the first and last turns', ['repeat', 'b', 'c', 'repeat']],
+  ])('charges a member who holds %s two shares in every cycle and gives them each of those turns', (_label, order) => {
+    const schedule = buildJameyaSchedule({
+      shareAmount: 100_000,
+      recurrenceType: RecurrenceType.MONTHLY,
+      firstDueDate: new Date('2027-01-10'),
+      graceDays: 0,
+      turns: fullTurns(order),
+    });
+
+    const potAmount = calculatePot(100_000, order.length);
+    expect(schedule.cycles.map((cycle) => cycle.holders[0].customerId)).toEqual(order);
+    expect(schedule.dueAmounts).toEqual([
+      { customerId: 'repeat', amount: 200_000 },
+      { customerId: 'b', amount: 100_000 },
+      { customerId: 'c', amount: 100_000 },
+    ]);
+    expect(schedule.dues).toHaveLength(order.length * 3);
+    for (const cycle of schedule.cycles) {
+      const cycleDues = schedule.dues.filter((due) => due.sequence === cycle.sequence);
+      expect(cycleDues.reduce((total, due) => total + due.amount, 0)).toBe(potAmount);
+      expect(calculateEntitlement(potAmount, cycle.holders[0].halves)).toBe(potAmount);
+    }
+  });
+
   it('rejects a turn that is not exactly one share and an odd share split into halves', () => {
     const base = {
       recurrenceType: RecurrenceType.MONTHLY,

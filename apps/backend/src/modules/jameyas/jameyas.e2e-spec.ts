@@ -281,4 +281,86 @@ describe('Jameyas', () => {
     expect(await prisma.payment.count({ where: { tenantId: shop.tenantId } })).toBe(0);
     expect(await prisma.paymentMethodTransaction.count({ where: { tenantId: shop.tenantId } })).toBe(0);
   });
+
+  describe('a member who holds two turns', () => {
+    function createWithTurns(shop: Shop, customerIds: string[], firstDueDate: Date) {
+      return jameyas.create(shop.tenantId, {
+        name: 'Two turns',
+        shareAmount: 100_000,
+        recurrenceType: RecurrenceType.MONTHLY,
+        firstDueDate: firstDueDate.toISOString().slice(0, 10),
+        graceDays: 0,
+        customerIds,
+      });
+    }
+
+    it('refuses a jameya with only one distinct member and creates nothing', async () => {
+      const shop = await createShop(1);
+      const [only] = shop.customerIds;
+
+      await expect(createWithTurns(shop, [only, only], today)).rejects.toThrow(
+        'A jameya needs at least two different members.',
+      );
+      await expect(
+        jameyas.preview(shop.tenantId, {
+          name: 'Two turns',
+          shareAmount: 100_000,
+          recurrenceType: RecurrenceType.MONTHLY,
+          firstDueDate: today.toISOString().slice(0, 10),
+          graceDays: 0,
+          customerIds: [only, only],
+        }),
+      ).rejects.toThrow(BadRequestException);
+      expect(await prisma.jameya.count({ where: { tenantId: shop.tenantId } })).toBe(0);
+    });
+
+    it('charges two shares per cycle, pays oldest dues first, pays out each turn separately and completes', async () => {
+      const shop = await createShop(2);
+      const [twice, once] = shop.customerIds;
+      const jameya = await createWithTurns(shop, [twice, once, twice], addUtcDays(today, -70));
+
+      expect(jameya.shareCount).toBe(3);
+      expect(jameya.potAmount).toBe(300_000);
+      const twiceMember = jameya.members.find((member) => member.customerId === twice)!;
+      expect(twiceMember.turnSequences).toEqual([1, 3]);
+      expect(twiceMember.dueAmount).toBe(600_000);
+      expect(jameya.members).toHaveLength(2);
+      const twiceDues = jameya.dues.filter((due) => due.customerId === twice);
+      expect(twiceDues.map((due) => due.amount)).toEqual([200_000, 200_000, 200_000]);
+
+      await pay(shop, jameya.id, twice, 300_000);
+      let detail = await jameyas.findOne(shop.tenantId, jameya.id);
+      const paidByCycle = detail.cycles.map(
+        (cycle) => detail.dues.find((due) => due.cycleId === cycle.id && due.customerId === twice)!.paidAmount,
+      );
+      expect(paidByCycle).toEqual([200_000, 100_000, 0]);
+
+      const [firstCycle, secondCycle, thirdCycle] = detail.cycles;
+      const firstPart = await payOut(shop, jameya.id, firstCycle.id, twice, 250_000);
+      expect(firstPart).toMatchObject({ remainingAmount: 50_000, coveredAmount: 50_000 });
+      const thirdPayout = await payOut(shop, jameya.id, thirdCycle.id, twice, 300_000);
+      expect(thirdPayout).toMatchObject({ remainingAmount: 0, coveredAmount: 300_000 });
+      await expect(payOut(shop, jameya.id, secondCycle.id, twice, 1)).rejects.toThrow(
+        'This customer does not hold this turn.',
+      );
+
+      const { data } = await jameyas.findAll(shop.tenantId, { customerId: twice, page: 1, limit: 10 });
+      expect(data.find((item) => item.id === jameya.id)?.member).toMatchObject({
+        turnSequences: [1, 3],
+        remainingAmount: 300_000,
+        receivedAmount: 550_000,
+      });
+
+      await payOut(shop, jameya.id, firstCycle.id, twice, 50_000);
+      await payOut(shop, jameya.id, secondCycle.id, once, 300_000);
+      await pay(shop, jameya.id, twice, 300_000);
+      expect((await jameyas.findOne(shop.tenantId, jameya.id)).status).toBe(JameyaStatus.ACTIVE);
+      await pay(shop, jameya.id, once, 300_000);
+
+      detail = await jameyas.findOne(shop.tenantId, jameya.id);
+      expect(detail.status).toBe(JameyaStatus.COMPLETED);
+      expect(detail.cycles.map((cycle) => cycle.state)).toEqual(['SETTLED', 'SETTLED', 'SETTLED']);
+      expect(detail.members.find((member) => member.customerId === twice)!.receivedAmount).toBe(600_000);
+    });
+  });
 });

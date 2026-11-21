@@ -1,5 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CustomerStatus, Prisma } from '@prisma/client';
+import { JAMEYA_MIN_MEMBERS } from '../../common/constants';
 import { getUtcToday } from '../../common/date/utc-date';
 import { buildPaginatedResult, PaginatedResult } from '../../common/pagination/paginated-result.interface';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -35,7 +36,7 @@ function buildListSelect(today: Date) {
 type JameyaListRow = Prisma.JameyaGetPayload<{ select: ReturnType<typeof buildListSelect> }>;
 
 export interface JameyaMemberStanding {
-  turnSequence: number;
+  turnSequences: number[];
   remainingAmount: number;
   lateAmount: number;
   receivedAmount: number;
@@ -146,10 +147,14 @@ export class JameyasService {
   }
 
   private async planSchedule(tenantId: string, dto: CreateJameyaDto): Promise<JameyaSchedule> {
+    const memberIds = [...new Set(dto.customerIds)];
+    if (memberIds.length < JAMEYA_MIN_MEMBERS) {
+      throw new BadRequestException('A jameya needs at least two different members.');
+    }
     const memberCount = await this.prisma.customer.count({
-      where: { id: { in: dto.customerIds }, tenantId, status: CustomerStatus.ACTIVE },
+      where: { id: { in: memberIds }, tenantId, status: CustomerStatus.ACTIVE },
     });
-    if (memberCount !== dto.customerIds.length) {
+    if (memberCount !== memberIds.length) {
       throw new NotFoundException('Customer not found.');
     }
     return buildJameyaSchedule({
@@ -221,11 +226,13 @@ export class JameyasService {
     const receivedByJameya = new Map(payouts.map((row) => [row.jameyaId, row._sum.amount ?? 0]));
     const standings = new Map<string, JameyaMemberStanding>();
     for (const share of shares) {
-      if (standings.has(share.jameyaId)) {
+      const standing = standings.get(share.jameyaId);
+      if (standing) {
+        standing.turnSequences.push(share.cycle.sequence);
         continue;
       }
       standings.set(share.jameyaId, {
-        turnSequence: share.cycle.sequence,
+        turnSequences: [share.cycle.sequence],
         remainingAmount: remainingByJameya.get(share.jameyaId) ?? 0,
         lateAmount: lateByJameya.get(share.jameyaId) ?? 0,
         receivedAmount: receivedByJameya.get(share.jameyaId) ?? 0,

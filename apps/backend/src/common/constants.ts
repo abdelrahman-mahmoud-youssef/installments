@@ -101,6 +101,8 @@ export const DEACTIVATED_ACCOUNT_MESSAGE = 'This account has been deactivated. Y
 
 export const JAMEYA_MIN_TURNS = 2;
 
+export const JAMEYA_MIN_MEMBERS = 2;
+
 export const JAMEYA_MAX_TURNS = 60;
 
 export const JAMEYA_MAX_SHARE_AMOUNT = 10_000_000;
