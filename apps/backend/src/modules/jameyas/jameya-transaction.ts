@@ -1,7 +1,7 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { JameyaStatus, Prisma } from '@prisma/client';
 import { calculatePot } from './jameya-amounts';
-import { OUTSTANDING_JAMEYA_DUE_STATUSES } from './jameya-due-where';
+import { OUTSTANDING_JAMEYA_DUE_STATUSES } from './jameya-late-where';
 
 export interface LockedJameya {
   id: string;

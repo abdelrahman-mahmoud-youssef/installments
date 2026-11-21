@@ -8,7 +8,7 @@ import { JameyaQueryDto } from './dto/jameya-query.dto';
 import { UpdateJameyaDto } from './dto/update-jameya.dto';
 import { calculateEntitlement, calculatePot, HALVES_PER_SHARE } from './jameya-amounts';
 import { buildJameyaDetail, JAMEYA_DETAIL_INCLUDE, JameyaDetail } from './jameya-detail';
-import { lateJameyaDueWhere } from './jameya-due-where';
+import { lateJameyaDueWhere } from './jameya-late-where';
 import { buildJameyaSchedule, JameyaSchedule, PlannedDueAmount } from './jameya-schedule';
 
 function buildListSelect(today: Date) {

@@ -1,6 +1,6 @@
 import { JameyaDueStatus, Prisma } from '@prisma/client';
 import { calculateEntitlement, calculateExposure, calculatePot } from './jameya-amounts';
-import { isJameyaDueLate } from './jameya-due-where';
+import { isJameyaDueLate } from './jameya-late-where';
 
 export const JameyaCycleState = {
   UPCOMING: 'UPCOMING',
