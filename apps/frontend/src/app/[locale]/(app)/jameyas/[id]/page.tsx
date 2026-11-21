@@ -15,6 +15,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { JameyaCurrentTurnCard } from '@/components/jameyas/jameya-current-turn-card';
 import { JameyaEditDialog } from '@/components/jameyas/jameya-edit-dialog';
 import { JameyaMemberSheet } from '@/components/jameyas/jameya-member-sheet';
+import { JameyaMembersStatements } from '@/components/jameyas/jameya-members-statements';
 import { JameyaMoreViews } from '@/components/jameyas/jameya-more-views';
 import { JameyaPayoutDialog } from '@/components/jameyas/jameya-payout-dialog';
 import { JameyaTurnMembers } from '@/components/jameyas/jameya-turn-members';
@@ -152,6 +153,7 @@ export default function JameyaDetailPage() {
         <>
           <JameyaUnpaidMembers jameya={jameya} onOpenMember={setMemberId} />
           <JameyaTurnsList jameya={jameya} onHandOver={startPayout} onOpenMember={setMemberId} />
+          <JameyaMembersStatements jameya={jameya} onOpenMember={setMemberId} />
           <JameyaMoreViews jameya={jameya} />
         </>
       )}

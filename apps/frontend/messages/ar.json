@@ -1415,7 +1415,8 @@
       "collectTitle": "سجّل دفعة {name}",
       "receipt": "صورة التحويل (اختياري)",
       "receiptHint": "ارفع صورة التحويل",
-      "viewReceipt": "شوف صورة التحويل"
+      "viewReceipt": "شوف صورة التحويل",
+      "membersTitle": "الأعضاء"
     },
     "grid": {
       "member": "العضو",
@@ -1492,6 +1493,38 @@
       "download": "إيصال",
       "shareError": "معرفناش نعمل الإيصال.",
       "balanceAfter": "المتبقي على العضو بعد هذه الدفعة"
+    },
+    "statement": {
+      "button": "كشف حساب",
+      "title": "كشف حساب عضو في جمعية",
+      "member": "العضو",
+      "jameya": "الجمعية",
+      "shares": "عدد الأسهم",
+      "payoutTurns": "أدوار القبض",
+      "sequenceSeparator": "، ",
+      "perTurn": {
+        "MONTHLY": "القسط الشهري",
+        "WEEKLY": "القسط الأسبوعي"
+      },
+      "totalPaid": "إجمالي المدفوع",
+      "overdue": "المتأخر",
+      "remaining": "المتبقي",
+      "received": "المستلم من القبض",
+      "columns": {
+        "turn": "الدور",
+        "date": "التاريخ",
+        "due": "المطلوب",
+        "paid": "المدفوع",
+        "status": "الحالة"
+      },
+      "status": {
+        "paid": "مدفوع",
+        "partial": "مدفوع جزئيًا",
+        "late": "متأخر",
+        "due": "غير مدفوع",
+        "upcoming": "لم يحن موعده"
+      },
+      "ownTurn": "دور القبض"
     },
     "validation": {
       "nameRequired": "اكتب اسم.",

@@ -1415,7 +1415,8 @@
       "collectTitle": "Record {name}'s payment",
       "receipt": "Transfer screenshot (optional)",
       "receiptHint": "Attach a screenshot of the transfer",
-      "viewReceipt": "View the transfer screenshot"
+      "viewReceipt": "View the transfer screenshot",
+      "membersTitle": "Members"
     },
     "grid": {
       "member": "Member",
@@ -1492,6 +1493,38 @@
       "download": "Receipt",
       "shareError": "Couldn't create the receipt.",
       "balanceAfter": "Still owed after this payment"
+    },
+    "statement": {
+      "button": "Statement",
+      "title": "Jameya member statement",
+      "member": "Member",
+      "jameya": "Jameya",
+      "shares": "Number of shares",
+      "payoutTurns": "Payout turns",
+      "sequenceSeparator": ", ",
+      "perTurn": {
+        "MONTHLY": "Amount due each month",
+        "WEEKLY": "Amount due each week"
+      },
+      "totalPaid": "Total paid",
+      "overdue": "Overdue",
+      "remaining": "Remaining",
+      "received": "Received from payouts",
+      "columns": {
+        "turn": "Turn",
+        "date": "Date",
+        "due": "Due",
+        "paid": "Paid",
+        "status": "Status"
+      },
+      "status": {
+        "paid": "Paid",
+        "partial": "Partly paid",
+        "late": "Overdue",
+        "due": "Not paid",
+        "upcoming": "Not due yet"
+      },
+      "ownTurn": "Payout turn"
     },
     "validation": {
       "nameRequired": "Enter a name.",

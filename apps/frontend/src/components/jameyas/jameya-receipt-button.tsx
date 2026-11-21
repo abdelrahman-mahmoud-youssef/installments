@@ -1,15 +1,10 @@
 'use client';
 
-import { pdf } from '@react-pdf/renderer';
 import { FileDown, Loader2 } from 'lucide-react';
-import { useLocale, useTranslations } from 'next-intl';
-import { useState } from 'react';
-import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
-import { useBranding } from '@/hooks/use-branding';
-import { resolveAssetUrl } from '@/lib/assets';
-import { isShareAbort, sanitizeFileName, shareOrDownloadPdf } from '@/lib/share-file';
 import { JameyaReceiptContent, JameyaReceiptPdf } from './jameya-receipt-pdf';
+import { useJameyaPdfShare } from './use-jameya-pdf-share';
 
 export function JameyaReceiptButton({
   buildContent,
@@ -21,45 +16,23 @@ export function JameyaReceiptButton({
   variant?: 'icon' | 'full';
 }) {
   const t = useTranslations('jameyas.receipt');
-  const locale = useLocale();
-  const { data: branding } = useBranding();
-  const [isGenerating, setIsGenerating] = useState(false);
+  const { share, isGenerating, isReady } = useJameyaPdfShare();
 
-  async function handleShare() {
-    if (!branding) {
-      return;
-    }
-    setIsGenerating(true);
-    try {
-      const content = buildContent();
-      const blob = await pdf(
-        <JameyaReceiptPdf
-          locale={locale === 'ar' ? 'ar' : 'en'}
-          content={content}
-          tenant={{
-            displayName: branding.displayName,
-            logoUrl: resolveAssetUrl(branding.logoUrl),
-            phone: branding.phone,
-            brandColor: branding.brandColor,
-          }}
-        />,
-      ).toBlob();
-      await shareOrDownloadPdf(blob, `${sanitizeFileName(fileName, 'receipt')}.pdf`, content.title);
-    } catch (error) {
-      if (!isShareAbort(error)) {
-        console.error(error);
-        toast.error(t('shareError'));
-      }
-    } finally {
-      setIsGenerating(false);
-    }
+  function handleShare() {
+    const content = buildContent();
+    void share({
+      render: (tenant, locale) => <JameyaReceiptPdf locale={locale} content={content} tenant={tenant} />,
+      fileName,
+      fallbackFileName: 'receipt',
+      title: content.title,
+    });
   }
 
   const icon = isGenerating ? <Loader2 className="size-4 animate-spin" /> : <FileDown className="size-4" />;
 
   if (variant === 'full') {
     return (
-      <Button type="button" variant="outline" disabled={isGenerating || !branding} onClick={handleShare}>
+      <Button type="button" variant="outline" disabled={!isReady} onClick={handleShare}>
         {icon}
         {t('download')}
       </Button>
@@ -71,7 +44,7 @@ export function JameyaReceiptButton({
       type="button"
       variant="ghost"
       size="icon-sm"
-      disabled={isGenerating || !branding}
+      disabled={!isReady}
       onClick={handleShare}
       aria-label={t('download')}
       title={t('download')}
