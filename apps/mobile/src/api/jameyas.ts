@@ -9,7 +9,7 @@ export const JAMEYA_STATUSES: JameyaStatus[] = ['ACTIVE', 'COMPLETED', 'CANCELLE
 export const JAMEYA_RECURRENCE_TYPES: JameyaRecurrenceType[] = ['MONTHLY', 'WEEKLY'];
 
 export interface JameyaMemberStanding {
-  turnSequence: number;
+  turnSequences: number[];
   remainingAmount: number;
   lateAmount: number;
   receivedAmount: number;

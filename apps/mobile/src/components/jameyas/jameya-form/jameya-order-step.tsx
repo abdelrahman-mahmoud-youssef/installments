@@ -8,10 +8,10 @@ import { useI18n } from '@/i18n/i18n-context';
 import { formatNumber } from '@/lib/format';
 import { useTheme } from '@/theme/theme-context';
 import { spacing } from '@/theme/tokens';
-import { JameyaFormMember } from './use-jameya-form';
+import { JameyaFormTurn } from './use-jameya-form';
 
 interface JameyaOrderStepProps {
-  members: JameyaFormMember[];
+  turns: JameyaFormTurn[];
   onMove: (from: number, to: number) => void;
   onShuffle: () => void;
 }
@@ -40,7 +40,7 @@ function MoveButton({ icon, label, disabled, onPress }: MoveButtonProps) {
   );
 }
 
-export function JameyaOrderStep({ members, onMove, onShuffle }: JameyaOrderStepProps) {
+export function JameyaOrderStep({ turns, onMove, onShuffle }: JameyaOrderStepProps) {
   const { t, locale } = useI18n();
   return (
     <View style={{ gap: spacing.lg }}>
@@ -50,24 +50,24 @@ export function JameyaOrderStep({ members, onMove, onShuffle }: JameyaOrderStepP
       <Button variant="secondary" icon="shuffle-outline" title={t('jameyas.new.randomOrder')} onPress={onShuffle} />
       <Card>
         <View style={{ gap: spacing.sm }}>
-          {members.map((member, index) => (
-            <View key={member.id} style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+          {turns.map((turn, index) => (
+            <View key={turn.turnId} style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
               <AppText variant="caption" tone="muted" style={{ minWidth: 64 }}>
                 {t('jameyas.new.turnNumber', { sequence: formatNumber(index + 1, locale) })}
               </AppText>
               <AppText variant="bodyStrong" numberOfLines={1} style={{ flex: 1 }}>
-                {member.name}
+                {turn.name}
               </AppText>
               <MoveButton
                 icon="chevron-up"
-                label={t('jameyas.new.moveUp', { name: member.name })}
+                label={t('jameyas.new.moveUp', { name: turn.name })}
                 disabled={index === 0}
                 onPress={() => onMove(index, index - 1)}
               />
               <MoveButton
                 icon="chevron-down"
-                label={t('jameyas.new.moveDown', { name: member.name })}
-                disabled={index === members.length - 1}
+                label={t('jameyas.new.moveDown', { name: turn.name })}
+                disabled={index === turns.length - 1}
                 onPress={() => onMove(index, index + 1)}
               />
             </View>

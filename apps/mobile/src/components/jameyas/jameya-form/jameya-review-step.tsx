@@ -1,17 +1,18 @@
 import { View } from 'react-native';
 import { JameyaPreview } from '@/api/jameyas';
 import { AppText } from '@/components/ui/app-text';
+import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { MoneyText } from '@/components/ui/money-text';
 import { useI18n } from '@/i18n/i18n-context';
 import { formatCalendarDate, formatMoney, formatNumber } from '@/lib/format';
 import { useTheme } from '@/theme/theme-context';
 import { spacing } from '@/theme/tokens';
-import { JameyaFormMember } from './use-jameya-form';
+import { JameyaFormTurn } from './use-jameya-form';
 
 interface JameyaReviewStepProps {
   preview: JameyaPreview;
-  members: JameyaFormMember[];
+  turns: JameyaFormTurn[];
 }
 
 function ReviewFigure({ label, value }: { label: string; value: string }) {
@@ -25,22 +26,40 @@ function ReviewFigure({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function JameyaReviewStep({ preview, members }: JameyaReviewStepProps) {
+export function JameyaReviewStep({ preview, turns }: JameyaReviewStepProps) {
   const { t, locale } = useI18n();
   const { colors } = useTheme();
-  const nameOf = (customerId: string) => members.find((member) => member.id === customerId)?.name ?? '';
-  const perMemberAmounts = [...new Set(preview.dueAmounts.map((due) => due.amount))];
+  const nameOf = (customerId: string) => turns.find((turn) => turn.id === customerId)?.name ?? '';
+  const turnCountOf = (customerId: string) => turns.filter((turn) => turn.id === customerId).length;
 
   return (
     <View style={{ gap: spacing.lg }}>
       <Card>
         <View style={{ flexDirection: 'row', gap: spacing.md }}>
           <ReviewFigure label={t('jameyas.new.review.pot')} value={formatMoney(preview.potAmount, locale)} />
-          <ReviewFigure
-            label={t('jameyas.new.review.perMember')}
-            value={perMemberAmounts.map((amount) => formatMoney(amount, locale)).join(' / ')}
-          />
           <ReviewFigure label={t('jameyas.new.review.cycles')} value={formatNumber(preview.cycles.length, locale)} />
+        </View>
+      </Card>
+      <Card>
+        <View style={{ gap: spacing.sm }}>
+          <AppText variant="label" tone="muted">
+            {t('jameyas.new.review.perMember')}
+          </AppText>
+          {preview.dueAmounts.map((due) => (
+            <View key={due.customerId} style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+              <AppText variant="body" numberOfLines={1} style={{ flexShrink: 1 }}>
+                {nameOf(due.customerId)}
+              </AppText>
+              {turnCountOf(due.customerId) > 1 ? (
+                <Badge
+                  label={t('jameyas.new.turnsBadge', { count: formatNumber(turnCountOf(due.customerId), locale) })}
+                  tone="primary"
+                />
+              ) : null}
+              <View style={{ flex: 1 }} />
+              <MoneyText minorUnits={due.amount} variant="bodyStrong" />
+            </View>
+          ))}
         </View>
       </Card>
       <Card>

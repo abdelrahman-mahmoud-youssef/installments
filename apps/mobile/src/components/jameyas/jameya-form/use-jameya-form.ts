@@ -1,12 +1,22 @@
 import { useState } from 'react';
 import { CreateJameyaInput, JameyaRecurrenceType } from '@/api/jameyas';
 import { parseAmountInput, parseNonNegativeAmountInput, todayIsoDate, toMinorUnits } from '@/lib/format';
-import { JAMEYA_MAX_GRACE_DAYS, JAMEYA_MAX_MEMBERS, JAMEYA_MIN_MEMBERS } from '../jameya-limits';
+import { createLocalId } from '@/lib/local-id';
+import { JAMEYA_MAX_GRACE_DAYS, JAMEYA_MAX_TURNS, JAMEYA_MIN_MEMBERS, JAMEYA_MIN_TURNS } from '../jameya-limits';
 
 export interface JameyaFormMember {
   id: string;
   name: string;
   phone: string;
+}
+
+export interface JameyaFormTurn extends JameyaFormMember {
+  turnId: string;
+}
+
+export interface JameyaMemberTurns {
+  member: JameyaFormMember;
+  count: number;
 }
 
 export interface JameyaFormValues {
@@ -67,10 +77,25 @@ function swapped<T>(items: T[], from: number, to: number): T[] {
   return result;
 }
 
+function groupTurns(turns: JameyaFormTurn[]): JameyaMemberTurns[] {
+  const groups = new Map<string, JameyaMemberTurns>();
+  for (const turn of turns) {
+    const group = groups.get(turn.id);
+    if (group) {
+      group.count += 1;
+    } else {
+      groups.set(turn.id, { member: { id: turn.id, name: turn.name, phone: turn.phone }, count: 1 });
+    }
+  }
+  return [...groups.values()];
+}
+
 export function useJameyaForm() {
   const [values, setValues] = useState<JameyaFormValues>(initialValues);
-  const [members, setMembers] = useState<JameyaFormMember[]>([]);
+  const [turns, setTurns] = useState<JameyaFormTurn[]>([]);
   const [errorCodes, setErrorCodes] = useState<Partial<Record<JameyaFormField, JameyaFormErrorCode>>>({});
+  const memberTurns = groupTurns(turns);
+  const hasEnoughMembers = memberTurns.length >= JAMEYA_MIN_MEMBERS;
 
   const setField = <K extends keyof JameyaFormValues>(field: K, value: JameyaFormValues[K]) =>
     setValues((current) => ({ ...current, [field]: value }));
@@ -81,21 +106,20 @@ export function useJameyaForm() {
     return Object.keys(errors).length === 0;
   };
 
-  const toggleMember = (member: JameyaFormMember) =>
-    setMembers((current) =>
-      current.some((item) => item.id === member.id)
-        ? current.filter((item) => item.id !== member.id)
-        : [...current, member],
+  const addTurn = (member: JameyaFormMember) =>
+    setTurns((current) =>
+      current.length >= JAMEYA_MAX_TURNS ? current : [...current, { ...member, turnId: createLocalId() }],
     );
 
-  const addMember = (member: JameyaFormMember) =>
-    setMembers((current) => (current.some((item) => item.id === member.id) ? current : [...current, member]));
+  const removeTurn = (customerId: string) =>
+    setTurns((current) => {
+      const lastIndex = current.map((turn) => turn.id).lastIndexOf(customerId);
+      return current.filter((_, index) => index !== lastIndex);
+    });
 
-  const removeMember = (memberId: string) => setMembers((current) => current.filter((item) => item.id !== memberId));
+  const moveTurn = (from: number, to: number) => setTurns((current) => swapped(current, from, to));
 
-  const moveMember = (from: number, to: number) => setMembers((current) => swapped(current, from, to));
-
-  const shuffleMembers = () => setMembers((current) => shuffled(current));
+  const shuffleTurns = () => setTurns((current) => shuffled(current));
 
   const payload = (): CreateJameyaInput => ({
     name: values.name.trim(),
@@ -104,7 +128,7 @@ export function useJameyaForm() {
     firstDueDate: values.firstDueDate,
     graceDays: parseGraceDays(values.graceDays) ?? 0,
     notes: values.notes.trim() || undefined,
-    customerIds: members.map((member) => member.id),
+    customerIds: turns.map((turn) => turn.id),
   });
 
   return {
@@ -112,13 +136,14 @@ export function useJameyaForm() {
     setField,
     errorCodes,
     confirmDetails,
-    members,
-    hasValidMemberCount: members.length >= JAMEYA_MIN_MEMBERS && members.length <= JAMEYA_MAX_MEMBERS,
-    toggleMember,
-    addMember,
-    removeMember,
-    moveMember,
-    shuffleMembers,
+    turns,
+    memberTurns,
+    hasEnoughMembers,
+    hasValidTurns: hasEnoughMembers && turns.length >= JAMEYA_MIN_TURNS && turns.length <= JAMEYA_MAX_TURNS,
+    addTurn,
+    removeTurn,
+    moveTurn,
+    shuffleTurns,
     payload,
   };
 }

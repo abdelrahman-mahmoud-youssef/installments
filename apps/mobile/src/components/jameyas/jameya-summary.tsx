@@ -18,7 +18,8 @@ export function JameyaSummary({ jameya }: { jameya: JameyaDetail }) {
         <Badge label={t(`jameyas.status.${jameya.status}`)} tone={jameyaStatusTone[jameya.status]} />
         <AppText variant="caption" tone="muted">
           {`${t('jameyas.detail.summaryLine', {
-            members: formatNumber(jameya.shareCount, locale),
+            members: formatNumber(jameya.members.length, locale),
+            turns: formatNumber(jameya.shareCount, locale),
             recurrence: t(`recurrenceType.${jameya.recurrenceType}`),
           })} · ${money(jameya.shareAmount)} ${t('jameyas.detail.perShare')}`}
         </AppText>

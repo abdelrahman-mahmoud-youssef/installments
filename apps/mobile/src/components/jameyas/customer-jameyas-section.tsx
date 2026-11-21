@@ -34,7 +34,15 @@ function CustomerJameyaCard({ jameya }: { jameya: JameyaListItem }) {
               </AppText>
               {member ? (
                 <AppText variant="caption" tone="muted">
-                  {t('jameyas.customerSection.turnValue', { sequence: formatNumber(member.turnSequence, locale) })}
+                  {member.turnSequences.length > 1
+                    ? t('jameyas.customerSection.turnsValue', {
+                        sequences: member.turnSequences
+                          .map((sequence) => formatNumber(sequence, locale))
+                          .join(t('jameyas.customerSection.sequenceSeparator')),
+                      })
+                    : t('jameyas.customerSection.turnValue', {
+                        sequence: formatNumber(member.turnSequences[0], locale),
+                      })}
                 </AppText>
               ) : null}
             </View>

@@ -74,7 +74,7 @@ export default function NewJameyaScreen() {
   const goNext = () => {
     if (step === 'details' && form.confirmDetails()) {
       showStep('members');
-    } else if (step === 'members' && form.hasValidMemberCount) {
+    } else if (step === 'members' && form.hasValidTurns) {
       showStep('order');
     } else if (step === 'order') {
       void goToReview();
@@ -118,15 +118,18 @@ export default function NewJameyaScreen() {
         ) : null}
         {step === 'members' ? (
           <JameyaMembersStep
-            members={form.members}
-            onAddMember={() => setOpenSheet('picker')}
-            onRemoveMember={form.removeMember}
+            memberTurns={form.memberTurns}
+            turnCount={form.turns.length}
+            hasEnoughMembers={form.hasEnoughMembers}
+            onAddCustomer={() => setOpenSheet('picker')}
+            onAddTurn={form.addTurn}
+            onRemoveTurn={form.removeTurn}
           />
         ) : null}
         {step === 'order' ? (
-          <JameyaOrderStep members={form.members} onMove={form.moveMember} onShuffle={form.shuffleMembers} />
+          <JameyaOrderStep turns={form.turns} onMove={form.moveTurn} onShuffle={form.shuffleTurns} />
         ) : null}
-        {step === 'review' && preview ? <JameyaReviewStep preview={preview} members={form.members} /> : null}
+        {step === 'review' && preview ? <JameyaReviewStep preview={preview} turns={form.turns} /> : null}
         {apiError ? (
           <AppText variant="caption" tone="danger">
             {apiError}
@@ -160,7 +163,7 @@ export default function NewJameyaScreen() {
               title={step === 'order' ? t('jameyas.new.toReview') : t('jameyas.new.next')}
               icon={isRTL ? 'arrow-back' : 'arrow-forward'}
               loading={previewJameya.isPending}
-              disabled={step === 'members' && !form.hasValidMemberCount}
+              disabled={step === 'members' && !form.hasValidTurns}
               onPress={goNext}
               style={{ flex: 1 }}
             />
@@ -170,9 +173,9 @@ export default function NewJameyaScreen() {
 
       <CustomerPickerSheet
         visible={openSheet === 'picker'}
-        selectedIds={form.members.map((member) => member.id)}
+        selectedIds={form.memberTurns.map(({ member }) => member.id)}
         onClose={() => setOpenSheet(null)}
-        onSelect={(customer) => form.toggleMember({ id: customer.id, name: customer.name, phone: customer.phone })}
+        onSelect={(customer) => form.addTurn({ id: customer.id, name: customer.name, phone: customer.phone })}
         onCreateNew={() => setOpenSheet('newCustomer')}
       />
       <CustomerFormSheet
@@ -182,7 +185,7 @@ export default function NewJameyaScreen() {
         onClose={() => setOpenSheet(null)}
         onSubmit={async (input) => {
           const customer = await createCustomer.mutateAsync(input);
-          form.addMember({ id: customer.id, name: customer.name, phone: customer.phone });
+          form.addTurn({ id: customer.id, name: customer.name, phone: customer.phone });
           setOpenSheet(null);
           showToast(t('customerForm.created'));
         }}

@@ -42,7 +42,7 @@ export function JameyaListCard({ jameya, onPress }: { jameya: JameyaListItem; on
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: spacing.sm }}>
             <AppText variant="caption" tone="muted">
-              {t('jameyas.new.memberCount', { count: formatNumber(jameya.shareCount, locale) })}
+              {t('jameyas.new.turnCount', { count: formatNumber(jameya.shareCount, locale) })}
             </AppText>
             {jameya.lateDueCount > 0 ? (
               <Badge
