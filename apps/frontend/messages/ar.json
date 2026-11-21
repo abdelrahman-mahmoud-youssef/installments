@@ -1345,7 +1345,7 @@
       "next": "التالي",
       "toReview": "مراجعة",
       "create": "أنشئ الجمعية",
-      "created": "الجمعية اتعملت.",
+      "created": "اتعملت الجمعية.",
       "createError": "معرفناش نعمل الجمعية.",
       "previewError": "معرفناش نجهّز الجدول."
     },
@@ -1373,9 +1373,9 @@
       "dueOn": "ميعاده",
       "holderIs": "اللي يقبض: {name}",
       "recordPayment": "سجّل دفعة",
-      "paymentHistory": "المدفوعات",
+      "paymentHistory": "سجل الدفعات",
       "paymentsLoadError": "معرفناش نحمّل المدفوعات.",
-      "noPayments": "مفيش مدفوعات لسه"
+      "noPayments": "لسه مفيش دفعات اتسجلت."
     },
     "grid": {
       "member": "العضو",
@@ -1399,12 +1399,12 @@
       "selectMember": "اختار عضو",
       "stillOwes": "لسه عليه",
       "amount": "المبلغ (ج.م)",
-      "paidAt": "اتدفع يوم",
+      "paidAt": "تاريخ الدفع",
       "owesAfterPayment": "هيفضل عليه",
-      "note": "ملاحظة",
+      "note": "ملاحظة (اختياري)",
       "submit": "سجّل الدفعة",
       "submitting": "بنسجّل…",
-      "recorded": "الدفعة اتسجلت.",
+      "recorded": "اتسجلت الدفعة.",
       "recordError": "معرفناش نسجّل الدفعة."
     },
     "payoutDialog": {
@@ -1417,7 +1417,7 @@
       "fromShopMoneyPrefix": "من المبلغ ده،",
       "fromShopMoneySuffix": "هيطلع من فلوس المحل لأنه لسه متجمعش.",
       "paidAt": "اتسلّم يوم",
-      "note": "ملاحظة",
+      "note": "ملاحظة (اختياري)",
       "notePlaceholder": "مثلًا: الباقي الأسبوع الجاي",
       "submit": "سلّم",
       "submitting": "بنحفظ…",
