@@ -12,6 +12,7 @@ const JAMEYA_PAYMENT_SELECT = {
   jameyaId: true,
   customerId: true,
   amount: true,
+  balanceAfter: true,
   paidAt: true,
   note: true,
   clientRequestId: true,
@@ -51,12 +52,14 @@ export class JameyaPaymentsService {
         throw new BadRequestException('The payment is more than what this member still owes.');
       }
 
+      const owedBefore = memberDues.reduce((total, due) => total + due.amount - due.paidAmount, 0);
       const payment = await tx.jameyaPayment.create({
         data: {
           tenantId,
           jameyaId,
           customerId: dto.customerId,
           amount: dto.amount,
+          balanceAfter: owedBefore - dto.amount,
           paidAt: dto.paidAt ? new Date(dto.paidAt) : undefined,
           note: dto.note,
           clientRequestId: dto.clientRequestId,

@@ -808,6 +808,7 @@ model JameyaPayment {
   jameyaId        String
   customerId      String
   amount          Int
+  balanceAfter    Int
   paidAt          DateTime                  @default(now())
   note            String?
   clientRequestId String
