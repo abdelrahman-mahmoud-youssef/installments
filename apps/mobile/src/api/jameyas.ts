@@ -188,7 +188,9 @@ export function listJameyaPayments(
   return apiClient.get(`jameyas/${id}/payments${buildQuery(params)}`);
 }
 
-export function createJameyaPayment(id: string, input: JameyaMoneyEntryInput): Promise<JameyaPayment> {
+export type JameyaPaymentInput = JameyaMoneyEntryInput & { image?: string };
+
+export function createJameyaPayment(id: string, input: JameyaPaymentInput): Promise<JameyaPayment> {
   return apiClient.post(`jameyas/${id}/payments`, input);
 }
 

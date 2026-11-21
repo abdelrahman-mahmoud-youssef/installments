@@ -25,6 +25,7 @@ import {
   JameyaListParams,
   JameyaMoneyEntryInput,
   JameyaPayment,
+  JameyaPaymentInput,
   listJameyaPayments,
   listJameyas,
   previewJameya,
@@ -801,7 +802,7 @@ export function useUpdateJameya(id: string) {
 export function useRecordJameyaPayment(id: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input: JameyaMoneyEntryInput) => createJameyaPayment(id, input),
+    mutationFn: (input: JameyaPaymentInput) => createJameyaPayment(id, input),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.jameyasRoot });
     },

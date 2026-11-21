@@ -22,6 +22,7 @@ import {
 import { useTheme } from '@/theme/theme-context';
 import { radius, spacing } from '@/theme/tokens';
 import { JameyaReceiptIconButton } from './jameya-receipt-icon-button';
+import { JameyaTurnMembers } from './jameya-turn-members';
 import { useShareJameyaReceipt } from './use-share-jameya-receipt';
 
 type HandOver = (cycle: JameyaCycle) => void;
@@ -45,13 +46,14 @@ function TurnStatusText({ status }: { status: JameyaTurnStatus }) {
   );
 }
 
-function TurnPayouts({ jameya, cycle, canManage, onHandOver }: TurnRowProps) {
+function TurnPayouts({ jameya, cycle, canManage, onHandOver, onOpenMember }: TurnRowProps) {
   const { t, locale } = useI18n();
   const { colors } = useTheme();
   const { sharePayoutReceipt, canShare } = useShareJameyaReceipt(jameya.name);
 
   return (
-    <View style={{ gap: spacing.sm, backgroundColor: colors.surfaceMuted, borderRadius: radius.md, padding: spacing.md }}>
+    <View style={{ gap: spacing.md, backgroundColor: colors.surfaceMuted, borderRadius: radius.md, padding: spacing.md }}>
+      <JameyaTurnMembers jameya={jameya} cycle={cycle} onOpenMember={onOpenMember} />
       {cycle.payouts.length === 0 ? (
         <AppText variant="caption" tone="muted">
           {t('jameyas.detail.noPayouts')}
@@ -95,13 +97,10 @@ interface TurnRowProps {
   cycle: JameyaCycle;
   canManage: boolean;
   onHandOver: HandOver;
+  onOpenMember: (customerId: string) => void;
 }
 
-function TurnRow({
-  status,
-  onOpenMember,
-  ...props
-}: TurnRowProps & { status: JameyaTurnStatus; onOpenMember: (customerId: string) => void }) {
+function TurnRow({ status, ...props }: TurnRowProps & { status: JameyaTurnStatus }) {
   const { t, locale } = useI18n();
   const { colors } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
@@ -114,7 +113,7 @@ function TurnRow({
           {formatNumber(cycle.sequence, locale)}
         </AppText>
         <PressableScale
-          onPress={() => onOpenMember(cycle.holders[0].customerId)}
+          onPress={() => props.onOpenMember(cycle.holders[0].customerId)}
           accessibilityRole="button"
           style={{ flex: 1 }}
         >
@@ -143,10 +142,7 @@ function TurnRow({
   );
 }
 
-export function JameyaTurnsList({
-  onOpenMember,
-  ...props
-}: Omit<TurnRowProps, 'cycle'> & { onOpenMember: (customerId: string) => void }) {
+export function JameyaTurnsList(props: Omit<TurnRowProps, 'cycle'>) {
   const { t } = useI18n();
   const [showAll, setShowAll] = useState(false);
   const current = findCurrentTurn(props.jameya);
@@ -162,7 +158,6 @@ export function JameyaTurnsList({
             {...props}
             cycle={cycle}
             status={resolveTurnStatus(cycle, current)}
-            onOpenMember={onOpenMember}
           />
         ))}
         {nearby.length < props.jameya.cycles.length ? (

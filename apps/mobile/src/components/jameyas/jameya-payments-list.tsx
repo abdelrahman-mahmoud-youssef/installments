@@ -6,6 +6,7 @@ import { AppText } from '@/components/ui/app-text';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ErrorState } from '@/components/ui/error-state';
+import { ImageThumbnail } from '@/components/ui/image-thumbnail';
 import { MoneyText } from '@/components/ui/money-text';
 import { SkeletonCardList } from '@/components/ui/skeleton';
 import { useJameyaPayments } from '@/hooks/queries';
@@ -16,6 +17,8 @@ import { useTheme } from '@/theme/theme-context';
 import { radius, spacing } from '@/theme/tokens';
 import { JameyaReceiptIconButton } from './jameya-receipt-icon-button';
 import { useShareJameyaReceipt } from './use-share-jameya-receipt';
+
+const RECEIPT_THUMBNAIL_SIZE = 36;
 
 export function JameyaPaymentsList({ jameya }: { jameya: JameyaDetail }) {
   const { t, locale } = useI18n();
@@ -73,6 +76,9 @@ export function JameyaPaymentsList({ jameya }: { jameya: JameyaDetail }) {
                 ) : null}
               </View>
               <MoneyText minorUnits={payment.amount} variant="bodyStrong" tone="success" />
+              {payment.receiptUrl ? (
+                <ImageThumbnail path={payment.receiptUrl} label={t('jameyas.detail.viewReceipt')} size={RECEIPT_THUMBNAIL_SIZE} />
+              ) : null}
               <JameyaReceiptIconButton
                 disabled={!canShare}
                 onPress={() =>

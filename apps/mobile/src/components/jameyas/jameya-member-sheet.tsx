@@ -2,6 +2,7 @@ import { View } from 'react-native';
 import { JameyaDetail, JameyaMember } from '@/api/jameyas';
 import { AppText } from '@/components/ui/app-text';
 import { BottomSheet } from '@/components/ui/bottom-sheet';
+import { ImageThumbnail } from '@/components/ui/image-thumbnail';
 import { MoneyText } from '@/components/ui/money-text';
 import { SkeletonCardList } from '@/components/ui/skeleton';
 import { useJameyaMemberPayments } from '@/hooks/queries';
@@ -12,6 +13,8 @@ import { radius, spacing } from '@/theme/tokens';
 import { JameyaReceiptIconButton } from './jameya-receipt-icon-button';
 import { JameyaReminderButton } from './jameya-reminder-button';
 import { useShareJameyaReceipt } from './use-share-jameya-receipt';
+
+const RECEIPT_THUMBNAIL_SIZE = 36;
 
 function MemberFigure({ label, minorUnits, isOwed = false }: { label: string; minorUnits: number; isOwed?: boolean }) {
   const { colors } = useTheme();
@@ -69,6 +72,9 @@ function MemberPayments({ jameya, member }: { jameya: JameyaDetail; member: Jame
             ) : null}
           </View>
           <MoneyText minorUnits={payment.amount} variant="bodyStrong" />
+          {payment.receiptUrl ? (
+            <ImageThumbnail path={payment.receiptUrl} label={t('jameyas.detail.viewReceipt')} size={RECEIPT_THUMBNAIL_SIZE} />
+          ) : null}
           <JameyaReceiptIconButton
             disabled={!canShare}
             onPress={() =>
