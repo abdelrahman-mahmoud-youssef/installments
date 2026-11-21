@@ -43,6 +43,7 @@ interface AuthContextValue {
   isReady: boolean;
   isAdmin: boolean;
   canSeeWallets: boolean;
+  canUseJameyas: boolean;
   isSubscriptionExpired: boolean;
   signIn: (email: string, password: string) => Promise<SignInResult>;
   register: (input: RegisterInput) => Promise<void>;
@@ -205,6 +206,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isReady,
       isAdmin: user?.role === 'ADMIN',
       canSeeWallets: user?.walletAccess === 'ALL' || user?.walletAccess === 'SELECTED',
+      canUseJameyas: user?.tenant.jameyaEnabled === true,
       isSubscriptionExpired: user?.subscription.status === 'EXPIRED',
       signIn,
       register: registerAccount,

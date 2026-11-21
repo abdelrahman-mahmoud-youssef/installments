@@ -16,6 +16,20 @@ import {
 import { listAuditLogs } from '@/api/audit';
 import { ChangePasswordInput, changePassword, disableTwoFactor, enableTwoFactor, setupTwoFactor } from '@/api/auth';
 import { getBranding, removeLogo, UpdateBrandingInput, updateBranding, uploadLogo } from '@/api/branding';
+import {
+  createJameya,
+  CreateJameyaInput,
+  createJameyaPayment,
+  createJameyaPayout,
+  getJameya,
+  JameyaListParams,
+  JameyaMoneyEntryInput,
+  listJameyaPayments,
+  listJameyas,
+  previewJameya,
+  updateJameya,
+  UpdateJameyaInput,
+} from '@/api/jameyas';
 import { PaginatedResult } from '@/api/client';
 import {
   CounterpartyHistoryParams,
@@ -154,6 +168,10 @@ export const queryKeys = {
   announcements: ['announcements', 'list'] as const,
   announcementSubscribers: (params: SubscriberListParams) => ['announcements', 'subscribers', params] as const,
   notificationSettings: ['settings', 'notifications'] as const,
+  jameyasRoot: ['jameyas'] as const,
+  jameyas: (params: JameyaListParams) => ['jameyas', 'list', params] as const,
+  jameya: (id: string) => ['jameyas', 'detail', id] as const,
+  jameyaPayments: (id: string) => ['jameyas', 'payments', id] as const,
 };
 
 export function useDashboard(enabled = true) {
@@ -707,4 +725,73 @@ export function useEnableTwoFactor() {
 
 export function useDisableTwoFactor() {
   return useMutation({ mutationFn: (code: string) => disableTwoFactor(code) });
+}
+
+export function useJameyas(params: Omit<JameyaListParams, 'page' | 'limit'>, enabled = true) {
+  return useInfiniteQuery({
+    queryKey: queryKeys.jameyas(params),
+    queryFn: ({ pageParam }) => listJameyas({ ...params, page: pageParam, limit: PAGE_SIZE }),
+    initialPageParam: 1,
+    getNextPageParam: nextPageParam,
+    enabled,
+  });
+}
+
+export function useJameya(id: string, enabled = true) {
+  return useQuery({ queryKey: queryKeys.jameya(id), queryFn: () => getJameya(id), enabled });
+}
+
+export function useJameyaPayments(id: string, enabled = true) {
+  return useInfiniteQuery({
+    queryKey: queryKeys.jameyaPayments(id),
+    queryFn: ({ pageParam }) => listJameyaPayments(id, { page: pageParam, limit: PAGE_SIZE }),
+    initialPageParam: 1,
+    getNextPageParam: nextPageParam,
+    enabled,
+  });
+}
+
+export function usePreviewJameya() {
+  return useMutation({ mutationFn: (input: CreateJameyaInput) => previewJameya(input) });
+}
+
+export function useCreateJameya() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: CreateJameyaInput) => createJameya(input),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.jameyasRoot });
+    },
+  });
+}
+
+export function useUpdateJameya(id: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: UpdateJameyaInput) => updateJameya(id, input),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.jameyasRoot });
+    },
+  });
+}
+
+export function useRecordJameyaPayment(id: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: JameyaMoneyEntryInput) => createJameyaPayment(id, input),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.jameyasRoot });
+    },
+  });
+}
+
+export function useCreateJameyaPayout(id: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ cycleId, input }: { cycleId: string; input: JameyaMoneyEntryInput }) =>
+      createJameyaPayout(id, cycleId, input),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.jameyasRoot });
+    },
+  });
 }

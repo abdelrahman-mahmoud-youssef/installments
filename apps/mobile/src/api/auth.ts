@@ -10,6 +10,7 @@ export interface CurrentUserTenant {
   displayName: string;
   brandColor: string;
   logoUrl: string | null;
+  jameyaEnabled: boolean;
 }
 
 export type SubscriptionStatus = 'TRIAL' | 'ACTIVE' | 'EXPIRED';
