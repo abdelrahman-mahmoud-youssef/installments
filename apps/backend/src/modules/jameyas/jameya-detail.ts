@@ -1,6 +1,7 @@
 import { JameyaDueStatus, Prisma } from '@prisma/client';
 import { calculateEntitlement, calculateExposure, calculatePot } from './jameya-amounts';
 import { isJameyaDueLate } from './jameya-late-where';
+import { formatJameyaReminderMessage } from './jameya-reminder-message';
 
 export const JameyaCycleState = {
   UPCOMING: 'UPCOMING',
@@ -43,10 +44,11 @@ export const JAMEYA_DETAIL_INCLUDE = {
       customerId: true,
       halves: true,
       cycle: { select: { sequence: true } },
-      customer: { select: { name: true, phone: true, photoUrl: true } },
+      customer: { select: { name: true, phone: true, photoUrl: true, notificationLanguage: true } },
     },
   },
   dues: { select: { id: true, cycleId: true, customerId: true, amount: true, paidAmount: true, status: true } },
+  tenant: { select: { name: true } },
 } satisfies Prisma.JameyaInclude;
 
 type JameyaDetailRow = Prisma.JameyaGetPayload<{ include: typeof JAMEYA_DETAIL_INCLUDE }>;
@@ -93,9 +95,10 @@ export interface JameyaMemberSummary {
   lateAmount: number;
   lateDueCount: number;
   receivedAmount: number;
+  reminderMessage: string | null;
 }
 
-export type JameyaDetail = Omit<JameyaDetailRow, 'cycles' | 'shares' | 'dues'> & {
+export type JameyaDetail = Omit<JameyaDetailRow, 'cycles' | 'shares' | 'dues' | 'tenant'> & {
   potAmount: number;
   collectedAmount: number;
   paidOutAmount: number;
@@ -168,10 +171,46 @@ function buildCycleSummary(
   };
 }
 
+interface ReminderContext {
+  businessName: string;
+  jameyaName: string;
+  today: Date;
+}
+
+function buildMemberReminder(
+  share: JameyaShareRow,
+  dues: JameyaDueCell[],
+  cycles: JameyaCycleSummary[],
+  context: ReminderContext,
+): string | null {
+  const outstanding = cycles.flatMap((cycle) =>
+    dues
+      .filter((due) => due.cycleId === cycle.id && due.status !== JameyaDueStatus.PAID)
+      .map((due) => ({ due, dueDate: cycle.dueDate })),
+  );
+  const dueNow = outstanding.filter(({ dueDate }) => dueDate <= context.today);
+  const reminderDues = dueNow.length > 0 ? dueNow : outstanding.slice(0, 1);
+  if (reminderDues.length === 0) {
+    return null;
+  }
+  return formatJameyaReminderMessage(
+    {
+      memberName: share.customer.name,
+      businessName: context.businessName,
+      jameyaName: context.jameyaName,
+      amountDue: sumBy(reminderDues, ({ due }) => due.amount - due.paidAmount),
+      dueDate: reminderDues[0].dueDate,
+      isLate: reminderDues.some(({ due }) => due.isLate),
+    },
+    share.customer.notificationLanguage,
+  );
+}
+
 function buildMemberSummaries(
   shares: JameyaShareRow[],
   dues: JameyaDueCell[],
   cycles: JameyaCycleSummary[],
+  context: ReminderContext,
 ): JameyaMemberSummary[] {
   const customerIds = [...new Set(shares.map((share) => share.customerId))];
   return customerIds.map((customerId) => {
@@ -195,12 +234,13 @@ function buildMemberSummaries(
         cycles.flatMap((cycle) => cycle.holders).filter((holder) => holder.customerId === customerId),
         (holder) => holder.paidOutAmount,
       ),
+      reminderMessage: buildMemberReminder(customerShares[0], memberDues, cycles, context),
     };
   });
 }
 
 export function buildJameyaDetail(row: JameyaDetailRow, today: Date): JameyaDetail {
-  const { cycles, shares, dues, ...jameya } = row;
+  const { cycles, shares, dues, tenant, ...jameya } = row;
   const potAmount = calculatePot(jameya.shareAmount, jameya.shareCount);
   const dueCellsByCycle = cycles.map((cycle) =>
     dues
@@ -226,7 +266,11 @@ export function buildJameyaDetail(row: JameyaDetailRow, today: Date): JameyaDeta
     collectedAmount,
     paidOutAmount,
     exposureAmount: sumBy(cycleSummaries, (cycle) => cycle.exposureAmount),
-    members: buildMemberSummaries(shares, dueCells, cycleSummaries),
+    members: buildMemberSummaries(shares, dueCells, cycleSummaries, {
+      businessName: tenant.name,
+      jameyaName: jameya.name,
+      today,
+    }),
     cycles: cycleSummaries,
     dues: dueCells,
   };
