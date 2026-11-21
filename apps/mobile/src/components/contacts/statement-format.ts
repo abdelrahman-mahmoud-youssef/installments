@@ -21,6 +21,11 @@ export function splitStatementMoney(minorUnits: number, locale: Locale): { curre
   };
 }
 
+export function formatStatementDate(isoDate: string): string {
+  const date = new Date(isoDate);
+  return `${padTwo(date.getUTCDate())}/${padTwo(date.getUTCMonth() + 1)}/${date.getUTCFullYear()}`;
+}
+
 export function formatStatementDateTime(date: Date): string {
   const day = `${padTwo(date.getDate())}/${padTwo(date.getMonth() + 1)}/${date.getFullYear()}`;
   return `${day}, ${padTwo(date.getHours())}:${padTwo(date.getMinutes())}`;

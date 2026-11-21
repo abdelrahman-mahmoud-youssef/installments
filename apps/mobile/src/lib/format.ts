@@ -67,6 +67,17 @@ export function formatDate(isoDate: string, locale: Locale): string {
   );
 }
 
+export function formatCalendarDate(isoDate: string, locale: Locale): string {
+  return toLatinDigits(
+    new Intl.DateTimeFormat(intlLocale(locale), {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      timeZone: 'UTC',
+    }).format(new Date(isoDate)),
+  );
+}
+
 export function formatDateTime(isoDate: string, locale: Locale): string {
   return toLatinDigits(
     new Intl.DateTimeFormat(intlLocale(locale), {

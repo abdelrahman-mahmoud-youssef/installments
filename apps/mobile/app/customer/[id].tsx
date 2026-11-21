@@ -4,6 +4,7 @@ import { Linking, RefreshControl, ScrollView, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { CustomerDetail } from '@/api/customers';
 import { CustomerContractsSection } from '@/components/customers/customer-contracts-section';
+import { CustomerJameyasSection } from '@/components/jameyas/customer-jameyas-section';
 import { CustomerFormSheet } from '@/components/customers/customer-form-sheet';
 import { NotificationHistorySheet } from '@/components/customers/notification-history-sheet';
 import { ShareLinkSheet } from '@/components/sharing/share-link-sheet';
@@ -177,6 +178,7 @@ export default function CustomerDetailScreen() {
             ) : null}
 
             <CustomerContractsSection contracts={data.contracts} onNewContract={() => openNewContract(data)} />
+            <CustomerJameyasSection customerId={data.id} />
           </>
         ) : null}
       </ScrollView>

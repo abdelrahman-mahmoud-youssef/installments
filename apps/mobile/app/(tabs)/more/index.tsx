@@ -19,7 +19,7 @@ import { useTheme } from '@/theme/theme-context';
 import { spacing } from '@/theme/tokens';
 
 export default function MoreScreen() {
-  const { user, isAdmin, signOut } = useAuth();
+  const { user, isAdmin, canUseJameyas, signOut } = useAuth();
   const { t, locale } = useI18n();
   const { colors } = useTheme();
   const router = useRouter();
@@ -112,6 +112,14 @@ export default function MoreScreen() {
               onPress={() => router.push('/reports')}
               showChevron
             />
+            {canUseJameyas ? (
+              <ListRow
+                icon="people-circle-outline"
+                title={t('more.jameyas')}
+                onPress={() => router.push('/jameyas')}
+                showChevron
+              />
+            ) : null}
           </Card>
         </View>
 
