@@ -5,14 +5,17 @@ import { RefreshControl, ScrollView, View } from 'react-native';
 import { JameyaCycle } from '@/api/jameyas';
 import { useAuth } from '@/auth/auth-context';
 import { jameyaForbiddenMessage } from '@/components/jameyas/jameya-access';
-import { JameyaCurrentCycleCard } from '@/components/jameyas/jameya-current-cycle-card';
-import { JameyaCyclesList } from '@/components/jameyas/jameya-cycles-list';
+import { JameyaCurrentTurnCard } from '@/components/jameyas/jameya-current-turn-card';
 import { JameyaEditSheet } from '@/components/jameyas/jameya-edit-sheet';
+import { JameyaMemberSheet } from '@/components/jameyas/jameya-member-sheet';
 import { JameyaMembersGrid } from '@/components/jameyas/jameya-members-grid';
 import { JameyaPaymentSheet } from '@/components/jameyas/jameya-payment-sheet';
 import { JameyaPaymentsList } from '@/components/jameyas/jameya-payments-list';
 import { JameyaPayoutSheet } from '@/components/jameyas/jameya-payout-sheet';
-import { JameyaSummary } from '@/components/jameyas/jameya-summary';
+import { JameyaTurnsList } from '@/components/jameyas/jameya-turns-list';
+import { JameyaUnpaidMembers } from '@/components/jameyas/jameya-unpaid-members';
+import { AppText } from '@/components/ui/app-text';
+import { BottomSheet } from '@/components/ui/bottom-sheet';
 import { Button } from '@/components/ui/button';
 import { DataFreshness } from '@/components/ui/data-freshness';
 import { DetailFallback } from '@/components/ui/detail-fallback';
@@ -21,20 +24,21 @@ import { PressableScale } from '@/components/ui/pressable-scale';
 import { SectionHeader } from '@/components/ui/section-header';
 import { useJameya } from '@/hooks/queries';
 import { useI18n } from '@/i18n/i18n-context';
+import { formatMoney, formatNumber } from '@/lib/format';
 import { useTheme } from '@/theme/theme-context';
 import { floatingActionClearance, spacing } from '@/theme/tokens';
 
-type OpenSheet = 'payment' | 'payout' | 'edit' | null;
+type OpenSheet = 'payment' | 'payout' | 'edit' | 'grid' | 'payments' | null;
 
 export default function JameyaDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const { colors } = useTheme();
   const { isAdmin, canUseJameyas } = useAuth();
   const { data, dataUpdatedAt, isPending, isError, error, refetch, isRefetching } = useJameya(id, canUseJameyas);
   const [openSheet, setOpenSheet] = useState<OpenSheet>(null);
-  const [paymentCustomerId, setPaymentCustomerId] = useState<string | null>(null);
   const [payoutCycle, setPayoutCycle] = useState<JameyaCycle | null>(null);
+  const [memberId, setMemberId] = useState<string | null>(null);
   const forbiddenMessage = jameyaForbiddenMessage(error);
   const closeSheet = () => setOpenSheet(null);
 
@@ -52,13 +56,7 @@ export default function JameyaDetailScreen() {
     );
   }
 
-  const isActive = data.status === 'ACTIVE';
-  const canRecordPayment = isActive && data.members.some((member) => member.remainingAmount > 0);
-
-  const startPayment = (customerId: string | null) => {
-    setPaymentCustomerId(customerId);
-    setOpenSheet('payment');
-  };
+  const canRecordPayment = data.status === 'ACTIVE' && data.members.some((member) => member.remainingAmount > 0);
 
   const startPayout = (cycle: JameyaCycle) => {
     setPayoutCycle(cycle);
@@ -93,31 +91,43 @@ export default function JameyaDetailScreen() {
         }
       >
         <DataFreshness updatedAt={dataUpdatedAt} hasRefreshFailed={isError} />
-        <JameyaSummary jameya={data} />
+        <AppText variant="caption" tone="muted">
+          {t('jameyas.detail.headerLine', {
+            members: formatNumber(data.members.length, locale),
+            share: formatMoney(data.shareAmount, locale),
+            period: t(`jameyas.detail.period.${data.recurrenceType}`),
+            pot: formatMoney(data.potAmount, locale),
+          })}
+        </AppText>
 
         <View style={{ gap: spacing.md }}>
-          <SectionHeader title={t('jameyas.detail.currentCycle')} />
-          <JameyaCurrentCycleCard
-            jameya={data}
-            canManage={isAdmin}
-            onRecordPayment={startPayment}
-            onHandOver={startPayout}
+          <SectionHeader title={t(`jameyas.detail.currentTitle.${data.recurrenceType}`)} />
+          <JameyaCurrentTurnCard jameya={data} canManage={isAdmin} onHandOver={startPayout} />
+        </View>
+
+        <View style={{ gap: spacing.md }}>
+          <SectionHeader title={t('jameyas.detail.unpaidTitle')} />
+          <JameyaUnpaidMembers jameya={data} onOpenMember={setMemberId} />
+        </View>
+
+        <View style={{ gap: spacing.md }}>
+          <SectionHeader title={t('jameyas.detail.turnsTitle')} />
+          <JameyaTurnsList jameya={data} canManage={isAdmin} onHandOver={startPayout} onOpenMember={setMemberId} />
+        </View>
+
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+          <Button
+            variant="ghost"
+            icon="grid-outline"
+            title={t('jameyas.detail.fullTable')}
+            onPress={() => setOpenSheet('grid')}
           />
-        </View>
-
-        <View style={{ gap: spacing.md }}>
-          <SectionHeader title={t('jameyas.detail.grid')} />
-          <JameyaMembersGrid jameya={data} />
-        </View>
-
-        <View style={{ gap: spacing.md }}>
-          <SectionHeader title={t('jameyas.detail.cycles')} />
-          <JameyaCyclesList jameya={data} canManage={isAdmin} onHandOver={startPayout} />
-        </View>
-
-        <View style={{ gap: spacing.md }}>
-          <SectionHeader title={t('jameyas.detail.paymentHistory')} />
-          <JameyaPaymentsList jameya={data} />
+          <Button
+            variant="ghost"
+            icon="receipt-outline"
+            title={t('jameyas.detail.allPayments')}
+            onPress={() => setOpenSheet('payments')}
+          />
         </View>
       </ScrollView>
 
@@ -127,17 +137,19 @@ export default function JameyaDetailScreen() {
             variant="glass"
             title={t('jameyas.detail.recordPayment')}
             icon="add-circle-outline"
-            onPress={() => startPayment(null)}
+            onPress={() => setOpenSheet('payment')}
           />
         </FloatingActionBar>
       ) : null}
 
-      <JameyaPaymentSheet
-        visible={openSheet === 'payment'}
-        jameya={data}
-        defaultCustomerId={paymentCustomerId}
-        onClose={closeSheet}
-      />
+      <BottomSheet visible={openSheet === 'grid'} onClose={closeSheet} title={t('jameyas.detail.fullTable')}>
+        <JameyaMembersGrid jameya={data} />
+      </BottomSheet>
+      <BottomSheet visible={openSheet === 'payments'} onClose={closeSheet} title={t('jameyas.detail.allPayments')}>
+        <JameyaPaymentsList jameya={data} />
+      </BottomSheet>
+      <JameyaMemberSheet jameya={data} customerId={memberId} onClose={() => setMemberId(null)} />
+      <JameyaPaymentSheet visible={openSheet === 'payment'} jameya={data} onClose={closeSheet} />
       {isAdmin ? (
         <>
           <JameyaPayoutSheet visible={openSheet === 'payout'} jameya={data} cycle={payoutCycle} onClose={closeSheet} />

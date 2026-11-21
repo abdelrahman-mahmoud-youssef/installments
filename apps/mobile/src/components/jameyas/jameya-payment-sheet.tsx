@@ -19,19 +19,15 @@ import { useJameyaMoneyEntry } from './use-jameya-money-entry';
 interface JameyaPaymentSheetProps {
   visible: boolean;
   jameya: JameyaDetail;
-  defaultCustomerId: string | null;
   onClose: () => void;
 }
 
-export function JameyaPaymentSheet({ visible, jameya, defaultCustomerId, onClose }: JameyaPaymentSheetProps) {
+export function JameyaPaymentSheet({ visible, jameya, onClose }: JameyaPaymentSheetProps) {
   const { t, locale } = useI18n();
   const { showToast } = useToast();
   const recordPayment = useRecordJameyaPayment(jameya.id);
   const owingMembers = jameya.members.filter((member) => member.remainingAmount > 0);
-  const entry = useJameyaMoneyEntry(visible, {
-    customerId: defaultCustomerId ?? owingMembers[0]?.customerId ?? '',
-    amount: 0,
-  });
+  const entry = useJameyaMoneyEntry(visible, { customerId: owingMembers[0]?.customerId ?? '', amount: 0 });
   const selectedMember = jameya.members.find((member) => member.customerId === entry.customerId);
   const owed = selectedMember?.remainingAmount ?? 0;
 

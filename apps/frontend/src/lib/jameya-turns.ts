@@ -13,7 +13,7 @@ function sumHolders(cycle: JameyaCycle, amountOf: (holder: JameyaCycle['holders'
   return cycle.holders.reduce((total, holder) => total + amountOf(holder), 0);
 }
 
-export function owedToHolders(cycle: JameyaCycle): number {
+function owedToHolders(cycle: JameyaCycle): number {
   return sumHolders(cycle, (holder) => holder.remainingAmount);
 }
 
