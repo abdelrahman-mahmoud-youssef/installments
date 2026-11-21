@@ -19,7 +19,7 @@ export interface JameyaListItem {
 }
 
 export interface JameyaMemberStanding {
-  turnSequence: number;
+  turnSequences: number[];
   remainingAmount: number;
   lateAmount: number;
   receivedAmount: number;

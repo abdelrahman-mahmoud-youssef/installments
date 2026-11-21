@@ -60,7 +60,7 @@ export default function JameyasPage() {
     },
     {
       id: 'members',
-      header: t('list.members'),
+      header: t('list.turns'),
       cell: (jameya) => <span className="text-muted-foreground tabular-nums">{jameya.shareCount}</span>,
     },
     {

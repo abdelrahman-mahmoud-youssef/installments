@@ -1284,7 +1284,6 @@
     "list": {
       "name": "Jameya",
       "pot": "Pot per turn",
-      "members": "Members",
       "nextCycle": "Next turn",
       "nextCycleValue": "Turn {sequence}",
       "status": "Status",
@@ -1292,7 +1291,8 @@
       "searchPlaceholder": "Search by name",
       "loadError": "Couldn't load jameyas.",
       "empty": "No jameyas here yet",
-      "createPrompt": "Start a jameya with your customers and track every turn."
+      "createPrompt": "Start a jameya with your customers and track every turn.",
+      "turns": "Turns"
     },
     "customerSection": {
       "title": "Jameyas",
@@ -1301,7 +1301,9 @@
       "turnValue": "Turn {sequence}",
       "owes": "Still owes",
       "received": "Received",
-      "late": "Late"
+      "late": "Late",
+      "turnsValue": "Turns {sequences}",
+      "sequenceSeparator": ", "
     },
     "new": {
       "title": "New jameya",
@@ -1320,11 +1322,10 @@
       "graceDays": "Grace days",
       "graceDaysHint": "A payment counts as late only after this many days.",
       "notes": "Notes",
-      "membersHint": "Add between {min} and {max} members. Each member holds one turn.",
+      "membersHint": "Add between {min} and {max} turns. Pick a customer again to give them another turn.",
       "loadingCustomers": "Loading customers…",
       "addMember": "Add a customer",
       "noMembers": "No members added yet.",
-      "removeMember": "Remove {name}",
       "memberCount": "{count, plural, one {# member} other {# members}}",
       "orderHint": "The first member receives the first turn. Move members or shuffle them.",
       "randomOrder": "Random order",
@@ -1347,11 +1348,16 @@
       "create": "Create jameya",
       "created": "Jameya created.",
       "createError": "Couldn't create the jameya.",
-      "previewError": "Couldn't prepare the schedule."
+      "previewError": "Couldn't prepare the schedule.",
+      "turnCount": "{count, plural, one {# turn} other {# turns}}",
+      "turnsBadge": "×{count}",
+      "addTurn": "Give {name} another turn",
+      "removeTurn": "Remove one turn from {name}",
+      "minMembers": "Add at least two different customers."
     },
     "detail": {
       "notFound": "Jameya not found",
-      "summaryLine": "{members} members · {recurrence}",
+      "summaryLine": "{members} members · {turns} turns · {recurrence}",
       "perShare": "per share",
       "pot": "Pot per turn",
       "collected": "Collected",

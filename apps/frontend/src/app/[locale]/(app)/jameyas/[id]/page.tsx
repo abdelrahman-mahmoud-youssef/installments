@@ -75,7 +75,8 @@ export default function JameyaDetailPage() {
             </div>
             <p className="text-sm text-muted-foreground">
               {t('summaryLine', {
-                members: jameya.shareCount,
+                members: jameya.members.length,
+                turns: jameya.shareCount,
                 recurrence: tRecurrence(jameya.recurrenceType),
               })}{' '}
               · <Money minorUnits={jameya.shareAmount} /> {t('perShare')}

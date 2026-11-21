@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowDown, ArrowUp, Loader2, Shuffle, UserPlus, X } from 'lucide-react';
+import { ArrowDown, ArrowUp, Loader2, Minus, Plus, Shuffle, UserPlus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -15,6 +15,7 @@ import { Money } from '@/components/shared/money';
 import { NumberInput } from '@/components/shared/number-input';
 import { PageHeader } from '@/components/shared/page-header';
 import { Section } from '@/components/shared/section';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -31,8 +32,9 @@ import { toMinorUnits, todayIso } from '@/lib/format';
 import { routes } from '@/lib/routes';
 import {
   createJameyaDetailsSchema,
-  JAMEYA_MAX_MEMBERS,
+  JAMEYA_MAX_TURNS,
   JAMEYA_MIN_MEMBERS,
+  JAMEYA_MIN_TURNS,
   JameyaDetailsInput,
 } from '@/lib/schemas/jameya';
 import { cn } from '@/lib/utils';
@@ -44,6 +46,28 @@ interface SelectedMember {
   id: string;
   name: string;
   phone: string;
+}
+
+interface SelectedTurn extends SelectedMember {
+  turnId: string;
+}
+
+interface MemberTurns {
+  member: SelectedMember;
+  count: number;
+}
+
+function groupTurns(turns: SelectedTurn[]): MemberTurns[] {
+  const groups = new Map<string, MemberTurns>();
+  for (const turn of turns) {
+    const group = groups.get(turn.id);
+    if (group) {
+      group.count += 1;
+    } else {
+      groups.set(turn.id, { member: turn, count: 1 });
+    }
+  }
+  return [...groups.values()];
 }
 
 type PreviewCycle = JameyaPreview['cycles'][number];
@@ -97,7 +121,7 @@ export default function NewJameyaPage() {
   const messages = useJameyaValidationMessages();
   const [schema] = useState(() => createJameyaDetailsSchema(messages));
   const [step, setStep] = useState<Step>('details');
-  const [members, setMembers] = useState<SelectedMember[]>([]);
+  const [turns, setTurns] = useState<SelectedTurn[]>([]);
   const [preview, setPreview] = useState<JameyaPreview | null>(null);
   const { data: customers, isLoading: isLoadingCustomers } = useCustomers({ status: 'ACTIVE', limit: 100 });
   const createCustomer = useCreateCustomer();
@@ -116,15 +140,24 @@ export default function NewJameyaPage() {
     },
   });
 
-  const selectedIds = new Set(members.map((member) => member.id));
-  const availableCustomers = (customers?.data ?? []).filter((customer) => !selectedIds.has(customer.id));
+  const availableCustomers = customers?.data ?? [];
   const customerItems = Object.fromEntries(availableCustomers.map((customer) => [customer.id, customer.name]));
   const recurrenceItems = Object.fromEntries(JAMEYA_RECURRENCE_TYPES.map((type) => [type, tRecurrence(type)]));
-  const memberCountIsValid = members.length >= JAMEYA_MIN_MEMBERS && members.length <= JAMEYA_MAX_MEMBERS;
-  const nameOf = (customerId: string) => members.find((member) => member.id === customerId)?.name ?? '';
+  const memberTurns = groupTurns(turns);
+  const hasEnoughMembers = memberTurns.length >= JAMEYA_MIN_MEMBERS;
+  const turnCountIsValid = hasEnoughMembers && turns.length >= JAMEYA_MIN_TURNS && turns.length <= JAMEYA_MAX_TURNS;
+  const nameOf = (customerId: string) => turns.find((turn) => turn.id === customerId)?.name ?? '';
+  const turnCountOf = (customerId: string) => turns.filter((turn) => turn.id === customerId).length;
 
-  function addMember(member: SelectedMember) {
-    setMembers((current) => (current.some((item) => item.id === member.id) ? current : [...current, member]));
+  function addTurn(member: SelectedMember) {
+    setTurns((current) => [...current, { ...member, turnId: crypto.randomUUID() }]);
+  }
+
+  function removeTurn(customerId: string) {
+    setTurns((current) => {
+      const lastIndex = current.map((turn) => turn.id).lastIndexOf(customerId);
+      return current.filter((_, index) => index !== lastIndex);
+    });
   }
 
   function buildPayload(): CreateJameyaPayload {
@@ -136,7 +169,7 @@ export default function NewJameyaPage() {
       firstDueDate: values.firstDueDate,
       graceDays: values.graceDays,
       notes: values.notes || undefined,
-      customerIds: members.map((member) => member.id),
+      customerIds: turns.map((turn) => turn.id),
     };
   }
 
@@ -166,7 +199,7 @@ export default function NewJameyaPage() {
   async function handleNext() {
     if (step === 'details' && (await form.trigger())) {
       setStep('members');
-    } else if (step === 'members' && memberCountIsValid) {
+    } else if (step === 'members' && turnCountIsValid) {
       setStep('order');
     } else if (step === 'order') {
       await goToReview();
@@ -323,7 +356,7 @@ export default function NewJameyaPage() {
       {step === 'members' && (
         <Section
           title={t('steps.members')}
-          description={t('membersHint', { min: JAMEYA_MIN_MEMBERS, max: JAMEYA_MAX_MEMBERS })}
+          description={t('membersHint', { min: JAMEYA_MIN_TURNS, max: JAMEYA_MAX_TURNS })}
           action={
             <CustomerFormDialog
               trigger={
@@ -334,7 +367,7 @@ export default function NewJameyaPage() {
               }
               onSubmit={async (input) => {
                 const customer = await createCustomer.mutateAsync(input);
-                addMember({ id: customer.id, name: customer.name, phone: customer.phone });
+                addTurn({ id: customer.id, name: customer.name, phone: customer.phone });
               }}
             />
           }
@@ -345,7 +378,7 @@ export default function NewJameyaPage() {
               onValueChange={(value) => {
                 const customer = availableCustomers.find((item) => item.id === value);
                 if (customer) {
-                  addMember({ id: customer.id, name: customer.name, phone: customer.phone });
+                  addTurn({ id: customer.id, name: customer.name, phone: customer.phone });
                 }
               }}
               items={customerItems}
@@ -362,32 +395,50 @@ export default function NewJameyaPage() {
               </SelectContent>
             </Select>
 
-            {members.length === 0 ? (
+            {memberTurns.length === 0 ? (
               <p className="text-sm text-muted-foreground">{t('noMembers')}</p>
             ) : (
               <ul className="divide-y divide-border rounded-lg border border-border">
-                {members.map((member) => (
+                {memberTurns.map(({ member, count }) => (
                   <li key={member.id} className="flex items-center justify-between gap-3 px-3 py-2">
-                    <span className="min-w-0 truncate text-sm">
-                      <span className="font-medium">{member.name}</span>{' '}
-                      <span dir="ltr" className="text-muted-foreground tabular-nums">
+                    <span className="flex min-w-0 items-center gap-2 text-sm">
+                      <span className="truncate font-medium">{member.name}</span>
+                      <span dir="ltr" className="shrink-0 text-muted-foreground tabular-nums">
                         {member.phone}
                       </span>
+                      {count > 1 && <Badge variant="secondary">{t('turnsBadge', { count })}</Badge>}
                     </span>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-sm"
-                      aria-label={t('removeMember', { name: member.name })}
-                      onClick={() => setMembers((current) => current.filter((item) => item.id !== member.id))}
-                    >
-                      <X className="size-4" />
-                    </Button>
+                    <span className="flex shrink-0 items-center gap-1">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-label={t('addTurn', { name: member.name })}
+                        title={t('addTurn', { name: member.name })}
+                        disabled={turns.length >= JAMEYA_MAX_TURNS}
+                        onClick={() => addTurn(member)}
+                      >
+                        <Plus className="size-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-label={t('removeTurn', { name: member.name })}
+                        title={t('removeTurn', { name: member.name })}
+                        onClick={() => removeTurn(member.id)}
+                      >
+                        <Minus className="size-4" />
+                      </Button>
+                    </span>
                   </li>
                 ))}
               </ul>
             )}
-            <p className="text-xs text-muted-foreground">{t('memberCount', { count: members.length })}</p>
+            <p className="text-xs text-muted-foreground">
+              {t('memberCount', { count: memberTurns.length })} · {t('turnCount', { count: turns.length })}
+            </p>
+            {turns.length > 0 && !hasEnoughMembers && <p className="text-sm text-danger">{t('minMembers')}</p>}
           </div>
         </Section>
       )}
@@ -397,26 +448,26 @@ export default function NewJameyaPage() {
           title={t('steps.order')}
           description={t('orderHint')}
           action={
-            <Button type="button" variant="outline" size="sm" onClick={() => setMembers(shuffled(members))}>
+            <Button type="button" variant="outline" size="sm" onClick={() => setTurns(shuffled(turns))}>
               <Shuffle className="size-4" />
               {t('randomOrder')}
             </Button>
           }
         >
           <ol className="divide-y divide-border rounded-lg border border-border">
-            {members.map((member, index) => (
-              <li key={member.id} className="flex items-center gap-3 px-3 py-2">
+            {turns.map((turn, index) => (
+              <li key={turn.turnId} className="flex items-center gap-3 px-3 py-2">
                 <span className="w-16 shrink-0 text-xs text-muted-foreground">
                   {t('turnNumber', { sequence: index + 1 })}
                 </span>
-                <span className="min-w-0 flex-1 truncate text-sm font-medium">{member.name}</span>
+                <span className="min-w-0 flex-1 truncate text-sm font-medium">{turn.name}</span>
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon-sm"
                   disabled={index === 0}
-                  aria-label={t('moveUp', { name: member.name })}
-                  onClick={() => setMembers(moved(members, index, index - 1))}
+                  aria-label={t('moveUp', { name: turn.name })}
+                  onClick={() => setTurns(moved(turns, index, index - 1))}
                 >
                   <ArrowUp className="size-4" />
                 </Button>
@@ -424,9 +475,9 @@ export default function NewJameyaPage() {
                   type="button"
                   variant="ghost"
                   size="icon-sm"
-                  disabled={index === members.length - 1}
-                  aria-label={t('moveDown', { name: member.name })}
-                  onClick={() => setMembers(moved(members, index, index + 1))}
+                  disabled={index === turns.length - 1}
+                  aria-label={t('moveDown', { name: turn.name })}
+                  onClick={() => setTurns(moved(turns, index, index + 1))}
                 >
                   <ArrowDown className="size-4" />
                 </Button>
@@ -448,9 +499,17 @@ export default function NewJameyaPage() {
               </div>
               <div className="space-y-0.5">
                 <dt className="text-xs text-muted-foreground">{t('review.perMember')}</dt>
-                <dd className="space-y-0.5 text-sm">
-                  {[...new Set(preview.dueAmounts.map((due) => due.amount))].map((amount) => (
-                    <Money key={amount} minorUnits={amount} className="block font-heading text-lg font-semibold" />
+                <dd className="space-y-1 text-sm">
+                  {preview.dueAmounts.map((due) => (
+                    <div key={due.customerId} className="flex items-center justify-between gap-3">
+                      <span className="flex min-w-0 items-center gap-1.5">
+                        <span className="truncate">{nameOf(due.customerId)}</span>
+                        {turnCountOf(due.customerId) > 1 && (
+                          <Badge variant="secondary">{t('turnsBadge', { count: turnCountOf(due.customerId) })}</Badge>
+                        )}
+                      </span>
+                      <Money minorUnits={due.amount} className="shrink-0 font-semibold" />
+                    </div>
                   ))}
                 </dd>
               </div>
@@ -482,7 +541,7 @@ export default function NewJameyaPage() {
           <Button
             type="button"
             onClick={() => void handleNext()}
-            disabled={(step === 'members' && !memberCountIsValid) || previewJameya.isPending}
+            disabled={(step === 'members' && !turnCountIsValid) || previewJameya.isPending}
           >
             {previewJameya.isPending && <Loader2 className="size-4 animate-spin" />}
             {step === 'order' ? t('toReview') : t('next')}

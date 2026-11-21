@@ -1284,7 +1284,6 @@
     "list": {
       "name": "الجمعية",
       "pot": "القبض في كل دور",
-      "members": "الأعضاء",
       "nextCycle": "الدور الجاي",
       "nextCycleValue": "الدور {sequence}",
       "status": "الحالة",
@@ -1292,7 +1291,8 @@
       "searchPlaceholder": "دوّر بالاسم",
       "loadError": "معرفناش نحمّل الجمعيات.",
       "empty": "مفيش جمعيات هنا لسه",
-      "createPrompt": "ابدأ جمعية مع عملائك وتابع كل دور."
+      "createPrompt": "ابدأ جمعية مع عملائك وتابع كل دور.",
+      "turns": "الأدوار"
     },
     "customerSection": {
       "title": "الجمعيات",
@@ -1301,7 +1301,9 @@
       "turnValue": "الدور {sequence}",
       "owes": "لسه عليه",
       "received": "قبض",
-      "late": "متأخر"
+      "late": "متأخر",
+      "turnsValue": "الأدوار {sequences}",
+      "sequenceSeparator": "، "
     },
     "new": {
       "title": "جمعية جديدة",
@@ -1320,11 +1322,10 @@
       "graceDays": "أيام السماح",
       "graceDaysHint": "الدفعة تبقى متأخرة بعد عدد الأيام ده بس.",
       "notes": "ملاحظات",
-      "membersHint": "ضيف من {min} لـ {max} عضو. كل عضو له دور واحد.",
+      "membersHint": "ضيف من {min} لـ {max} دور. اختار العميل تاني لو هياخد أكتر من دور.",
       "loadingCustomers": "بنحمّل العملاء…",
       "addMember": "ضيف عميل",
       "noMembers": "لسه مضفتش أعضاء.",
-      "removeMember": "شيل {name}",
       "memberCount": "{count, plural, one {عضو واحد} two {عضوين} few {# أعضاء} many {# عضو} other {# عضو}}",
       "orderHint": "أول عضو يقبض أول دور. حرّك الأعضاء أو رتّبهم عشوائي.",
       "randomOrder": "ترتيب عشوائي",
@@ -1347,11 +1348,16 @@
       "create": "أنشئ الجمعية",
       "created": "اتعملت الجمعية.",
       "createError": "معرفناش نعمل الجمعية.",
-      "previewError": "معرفناش نجهّز الجدول."
+      "previewError": "معرفناش نجهّز الجدول.",
+      "turnCount": "{count, plural, one {دور واحد} two {دورين} few {# أدوار} many {# دور} other {# دور}}",
+      "turnsBadge": "×{count}",
+      "addTurn": "زوّد دور لـ {name}",
+      "removeTurn": "شيل دور من {name}",
+      "minMembers": "ضيف عميلين مختلفين على الأقل."
     },
     "detail": {
       "notFound": "الجمعية مش موجودة",
-      "summaryLine": "{members} عضو · {recurrence}",
+      "summaryLine": "{members} عضو · {turns} دور · {recurrence}",
       "perShare": "للسهم",
       "pot": "القبض في كل دور",
       "collected": "اتجمع",

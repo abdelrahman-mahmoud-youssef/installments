@@ -49,7 +49,11 @@ function CustomerJameyasTable({ customerId }: { customerId: string }) {
       cell: (jameya) =>
         jameya.member ? (
           <span className="text-muted-foreground">
-            {t('customerSection.turnValue', { sequence: jameya.member.turnSequence })}
+            {jameya.member.turnSequences.length > 1
+              ? t('customerSection.turnsValue', {
+                  sequences: jameya.member.turnSequences.join(t('customerSection.sequenceSeparator')),
+                })
+              : t('customerSection.turnValue', { sequence: jameya.member.turnSequences[0] })}
           </span>
         ) : null,
     },
