@@ -15,6 +15,14 @@ export interface JameyaListItem {
   potAmount: number;
   nextCycle: { sequence: number; dueDate: string } | null;
   lateDueCount: number;
+  member?: JameyaMemberStanding;
+}
+
+export interface JameyaMemberStanding {
+  turnSequence: number;
+  remainingAmount: number;
+  lateAmount: number;
+  receivedAmount: number;
 }
 
 export interface JameyaListParams {
@@ -71,6 +79,7 @@ export interface JameyaMember {
   lateAmount: number;
   lateDueCount: number;
   receivedAmount: number;
+  reminderMessage: string | null;
 }
 
 export interface JameyaDue {
@@ -83,7 +92,7 @@ export interface JameyaDue {
   isLate: boolean;
 }
 
-export interface JameyaDetail extends Omit<JameyaListItem, 'nextCycle' | 'lateDueCount'> {
+export interface JameyaDetail extends Omit<JameyaListItem, 'nextCycle' | 'lateDueCount' | 'member'> {
   notes: string | null;
   updatedAt: string;
   collectedAmount: number;
@@ -99,6 +108,7 @@ export interface JameyaPayment {
   jameyaId: string;
   customerId: string;
   amount: number;
+  balanceAfter: number;
   paidAt: string;
   note: string | null;
   clientRequestId: string;

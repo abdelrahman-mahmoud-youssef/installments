@@ -1296,7 +1296,12 @@
     },
     "customerSection": {
       "title": "Jameyas",
-      "empty": "This customer is not in any jameya."
+      "empty": "This customer is not in any jameya.",
+      "turn": "Turn",
+      "turnValue": "Turn {sequence}",
+      "owes": "Still owes",
+      "received": "Received",
+      "late": "Late"
     },
     "new": {
       "title": "New jameya",
@@ -1384,7 +1389,8 @@
         "late": "Late",
         "due": "Due",
         "upcoming": "Upcoming"
-      }
+      },
+      "sendReminder": "Send a WhatsApp reminder to {name}"
     },
     "paymentDialog": {
       "title": "Record payment",
@@ -1443,11 +1449,11 @@
       "turnValue": "Turn {sequence} · {date}",
       "paidOn": "Date",
       "note": "Note",
-      "stillOwed": "Still owed as of {date}",
       "stillOwedForTurn": "Still owed for this turn",
       "footerPrefix": "Issued by",
       "download": "Receipt",
-      "shareError": "Couldn't create the receipt."
+      "shareError": "Couldn't create the receipt.",
+      "balanceAfter": "Still owed after this payment"
     },
     "validation": {
       "nameRequired": "Enter a name.",

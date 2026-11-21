@@ -3,11 +3,11 @@
 import { HandCoins } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { DataTable, type Column } from '@/components/shared/data-table';
-import { DateText } from '@/components/shared/date-text';
 import { EmptyState } from '@/components/shared/empty-state';
 import { Money } from '@/components/shared/money';
 import { Section } from '@/components/shared/section';
 import { StatusBadge } from '@/components/shared/status-badge';
+import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useJameyaAccess } from '@/hooks/use-jameya-access';
 import { useJameyas } from '@/hooks/use-jameyas';
@@ -33,28 +33,37 @@ function CustomerJameyasTable({ customerId }: { customerId: string }) {
       header: t('list.name'),
       role: 'primary',
       cell: (jameya) => (
-        <Link href={routes.jameya(jameya.id)} className="font-medium hover:underline">
+        <Link href={routes.jameya(jameya.id)} className="flex items-center gap-2 font-medium hover:underline">
           {jameya.name}
+          {jameya.member && jameya.member.lateAmount > 0 && (
+            <Badge variant="destructive" className="shrink-0">
+              {t('customerSection.late')} <Money minorUnits={jameya.member.lateAmount} />
+            </Badge>
+          )}
         </Link>
       ),
     },
     {
-      id: 'pot',
-      header: t('list.pot'),
-      cell: (jameya) => <Money minorUnits={jameya.potAmount} className="font-medium" />,
+      id: 'turn',
+      header: t('customerSection.turn'),
+      cell: (jameya) =>
+        jameya.member ? (
+          <span className="text-muted-foreground">
+            {t('customerSection.turnValue', { sequence: jameya.member.turnSequence })}
+          </span>
+        ) : null,
     },
     {
-      id: 'next',
-      header: t('list.nextCycle'),
+      id: 'owes',
+      header: t('customerSection.owes'),
       cell: (jameya) =>
-        jameya.nextCycle ? (
-          <span className="text-muted-foreground">
-            {t('list.nextCycleValue', { sequence: jameya.nextCycle.sequence })} ·{' '}
-            <DateText value={jameya.nextCycle.dueDate} />
-          </span>
-        ) : (
-          '—'
-        ),
+        jameya.member ? <Money minorUnits={jameya.member.remainingAmount} className="font-medium" /> : null,
+    },
+    {
+      id: 'received',
+      header: t('customerSection.received'),
+      cell: (jameya) =>
+        jameya.member ? <Money minorUnits={jameya.member.receivedAmount} className="text-muted-foreground" /> : null,
     },
     {
       id: 'status',

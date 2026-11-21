@@ -1296,7 +1296,12 @@
     },
     "customerSection": {
       "title": "الجمعيات",
-      "empty": "العميل ده مش في أي جمعية."
+      "empty": "العميل ده مش في أي جمعية.",
+      "turn": "الدور",
+      "turnValue": "الدور {sequence}",
+      "owes": "لسه عليه",
+      "received": "قبض",
+      "late": "متأخر"
     },
     "new": {
       "title": "جمعية جديدة",
@@ -1384,7 +1389,8 @@
         "late": "متأخر",
         "due": "مستحق",
         "upcoming": "لسه"
-      }
+      },
+      "sendReminder": "ابعت تذكير واتساب لـ {name}"
     },
     "paymentDialog": {
       "title": "سجّل دفعة",
@@ -1431,23 +1437,23 @@
     },
     "receipt": {
       "documentLabel": "إيصال",
-      "paymentTitle": "إيصال دفعة جمعية",
-      "payoutTitle": "إيصال قبض جمعية",
-      "issuedOn": "اتعمل يوم {date}",
+      "paymentTitle": "إيصال سداد جمعية",
+      "payoutTitle": "إيصال صرف جمعية",
+      "issuedOn": "صدر بتاريخ {date}",
       "amountPaid": "المبلغ المدفوع",
       "amountReceived": "المبلغ المستلم",
       "member": "العضو",
-      "holder": "استلمه",
+      "holder": "المستلم",
       "jameya": "الجمعية",
       "turn": "الدور",
       "turnValue": "الدور {sequence} · {date}",
       "paidOn": "التاريخ",
       "note": "ملاحظة",
-      "stillOwed": "لسه عليه لحد {date}",
-      "stillOwedForTurn": "لسه ليه في الدور ده",
-      "footerPrefix": "صادر من",
+      "stillOwedForTurn": "المتبقي له في هذا الدور",
+      "footerPrefix": "صادر عن",
       "download": "إيصال",
-      "shareError": "معرفناش نعمل الإيصال."
+      "shareError": "معرفناش نعمل الإيصال.",
+      "balanceAfter": "المتبقي على العضو بعد هذه الدفعة"
     },
     "validation": {
       "nameRequired": "اكتب اسم.",

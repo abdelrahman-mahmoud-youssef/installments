@@ -37,8 +37,7 @@ export function JameyaPaymentsHistory({ jameya }: { jameya: JameyaDetail }) {
         <div className="space-y-3">
           <ul className="space-y-1">
             {data.data.map((payment) => {
-              const member = membersById.get(payment.customerId);
-              const name = member?.name ?? '';
+              const name = membersById.get(payment.customerId)?.name ?? '';
               return (
                 <li key={payment.id} className="flex items-center gap-3 py-2">
                   <span className="grid size-9 shrink-0 place-items-center rounded-full bg-success-soft text-success">
@@ -59,7 +58,7 @@ export function JameyaPaymentsHistory({ jameya }: { jameya: JameyaDetail }) {
                         amount: payment.amount,
                         paidAt: payment.paidAt,
                         note: payment.note,
-                        remainingAmount: member?.remainingAmount ?? 0,
+                        balanceAfter: payment.balanceAfter,
                       })
                     }
                   />

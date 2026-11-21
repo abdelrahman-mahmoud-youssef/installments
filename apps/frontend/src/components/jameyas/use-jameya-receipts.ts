@@ -8,7 +8,7 @@ interface PaymentReceiptInput {
   amount: number;
   paidAt: string;
   note: string | null;
-  remainingAmount: number;
+  balanceAfter: number;
 }
 
 interface PayoutReceiptInput {
@@ -44,7 +44,7 @@ export function useJameyaReceipts(jameya: Pick<JameyaDetail, 'name'>) {
           ],
           input.note,
         ),
-        { label: t('stillOwed', { date: today }), value: money(input.remainingAmount) },
+        { label: t('balanceAfter'), value: money(input.balanceAfter) },
       ],
       footerPrefix: t('footerPrefix'),
     };

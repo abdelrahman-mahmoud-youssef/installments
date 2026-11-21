@@ -2,10 +2,13 @@
 
 import { HandCoins } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
+import { FaWhatsapp } from 'react-icons/fa6';
 import { DateText } from '@/components/shared/date-text';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { JameyaCycle, JameyaDetail, JameyaDue } from '@/lib/api/jameyas';
 import { formatMoney } from '@/lib/format';
+import { toWhatsappNumber } from '@/lib/phone';
 import { cn } from '@/lib/utils';
 
 type CellKind = 'paid' | 'partial' | 'late' | 'due' | 'upcoming';
@@ -73,12 +76,31 @@ export function JameyaMembersGrid({ jameya }: { jameya: JameyaDetail }) {
                   scope="row"
                   className="sticky start-0 z-10 border-b border-e border-border bg-card px-4 py-2.5 text-start font-medium"
                 >
-                  <span className="flex min-w-40 flex-col gap-1">
-                    <span className="truncate">{member.name}</span>
-                    {hasReceivedAndIsLate(member) && (
-                      <Badge variant="destructive" className="w-fit">
-                        {t('receivedAndLate')}
-                      </Badge>
+                  <span className="flex min-w-40 items-start justify-between gap-2">
+                    <span className="flex min-w-0 flex-col gap-1">
+                      <span className="truncate">{member.name}</span>
+                      {hasReceivedAndIsLate(member) && (
+                        <Badge variant="destructive" className="w-fit">
+                          {t('receivedAndLate')}
+                        </Badge>
+                      )}
+                    </span>
+                    {member.reminderMessage && (
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-label={t('sendReminder', { name: member.name })}
+                        title={t('sendReminder', { name: member.name })}
+                        render={
+                          <a
+                            href={`https://wa.me/${toWhatsappNumber(member.phone)}?text=${encodeURIComponent(member.reminderMessage)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          />
+                        }
+                      >
+                        <FaWhatsapp className="size-4 text-success" />
+                      </Button>
                     )}
                   </span>
                 </th>
