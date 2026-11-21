@@ -113,7 +113,8 @@ function JameyaPayoutForm({
   const openHolders = cycle.holders.filter((holder) => holder.remainingAmount > 0);
   const holderItems = Object.fromEntries(openHolders.map((holder) => [holder.customerId, nameOf(holder.customerId)]));
   const availableCash = Math.max(0, cycle.collectedAmount - cycle.paidOutAmount);
-  const suggestedFor = (customerId: string) => Math.min(remainingByHolder.get(customerId) ?? 0, availableCash);
+  const suggestedFor = (customerId: string) =>
+    Math.min(remainingByHolder.get(customerId) ?? 0, cycle.collectedAmount);
   const firstHolderId = openHolders[0]?.customerId ?? '';
 
   const form = useForm<JameyaMoneyEntryInput>({

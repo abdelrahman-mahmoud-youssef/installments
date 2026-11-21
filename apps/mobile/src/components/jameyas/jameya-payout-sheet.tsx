@@ -93,7 +93,7 @@ function PayoutForm({ visible, jameya, cycle, saving, onSubmit }: PayoutFormProp
   const availableCash = availableCycleCash(cycle);
   const remainingFor = (customerId: string) =>
     cycle.holders.find((holder) => holder.customerId === customerId)?.remainingAmount ?? 0;
-  const suggestedFor = (customerId: string) => suggestedPayoutAmount(remainingFor(customerId), availableCash);
+  const suggestedFor = (customerId: string) => suggestedPayoutAmount(remainingFor(customerId), cycle.collectedAmount);
   const firstHolderId = openHolders[0]?.customerId ?? '';
   const entry = useJameyaMoneyEntry(visible, { customerId: firstHolderId, amount: suggestedFor(firstHolderId) });
   const fromShopMoney = amountFromShopMoney(entry.amount, availableCash);
