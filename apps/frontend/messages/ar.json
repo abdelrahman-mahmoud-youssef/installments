@@ -1360,6 +1360,16 @@
       "shopCoveredHint": "لسه متجمعش",
       "grid": "مين دفع",
       "cycles": "الأدوار",
+      "cycleViews": {
+        "current": "الدور ده",
+        "upcoming": "الأدوار الجاية",
+        "previous": "الأدوار اللي فاتت"
+      },
+      "cycleViewsEmpty": {
+        "current": "كل الأدوار خلصت.",
+        "upcoming": "مفيش أدوار بعد الدور ده.",
+        "previous": "لسه مفيش أدوار خلصت."
+      },
       "turnLabel": "الدور {sequence}",
       "lateAfter": "يتأخر بعد",
       "holder": "اللي يقبض",
@@ -1385,10 +1395,10 @@
       "ownTurn": "دوره",
       "cell": {
         "paid": "دفع",
-        "partial": "جزء",
+        "partial": "دفع جزء",
         "late": "متأخر",
-        "due": "جه ميعاده",
-        "upcoming": "لسه"
+        "due": "لسه مدفعش",
+        "upcoming": "ميعاده لسه مجاش"
       },
       "sendReminder": "ابعت تذكير واتساب لـ {name}"
     },

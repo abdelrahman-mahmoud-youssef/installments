@@ -22,7 +22,7 @@ import { JameyaReminderButton } from './jameya-reminder-button';
 const HEADER_HEIGHT = 52;
 const ROW_HEIGHT = 64;
 const NAME_COLUMN_WIDTH = 150;
-const CYCLE_COLUMN_WIDTH = 104;
+const CYCLE_COLUMN_WIDTH = 136;
 
 function MemberNameCell({ member }: { member: JameyaMember }) {
   const { t } = useI18n();

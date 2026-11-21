@@ -1996,10 +1996,10 @@ const ar: typeof en = {
       ownTurn: 'دوره',
       cell: {
         paid: 'دفع',
-        partial: 'جزء',
+        partial: 'دفع جزء',
         late: 'متأخر',
-        due: 'جه ميعاده',
-        upcoming: 'لسه',
+        due: 'لسه مدفعش',
+        upcoming: 'ميعاده لسه مجاش',
       },
       sendReminder: 'ابعت تذكير واتساب لـ {name}',
     },

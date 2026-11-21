@@ -1360,6 +1360,16 @@
       "shopCoveredHint": "Still not collected",
       "grid": "Who paid",
       "cycles": "Turns",
+      "cycleViews": {
+        "current": "This turn",
+        "upcoming": "Upcoming",
+        "previous": "Previous"
+      },
+      "cycleViewsEmpty": {
+        "current": "Every turn is settled.",
+        "upcoming": "No turns after this one.",
+        "previous": "No turns have finished yet."
+      },
       "turnLabel": "Turn {sequence}",
       "lateAfter": "late after",
       "holder": "Receives",

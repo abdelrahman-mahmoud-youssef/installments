@@ -2,17 +2,37 @@
 
 import { HandCoins, Receipt } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useState } from 'react';
 import { DateText } from '@/components/shared/date-text';
 import { Money } from '@/components/shared/money';
 import { Section } from '@/components/shared/section';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useJameyaAccess } from '@/hooks/use-jameya-access';
 import { JameyaCycle, JameyaDetail, JameyaPayout } from '@/lib/api/jameyas';
 import { cn } from '@/lib/utils';
 import { JameyaReceiptButton } from './jameya-receipt-button';
 import { RecordJameyaPaymentDialog } from './record-jameya-payment-dialog';
 import { useJameyaReceipts } from './use-jameya-receipts';
+
+const CYCLE_VIEWS = ['current', 'upcoming', 'previous'] as const;
+type CycleView = (typeof CYCLE_VIEWS)[number];
+
+function currentCycleOf(jameya: JameyaDetail): JameyaCycle | undefined {
+  return jameya.cycles.find((cycle) => cycle.state !== 'SETTLED');
+}
+
+function cyclesInView(jameya: JameyaDetail, view: CycleView): JameyaCycle[] {
+  const current = currentCycleOf(jameya);
+  if (view === 'current') {
+    return current ? [current] : [];
+  }
+  const currentSequence = current?.sequence ?? Number.POSITIVE_INFINITY;
+  return view === 'upcoming'
+    ? jameya.cycles.filter((cycle) => cycle.sequence > currentSequence)
+    : jameya.cycles.filter((cycle) => cycle.sequence < currentSequence).reverse();
+}
 
 function canHandOver(jameya: JameyaDetail, cycle: JameyaCycle): boolean {
   return (
@@ -162,13 +182,35 @@ function CycleRow({
 
 export function JameyaCyclesList({ jameya, onHandOver }: { jameya: JameyaDetail; onHandOver: StartPayout }) {
   const t = useTranslations('jameyas.detail');
+  const [view, setView] = useState<CycleView>(() => (currentCycleOf(jameya) ? 'current' : 'previous'));
+  const cycles = cyclesInView(jameya, view);
+
   return (
-    <Section title={t('cycles')}>
-      <ul className="divide-y divide-border">
-        {jameya.cycles.map((cycle) => (
-          <CycleRow key={cycle.id} jameya={jameya} cycle={cycle} onHandOver={onHandOver} />
-        ))}
-      </ul>
+    <Section
+      title={t('cycles')}
+      action={
+        <Tabs value={view} onValueChange={(value) => setView(value as CycleView)}>
+          <div className="-mx-1 overflow-x-auto px-1">
+            <TabsList className="min-w-fit">
+              {CYCLE_VIEWS.map((value) => (
+                <TabsTrigger key={value} value={value} className="shrink-0">
+                  {t(`cycleViews.${value}`)}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
+        </Tabs>
+      }
+    >
+      {cycles.length === 0 ? (
+        <p className="text-sm text-muted-foreground">{t(`cycleViewsEmpty.${view}`)}</p>
+      ) : (
+        <ul className="divide-y divide-border">
+          {cycles.map((cycle) => (
+            <CycleRow key={cycle.id} jameya={jameya} cycle={cycle} onHandOver={onHandOver} />
+          ))}
+        </ul>
+      )}
     </Section>
   );
 }
@@ -176,7 +218,7 @@ export function JameyaCyclesList({ jameya, onHandOver }: { jameya: JameyaDetail;
 export function JameyaCurrentCyclePanel({ jameya, onHandOver }: { jameya: JameyaDetail; onHandOver: StartPayout }) {
   const t = useTranslations('jameyas.detail');
   const { canManageJameyas } = useJameyaAccess();
-  const cycle = jameya.cycles.find((item) => item.state !== 'SETTLED');
+  const cycle = currentCycleOf(jameya);
 
   if (!cycle) {
     return (
