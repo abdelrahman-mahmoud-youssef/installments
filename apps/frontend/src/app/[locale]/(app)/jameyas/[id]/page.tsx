@@ -1,6 +1,6 @@
 'use client';
 
-import { FileWarning, HandCoins, PiggyBank, ShieldAlert, Wallet } from 'lucide-react';
+import { Coins, FileWarning, HandCoins, ShieldAlert, Wallet } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useState } from 'react';
@@ -91,7 +91,7 @@ export default function JameyaDetailPage() {
           <MetricCard
             label={t('pot')}
             value={<Money minorUnits={jameya.potAmount} />}
-            icon={PiggyBank}
+            icon={Coins}
             tone="primary"
           />
           <MetricCard
