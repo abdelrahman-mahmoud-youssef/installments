@@ -5,6 +5,7 @@ import {
   PDF_COLORS as COLORS,
   PDF_LATIN_FONT,
   pdfFontFamily,
+  pdfFontForText,
   sanitizeForPdfFont,
   splitMoneyParts,
 } from '@/lib/pdf';
@@ -47,6 +48,7 @@ export function ContactStatementPdf({ locale, copy, tenant, contact }: ContactSt
   const align = isRtl ? 'right' : 'left';
   const rowDirection = isRtl ? 'row-reverse' : 'row';
   const s = (text: string) => sanitizeForPdfFont(text);
+  const fontOf = (text: string) => ({ fontFamily: pdfFontForText(text, locale) });
 
   const balanceTone = contact.balance > 0 ? 'danger' : contact.balance < 0 ? 'success' : 'neutral';
   const balanceHint = contact.balance > 0 ? copy.theyOwe : contact.balance < 0 ? copy.youOwe : copy.settled;
@@ -148,7 +150,7 @@ export function ContactStatementPdf({ locale, copy, tenant, contact }: ContactSt
           <View style={styles.headerBrand}>
             {tenant.logoUrl && <Image src={tenant.logoUrl} style={styles.logo} />}
             <View style={styles.headerBrandText}>
-              <Text style={styles.tenantName}>{s(tenant.displayName)}</Text>
+              <Text style={[styles.tenantName, fontOf(tenant.displayName)]}>{s(tenant.displayName)}</Text>
               {tenant.phone && <Text style={styles.tenantPhone}>{s(tenant.phone)}</Text>}
             </View>
           </View>
@@ -161,7 +163,7 @@ export function ContactStatementPdf({ locale, copy, tenant, contact }: ContactSt
         <View style={styles.metaPanel}>
           <View style={styles.metaRow}>
             <Text style={styles.metaLabel}>{s(copy.contactLabel)}</Text>
-            <Text style={styles.metaValue}>{s(contact.name)}</Text>
+            <Text style={[styles.metaValue, fontOf(contact.name)]}>{s(contact.name)}</Text>
           </View>
           {contact.phone && (
             <View style={styles.metaRow}>
@@ -183,7 +185,7 @@ export function ContactStatementPdf({ locale, copy, tenant, contact }: ContactSt
 
         <View style={styles.footer} fixed>
           <Text style={styles.footerText}>{s(copy.footerPrefix)}</Text>
-          <Text style={styles.footerText}>{s(tenant.displayName)}</Text>
+          <Text style={[styles.footerText, fontOf(tenant.displayName)]}>{s(tenant.displayName)}</Text>
         </View>
       </Page>
     </Document>
