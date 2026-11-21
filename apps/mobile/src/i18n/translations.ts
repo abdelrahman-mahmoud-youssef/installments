@@ -16,6 +16,7 @@ const en = {
     remove: 'Remove',
     confirm: 'Confirm',
     close: 'Close',
+    done: 'Done',
     back: 'Back',
     search: 'Search',
     seeAll: 'See all',
@@ -297,6 +298,7 @@ const en = {
     previousMonth: 'Previous month',
     nextMonth: 'Next month',
     backToThisMonth: 'Back to this month',
+    chooseDate: 'Choose a date',
   },
   announcements: {
     title: 'Announcements',
@@ -1129,6 +1131,7 @@ const ar: typeof en = {
     remove: 'حذف',
     confirm: 'تأكيد',
     close: 'إغلاق',
+    done: 'تم',
     back: 'رجوع',
     search: 'بحث',
     seeAll: 'عرض الكل',
@@ -1410,6 +1413,7 @@ const ar: typeof en = {
     previousMonth: 'الشهر السابق',
     nextMonth: 'الشهر التالي',
     backToThisMonth: 'العودة لهذا الشهر',
+    chooseDate: 'اختار التاريخ',
   },
   announcements: {
     title: 'الإعلانات',

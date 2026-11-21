@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useI18n } from '@/i18n/i18n-context';
@@ -6,6 +7,7 @@ import { formatDate, todayIsoDate } from '@/lib/format';
 import { useTheme } from '@/theme/theme-context';
 import { radius, spacing, touchTarget } from '@/theme/tokens';
 import { AppText } from './app-text';
+import { CalendarSheet } from './calendar-sheet';
 import { PressableScale } from './pressable-scale';
 
 type Direction = -1 | 1;
@@ -17,6 +19,7 @@ interface DateStepperProps {
   onChange: (isoDate: string) => void;
   maxDate?: string;
   showMonthSteps?: boolean;
+  withCalendar?: boolean;
 }
 
 const STEP_ICONS: Record<StepUnit, { back: keyof typeof Ionicons.glyphMap; forward: keyof typeof Ionicons.glyphMap }> = {
@@ -29,10 +32,18 @@ const STEP_LABELS: Record<StepUnit, { back: string; forward: string }> = {
   month: { back: 'calendar.previousMonth', forward: 'calendar.nextMonth' },
 };
 
-export function DateStepper({ label, value, onChange, maxDate, showMonthSteps = false }: DateStepperProps) {
+export function DateStepper({
+  label,
+  value,
+  onChange,
+  maxDate,
+  showMonthSteps = false,
+  withCalendar = false,
+}: DateStepperProps) {
   const { colors } = useTheme();
   const { t, locale, isRTL } = useI18n();
   const isToday = value === todayIsoDate();
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const shift = (unit: StepUnit, direction: Direction) =>
     unit === 'day' ? shiftIsoDate(value, direction) : shiftIsoDateByMonths(value, direction);
@@ -80,12 +91,32 @@ export function DateStepper({ label, value, onChange, maxDate, showMonthSteps = 
       >
         {showMonthSteps ? renderStepButton('month', -1) : null}
         {renderStepButton('day', -1)}
-        <View style={{ flex: 1, alignItems: 'center' }}>
+        <PressableScale
+          onPress={() => setIsCalendarOpen(true)}
+          disabled={!withCalendar}
+          accessibilityRole={withCalendar ? 'button' : undefined}
+          accessibilityLabel={withCalendar ? t('calendar.chooseDate') : undefined}
+          style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.xs }}
+        >
+          {withCalendar ? <Ionicons name="calendar-outline" size={16} color={colors.primary} /> : null}
           <AppText variant="body">{isToday ? t('calendar.today') : formatDate(value, locale)}</AppText>
-        </View>
+        </PressableScale>
         {renderStepButton('day', 1)}
         {showMonthSteps ? renderStepButton('month', 1) : null}
       </View>
+      {withCalendar ? (
+        <CalendarSheet
+          visible={isCalendarOpen}
+          title={label}
+          value={value}
+          maxDate={maxDate}
+          onSelect={(isoDate) => {
+            onChange(isoDate);
+            setIsCalendarOpen(false);
+          }}
+          onClose={() => setIsCalendarOpen(false)}
+        />
+      ) : null}
     </View>
   );
 }

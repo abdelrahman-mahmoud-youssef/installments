@@ -3,6 +3,7 @@ import { JAMEYA_RECURRENCE_TYPES, JameyaRecurrenceType } from '@/api/jameyas';
 import { AppText } from '@/components/ui/app-text';
 import { ChoiceChips } from '@/components/ui/choice-chips';
 import { DateStepper } from '@/components/ui/date-stepper';
+import { KEYBOARD_DONE_BAR_ID } from '@/components/ui/keyboard-done-bar';
 import { TextField } from '@/components/ui/text-field';
 import { useI18n } from '@/i18n/i18n-context';
 import { spacing } from '@/theme/tokens';
@@ -23,6 +24,7 @@ export function JameyaDetailsStep({ values, setField, errorFor }: JameyaDetailsS
         {t('jameyas.new.description')}
       </AppText>
       <TextField
+        inputAccessoryViewID={KEYBOARD_DONE_BAR_ID}
         label={t('jameyas.new.name')}
         placeholder={t('jameyas.new.namePlaceholder')}
         value={values.name}
@@ -31,6 +33,7 @@ export function JameyaDetailsStep({ values, setField, errorFor }: JameyaDetailsS
         error={errorFor('name')}
       />
       <TextField
+        inputAccessoryViewID={KEYBOARD_DONE_BAR_ID}
         label={t('jameyas.new.shareAmount')}
         value={values.shareAmount}
         onChangeText={(text) => setField('shareAmount', text)}
@@ -53,8 +56,10 @@ export function JameyaDetailsStep({ values, setField, errorFor }: JameyaDetailsS
         value={values.firstDueDate}
         onChange={(date) => setField('firstDueDate', date)}
         showMonthSteps
+        withCalendar
       />
       <TextField
+        inputAccessoryViewID={KEYBOARD_DONE_BAR_ID}
         label={t('jameyas.new.graceDays')}
         value={values.graceDays}
         onChangeText={(text) => setField('graceDays', text)}
@@ -63,6 +68,7 @@ export function JameyaDetailsStep({ values, setField, errorFor }: JameyaDetailsS
         error={errorFor('graceDays')}
       />
       <TextField
+        inputAccessoryViewID={KEYBOARD_DONE_BAR_ID}
         label={t('jameyas.new.notes')}
         value={values.notes}
         onChangeText={(text) => setField('notes', text)}

@@ -57,3 +57,42 @@ export function shiftIsoDate(isoDate: string, days: number): string {
   date.setDate(date.getDate() + days);
   return toIsoDate(date);
 }
+
+const DAYS_PER_WEEK = 7;
+const SATURDAY = 6;
+const WEEKDAY_REFERENCE_SATURDAY = new Date(2026, 0, 3);
+
+export function monthKeyOfIsoDate(isoDate: string): string {
+  return isoDate.slice(0, 7);
+}
+
+export function buildMonthWeeks(monthKey: string): (string | null)[][] {
+  const firstDay = parseMonthKey(monthKey);
+  const daysInMonth = new Date(firstDay.getFullYear(), firstDay.getMonth() + 1, 0).getDate();
+  const leadingBlanks = (firstDay.getDay() - SATURDAY + DAYS_PER_WEEK) % DAYS_PER_WEEK;
+  const cells: (string | null)[] = [
+    ...Array.from({ length: leadingBlanks }, () => null),
+    ...Array.from({ length: daysInMonth }, (_, index) =>
+      toIsoDate(new Date(firstDay.getFullYear(), firstDay.getMonth(), index + 1)),
+    ),
+  ];
+  while (cells.length % DAYS_PER_WEEK !== 0) {
+    cells.push(null);
+  }
+  return Array.from({ length: cells.length / DAYS_PER_WEEK }, (_, week) =>
+    cells.slice(week * DAYS_PER_WEEK, (week + 1) * DAYS_PER_WEEK),
+  );
+}
+
+export function weekdayInitials(locale: Locale): string[] {
+  const formatter = new Intl.DateTimeFormat(intlLocale(locale), { weekday: 'narrow' });
+  return Array.from({ length: DAYS_PER_WEEK }, (_, offset) =>
+    formatter.format(
+      new Date(
+        WEEKDAY_REFERENCE_SATURDAY.getFullYear(),
+        WEEKDAY_REFERENCE_SATURDAY.getMonth(),
+        WEEKDAY_REFERENCE_SATURDAY.getDate() + offset,
+      ),
+    ),
+  );
+}

@@ -15,6 +15,7 @@ import { JameyaUnavailable } from '@/components/jameyas/jameya-unavailable';
 import { AppText } from '@/components/ui/app-text';
 import { Button } from '@/components/ui/button';
 import { FloatingActionBar } from '@/components/ui/floating-action-bar';
+import { KeyboardDoneBar } from '@/components/ui/keyboard-done-bar';
 import { StepIndicator } from '@/components/ui/step-indicator';
 import { useToast } from '@/components/ui/toast-context';
 import { useCreateCustomer, useCreateJameya, usePreviewJameya } from '@/hooks/queries';
@@ -100,6 +101,7 @@ export default function NewJameyaScreen() {
         contentInsetAdjustmentBehavior="automatic"
         automaticallyAdjustKeyboardInsets
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
         contentContainerStyle={{ padding: spacing.xl, gap: spacing.xl, paddingBottom: spacing.xxxl + floatingActionClearance }}
       >
         <View style={{ gap: spacing.sm }}>
@@ -171,6 +173,7 @@ export default function NewJameyaScreen() {
         </View>
       </FloatingActionBar>
 
+      <KeyboardDoneBar />
       <CustomerPickerSheet
         visible={openSheet === 'picker'}
         selectedIds={form.memberTurns.map(({ member }) => member.id)}
