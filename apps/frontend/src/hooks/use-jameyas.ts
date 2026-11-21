@@ -7,6 +7,7 @@ import {
   getJameya,
   JameyaListParams,
   JameyaMoneyEntryPayload,
+  JameyaPayment,
   listJameyaPayments,
   listJameyas,
   previewJameya,
@@ -19,7 +20,21 @@ export const jameyaKeys = {
   list: (params: JameyaListParams) => [...jameyaKeys.all, 'list', params] as const,
   detail: (id: string) => [...jameyaKeys.all, 'detail', id] as const,
   payments: (id: string, page: number) => [...jameyaKeys.all, 'payments', id, page] as const,
+  memberPayments: (id: string, customerId: string | null) =>
+    [...jameyaKeys.all, 'member-payments', id, customerId] as const,
 };
+
+const MEMBER_PAYMENTS_PAGE_SIZE = 100;
+
+async function listAllJameyaPayments(id: string): Promise<JameyaPayment[]> {
+  const payments: JameyaPayment[] = [];
+  for (let page = 1, totalPages = 1; page <= totalPages; page += 1) {
+    const result = await listJameyaPayments(id, { page, limit: MEMBER_PAYMENTS_PAGE_SIZE });
+    payments.push(...result.data);
+    totalPages = result.totalPages;
+  }
+  return payments;
+}
 
 export function useJameyas(params: JameyaListParams, options: { enabled?: boolean } = {}) {
   return useQuery({
@@ -43,6 +58,14 @@ export function useJameyaPayments(id: string, page: number) {
     queryKey: jameyaKeys.payments(id, page),
     queryFn: () => listJameyaPayments(id, { page, limit: 10 }),
     placeholderData: (previousData) => previousData,
+  });
+}
+
+export function useJameyaMemberPayments(id: string, customerId: string | null) {
+  return useQuery({
+    queryKey: jameyaKeys.memberPayments(id, customerId),
+    queryFn: async () => (await listAllJameyaPayments(id)).filter((payment) => payment.customerId === customerId),
+    enabled: customerId !== null,
   });
 }
 

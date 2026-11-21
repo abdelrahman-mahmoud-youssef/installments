@@ -1357,41 +1357,54 @@
     },
     "detail": {
       "notFound": "Jameya not found",
-      "summaryLine": "{members} members · {turns} turns · {recurrence}",
-      "perShare": "per share",
-      "pot": "Pot per turn",
-      "collected": "Collected",
-      "paidOut": "Handed over",
-      "shopCovered": "Covered by the shop",
-      "shopCoveredHint": "Still not collected",
-      "grid": "Who paid",
-      "cycles": "Turns",
-      "cycleViews": {
-        "current": "This turn",
-        "upcoming": "Upcoming",
-        "previous": "Previous"
-      },
-      "cycleViewsEmpty": {
-        "current": "Every turn is settled.",
-        "upcoming": "No turns after this one.",
-        "previous": "No turns have finished yet."
-      },
-      "turnLabel": "Turn {sequence}",
-      "lateAfter": "late after",
-      "holder": "Receives",
-      "entitlement": "Entitled to",
-      "remainingForTurn": "Still owed",
-      "payoutCovered": "Shop covered",
-      "handOverPayout": "Hand over payout",
-      "currentCycle": "Current turn",
-      "currentCycleTitle": "Current turn: {sequence}",
-      "allSettled": "Every turn is settled.",
-      "dueOn": "Due",
-      "holderIs": "Receives: {name}",
       "recordPayment": "Record payment",
+      "handOverPayout": "Hand over payout",
       "paymentHistory": "Payments",
       "paymentsLoadError": "Couldn't load payments.",
-      "noPayments": "No payments yet"
+      "noPayments": "No payments yet",
+      "headerLine": "{members} members · {share} {period} · payout {pot}",
+      "period": {
+        "MONTHLY": "a month",
+        "WEEKLY": "a week"
+      },
+      "currentTitle": {
+        "MONTHLY": "This month",
+        "WEEKLY": "This week"
+      },
+      "turnOn": "Turn {sequence} · {date}",
+      "holderGets": "{name} gets {amount}",
+      "collectedAmount": "Collected {amount}",
+      "missingAmount": "{amount} missing",
+      "handOverTo": "Hand the payout to {name}",
+      "shopPaid": "The shop paid {amount} from its own money",
+      "allHandedOver": "Every turn has been handed over.",
+      "unpaidTitle": "Not paid yet",
+      "owes": "Owes {amount}",
+      "everyonePaid": "Everyone has paid what is due so far.",
+      "showAll": "Show all",
+      "showLess": "Show less",
+      "turnsTitle": "Who got paid",
+      "turnStatus": {
+        "current": "This turn",
+        "paidOut": "Paid out",
+        "partlyPaidOut": "Got {paid} · owed {owed}",
+        "later": "Not yet"
+      },
+      "turnDetails": "Turn {sequence} payouts",
+      "showAllTurns": "Show all turns",
+      "showFewerTurns": "Show fewer turns",
+      "noPayouts": "Nothing handed over yet.",
+      "fullTable": "Full table",
+      "allPayments": "All payments",
+      "member": {
+        "paid": "Paid",
+        "owes": "Owes",
+        "late": "Late",
+        "received": "Got paid",
+        "payments": "Payments",
+        "noPayments": "No payments yet.",
+        "paymentsLoadError": "Couldn't load the payments."
+      }
     },
     "grid": {
       "member": "Member",

@@ -76,6 +76,7 @@ export interface JameyaMember {
   dueAmount: number;
   paidAmount: number;
   remainingAmount: number;
+  dueNowAmount: number;
   lateAmount: number;
   lateDueCount: number;
   receivedAmount: number;

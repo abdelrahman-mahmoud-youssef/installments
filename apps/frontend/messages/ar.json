@@ -1357,41 +1357,54 @@
     },
     "detail": {
       "notFound": "الجمعية مش موجودة",
-      "summaryLine": "{members} عضو · {turns} دور · {recurrence}",
-      "perShare": "للسهم",
-      "pot": "القبض في كل دور",
-      "collected": "اتجمع",
-      "paidOut": "اتسلّم",
-      "shopCovered": "المحل غطّاه",
-      "shopCoveredHint": "لسه متجمعش",
-      "grid": "مين دفع",
-      "cycles": "الأدوار",
-      "cycleViews": {
-        "current": "الدور ده",
-        "upcoming": "الأدوار الجاية",
-        "previous": "الأدوار اللي فاتت"
-      },
-      "cycleViewsEmpty": {
-        "current": "كل الأدوار خلصت.",
-        "upcoming": "مفيش أدوار بعد الدور ده.",
-        "previous": "لسه مفيش أدوار خلصت."
-      },
-      "turnLabel": "الدور {sequence}",
-      "lateAfter": "يتأخر بعد",
-      "holder": "اللي يقبض",
-      "entitlement": "من حقه",
-      "remainingForTurn": "لسه ليه",
-      "payoutCovered": "المحل غطّى",
-      "handOverPayout": "سلّم القبض",
-      "currentCycle": "الدور الحالي",
-      "currentCycleTitle": "الدور الحالي: {sequence}",
-      "allSettled": "كل الأدوار خلصت.",
-      "dueOn": "ميعاده",
-      "holderIs": "اللي يقبض: {name}",
       "recordPayment": "سجّل دفعة",
+      "handOverPayout": "سلّم القبض",
       "paymentHistory": "سجل الدفعات",
       "paymentsLoadError": "معرفناش نحمّل المدفوعات.",
-      "noPayments": "لسه مفيش دفعات اتسجلت."
+      "noPayments": "لسه مفيش دفعات اتسجلت.",
+      "headerLine": "{members} عضو · {share} {period} · القبض {pot}",
+      "period": {
+        "MONTHLY": "كل شهر",
+        "WEEKLY": "كل أسبوع"
+      },
+      "currentTitle": {
+        "MONTHLY": "الشهر ده",
+        "WEEKLY": "الأسبوع ده"
+      },
+      "turnOn": "الدور {sequence} · {date}",
+      "holderGets": "{name} هيقبض {amount}",
+      "collectedAmount": "اتجمع {amount}",
+      "missingAmount": "ناقص {amount}",
+      "handOverTo": "سلّم القبض لـ{name}",
+      "shopPaid": "المحل دفع من عنده {amount}",
+      "allHandedOver": "كل الأدوار اتسلمت.",
+      "unpaidTitle": "لسه مدفعوش",
+      "owes": "عليه {amount}",
+      "everyonePaid": "الكل دفع اللي عليه لحد النهاردة.",
+      "showAll": "عرض الكل",
+      "showLess": "عرض أقل",
+      "turnsTitle": "مين قبض ومين لسه",
+      "turnStatus": {
+        "current": "الدور ده",
+        "paidOut": "قبض",
+        "partlyPaidOut": "قبض {paid} · ليه {owed}",
+        "later": "لسه"
+      },
+      "turnDetails": "تسليمات الدور {sequence}",
+      "showAllTurns": "عرض كل الأدوار",
+      "showFewerTurns": "عرض أدوار أقل",
+      "noPayouts": "لسه ما اتسلمش حاجة.",
+      "fullTable": "الجدول الكامل",
+      "allPayments": "كل الدفعات",
+      "member": {
+        "paid": "دفع",
+        "owes": "عليه",
+        "late": "متأخر عليه",
+        "received": "قبض",
+        "payments": "دفعاته",
+        "noPayments": "لسه مدفعش حاجة.",
+        "paymentsLoadError": "معرفناش نحمّل الدفعات."
+      }
     },
     "grid": {
       "member": "العضو",

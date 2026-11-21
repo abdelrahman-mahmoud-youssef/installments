@@ -1,10 +1,16 @@
 import { format } from 'date-fns';
 
-export function formatMoney(minorUnits: number, locale = 'en'): string {
+export interface MoneyFormatOptions {
+  hideWholeDecimals?: boolean;
+}
+
+export function formatMoney(minorUnits: number, locale = 'en', options: MoneyFormatOptions = {}): string {
+  const fractionDigits = options.hideWholeDecimals && minorUnits % 100 === 0 ? 0 : 2;
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: 'EGP',
-    minimumFractionDigits: 2,
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
     numberingSystem: 'latn',
   }).format(minorUnits / 100);
 }
