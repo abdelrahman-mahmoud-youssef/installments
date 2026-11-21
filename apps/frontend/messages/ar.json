@@ -1495,6 +1495,7 @@
       "balanceAfter": "المتبقي على العضو بعد هذه الدفعة"
     },
     "statement": {
+      "documentLabel": "كشف حساب",
       "button": "كشف حساب",
       "title": "كشف حساب عضو في جمعية",
       "member": "العضو",

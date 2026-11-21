@@ -1060,6 +1060,7 @@ const en = {
       balanceAfter: 'Still owed after this payment',
     },
     statement: {
+      documentLabel: 'STATEMENT',
       button: 'Statement',
       title: 'Jameya member statement',
       member: 'Member',
@@ -2172,6 +2173,7 @@ const ar: typeof en = {
       balanceAfter: 'المتبقي على العضو بعد هذه الدفعة',
     },
     statement: {
+      documentLabel: 'كشف حساب',
       button: 'كشف حساب',
       title: 'كشف حساب عضو في جمعية',
       member: 'العضو',

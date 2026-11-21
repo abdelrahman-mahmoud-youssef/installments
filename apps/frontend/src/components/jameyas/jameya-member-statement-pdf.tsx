@@ -1,6 +1,14 @@
 import { Document, Image, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
 import { BRAND_COLOR_VALUES } from '@/lib/brand-colors';
-import { PDF_COLORS, PdfLocale, pdfFontFamily, pdfFontForText, sanitizeForPdfFont } from '@/lib/pdf';
+import {
+  PDF_COLORS,
+  PDF_LATIN_FONT,
+  PdfLocale,
+  pdfFontFamily,
+  pdfFontForText,
+  sanitizeForPdfFont,
+  splitMoneyParts,
+} from '@/lib/pdf';
 import { JameyaStatementContent, JameyaStatementTone } from './use-jameya-member-statement';
 import { JameyaPdfTenant } from './use-jameya-pdf-share';
 
@@ -27,6 +35,24 @@ export function JameyaMemberStatementPdf({
   const rowDirection = isRtl ? 'row-reverse' : 'row';
   const s = (text: string) => sanitizeForPdfFont(text);
   const fontOf = (text: string) => ({ fontFamily: pdfFontForText(text, locale) });
+  const money = (minorUnits: number, color: string = PDF_COLORS.ink) => {
+    const { amount, currency } = splitMoneyParts(minorUnits, locale);
+    const amountText = (
+      <Text key="amount" style={{ fontFamily: PDF_LATIN_FONT, color }}>
+        {amount}
+      </Text>
+    );
+    const currencyText = (
+      <Text key="currency" style={{ color }}>
+        {s(currency)}
+      </Text>
+    );
+    return (
+      <View style={{ flexDirection: rowDirection, gap: 3 }}>
+        {isRtl ? [amountText, currencyText] : [currencyText, amountText]}
+      </View>
+    );
+  };
 
   const styles = StyleSheet.create({
     page: {
@@ -122,13 +148,17 @@ export function JameyaMemberStatementPdf({
               <Text style={[styles.detailValue, fontOf(detail.value)]}>{s(detail.value)}</Text>
             </View>
           ))}
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>{s(content.perTurn.label)}</Text>
+            <View style={styles.detailValue}>{money(content.perTurn.amount)}</View>
+          </View>
         </View>
 
         <View style={styles.totals}>
           {content.totals.map((total) => (
             <View key={total.label} style={styles.total}>
               <Text style={styles.totalLabel}>{s(total.label)}</Text>
-              <Text style={[styles.totalValue, { color: TONE_COLORS[total.tone] }]}>{s(total.value)}</Text>
+              <View style={styles.totalValue}>{money(total.amount, TONE_COLORS[total.tone])}</View>
             </View>
           ))}
         </View>
@@ -145,8 +175,8 @@ export function JameyaMemberStatementPdf({
             <View key={row.key} style={styles.tableRow} wrap={false}>
               <Text style={[styles.cell, { width: COLUMN_WIDTHS.turn }]}>{row.turn}</Text>
               <Text style={[styles.cell, { width: COLUMN_WIDTHS.date }]}>{row.date}</Text>
-              <Text style={[styles.cell, { width: COLUMN_WIDTHS.due }]}>{s(row.due)}</Text>
-              <Text style={[styles.cell, { width: COLUMN_WIDTHS.paid }]}>{s(row.paid)}</Text>
+              <View style={[styles.cell, { width: COLUMN_WIDTHS.due }]}>{money(row.due)}</View>
+              <View style={[styles.cell, { width: COLUMN_WIDTHS.paid }]}>{money(row.paid)}</View>
               <View style={[styles.cell, { width: COLUMN_WIDTHS.status }]}>
                 <Text style={{ color: TONE_COLORS[row.tone], textAlign: align }}>{s(row.status)}</Text>
                 {row.isOwnTurn && <Text style={[styles.ownTurn, { textAlign: align }]}>{s(content.ownTurnLabel)}</Text>}

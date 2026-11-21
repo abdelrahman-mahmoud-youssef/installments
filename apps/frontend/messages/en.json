@@ -1495,6 +1495,7 @@
       "balanceAfter": "Still owed after this payment"
     },
     "statement": {
+      "documentLabel": "STATEMENT",
       "button": "Statement",
       "title": "Jameya member statement",
       "member": "Member",

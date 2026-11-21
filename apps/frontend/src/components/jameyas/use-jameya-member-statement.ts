@@ -1,13 +1,13 @@
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { JameyaDetail, JameyaMember } from '@/lib/api/jameyas';
-import { formatDate, formatMoney, todayIso } from '@/lib/format';
+import { formatDate, todayIso } from '@/lib/format';
 import { dueKindOf, JameyaDueKind } from '@/lib/jameya-turns';
 
 export type JameyaStatementTone = 'success' | 'danger' | 'muted';
 
 export interface JameyaStatementFigure {
   label: string;
-  value: string;
+  amount: number;
   tone: JameyaStatementTone;
 }
 
@@ -15,8 +15,8 @@ export interface JameyaStatementRow {
   key: string;
   turn: string;
   date: string;
-  due: string;
-  paid: string;
+  due: number;
+  paid: number;
   status: string;
   tone: JameyaStatementTone;
   isOwnTurn: boolean;
@@ -27,6 +27,7 @@ export interface JameyaStatementContent {
   title: string;
   issuedOn: string;
   details: { label: string; value: string }[];
+  perTurn: { label: string; amount: number };
   totals: JameyaStatementFigure[];
   columns: { turn: string; date: string; due: string; paid: string; status: string };
   rows: JameyaStatementRow[];
@@ -45,8 +46,6 @@ const STATUS_TONE: Record<JameyaDueKind, JameyaStatementTone> = {
 export function useJameyaMemberStatement(jameya: JameyaDetail) {
   const t = useTranslations('jameyas.statement');
   const tReceipt = useTranslations('jameyas.receipt');
-  const locale = useLocale();
-  const money = (minorUnits: number) => formatMoney(minorUnits, locale);
 
   function buildStatement(member: JameyaMember): JameyaStatementContent {
     const memberDues = jameya.dues.filter((due) => due.customerId === member.customerId);
@@ -62,8 +61,8 @@ export function useJameyaMemberStatement(jameya: JameyaDetail) {
           key: cycle.id,
           turn: String(cycle.sequence),
           date: formatDate(cycle.dueDate),
-          due: money(due.amount),
-          paid: money(due.paidAmount),
+          due: due.amount,
+          paid: due.paidAmount,
           status: t(`status.${kind}`),
           tone: STATUS_TONE[kind],
           isOwnTurn: member.turnSequences.includes(cycle.sequence),
@@ -72,7 +71,7 @@ export function useJameyaMemberStatement(jameya: JameyaDetail) {
     });
 
     return {
-      documentLabel: tReceipt('documentLabel'),
+      documentLabel: t('documentLabel'),
       title: t('title'),
       issuedOn: tReceipt('issuedOn', { date: formatDate(todayIso()) }),
       details: [
@@ -80,13 +79,13 @@ export function useJameyaMemberStatement(jameya: JameyaDetail) {
         { label: t('jameya'), value: jameya.name },
         { label: t('shares'), value: String(member.turnSequences.length) },
         { label: t('payoutTurns'), value: member.turnSequences.join(t('sequenceSeparator')) },
-        { label: t(`perTurn.${jameya.recurrenceType}`), value: money(perTurnAmount) },
       ],
+      perTurn: { label: t(`perTurn.${jameya.recurrenceType}`), amount: perTurnAmount },
       totals: [
-        { label: t('totalPaid'), value: money(member.paidAmount), tone: 'success' },
-        { label: t('overdue'), value: money(member.lateAmount), tone: member.lateAmount > 0 ? 'danger' : 'muted' },
-        { label: t('remaining'), value: money(member.remainingAmount), tone: 'muted' },
-        { label: t('received'), value: money(member.receivedAmount), tone: 'muted' },
+        { label: t('totalPaid'), amount: member.paidAmount, tone: 'success' },
+        { label: t('overdue'), amount: member.lateAmount, tone: member.lateAmount > 0 ? 'danger' : 'muted' },
+        { label: t('remaining'), amount: member.remainingAmount, tone: 'muted' },
+        { label: t('received'), amount: member.receivedAmount, tone: 'muted' },
       ],
       columns: {
         turn: t('columns.turn'),

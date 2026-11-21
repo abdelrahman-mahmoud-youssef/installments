@@ -60,7 +60,7 @@ export function useShareJameyaStatement(jameya: JameyaDetail) {
         const html = buildJameyaMemberStatementHtml({
           isRTL,
           fontFaces: await loadStatementFontFaces(isRTL),
-          documentLabel: t('jameyas.receipt.documentLabel'),
+          documentLabel: t('jameyas.statement.documentLabel'),
           title: t('jameyas.statement.title'),
           issuedOn: t('jameyas.receipt.issuedOn', { date: formatStatementDate(todayIsoDate()) }),
           details: [
