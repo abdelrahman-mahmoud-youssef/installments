@@ -6,6 +6,7 @@ import { Queue } from 'bullmq';
 import { addUtcDays, getUtcToday } from '../../common/date/utc-date';
 import { PrismaService } from '../../prisma/prisma.service';
 import { buildReminderEligibleTenantWhere } from './reminder-eligible-tenant-where';
+import { computeJameyaSummaryTotals, JameyaSummaryTotals } from '../jameyas/jameya-summary-totals';
 import { PushService } from '../push/push.service';
 import { PushRoute } from '../push/push.types';
 import { ShareLinksService } from '../share-links/share-links.service';
@@ -53,6 +54,7 @@ interface ReminderTotals {
   dueTodayTotal: number;
   overdueCount: number;
   overdueTotal: number;
+  jameya?: JameyaSummaryTotals;
 }
 
 interface EveningTotals {
@@ -130,7 +132,7 @@ export class RemindersService implements OnModuleInit {
     });
 
     for (const tenant of tenants) {
-      const totals = await this.computeReminderTotals(tenant.id);
+      const totals = await this.computeReminderTotals(tenant);
 
       if (tenant.telegramBotToken && tenant.telegramChatId) {
         try {
@@ -174,12 +176,12 @@ export class RemindersService implements OnModuleInit {
         ...buildReminderEligibleTenantWhere(getUtcToday()),
         pushDevices: { some: { user: { role: Role.ADMIN } } },
       },
-      select: { id: true },
+      select: { id: true, jameyaEnabled: true },
     });
 
     for (const tenant of tenants) {
       try {
-        const totals = await this.computeReminderTotals(tenant.id);
+        const totals = await this.computeReminderTotals(tenant);
         if (hasMorningSummary(totals)) {
           await this.pushService.sendToTenantAdmins(
             tenant.id,
@@ -235,7 +237,7 @@ export class RemindersService implements OnModuleInit {
     if (!tenant.telegramChatId) {
       throw new BadRequestException('This tenant has no Telegram chat configured.');
     }
-    const totals = await this.computeReminderTotals(tenant.id);
+    const totals = await this.computeReminderTotals(tenant);
     await this.sendTelegramReminder(
       tenant.id,
       tenant.name,
@@ -441,10 +443,11 @@ export class RemindersService implements OnModuleInit {
     }
   }
 
-  private async computeReminderTotals(tenantId: string): Promise<ReminderTotals> {
+  private async computeReminderTotals(tenant: { id: string; jameyaEnabled: boolean }): Promise<ReminderTotals> {
     const today = getUtcToday();
+    const tenantId = tenant.id;
 
-    const [dueToday, overdue] = await Promise.all([
+    const [dueToday, overdue, jameya] = await Promise.all([
       this.prisma.installment.aggregate({
         where: { tenantId, status: { in: OUTSTANDING_STATUSES }, dueDate: today },
         _count: true,
@@ -455,6 +458,7 @@ export class RemindersService implements OnModuleInit {
         _count: true,
         _sum: { amount: true, paidAmount: true },
       }),
+      computeJameyaSummaryTotals(this.prisma, tenant, today),
     ]);
 
     return {
@@ -462,6 +466,7 @@ export class RemindersService implements OnModuleInit {
       dueTodayTotal: (dueToday._sum.amount ?? 0) - (dueToday._sum.paidAmount ?? 0),
       overdueCount: overdue._count,
       overdueTotal: (overdue._sum.amount ?? 0) - (overdue._sum.paidAmount ?? 0),
+      jameya,
     };
   }
 

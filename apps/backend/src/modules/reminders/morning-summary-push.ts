@@ -1,5 +1,6 @@
 import { NotificationLanguage } from '@prisma/client';
 import { PushContent } from '../push/push.types';
+import { formatJameyaSummaryLines, hasJameyaSummary } from './jameya-summary-lines';
 import { formatCount, formatMoney } from './notification-format';
 import { ReminderMessageData } from './reminder-message';
 
@@ -27,7 +28,7 @@ const MORNING_SUMMARY_COPY: Record<NotificationLanguage, MorningSummaryCopy> = {
 };
 
 export function hasMorningSummary(totals: MorningSummaryTotals): boolean {
-  return totals.dueTodayCount > 0 || totals.overdueCount > 0;
+  return totals.dueTodayCount > 0 || totals.overdueCount > 0 || hasJameyaSummary(totals.jameya);
 }
 
 export function buildMorningSummaryPushContent(
@@ -54,5 +55,6 @@ export function buildMorningSummaryPushContent(
       ),
     );
   }
+  lines.push(...formatJameyaSummaryLines(totals.jameya, language, (count) => formatCount(count, language)));
   return { title: copy.title, body: lines.join('\n') };
 }
