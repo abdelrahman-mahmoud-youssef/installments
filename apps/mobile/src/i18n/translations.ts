@@ -981,6 +981,8 @@ const en = {
       getsPaid: 'Gets paid',
       recordShort: 'Record',
       amountFor: 'Amount from {name}',
+      confirmPaymentTitle: 'Record this payment?',
+      confirmPaymentDescription: 'Record {amount} from {name} for today.',
     },
     grid: {
       member: 'Member',
@@ -2057,6 +2059,8 @@ const ar: typeof en = {
       getsPaid: 'هيقبض',
       recordShort: 'سجّل',
       amountFor: 'المبلغ من {name}',
+      confirmPaymentTitle: 'تسجّل الدفعة دي؟',
+      confirmPaymentDescription: 'هيتسجل {amount} من {name} بتاريخ النهاردة.',
     },
     grid: {
       member: 'العضو',

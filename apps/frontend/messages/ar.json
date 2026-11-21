@@ -1412,7 +1412,9 @@
       "turnMembersTitle": "الأعضاء في الدور ده",
       "getsPaid": "هيقبض",
       "recordShort": "سجّل",
-      "amountFor": "المبلغ من {name}"
+      "amountFor": "المبلغ من {name}",
+      "confirmPaymentTitle": "تسجّل الدفعة دي؟",
+      "confirmPaymentDescription": "هيتسجل {amount} من {name} بتاريخ النهاردة."
     },
     "grid": {
       "member": "العضو",

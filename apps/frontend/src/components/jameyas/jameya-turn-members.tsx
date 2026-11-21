@@ -4,6 +4,7 @@ import { Loader2 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import { NumberInput } from '@/components/shared/number-input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -25,6 +26,7 @@ const DUE_KIND_TONE: Record<JameyaDueKind, string> = {
 
 function QuickPayment({ jameya, member }: { jameya: JameyaDetail; member: JameyaMember }) {
   const t = useTranslations('jameyas');
+  const locale = useLocale();
   const createPayment = useCreateJameyaPayment(jameya.id);
   const suggested = suggestedPaymentOf(jameya, member.customerId);
   const [amount, setAmount] = useState<number | undefined>(suggested > 0 ? toMajorUnits(suggested) : undefined);
@@ -63,10 +65,21 @@ function QuickPayment({ jameya, member }: { jameya: JameyaDetail; member: Jameya
         aria-label={t('detail.amountFor', { name: member.name })}
         className="h-8 w-24"
       />
-      <Button size="sm" variant="outline" disabled={createPayment.isPending} onClick={() => void record()}>
-        {createPayment.isPending && <Loader2 className="size-4 animate-spin" />}
-        {t('detail.recordShort')}
-      </Button>
+      <ConfirmDialog
+        trigger={
+          <Button size="sm" variant="outline" disabled={createPayment.isPending}>
+            {createPayment.isPending && <Loader2 className="size-4 animate-spin" />}
+            {t('detail.recordShort')}
+          </Button>
+        }
+        title={t('detail.confirmPaymentTitle')}
+        description={t('detail.confirmPaymentDescription', {
+          amount: formatMoney(amount === undefined ? 0 : toMinorUnits(amount), locale, { hideWholeDecimals: true }),
+          name: member.name,
+        })}
+        confirmLabel={t('detail.recordShort')}
+        onConfirm={record}
+      />
     </div>
   );
 }
@@ -85,8 +98,14 @@ export function JameyaTurnMembers({
   const t = useTranslations('jameyas');
   const locale = useLocale();
   const holderIds = new Set(cycle.holders.map((holder) => holder.customerId));
+  const owedThisTurnOf = (customerId: string) => {
+    const due = jameya.dues.find((item) => item.cycleId === cycle.id && item.customerId === customerId);
+    return due ? due.amount - due.paidAmount : 0;
+  };
+  const sortRank = (customerId: string) =>
+    (owedThisTurnOf(customerId) > 0 ? 0 : 2) + (holderIds.has(customerId) ? 0 : 1);
   const members = [...jameya.members].sort(
-    (first, second) => Number(holderIds.has(second.customerId)) - Number(holderIds.has(first.customerId)),
+    (first, second) => sortRank(first.customerId) - sortRank(second.customerId),
   );
 
   return (
@@ -94,7 +113,7 @@ export function JameyaTurnMembers({
       {members.map((member) => {
         const due = jameya.dues.find((item) => item.cycleId === cycle.id && item.customerId === member.customerId);
         const kind = due ? dueKindOf(due, cycle) : null;
-        const owedThisTurn = due ? due.amount - due.paidAmount : 0;
+        const owedThisTurn = owedThisTurnOf(member.customerId);
         return (
           <li key={member.customerId} className="flex flex-wrap items-center gap-x-3 gap-y-2 py-2.5">
             <div className="flex min-w-0 flex-1 items-center gap-2">

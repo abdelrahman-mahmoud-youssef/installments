@@ -1,6 +1,6 @@
 'use client';
 
-import { FileWarning, Receipt } from 'lucide-react';
+import { FileWarning, HandCoins, ListChecks, type LucideIcon, Receipt } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useState } from 'react';
@@ -31,6 +31,11 @@ import { routes } from '@/lib/routes';
 
 const DETAIL_TABS = ['current', 'details'] as const;
 type DetailTab = (typeof DETAIL_TABS)[number];
+
+const DETAIL_TAB_ICONS: Record<DetailTab, LucideIcon> = {
+  current: HandCoins,
+  details: ListChecks,
+};
 
 export default function JameyaDetailPage() {
   const t = useTranslations('jameyas.detail');
@@ -115,12 +120,16 @@ export default function JameyaDetailPage() {
 
       <FadeIn delay={0.06}>
         <Tabs value={tab} onValueChange={(value) => setTab(value as DetailTab)}>
-          <TabsList>
-            {DETAIL_TABS.map((value) => (
-              <TabsTrigger key={value} value={value}>
-                {t(`tabs.${value}`)}
-              </TabsTrigger>
-            ))}
+          <TabsList className="w-full">
+            {DETAIL_TABS.map((value) => {
+              const Icon = DETAIL_TAB_ICONS[value];
+              return (
+                <TabsTrigger key={value} value={value} className="flex-1 gap-1.5">
+                  <Icon className="size-4" />
+                  {t(`tabs.${value}`)}
+                </TabsTrigger>
+              );
+            })}
           </TabsList>
         </Tabs>
       </FadeIn>
