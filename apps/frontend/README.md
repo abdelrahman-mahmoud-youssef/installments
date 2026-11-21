@@ -20,6 +20,21 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## PDF fonts
+
+The Arabic PDFs (jameya receipts and contact statements) use the Cairo files in `public/fonts/pdf/cairo-arabic-*.woff`, loaded by `src/lib/pdf.ts`.
+
+`@react-pdf/renderer` shapes Arabic text left to right. Cairo's kerning pair for فـ followed by ـي is then applied on the wrong side of the glyph and closes the space before "في", so "لسه ليه في" renders as "لسه ليهفي". The committed fonts have the GPOS `kern` feature emptied to prevent this.
+
+Run the script whenever these font files are replaced or re-downloaded:
+
+```bash
+pip install fonttools
+pnpm --filter frontend fonts:strip-pdf-kerning
+```
+
+It rewrites the files in place and keeps their original timestamps, so running it on the upstream files reproduces the committed ones byte for byte. Check a few Arabic receipts afterwards. If a later react-pdf release shapes right-to-left text correctly, the original fonts (in git before commit 854f151) can be restored.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
