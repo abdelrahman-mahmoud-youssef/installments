@@ -1,6 +1,3 @@
-import { File, Paths } from 'expo-file-system';
-import { printToFileAsync } from 'expo-print';
-import { shareAsync } from 'expo-sharing';
 import { useCallback, useState } from 'react';
 import { TenantBranding } from '@/api/branding';
 import { Counterparty } from '@/api/counterparties';
@@ -11,32 +8,18 @@ import { describeAmountInWords } from '@/lib/amount-in-words';
 import { resolveAssetUrl } from '@/lib/asset-url';
 import { BRAND_COLOR_HEX } from '@/lib/brand-colors';
 import { BalanceStatus, balanceStatus } from '@/lib/counterparty-balance';
+import { sharePdf } from '@/lib/share-pdf';
 import { buildContactStatementHtml, STATEMENT_PAGE_SIZE } from './contact-statement-html';
 import { loadStatementFontFaces } from './statement-fonts';
 import { formatStatementDateTime, splitStatementMoney } from './statement-format';
 
-const PDF_MIME_TYPE = 'application/pdf';
-const PDF_UTI = 'com.adobe.pdf';
-const FALLBACK_FILE_NAME = 'statement';
-const UNSAFE_FILE_NAME_CHARACTERS = /[\\/:*?"<>|]+/g;
-const NO_MARGINS = { top: 0, right: 0, bottom: 0, left: 0 };
+const STATEMENT_FALLBACK_FILE_NAME = 'statement';
 
 const BALANCE_HINT_KEYS: Record<BalanceStatus, string> = {
   theyOwe: 'contacts.pdfTheyOwe',
   youOwe: 'contacts.pdfYouOwe',
   settled: 'contacts.pdfSettled',
 };
-
-function statementFileName(shopName: string): string {
-  const safeName = shopName.replace(UNSAFE_FILE_NAME_CHARACTERS, ' ').trim();
-  return `${safeName || FALLBACK_FILE_NAME}.pdf`;
-}
-
-async function renameInCache(uri: string, fileName: string): Promise<string> {
-  const destination = new File(Paths.cache, fileName);
-  await new File(uri).move(destination, { overwrite: true });
-  return destination.uri;
-}
 
 export function useShareStatement() {
   const { t, locale, isRTL } = useI18n();
@@ -84,14 +67,13 @@ export function useShareStatement() {
       }
       setIsSharing(true);
       try {
-        const { uri } = await printToFileAsync({
+        await sharePdf({
           html: await buildHtml(contact, branding.data),
-          width: STATEMENT_PAGE_SIZE.width,
-          height: STATEMENT_PAGE_SIZE.height,
-          margins: NO_MARGINS,
+          pageSize: STATEMENT_PAGE_SIZE,
+          fileName: branding.data.displayName,
+          fallbackFileName: STATEMENT_FALLBACK_FILE_NAME,
+          dialogTitle: t('contacts.pdfTitle'),
         });
-        const fileUri = await renameInCache(uri, statementFileName(branding.data.displayName));
-        await shareAsync(fileUri, { mimeType: PDF_MIME_TYPE, UTI: PDF_UTI, dialogTitle: t('contacts.pdfTitle') });
       } catch {
         showToast(t('contacts.shareError'), 'error');
       } finally {

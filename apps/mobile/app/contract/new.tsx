@@ -160,7 +160,7 @@ export default function NewContractScreen() {
 
       <CustomerPickerSheet
         visible={openSheet === 'picker'}
-        selectedId={values.customer?.id ?? null}
+        selectedIds={values.customer ? [values.customer.id] : []}
         onClose={() => setOpenSheet(null)}
         onSelect={(customer) => {
           setField('customer', { id: customer.id, name: customer.name, phone: customer.phone });

@@ -17,13 +17,13 @@ import { isolateLtr, toLatinDigits } from '@/lib/format';
 
 interface CustomerPickerSheetProps {
   visible: boolean;
-  selectedId: string | null;
+  selectedIds: readonly string[];
   onClose: () => void;
   onSelect: (customer: CustomerListItem) => void;
   onCreateNew: () => void;
 }
 
-export function CustomerPickerSheet({ visible, selectedId, onClose, onSelect, onCreateNew }: CustomerPickerSheetProps) {
+export function CustomerPickerSheet({ visible, selectedIds, onClose, onSelect, onCreateNew }: CustomerPickerSheetProps) {
   const { t } = useI18n();
   const { colors } = useTheme();
   const [search, setSearch] = useState('');
@@ -49,7 +49,7 @@ export function CustomerPickerSheet({ visible, selectedId, onClose, onSelect, on
           </AppText>
         ) : null}
         {customers.map((customer) => {
-          const isSelected = customer.id === selectedId;
+          const isSelected = selectedIds.includes(customer.id);
           return (
             <PressableScale
               key={customer.id}

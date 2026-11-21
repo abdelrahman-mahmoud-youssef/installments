@@ -3,7 +3,7 @@ import { STATEMENT_FONT_FAMILIES } from './statement-fonts';
 
 export const STATEMENT_PAGE_SIZE = { width: 595, height: 842 } as const;
 
-const DOCUMENT_COLORS = {
+export const DOCUMENT_COLORS = {
   ink: '#1c2333',
   muted: '#6b7280',
   border: '#e2e4ea',
@@ -47,7 +47,7 @@ export interface ContactStatementDocument {
   balance: { status: BalanceStatus; currency: string; amount: string; inWords: string };
 }
 
-function escapeHtml(text: string): string {
+export function escapeHtml(text: string): string {
   return text.replace(/[&<>"']/g, (character) => HTML_ESCAPES[character]);
 }
 
