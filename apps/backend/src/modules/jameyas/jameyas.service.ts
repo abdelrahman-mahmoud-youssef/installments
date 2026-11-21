@@ -34,11 +34,23 @@ function buildListSelect(today: Date) {
 
 type JameyaListRow = Prisma.JameyaGetPayload<{ select: ReturnType<typeof buildListSelect> }>;
 
+export interface JameyaMemberStanding {
+  turnSequence: number;
+  remainingAmount: number;
+  lateAmount: number;
+  receivedAmount: number;
+}
+
 export type JameyaListItem = Omit<JameyaListRow, 'cycles' | '_count'> & {
   potAmount: number;
   nextCycle: JameyaListRow['cycles'][number] | null;
   lateDueCount: number;
+  member?: JameyaMemberStanding;
 };
+
+function owedOf(sum: { amount: number | null; paidAmount: number | null }): number {
+  return (sum.amount ?? 0) - (sum.paidAmount ?? 0);
+}
 
 export interface JameyaPreviewCycle {
   sequence: number;
@@ -169,13 +181,57 @@ export class JameyasService {
       this.prisma.jameya.count({ where }),
     ]);
 
+    const standings = query.customerId
+      ? await this.findMemberStandings(tenantId, query.customerId, rows.map((row) => row.id), today)
+      : new Map<string, JameyaMemberStanding>();
     const data = rows.map(({ cycles, _count, ...jameya }) => ({
       ...jameya,
       potAmount: calculatePot(jameya.shareAmount, jameya.shareCount),
       nextCycle: cycles[0] ?? null,
       lateDueCount: _count.dues,
+      member: standings.get(jameya.id),
     }));
     return buildPaginatedResult(data, total, query.page, query.limit);
+  }
+
+  private async findMemberStandings(
+    tenantId: string,
+    customerId: string,
+    jameyaIds: string[],
+    today: Date,
+  ): Promise<Map<string, JameyaMemberStanding>> {
+    const memberWhere = { tenantId, customerId, jameyaId: { in: jameyaIds } };
+    const [shares, dues, lateDues, payouts] = await Promise.all([
+      this.prisma.jameyaShare.findMany({
+        where: memberWhere,
+        orderBy: { cycle: { sequence: 'asc' } },
+        select: { jameyaId: true, cycle: { select: { sequence: true } } },
+      }),
+      this.prisma.jameyaDue.groupBy({ by: ['jameyaId'], where: memberWhere, _sum: { amount: true, paidAmount: true } }),
+      this.prisma.jameyaDue.groupBy({
+        by: ['jameyaId'],
+        where: { ...memberWhere, ...lateJameyaDueWhere(today) },
+        _sum: { amount: true, paidAmount: true },
+      }),
+      this.prisma.jameyaPayout.groupBy({ by: ['jameyaId'], where: memberWhere, _sum: { amount: true } }),
+    ]);
+
+    const remainingByJameya = new Map(dues.map((row) => [row.jameyaId, owedOf(row._sum)]));
+    const lateByJameya = new Map(lateDues.map((row) => [row.jameyaId, owedOf(row._sum)]));
+    const receivedByJameya = new Map(payouts.map((row) => [row.jameyaId, row._sum.amount ?? 0]));
+    const standings = new Map<string, JameyaMemberStanding>();
+    for (const share of shares) {
+      if (standings.has(share.jameyaId)) {
+        continue;
+      }
+      standings.set(share.jameyaId, {
+        turnSequence: share.cycle.sequence,
+        remainingAmount: remainingByJameya.get(share.jameyaId) ?? 0,
+        lateAmount: lateByJameya.get(share.jameyaId) ?? 0,
+        receivedAmount: receivedByJameya.get(share.jameyaId) ?? 0,
+      });
+    }
+    return standings;
   }
 
   async findOne(tenantId: string, id: string): Promise<JameyaDetail> {
