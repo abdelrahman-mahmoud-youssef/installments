@@ -92,6 +92,7 @@ export interface JameyaMemberSummary {
   dueAmount: number;
   paidAmount: number;
   remainingAmount: number;
+  dueNowAmount: number;
   lateAmount: number;
   lateDueCount: number;
   receivedAmount: number;
@@ -185,7 +186,28 @@ interface ReminderContext {
   today: Date;
 }
 
-function resolveReminderStatus(reminderDues: { due: JameyaDueCell; dueDate: Date }[], today: Date) {
+interface OutstandingDue {
+  due: JameyaDueCell;
+  dueDate: Date;
+}
+
+function findOutstandingDues(dues: JameyaDueCell[], cycles: JameyaCycleSummary[]): OutstandingDue[] {
+  return cycles.flatMap((cycle) =>
+    dues
+      .filter((due) => due.cycleId === cycle.id && due.status !== JameyaDueStatus.PAID)
+      .map((due) => ({ due, dueDate: cycle.dueDate })),
+  );
+}
+
+function filterDueByToday(outstanding: OutstandingDue[], today: Date): OutstandingDue[] {
+  return outstanding.filter(({ dueDate }) => dueDate <= today);
+}
+
+function sumOwed(outstanding: OutstandingDue[]): number {
+  return sumBy(outstanding, ({ due }) => due.amount - due.paidAmount);
+}
+
+function resolveReminderStatus(reminderDues: OutstandingDue[], today: Date) {
   if (reminderDues.some(({ due }) => due.isLate)) {
     return JameyaReminderStatus.LATE;
   }
@@ -194,16 +216,10 @@ function resolveReminderStatus(reminderDues: { due: JameyaDueCell; dueDate: Date
 
 function buildMemberReminder(
   share: JameyaShareRow,
-  dues: JameyaDueCell[],
-  cycles: JameyaCycleSummary[],
+  outstanding: OutstandingDue[],
   context: ReminderContext,
 ): string | null {
-  const outstanding = cycles.flatMap((cycle) =>
-    dues
-      .filter((due) => due.cycleId === cycle.id && due.status !== JameyaDueStatus.PAID)
-      .map((due) => ({ due, dueDate: cycle.dueDate })),
-  );
-  const dueNow = outstanding.filter(({ dueDate }) => dueDate <= context.today);
+  const dueNow = filterDueByToday(outstanding, context.today);
   const reminderDues = dueNow.length > 0 ? dueNow : outstanding.slice(0, 1);
   if (reminderDues.length === 0) {
     return null;
@@ -213,7 +229,7 @@ function buildMemberReminder(
       memberName: share.customer.name,
       businessName: context.businessName,
       jameyaName: context.jameyaName,
-      amountDue: sumBy(reminderDues, ({ due }) => due.amount - due.paidAmount),
+      amountDue: sumOwed(reminderDues),
       dueDate: reminderDues[0].dueDate,
       status: resolveReminderStatus(reminderDues, context.today),
     },
@@ -234,6 +250,7 @@ function buildMemberSummaries(
     const lateDues = memberDues.filter((due) => due.isLate);
     const dueAmount = sumBy(memberDues, (due) => due.amount);
     const paidAmount = sumBy(memberDues, (due) => due.paidAmount);
+    const outstanding = findOutstandingDues(memberDues, cycles);
     return {
       customerId,
       name: customerShares[0].customer.name,
@@ -243,13 +260,14 @@ function buildMemberSummaries(
       dueAmount,
       paidAmount,
       remainingAmount: dueAmount - paidAmount,
+      dueNowAmount: sumOwed(filterDueByToday(outstanding, context.today)),
       lateAmount: sumBy(lateDues, (due) => due.amount - due.paidAmount),
       lateDueCount: lateDues.length,
       receivedAmount: sumBy(
         cycles.flatMap((cycle) => cycle.holders).filter((holder) => holder.customerId === customerId),
         (holder) => holder.paidOutAmount,
       ),
-      reminderMessage: buildMemberReminder(customerShares[0], memberDues, cycles, context),
+      reminderMessage: buildMemberReminder(customerShares[0], outstanding, context),
     };
   });
 }

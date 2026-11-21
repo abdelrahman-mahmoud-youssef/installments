@@ -363,4 +363,22 @@ describe('Jameyas', () => {
       expect(detail.members.find((member) => member.customerId === twice)!.receivedAmount).toBe(600_000);
     });
   });
+
+  it('reports what each member owes for turns due by today, apart from later turns', async () => {
+    const shop = await createShop(3);
+    const jameya = await createJameya(shop, 100_000, addUtcDays(today, -35));
+    const [paidAhead, partial, unpaid] = shop.customerIds;
+
+    await pay(shop, jameya.id, paidAhead, 300_000);
+    await pay(shop, jameya.id, partial, 150_000);
+
+    const detail = await jameyas.findOne(shop.tenantId, jameya.id);
+    const dueNowOf = (customerId: string) =>
+      detail.members.find((member) => member.customerId === customerId)!.dueNowAmount;
+    expect(detail.cycles.map((cycle) => cycle.dueDate <= today)).toEqual([true, true, false]);
+    expect(dueNowOf(paidAhead)).toBe(0);
+    expect(dueNowOf(partial)).toBe(50_000);
+    expect(dueNowOf(unpaid)).toBe(200_000);
+    expect(detail.members.find((member) => member.customerId === unpaid)!.remainingAmount).toBe(300_000);
+  });
 });
