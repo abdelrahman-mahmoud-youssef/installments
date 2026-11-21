@@ -27,10 +27,10 @@ describe('formatCustomerReminderMessage', () => {
         'Reminder from Acme Electronics',
         '',
         'Due today:',
-        '• iPhone 15 — EGP 1,250.00 (18 Jul)',
+        '• iPhone 15 — EGP 1,250.00 (18/07/2026)',
         '',
         'Overdue:',
-        '• Laptop — EGP 900.00 (10 Jul)',
+        '• Laptop — EGP 900.00 (10/07/2026)',
       ].join('\n'),
     );
   });
