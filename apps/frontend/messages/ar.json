@@ -1412,9 +1412,10 @@
       "turnMembersTitle": "الأعضاء في الدور ده",
       "getsPaid": "هيقبض",
       "recordShort": "سجّل",
-      "amountFor": "المبلغ من {name}",
-      "confirmPaymentTitle": "تسجّل الدفعة دي؟",
-      "confirmPaymentDescription": "هيتسجل {amount} من {name} بتاريخ النهاردة."
+      "collectTitle": "سجّل دفعة {name}",
+      "receipt": "صورة التحويل (اختياري)",
+      "receiptHint": "ارفع صورة التحويل",
+      "viewReceipt": "شوف صورة التحويل"
     },
     "grid": {
       "member": "العضو",

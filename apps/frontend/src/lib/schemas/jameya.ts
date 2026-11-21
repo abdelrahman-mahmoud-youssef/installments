@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { JAMEYA_RECURRENCE_TYPES } from '@/lib/enums';
 import { toMinorUnits } from '@/lib/format';
+import { imageFileSchema } from './image-file';
 
 export const JAMEYA_MIN_MEMBERS = 2;
 export const JAMEYA_MIN_TURNS = 2;
@@ -8,6 +9,7 @@ export const JAMEYA_MAX_TURNS = 60;
 const JAMEYA_NAME_MAX_LENGTH = 60;
 const JAMEYA_NOTE_MAX_LENGTH = 500;
 const JAMEYA_MAX_GRACE_DAYS = 60;
+const JAMEYA_RECEIPT_MAX_BYTES = 5 * 1024 * 1024;
 
 export interface JameyaValidationMessages {
   nameRequired: string;
@@ -70,3 +72,14 @@ export function createJameyaMoneyEntrySchema(
 }
 
 export type JameyaMoneyEntryInput = z.infer<ReturnType<typeof createJameyaMoneyEntrySchema>>;
+
+export function createJameyaCollectSchema(
+  messages: JameyaValidationMessages,
+  limitFor: (customerId: string) => number,
+) {
+  return createJameyaMoneyEntrySchema(messages, limitFor).and(
+    z.object({ image: imageFileSchema(JAMEYA_RECEIPT_MAX_BYTES, 'Screenshot') }),
+  );
+}
+
+export type JameyaCollectInput = z.infer<ReturnType<typeof createJameyaCollectSchema>>;

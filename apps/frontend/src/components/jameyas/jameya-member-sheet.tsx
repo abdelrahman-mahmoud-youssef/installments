@@ -8,6 +8,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '
 import { useJameyaMemberPayments } from '@/hooks/use-jameyas';
 import { JameyaDetail, JameyaMember } from '@/lib/api/jameyas';
 import { cn } from '@/lib/utils';
+import { JameyaPaymentReceiptLink } from './jameya-payment-receipt-link';
 import { JameyaReceiptButton } from './jameya-receipt-button';
 import { JameyaWhatsappButton } from './jameya-whatsapp-button';
 import { useJameyaReceipts } from './use-jameya-receipts';
@@ -48,6 +49,7 @@ function MemberPayments({ jameya, member }: { jameya: JameyaDetail; member: Jame
             {payment.note && <p className="truncate text-xs text-muted-foreground">{payment.note}</p>}
           </div>
           <Money minorUnits={payment.amount} hideWholeDecimals className="text-sm font-semibold" />
+          <JameyaPaymentReceiptLink receiptUrl={payment.receiptUrl} />
           <JameyaReceiptButton
             fileName={`${jameya.name} ${member.name}`}
             buildContent={() =>

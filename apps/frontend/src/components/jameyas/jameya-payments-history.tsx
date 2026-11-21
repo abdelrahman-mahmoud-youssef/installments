@@ -11,6 +11,7 @@ import { Section } from '@/components/shared/section';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useJameyaPayments } from '@/hooks/use-jameyas';
 import { JameyaDetail } from '@/lib/api/jameyas';
+import { JameyaPaymentReceiptLink } from './jameya-payment-receipt-link';
 import { JameyaReceiptButton } from './jameya-receipt-button';
 import { useJameyaReceipts } from './use-jameya-receipts';
 
@@ -50,6 +51,7 @@ export function JameyaPaymentsHistory({ jameya }: { jameya: JameyaDetail }) {
                     {payment.note && <p className="truncate text-xs text-muted-foreground">{payment.note}</p>}
                   </div>
                   <Money minorUnits={payment.amount} className="text-sm font-semibold text-success" />
+                  <JameyaPaymentReceiptLink receiptUrl={payment.receiptUrl} />
                   <JameyaReceiptButton
                     fileName={`${jameya.name} ${name}`}
                     buildContent={() =>

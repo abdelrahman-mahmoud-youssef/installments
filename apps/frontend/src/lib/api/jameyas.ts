@@ -1,4 +1,5 @@
 import { JameyaCycleState, JameyaDueStatus, JameyaRecurrenceType, JameyaStatus } from '@/lib/enums';
+import { fileToBase64 } from '@/lib/file';
 import { apiClient } from './client';
 import { buildQuery, PaginatedResult } from './pagination';
 
@@ -112,6 +113,7 @@ export interface JameyaPayment {
   balanceAfter: number;
   paidAt: string;
   note: string | null;
+  receiptUrl: string | null;
   clientRequestId: string;
   createdAt: string;
   allocations: { dueId: string; amount: number }[];
@@ -182,8 +184,14 @@ export function listJameyaPayments(
   return apiClient.get(`jameyas/${id}/payments${buildQuery(params)}`);
 }
 
-export function createJameyaPayment(id: string, payload: JameyaMoneyEntryPayload): Promise<JameyaPayment> {
-  return apiClient.post(`jameyas/${id}/payments`, payload);
+export type JameyaPaymentPayload = JameyaMoneyEntryPayload & { image?: File };
+
+export async function createJameyaPayment(id: string, payload: JameyaPaymentPayload): Promise<JameyaPayment> {
+  const { image, ...entry } = payload;
+  return apiClient.post(`jameyas/${id}/payments`, {
+    ...entry,
+    image: image ? await fileToBase64(image) : undefined,
+  });
 }
 
 export function createJameyaPayout(
