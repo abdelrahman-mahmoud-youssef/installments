@@ -1450,7 +1450,6 @@
       "description": "You can hand it over in parts. Add a note each time.",
       "holder": "Receives",
       "stillOwedForTurn": "Still owed for this turn",
-      "availableCash": "Collected and not handed over yet",
       "amount": "Amount (EGP)",
       "fromShopMoneyPrefix": "Of this amount,",
       "fromShopMoneySuffix": "comes from the shop's own money because it hasn't been collected yet.",
@@ -1462,7 +1461,8 @@
       "payoutError": "Couldn't save the payout.",
       "handedOver": "Handed over to {name}.",
       "shopCovered": "Covered by the shop",
-      "done": "Done"
+      "done": "Done",
+      "remainingAfter": "{amount} will still be owed for this turn"
     },
     "editDialog": {
       "trigger": "Edit",

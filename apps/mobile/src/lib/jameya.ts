@@ -115,8 +115,8 @@ export function availableCycleCash(cycle: Pick<JameyaCycle, 'collectedAmount' | 
   return Math.max(0, cycle.collectedAmount - cycle.paidOutAmount);
 }
 
-export function suggestedPayoutAmount(holderRemainingAmount: number, collectedAmount: number): number {
-  return Math.min(holderRemainingAmount, collectedAmount);
+export function suggestedPayoutAmount(holderRemainingAmount: number, availableCash: number): number {
+  return Math.min(holderRemainingAmount, availableCash);
 }
 
 export function amountFromShopMoney(amount: number, availableCash: number): number {

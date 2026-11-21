@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CircleCheck, Loader2 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -19,13 +19,12 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useCreateJameyaPayout } from '@/hooks/use-jameyas';
 import { useJameyaValidationMessages } from '@/hooks/use-jameya-validation-messages';
 import { ApiError } from '@/lib/api/client';
 import { JameyaCycle, JameyaDetail, JameyaPayoutResult } from '@/lib/api/jameyas';
-import { toMajorUnits, toMinorUnits, todayIso } from '@/lib/format';
+import { formatMoney, toMajorUnits, toMinorUnits, todayIso } from '@/lib/format';
 import { createJameyaMoneyEntrySchema, JameyaMoneyEntryInput } from '@/lib/schemas/jameya';
 import { JameyaReceiptButton } from './jameya-receipt-button';
 import { useJameyaReceipts } from './use-jameya-receipts';
@@ -98,6 +97,7 @@ function JameyaPayoutForm({
   onClose: () => void;
 }) {
   const t = useTranslations('jameyas.payoutDialog');
+  const locale = useLocale();
   const messages = useJameyaValidationMessages();
   const createPayout = useCreateJameyaPayout(jameya.id);
   const [clientRequestId] = useState(() => crypto.randomUUID());
@@ -111,10 +111,8 @@ function JameyaPayoutForm({
   const nameOf = (customerId: string) =>
     jameya.members.find((member) => member.customerId === customerId)?.name ?? '';
   const openHolders = cycle.holders.filter((holder) => holder.remainingAmount > 0);
-  const holderItems = Object.fromEntries(openHolders.map((holder) => [holder.customerId, nameOf(holder.customerId)]));
   const availableCash = Math.max(0, cycle.collectedAmount - cycle.paidOutAmount);
-  const suggestedFor = (customerId: string) =>
-    Math.min(remainingByHolder.get(customerId) ?? 0, cycle.collectedAmount);
+  const suggestedFor = (customerId: string) => Math.min(remainingByHolder.get(customerId) ?? 0, availableCash);
   const firstHolderId = openHolders[0]?.customerId ?? '';
 
   const form = useForm<JameyaMoneyEntryInput>({
@@ -130,6 +128,7 @@ function JameyaPayoutForm({
   const amount = useWatch({ control: form.control, name: 'amount' });
   const enteredMinorUnits = typeof amount === 'number' && amount > 0 ? toMinorUnits(amount) : 0;
   const fromShopMoney = Math.max(0, enteredMinorUnits - availableCash);
+  const remainingAfterPayout = Math.max(0, (remainingByHolder.get(customerId) ?? 0) - enteredMinorUnits);
 
   if (result) {
     return (
@@ -165,43 +164,11 @@ function JameyaPayoutForm({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="flex min-h-0 flex-1 flex-col">
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-5">
-          <FormField
-            control={form.control}
-            name="customerId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('holder')}</FormLabel>
-                <Select
-                  value={field.value}
-                  onValueChange={(value) => {
-                    field.onChange(value);
-                    if (value) {
-                      form.setValue('amount', toMajorUnits(suggestedFor(value)), { shouldValidate: true });
-                    }
-                  }}
-                  items={holderItems}
-                >
-                  <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {openHolders.map((holder) => (
-                      <SelectItem key={holder.customerId} value={holder.customerId}>
-                        {nameOf(holder.customerId)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <div className="space-y-2 rounded-lg border border-border bg-muted/40 p-3.5">
-            <SummaryLine label={t('stillOwedForTurn')} minorUnits={remainingByHolder.get(customerId) ?? 0} />
-            <SummaryLine label={t('availableCash')} minorUnits={availableCash} />
+          <div className="space-y-0.5">
+            <p className="text-sm text-muted-foreground">{t('holder')}</p>
+            <p className="font-heading text-lg font-semibold">
+              {openHolders.map((holder) => nameOf(holder.customerId)).join(' · ')}
+            </p>
           </div>
 
           <FormField
@@ -213,6 +180,13 @@ function JameyaPayoutForm({
                 <FormControl>
                   <NumberInput step="0.01" min="0" {...field} />
                 </FormControl>
+                {remainingAfterPayout > 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    {t('remainingAfter', {
+                      amount: formatMoney(remainingAfterPayout, locale, { hideWholeDecimals: true }),
+                    })}
+                  </p>
+                )}
                 <FormMessage />
               </FormItem>
             )}

@@ -1450,7 +1450,6 @@
       "description": "ممكن تسلّمه على أجزاء. اكتب ملاحظة كل مرة.",
       "holder": "اللي يقبض",
       "stillOwedForTurn": "لسه ليه في الدور ده",
-      "availableCash": "اتجمع ولسه متسلّمش",
       "amount": "المبلغ (ج.م)",
       "fromShopMoneyPrefix": "من المبلغ ده،",
       "fromShopMoneySuffix": "هيطلع من فلوس المحل لأنه لسه متجمعش.",
@@ -1462,7 +1461,8 @@
       "payoutError": "معرفناش نحفظ القبض.",
       "handedOver": "اتسلّم لـ {name}.",
       "shopCovered": "المحل غطّى",
-      "done": "تمام"
+      "done": "تمام",
+      "remainingAfter": "هيفضل ليه {amount} في الدور ده"
     },
     "editDialog": {
       "trigger": "تعديل",
