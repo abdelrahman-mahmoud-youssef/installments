@@ -11,11 +11,13 @@ import { Section } from '@/components/shared/section';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { JameyaCurrentTurnCard } from '@/components/jameyas/jameya-current-turn-card';
 import { JameyaEditDialog } from '@/components/jameyas/jameya-edit-dialog';
 import { JameyaMemberSheet } from '@/components/jameyas/jameya-member-sheet';
 import { JameyaMoreViews } from '@/components/jameyas/jameya-more-views';
 import { JameyaPayoutDialog } from '@/components/jameyas/jameya-payout-dialog';
+import { JameyaTurnMembers } from '@/components/jameyas/jameya-turn-members';
 import { JameyaTurnsList } from '@/components/jameyas/jameya-turns-list';
 import { JameyaUnpaidMembers } from '@/components/jameyas/jameya-unpaid-members';
 import { RecordJameyaPaymentDialog } from '@/components/jameyas/record-jameya-payment-dialog';
@@ -24,7 +26,11 @@ import { useJameya } from '@/hooks/use-jameyas';
 import { ApiError } from '@/lib/api/client';
 import { JameyaCycle } from '@/lib/api/jameyas';
 import { formatMoney } from '@/lib/format';
+import { findCurrentTurn } from '@/lib/jameya-turns';
 import { routes } from '@/lib/routes';
+
+const DETAIL_TABS = ['current', 'details'] as const;
+type DetailTab = (typeof DETAIL_TABS)[number];
 
 export default function JameyaDetailPage() {
   const t = useTranslations('jameyas.detail');
@@ -36,6 +42,7 @@ export default function JameyaDetailPage() {
   const [payoutCycle, setPayoutCycle] = useState<JameyaCycle | null>(null);
   const [isPayoutOpen, setIsPayoutOpen] = useState(false);
   const [memberId, setMemberId] = useState<string | null>(null);
+  const [tab, setTab] = useState<DetailTab>('current');
 
   if (isLoading) {
     return (
@@ -64,6 +71,7 @@ export default function JameyaDetailPage() {
     setIsPayoutOpen(true);
   }
 
+  const currentTurn = findCurrentTurn(jameya);
   const money = (minorUnits: number) => formatMoney(minorUnits, locale, { hideWholeDecimals: true });
 
   return (
@@ -106,20 +114,38 @@ export default function JameyaDetailPage() {
       </FadeIn>
 
       <FadeIn delay={0.06}>
-        <JameyaCurrentTurnCard jameya={jameya} onHandOver={startPayout} />
+        <Tabs value={tab} onValueChange={(value) => setTab(value as DetailTab)}>
+          <TabsList>
+            {DETAIL_TABS.map((value) => (
+              <TabsTrigger key={value} value={value}>
+                {t(`tabs.${value}`)}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
       </FadeIn>
 
-      <FadeIn delay={0.08}>
-        <JameyaUnpaidMembers jameya={jameya} onOpenMember={setMemberId} />
-      </FadeIn>
-
-      <FadeIn delay={0.1}>
-        <JameyaTurnsList jameya={jameya} onHandOver={startPayout} onOpenMember={setMemberId} />
-      </FadeIn>
-
-      <FadeIn delay={0.12}>
-        <JameyaMoreViews jameya={jameya} />
-      </FadeIn>
+      {tab === 'current' ? (
+        <>
+          <JameyaCurrentTurnCard jameya={jameya} onHandOver={startPayout} />
+          {currentTurn && (
+            <Section title={t('turnMembersTitle')}>
+              <JameyaTurnMembers
+                jameya={jameya}
+                cycle={currentTurn}
+                canRecord={jameya.status === 'ACTIVE'}
+                onOpenMember={setMemberId}
+              />
+            </Section>
+          )}
+        </>
+      ) : (
+        <>
+          <JameyaUnpaidMembers jameya={jameya} onOpenMember={setMemberId} />
+          <JameyaTurnsList jameya={jameya} onHandOver={startPayout} onOpenMember={setMemberId} />
+          <JameyaMoreViews jameya={jameya} />
+        </>
+      )}
 
       <JameyaMemberSheet jameya={jameya} customerId={memberId} onClose={() => setMemberId(null)} />
       {canManageJameyas && (

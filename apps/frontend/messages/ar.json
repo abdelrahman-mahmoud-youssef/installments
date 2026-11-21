@@ -1404,7 +1404,15 @@
         "payments": "دفعاته",
         "noPayments": "لسه مدفعش حاجة.",
         "paymentsLoadError": "معرفناش نحمّل الدفعات."
-      }
+      },
+      "tabs": {
+        "current": "الدور ده",
+        "details": "تفاصيل الجمعية"
+      },
+      "turnMembersTitle": "الأعضاء في الدور ده",
+      "getsPaid": "هيقبض",
+      "recordShort": "سجّل",
+      "amountFor": "المبلغ من {name}"
     },
     "grid": {
       "member": "العضو",
@@ -1426,10 +1434,8 @@
       "description": "فلوس كاش اتاستلمت لـ {name}. بتتحسب على أقدم أدوار مش مدفوعة الأول.",
       "member": "العضو",
       "selectMember": "اختار عضو",
-      "stillOwes": "لسه عليه",
       "amount": "المبلغ (ج.م)",
       "paidAt": "تاريخ الدفع",
-      "owesAfterPayment": "هيفضل عليه",
       "note": "ملاحظة (اختياري)",
       "submit": "سجّل الدفعة",
       "submitting": "بنسجّل…",

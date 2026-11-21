@@ -20,6 +20,7 @@ import {
 } from '@/lib/jameya-turns';
 import { cn } from '@/lib/utils';
 import { JameyaReceiptButton } from './jameya-receipt-button';
+import { JameyaTurnMembers } from './jameya-turn-members';
 import { useJameyaReceipts } from './use-jameya-receipts';
 
 type HandOver = (cycle: JameyaCycle) => void;
@@ -54,7 +55,17 @@ function TurnStatusText({ status }: { status: JameyaTurnStatus }) {
   );
 }
 
-function TurnPayouts({ jameya, cycle, onHandOver }: { jameya: JameyaDetail; cycle: JameyaCycle; onHandOver: HandOver }) {
+function TurnPayouts({
+  jameya,
+  cycle,
+  onHandOver,
+  onOpenMember,
+}: {
+  jameya: JameyaDetail;
+  cycle: JameyaCycle;
+  onHandOver: HandOver;
+  onOpenMember: (customerId: string) => void;
+}) {
   const t = useTranslations('jameyas.detail');
   const { canManageJameyas } = useJameyaAccess();
   const { buildPayoutReceipt } = useJameyaReceipts(jameya);
@@ -62,6 +73,7 @@ function TurnPayouts({ jameya, cycle, onHandOver }: { jameya: JameyaDetail; cycl
 
   return (
     <div className="space-y-2 rounded-lg bg-muted/40 p-3">
+      <JameyaTurnMembers jameya={jameya} cycle={cycle} canRecord={false} onOpenMember={onOpenMember} />
       {cycle.payouts.length === 0 ? (
         <p className="text-sm text-muted-foreground">{t('noPayouts')}</p>
       ) : (
@@ -138,7 +150,7 @@ function TurnRow({
       </div>
       {isOpen && (
         <div className="mt-2">
-          <TurnPayouts jameya={jameya} cycle={cycle} onHandOver={onHandOver} />
+          <TurnPayouts jameya={jameya} cycle={cycle} onHandOver={onHandOver} onOpenMember={onOpenMember} />
         </div>
       )}
     </li>

@@ -6,14 +6,13 @@ import { FaWhatsapp } from 'react-icons/fa6';
 import { DateText } from '@/components/shared/date-text';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { JameyaCycle, JameyaDetail, JameyaDue } from '@/lib/api/jameyas';
+import { JameyaDetail } from '@/lib/api/jameyas';
 import { formatMoney } from '@/lib/format';
 import { toWhatsappNumber } from '@/lib/phone';
+import { dueKindOf, JameyaDueKind } from '@/lib/jameya-turns';
 import { cn } from '@/lib/utils';
 
-type CellKind = 'paid' | 'partial' | 'late' | 'due' | 'upcoming';
-
-const CELL_TONE: Record<CellKind, string> = {
+const CELL_TONE: Record<JameyaDueKind, string> = {
   paid: 'bg-success-soft text-success',
   partial: 'bg-warning-soft text-warning',
   late: 'bg-danger-soft text-danger',
@@ -21,20 +20,7 @@ const CELL_TONE: Record<CellKind, string> = {
   upcoming: 'bg-muted text-muted-foreground',
 };
 
-const LEGEND: CellKind[] = ['paid', 'partial', 'late', 'due', 'upcoming'];
-
-function cellKindOf(due: JameyaDue, cycle: JameyaCycle): CellKind {
-  if (due.status === 'PAID') {
-    return 'paid';
-  }
-  if (due.isLate) {
-    return 'late';
-  }
-  if (due.status === 'PARTIALLY_PAID') {
-    return 'partial';
-  }
-  return cycle.state === 'UPCOMING' ? 'upcoming' : 'due';
-}
+const LEGEND: JameyaDueKind[] = ['paid', 'partial', 'late', 'due', 'upcoming'];
 
 export function hasReceivedAndIsLate(member: { receivedAmount: number; lateAmount: number }): boolean {
   return member.receivedAmount > 0 && member.lateAmount > 0;
@@ -109,7 +95,7 @@ export function JameyaMembersGrid({ jameya }: { jameya: JameyaDetail }) {
                   if (!due) {
                     return <td key={cycle.id} className="border-b border-border" />;
                   }
-                  const kind = cellKindOf(due, cycle);
+                  const kind = dueKindOf(due, cycle);
                   const isOwnTurn = member.turnSequences.includes(cycle.sequence);
                   return (
                     <td key={cycle.id} className="border-b border-border px-1.5 py-2 text-center">

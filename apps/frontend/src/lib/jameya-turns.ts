@@ -1,4 +1,6 @@
-import { JameyaCycle, JameyaDetail } from '@/lib/api/jameyas';
+import { JameyaCycle, JameyaDetail, JameyaDue } from '@/lib/api/jameyas';
+
+export type JameyaDueKind = 'paid' | 'partial' | 'late' | 'due' | 'upcoming';
 
 const TURNS_BEFORE_CURRENT = 2;
 const TURNS_AFTER_CURRENT = 2;
@@ -44,6 +46,25 @@ export function resolveTurnStatus(cycle: JameyaCycle, current: JameyaCycle | und
 
 export function canHandOverTurn(jameya: Pick<JameyaDetail, 'status'>, cycle: JameyaCycle): boolean {
   return jameya.status === 'ACTIVE' && cycle.state !== 'UPCOMING' && owedToHolders(cycle) > 0;
+}
+
+export function dueKindOf(due: JameyaDue, cycle: Pick<JameyaCycle, 'state'>): JameyaDueKind {
+  if (due.status === 'PAID') {
+    return 'paid';
+  }
+  if (due.isLate) {
+    return 'late';
+  }
+  if (due.status === 'PARTIALLY_PAID') {
+    return 'partial';
+  }
+  return cycle.state === 'UPCOMING' ? 'upcoming' : 'due';
+}
+
+export function suggestedPaymentOf(jameya: Pick<JameyaDetail, 'dues' | 'members'>, customerId: string): number {
+  const perTurnAmount = jameya.dues.find((due) => due.customerId === customerId)?.amount ?? 0;
+  const remainingAmount = jameya.members.find((member) => member.customerId === customerId)?.remainingAmount ?? 0;
+  return Math.min(perTurnAmount, remainingAmount);
 }
 
 export function holderNamesOf(jameya: Pick<JameyaDetail, 'members'>, cycle: JameyaCycle): string {

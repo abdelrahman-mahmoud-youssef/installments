@@ -1404,7 +1404,15 @@
         "payments": "Payments",
         "noPayments": "No payments yet.",
         "paymentsLoadError": "Couldn't load the payments."
-      }
+      },
+      "tabs": {
+        "current": "This turn",
+        "details": "Jameya details"
+      },
+      "turnMembersTitle": "Members this turn",
+      "getsPaid": "Gets paid",
+      "recordShort": "Record",
+      "amountFor": "Amount from {name}"
     },
     "grid": {
       "member": "Member",
@@ -1426,10 +1434,8 @@
       "description": "Cash received for {name}. It goes to the oldest unpaid turns first.",
       "member": "Member",
       "selectMember": "Select a member",
-      "stillOwes": "Still owes",
       "amount": "Amount (EGP)",
       "paidAt": "Paid on",
-      "owesAfterPayment": "Will still owe",
       "note": "Note (optional)",
       "submit": "Record payment",
       "submitting": "Recording…",

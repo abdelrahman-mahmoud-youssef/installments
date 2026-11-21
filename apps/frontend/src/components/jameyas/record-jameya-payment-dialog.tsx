@@ -4,10 +4,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { DatePickerField } from '@/components/shared/date-picker-field';
-import { Money } from '@/components/shared/money';
 import { NumberInput } from '@/components/shared/number-input';
 import { Button } from '@/components/ui/button';
 import {
@@ -27,8 +26,8 @@ import { useJameyaValidationMessages } from '@/hooks/use-jameya-validation-messa
 import { ApiError } from '@/lib/api/client';
 import { JameyaDetail } from '@/lib/api/jameyas';
 import { toMajorUnits, toMinorUnits, todayIso } from '@/lib/format';
+import { suggestedPaymentOf } from '@/lib/jameya-turns';
 import { createJameyaMoneyEntrySchema, JameyaMoneyEntryInput } from '@/lib/schemas/jameya';
-import { cn } from '@/lib/utils';
 
 function JameyaPaymentForm({
   jameya,
@@ -52,20 +51,21 @@ function JameyaPaymentForm({
   const owingMembers = jameya.members.filter((member) => member.remainingAmount > 0);
   const memberItems = Object.fromEntries(owingMembers.map((member) => [member.customerId, member.name]));
 
+  const suggestedAmountFor = (customerId: string) => {
+    const suggested = suggestedPaymentOf(jameya, customerId);
+    return suggested > 0 ? toMajorUnits(suggested) : undefined;
+  };
+  const initialCustomerId = defaultCustomerId ?? owingMembers[0]?.customerId ?? '';
+
   const form = useForm<JameyaMoneyEntryInput>({
     resolver: zodResolver(schema),
     defaultValues: {
-      customerId: defaultCustomerId ?? owingMembers[0]?.customerId ?? '',
-      amount: undefined,
+      customerId: initialCustomerId,
+      amount: suggestedAmountFor(initialCustomerId),
       paidAt: todayIso(),
       note: '',
     },
   });
-  const customerId = useWatch({ control: form.control, name: 'customerId' });
-  const amount = useWatch({ control: form.control, name: 'amount' });
-  const owed = remainingByMember.get(customerId) ?? 0;
-  const enteredMinorUnits = typeof amount === 'number' && amount > 0 ? toMinorUnits(amount) : 0;
-  const owedAfterPayment = Math.max(owed - enteredMinorUnits, 0);
 
   async function handleSubmit(values: JameyaMoneyEntryInput) {
     try {
@@ -93,7 +93,17 @@ function JameyaPaymentForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t('member')}</FormLabel>
-                <Select value={field.value} onValueChange={field.onChange} items={memberItems}>
+                <Select
+                  value={field.value}
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    const suggested = value ? suggestedAmountFor(value) : undefined;
+                    if (suggested !== undefined) {
+                      form.setValue('amount', suggested, { shouldValidate: true });
+                    }
+                  }}
+                  items={memberItems}
+                >
                   <FormControl>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder={t('selectMember')} />
@@ -111,18 +121,6 @@ function JameyaPaymentForm({
               </FormItem>
             )}
           />
-
-          <div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 px-3 py-2.5">
-            <span className="text-sm text-muted-foreground">{t('stillOwes')}</span>
-            <button
-              type="button"
-              disabled={owed === 0}
-              onClick={() => form.setValue('amount', toMajorUnits(owed), { shouldValidate: true })}
-              className="text-sm font-semibold underline-offset-4 hover:underline disabled:no-underline"
-            >
-              <Money minorUnits={owed} />
-            </button>
-          </div>
 
           <FormField
             control={form.control}
@@ -156,14 +154,6 @@ function JameyaPaymentForm({
               </FormItem>
             )}
           />
-
-          <div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 px-3 py-2.5">
-            <span className="text-sm text-muted-foreground">{t('owesAfterPayment')}</span>
-            <Money
-              minorUnits={owedAfterPayment}
-              className={cn('text-sm font-semibold', owedAfterPayment === 0 && 'text-success')}
-            />
-          </div>
 
           <FormField
             control={form.control}
