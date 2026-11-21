@@ -41,7 +41,7 @@ describe('formatJameyaReminderMessage', () => {
     expect(english).toContain(`⏳ Your payment of ${money} has been due since ${date}.`);
     expect(english).not.toMatch(/late|next payment/);
     expect(arabic).toContain(
-      `⏳ عليك دفعة مستحقة من يوم ${formatDate(dueDate, NotificationLanguage.AR)}: ${formatMoney(150_000, NotificationLanguage.AR)}`,
+      `⏳ ميعاد دفعتك كان يوم ${formatDate(dueDate, NotificationLanguage.AR)}: ${formatMoney(150_000, NotificationLanguage.AR)}`,
     );
     expect(arabic).not.toMatch(/متأخرة|الجاية/);
   });
@@ -65,7 +65,7 @@ describe('formatJameyaReminderMessage', () => {
         'مرحباً Mona 👋',
         'معاك Acme Shop بخصوص جمعية "Family circle".',
         '',
-        `⏰ عليك دفعة متأخرة: ${money} (كانت مستحقة ${date})`,
+        `⏰ عليك دفعة متأخرة: ${money} (كان ميعادها ${date})`,
         '',
         'لو حضرتك دفعت بالفعل، تجاهل الرسالة دي وسامحنا على الإزعاج 🙏',
       ].join('\n'),
@@ -78,7 +78,7 @@ describe('formatJameyaReminderMessage', () => {
     const money = formatMoney(150_000, NotificationLanguage.AR);
     const date = formatDate(dueDate, NotificationLanguage.AR);
 
-    expect(message).toContain(`📅 دفعتك الجاية: ${money} مستحقة ${date}`);
+    expect(message).toContain(`📅 دفعتك الجاية: ${money} ميعادها ${date}`);
     expect(message).not.toContain('متأخرة');
   });
 });

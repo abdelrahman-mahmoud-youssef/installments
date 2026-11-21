@@ -24,9 +24,9 @@ const MESSAGE_COPY = {
     intro: (businessName: string, jameyaName: string) =>
       `معاك ${businessName} بخصوص جمعية "${jameyaName}".`,
     late: (amount: string, date: string) =>
-      `⏰ عليك دفعة متأخرة: ${amount} (كانت مستحقة ${date})`,
-    due: (amount: string, date: string) => `⏳ عليك دفعة مستحقة من يوم ${date}: ${amount}`,
-    upcoming: (amount: string, date: string) => `📅 دفعتك الجاية: ${amount} مستحقة ${date}`,
+      `⏰ عليك دفعة متأخرة: ${amount} (كان ميعادها ${date})`,
+    due: (amount: string, date: string) => `⏳ ميعاد دفعتك كان يوم ${date}: ${amount}`,
+    upcoming: (amount: string, date: string) => `📅 دفعتك الجاية: ${amount} ميعادها ${date}`,
     footer: 'لو حضرتك دفعت بالفعل، تجاهل الرسالة دي وسامحنا على الإزعاج 🙏',
   },
   [NotificationLanguage.EN]: {

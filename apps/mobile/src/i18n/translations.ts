@@ -1998,7 +1998,7 @@ const ar: typeof en = {
         paid: 'دفع',
         partial: 'جزء',
         late: 'متأخر',
-        due: 'مستحق',
+        due: 'جه ميعاده',
         upcoming: 'لسه',
       },
       sendReminder: 'ابعت تذكير واتساب لـ {name}',
@@ -2073,7 +2073,7 @@ const ar: typeof en = {
     },
     cycleState: {
       UPCOMING: 'لسه',
-      DUE: 'مستحق',
+      DUE: 'جه ميعاده',
       LATE: 'متأخر',
       PARTIALLY_PAID_OUT: 'اتقبض جزء',
       PAID_OUT: 'اتقبض',

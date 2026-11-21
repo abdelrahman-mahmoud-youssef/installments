@@ -14,7 +14,7 @@ const JAMEYA_SUMMARY_COPY: Record<NotificationLanguage, JameyaSummaryCopy> = {
     payoutsPending: (count) => `Jameya payouts pending: ${count}`,
   },
   [NotificationLanguage.AR]: {
-    dueToday: (count) => `دفعات جمعيات مستحقة النهاردة: ${count}`,
+    dueToday: (count) => `دفعات جمعيات ميعادها النهاردة: ${count}`,
     late: (count) => `دفعات جمعيات متأخرة: ${count}`,
     payoutsPending: (count) => `قبض جمعيات لسه متسلّمش: ${count}`,
   },
