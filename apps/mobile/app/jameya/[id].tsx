@@ -9,6 +9,7 @@ import { JameyaCollectSheet } from '@/components/jameyas/jameya-collect-sheet';
 import { JameyaCurrentTurnCard } from '@/components/jameyas/jameya-current-turn-card';
 import { JameyaEditSheet } from '@/components/jameyas/jameya-edit-sheet';
 import { JameyaMemberSheet } from '@/components/jameyas/jameya-member-sheet';
+import { JameyaMembersStatements } from '@/components/jameyas/jameya-members-statements';
 import { JameyaMembersGrid } from '@/components/jameyas/jameya-members-grid';
 import { JameyaPaymentSheet } from '@/components/jameyas/jameya-payment-sheet';
 import { JameyaPaymentsList } from '@/components/jameyas/jameya-payments-list';
@@ -149,6 +150,11 @@ export default function JameyaDetailScreen() {
             <View style={{ gap: spacing.md }}>
               <SectionHeader title={t('jameyas.detail.turnsTitle')} />
               <JameyaTurnsList jameya={data} canManage={isAdmin} onHandOver={startPayout} onOpenMember={setMemberId} />
+            </View>
+
+            <View style={{ gap: spacing.md }}>
+              <SectionHeader title={t('jameyas.detail.membersTitle')} />
+              <JameyaMembersStatements jameya={data} onOpenMember={setMemberId} />
             </View>
 
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
