@@ -118,6 +118,7 @@ export interface JameyaPayment {
   balanceAfter: number;
   paidAt: string;
   note: string | null;
+  receiptUrl: string | null;
   clientRequestId: string;
   createdAt: string;
 }
