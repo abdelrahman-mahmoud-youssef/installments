@@ -1,12 +1,13 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowDown, ArrowUp, Loader2, Minus, Plus, Shuffle, UserPlus } from 'lucide-react';
+import { Loader2, Minus, Plus, Shuffle, UserPlus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { toast } from 'sonner';
 import { CustomerFormDialog } from '@/components/customers/customer-form-dialog';
+import { JameyaTurnOrderRow } from '@/components/jameyas/jameya-turn-order-row';
 import { BackLink } from '@/components/shared/back-link';
 import { DataTable, type Column } from '@/components/shared/data-table';
 import { DateText } from '@/components/shared/date-text';
@@ -22,16 +23,31 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useCreateCustomer, useCustomers } from '@/hooks/use-customers';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useJameyaValidationMessages } from '@/hooks/use-jameya-validation-messages';
-import { useCreateJameya, usePreviewJameya } from '@/hooks/use-jameyas';
+import { useCreateJameya, useJameyaPreview, usePreviewJameya } from '@/hooks/use-jameyas';
 import { useRouter } from '@/i18n/navigation';
 import { ApiError } from '@/lib/api/client';
 import { CreateJameyaPayload, JameyaPreview } from '@/lib/api/jameyas';
 import { JAMEYA_RECURRENCE_TYPES } from '@/lib/enums';
 import { toMinorUnits, todayIso } from '@/lib/format';
+import {
+  groupMemberTurns,
+  toTurnsPayload,
+  turnAddsUp,
+  WizardMember,
+  WizardTurn,
+  withHolderAmount,
+  withoutLastTurnOf,
+  withoutPartner,
+  withPartner,
+  withSoloTurn,
+  withSplit,
+} from '@/lib/jameya-wizard';
 import { routes } from '@/lib/routes';
 import {
   createJameyaDetailsSchema,
+  JAMEYA_MAX_HOLDERS_PER_TURN,
   JAMEYA_MAX_TURNS,
   JAMEYA_MIN_MEMBERS,
   JAMEYA_MIN_TURNS,
@@ -42,33 +58,7 @@ import { cn } from '@/lib/utils';
 const STEPS = ['details', 'members', 'order', 'review'] as const;
 type Step = (typeof STEPS)[number];
 
-interface SelectedMember {
-  id: string;
-  name: string;
-  phone: string;
-}
-
-interface SelectedTurn extends SelectedMember {
-  turnId: string;
-}
-
-interface MemberTurns {
-  member: SelectedMember;
-  count: number;
-}
-
-function groupTurns(turns: SelectedTurn[]): MemberTurns[] {
-  const groups = new Map<string, MemberTurns>();
-  for (const turn of turns) {
-    const group = groups.get(turn.id);
-    if (group) {
-      group.count += 1;
-    } else {
-      groups.set(turn.id, { member: turn, count: 1 });
-    }
-  }
-  return [...groups.values()];
-}
+const PREVIEW_DEBOUNCE_MS = 400;
 
 type PreviewCycle = JameyaPreview['cycles'][number];
 
@@ -121,7 +111,7 @@ export default function NewJameyaPage() {
   const messages = useJameyaValidationMessages();
   const [schema] = useState(() => createJameyaDetailsSchema(messages));
   const [step, setStep] = useState<Step>('details');
-  const [turns, setTurns] = useState<SelectedTurn[]>([]);
+  const [turns, setTurns] = useState<WizardTurn[]>([]);
   const [preview, setPreview] = useState<JameyaPreview | null>(null);
   const { data: customers, isLoading: isLoadingCustomers } = useCustomers({ status: 'ACTIVE', limit: 100 });
   const createCustomer = useCreateCustomer();
@@ -140,24 +130,43 @@ export default function NewJameyaPage() {
     },
   });
 
+  const enteredShareAmount = useWatch({ control: form.control, name: 'shareAmount' });
+  const shareAmount = typeof enteredShareAmount === 'number' ? enteredShareAmount : 0;
   const availableCustomers = customers?.data ?? [];
+  const customerChoices: WizardMember[] = availableCustomers.map((customer) => ({
+    id: customer.id,
+    name: customer.name,
+    phone: customer.phone,
+  }));
   const customerItems = Object.fromEntries(availableCustomers.map((customer) => [customer.id, customer.name]));
   const recurrenceItems = Object.fromEntries(JAMEYA_RECURRENCE_TYPES.map((type) => [type, tRecurrence(type)]));
-  const memberTurns = groupTurns(turns);
+  const memberTurns = groupMemberTurns(turns);
   const hasEnoughMembers = memberTurns.length >= JAMEYA_MIN_MEMBERS;
   const turnCountIsValid = hasEnoughMembers && turns.length >= JAMEYA_MIN_TURNS && turns.length <= JAMEYA_MAX_TURNS;
-  const nameOf = (customerId: string) => turns.find((turn) => turn.id === customerId)?.name ?? '';
-  const turnCountOf = (customerId: string) => turns.filter((turn) => turn.id === customerId).length;
+  const everyTurnAddsUp = turns.every((turn) => turnAddsUp(turn, shareAmount));
+  const nameOf = (customerId: string) =>
+    memberTurns.find((group) => group.member.id === customerId)?.member.name ?? '';
+  const turnCountOf = (customerId: string) =>
+    memberTurns.find((group) => group.member.id === customerId)?.count ?? 0;
+  const livePreviewRequest = useDebouncedValue(
+    step === 'order' && everyTurnAddsUp && shareAmount > 0 ? JSON.stringify(buildPayload()) : null,
+    PREVIEW_DEBOUNCE_MS,
+  );
+  const livePreview = useJameyaPreview(
+    livePreviewRequest === null ? null : (JSON.parse(livePreviewRequest) as CreateJameyaPayload),
+  );
 
-  function addTurn(member: SelectedMember) {
-    setTurns((current) => [...current, { ...member, turnId: crypto.randomUUID() }]);
+  function previewContributionOf(turnIndex: number, customerId: string): number | undefined {
+    return livePreview.data?.cycles[turnIndex]?.holders.find((holder) => holder.customerId === customerId)
+      ?.contribution;
+  }
+
+  function addTurn(member: WizardMember) {
+    setTurns((current) => withSoloTurn(current, member, crypto.randomUUID()));
   }
 
   function removeTurn(customerId: string) {
-    setTurns((current) => {
-      const lastIndex = current.map((turn) => turn.id).lastIndexOf(customerId);
-      return current.filter((_, index) => index !== lastIndex);
-    });
+    setTurns((current) => withoutLastTurnOf(current, customerId));
   }
 
   function buildPayload(): CreateJameyaPayload {
@@ -169,7 +178,7 @@ export default function NewJameyaPage() {
       firstDueDate: values.firstDueDate,
       graceDays: values.graceDays,
       notes: values.notes || undefined,
-      customerIds: turns.map((turn) => turn.id),
+      turns: toTurnsPayload(turns),
     };
   }
 
@@ -201,7 +210,7 @@ export default function NewJameyaPage() {
       setStep('members');
     } else if (step === 'members' && turnCountIsValid) {
       setStep('order');
-    } else if (step === 'order') {
+    } else if (step === 'order' && everyTurnAddsUp) {
       await goToReview();
     }
   }
@@ -218,7 +227,19 @@ export default function NewJameyaPage() {
       header: t('review.holder'),
       role: 'primary',
       cell: (cycle) => (
-        <span className="font-medium">{cycle.holders.map((holder) => nameOf(holder.customerId)).join(' · ')}</span>
+        <ul className="space-y-0.5">
+          {cycle.holders.map((holder) => (
+            <li key={holder.customerId} className="flex flex-wrap items-center gap-x-2">
+              <span className="font-medium">{nameOf(holder.customerId)}</span>
+              {cycle.holders.length > 1 && (
+                <span className="text-xs text-muted-foreground">
+                  <Money minorUnits={holder.contribution} hideWholeDecimals /> →{' '}
+                  <Money minorUnits={holder.entitlementAmount} hideWholeDecimals />
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
       ),
     },
     { id: 'due', header: t('review.dueDate'), cell: (cycle) => <DateText value={cycle.dueDate} /> },
@@ -235,6 +256,7 @@ export default function NewJameyaPage() {
       cell: (cycle) => (
         <Money
           minorUnits={cycle.holders.reduce((total, holder) => total + holder.entitlementAmount, 0)}
+          hideWholeDecimals
           className="font-medium"
         />
       ),
@@ -277,7 +299,7 @@ export default function NewJameyaPage() {
                     <FormItem>
                       <FormLabel>{t('shareAmount')}</FormLabel>
                       <FormControl>
-                        <NumberInput step="0.01" min="0" {...field} />
+                        <NumberInput step="1" min="0" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -446,7 +468,7 @@ export default function NewJameyaPage() {
       {step === 'order' && (
         <Section
           title={t('steps.order')}
-          description={t('orderHint')}
+          description={t('orderHint', { max: JAMEYA_MAX_HOLDERS_PER_TURN })}
           action={
             <Button type="button" variant="outline" size="sm" onClick={() => setTurns(shuffled(turns))}>
               <Shuffle className="size-4" />
@@ -456,32 +478,20 @@ export default function NewJameyaPage() {
         >
           <ol className="divide-y divide-border rounded-lg border border-border">
             {turns.map((turn, index) => (
-              <li key={turn.turnId} className="flex items-center gap-3 px-3 py-2">
-                <span className="w-16 shrink-0 text-xs text-muted-foreground">
-                  {t('turnNumber', { sequence: index + 1 })}
-                </span>
-                <span className="min-w-0 flex-1 truncate text-sm font-medium">{turn.name}</span>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  disabled={index === 0}
-                  aria-label={t('moveUp', { name: turn.name })}
-                  onClick={() => setTurns(moved(turns, index, index - 1))}
-                >
-                  <ArrowUp className="size-4" />
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  disabled={index === turns.length - 1}
-                  aria-label={t('moveDown', { name: turn.name })}
-                  onClick={() => setTurns(moved(turns, index, index + 1))}
-                >
-                  <ArrowDown className="size-4" />
-                </Button>
-              </li>
+              <JameyaTurnOrderRow
+                key={turn.turnId}
+                turn={turn}
+                index={index}
+                turnCount={turns.length}
+                shareAmount={shareAmount}
+                customers={customerChoices}
+                previewContributionOf={(customerId) => previewContributionOf(index, customerId)}
+                onMove={(to) => setTurns(moved(turns, index, to))}
+                onAddPartner={(member) => setTurns(withPartner(turns, index, member))}
+                onRemovePartner={(customerId) => setTurns(withoutPartner(turns, index, customerId))}
+                onSplit={(split) => setTurns(withSplit(turns, index, split))}
+                onAmount={(customerId, amount) => setTurns(withHolderAmount(turns, index, customerId, amount))}
+              />
             ))}
           </ol>
         </Section>
@@ -494,7 +504,7 @@ export default function NewJameyaPage() {
               <div className="space-y-0.5">
                 <dt className="text-xs text-muted-foreground">{t('review.pot')}</dt>
                 <dd className="font-heading text-lg font-semibold">
-                  <Money minorUnits={preview.potAmount} />
+                  <Money minorUnits={preview.potAmount} hideWholeDecimals />
                 </dd>
               </div>
               <div className="space-y-0.5">
@@ -508,7 +518,7 @@ export default function NewJameyaPage() {
                           <Badge variant="secondary">{t('turnsBadge', { count: turnCountOf(due.customerId) })}</Badge>
                         )}
                       </span>
-                      <Money minorUnits={due.amount} className="shrink-0 font-semibold" />
+                      <Money minorUnits={due.amount} hideWholeDecimals className="shrink-0 font-semibold" />
                     </div>
                   ))}
                 </dd>
@@ -541,7 +551,9 @@ export default function NewJameyaPage() {
           <Button
             type="button"
             onClick={() => void handleNext()}
-            disabled={(step === 'members' && !turnCountIsValid) || previewJameya.isPending}
+            disabled={
+              (step === 'members' && !turnCountIsValid) || (step === 'order' && !everyTurnAddsUp) || previewJameya.isPending
+            }
           >
             {previewJameya.isPending && <Loader2 className="size-4 animate-spin" />}
             {step === 'order' ? t('toReview') : t('next')}

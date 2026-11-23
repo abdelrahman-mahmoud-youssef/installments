@@ -45,7 +45,7 @@ export default function JameyaDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { data: jameya, isLoading, isError, error } = useJameya(id);
   const { canManageJameyas } = useJameyaAccess();
-  const [payoutCycle, setPayoutCycle] = useState<JameyaCycle | null>(null);
+  const [payoutTarget, setPayoutTarget] = useState<{ cycle: JameyaCycle; customerId: string } | null>(null);
   const [isPayoutOpen, setIsPayoutOpen] = useState(false);
   const [memberId, setMemberId] = useState<string | null>(null);
   const [tab, setTab] = useState<DetailTab>('current');
@@ -72,8 +72,8 @@ export default function JameyaDetailPage() {
     );
   }
 
-  function startPayout(cycle: JameyaCycle) {
-    setPayoutCycle(cycle);
+  function startPayout(cycle: JameyaCycle, customerId: string) {
+    setPayoutTarget({ cycle, customerId });
     setIsPayoutOpen(true);
   }
 
@@ -162,7 +162,8 @@ export default function JameyaDetailPage() {
       {canManageJameyas && (
         <JameyaPayoutDialog
           jameya={jameya}
-          cycle={payoutCycle}
+          cycle={payoutTarget?.cycle ?? null}
+          holderId={payoutTarget?.customerId ?? null}
           open={isPayoutOpen}
           onOpenChange={setIsPayoutOpen}
         />

@@ -7,7 +7,9 @@ import { Button } from '@/components/ui/button';
 import { useJameyaAccess } from '@/hooks/use-jameya-access';
 import { JameyaCycle, JameyaDetail } from '@/lib/api/jameyas';
 import { formatDate, formatMoney } from '@/lib/format';
-import { canHandOverTurn, findCurrentTurn, holderNamesOf } from '@/lib/jameya-turns';
+import { canHandOverTurn, findCurrentTurn } from '@/lib/jameya-turns';
+import { JameyaTurnHolders } from './jameya-turn-holders';
+import { useTurnHoldersLabel } from './use-turn-holders-label';
 
 const FULL_PERCENT = 100;
 
@@ -16,12 +18,13 @@ export function JameyaCurrentTurnCard({
   onHandOver,
 }: {
   jameya: JameyaDetail;
-  onHandOver: (cycle: JameyaCycle) => void;
+  onHandOver: (cycle: JameyaCycle, customerId: string) => void;
 }) {
   const t = useTranslations('jameyas.detail');
   const locale = useLocale();
   const { canManageJameyas } = useJameyaAccess();
   const money = (minorUnits: number) => formatMoney(minorUnits, locale, { hideWholeDecimals: true });
+  const holdersLabel = useTurnHoldersLabel(jameya);
   const cycle = findCurrentTurn(jameya);
 
   if (!cycle) {
@@ -32,7 +35,9 @@ export function JameyaCurrentTurnCard({
     );
   }
 
-  const holderName = holderNamesOf(jameya, cycle);
+  const holderName = holdersLabel(cycle);
+  const [onlyHolder] = cycle.holders;
+  const isShared = cycle.holders.length > 1;
   const missingAmount = Math.max(0, cycle.potAmount - cycle.collectedAmount);
   const collectedPercent = Math.min(FULL_PERCENT, (cycle.collectedAmount / cycle.potAmount) * FULL_PERCENT);
 
@@ -44,9 +49,11 @@ export function JameyaCurrentTurnCard({
             {t('turnOn', { sequence: cycle.sequence, date: formatDate(cycle.dueDate) })}
           </p>
           <p className="font-heading text-xl font-semibold sm:text-2xl">
-            {t('holderGets', { name: holderName, amount: money(cycle.potAmount) })}
+            {t(isShared ? 'sharedTurnGets' : 'holderGets', { name: holderName, amount: money(cycle.potAmount) })}
           </p>
         </div>
+
+        {isShared && <JameyaTurnHolders jameya={jameya} cycle={cycle} onHandOver={onHandOver} />}
 
         <div className="space-y-1.5">
           <div
@@ -70,8 +77,8 @@ export function JameyaCurrentTurnCard({
           <p className="text-sm text-muted-foreground">{t('shopPaid', { amount: money(cycle.exposureAmount) })}</p>
         )}
 
-        {canManageJameyas && canHandOverTurn(jameya, cycle) && (
-          <Button variant="outline" onClick={() => onHandOver(cycle)}>
+        {!isShared && canManageJameyas && canHandOverTurn(jameya, cycle) && (
+          <Button variant="outline" onClick={() => onHandOver(cycle, onlyHolder.customerId)}>
             <HandCoins className="size-4" />
             {t('handOverTo', { name: holderName })}
           </Button>

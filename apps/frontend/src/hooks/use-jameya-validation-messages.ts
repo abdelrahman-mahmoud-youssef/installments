@@ -12,6 +12,7 @@ export function useJameyaValidationMessages(): JameyaValidationMessages {
     noteTooLong: t('noteTooLong'),
     memberRequired: t('memberRequired'),
     amountPositive: t('amountPositive'),
+    wholePounds: t('wholePounds'),
     amountAboveLimit: t('amountAboveLimit'),
     dateRequired: t('dateRequired'),
   };

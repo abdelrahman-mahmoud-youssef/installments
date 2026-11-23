@@ -50,7 +50,7 @@ export function JameyaPaymentsHistory({ jameya }: { jameya: JameyaDetail }) {
                     </p>
                     {payment.note && <p className="truncate text-xs text-muted-foreground">{payment.note}</p>}
                   </div>
-                  <Money minorUnits={payment.amount} className="text-sm font-semibold text-success" />
+                  <Money minorUnits={payment.amount} hideWholeDecimals className="text-sm font-semibold text-success" />
                   <JameyaPaymentReceiptLink receiptUrl={payment.receiptUrl} />
                   <JameyaReceiptButton
                     fileName={`${jameya.name} ${name}`}

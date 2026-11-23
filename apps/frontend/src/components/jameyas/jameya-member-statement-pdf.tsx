@@ -36,7 +36,7 @@ export function JameyaMemberStatementPdf({
   const s = (text: string) => sanitizeForPdfFont(text);
   const fontOf = (text: string) => ({ fontFamily: pdfFontForText(text, locale) });
   const money = (minorUnits: number, color: string = PDF_COLORS.ink) => {
-    const { amount, currency } = splitMoneyParts(minorUnits, locale);
+    const { amount, currency } = splitMoneyParts(minorUnits, locale, { hideWholeDecimals: true });
     const amountText = (
       <Text key="amount" style={{ fontFamily: PDF_LATIN_FONT, color }}>
         {amount}

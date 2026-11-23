@@ -56,7 +56,7 @@ export default function JameyasPage() {
     {
       id: 'pot',
       header: t('list.pot'),
-      cell: (jameya) => <Money minorUnits={jameya.potAmount} className="font-medium" />,
+      cell: (jameya) => <Money minorUnits={jameya.potAmount} hideWholeDecimals className="font-medium" />,
     },
     {
       id: 'members',

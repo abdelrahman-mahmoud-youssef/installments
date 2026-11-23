@@ -45,7 +45,7 @@ export function JameyaReceiptPdf({ locale, content, tenant }: JameyaReceiptPdfPr
   const rowDirection = isRtl ? 'row-reverse' : 'row';
   const s = (text: string) => sanitizeForPdfFont(text);
   const fontOf = (text: string) => ({ fontFamily: pdfFontForText(text, locale) });
-  const moneyParts = splitMoneyParts(content.amount, locale);
+  const moneyParts = splitMoneyParts(content.amount, locale, { hideWholeDecimals: true });
 
   const styles = StyleSheet.create({
     page: {

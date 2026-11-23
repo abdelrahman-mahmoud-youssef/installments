@@ -15,13 +15,14 @@ interface PayoutReceiptInput {
   holderName: string;
   cycle: Pick<JameyaCycle, 'sequence' | 'dueDate'>;
   payout: Pick<JameyaPayout, 'amount' | 'paidAt' | 'note'>;
+  entitlementAmount: number;
   remainingAmount: number;
 }
 
 export function useJameyaReceipts(jameya: Pick<JameyaDetail, 'name'>) {
   const t = useTranslations('jameyas.receipt');
   const locale = useLocale();
-  const money = (minorUnits: number) => formatMoney(minorUnits, locale);
+  const money = (minorUnits: number) => formatMoney(minorUnits, locale, { hideWholeDecimals: true });
   const today = formatDate(todayIso());
 
   function withNote(rows: JameyaReceiptRow[], note: string | null): JameyaReceiptRow[] {
@@ -70,6 +71,7 @@ export function useJameyaReceipts(jameya: Pick<JameyaDetail, 'name'>) {
           ],
           input.payout.note,
         ),
+        { label: t('holderPart'), value: money(input.entitlementAmount) },
         { label: t('stillOwedForTurn'), value: money(input.remainingAmount) },
       ],
       footerPrefix: t('footerPrefix'),

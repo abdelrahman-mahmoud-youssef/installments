@@ -6,6 +6,7 @@ import { imageFileSchema } from './image-file';
 export const JAMEYA_MIN_MEMBERS = 2;
 export const JAMEYA_MIN_TURNS = 2;
 export const JAMEYA_MAX_TURNS = 60;
+export const JAMEYA_MAX_HOLDERS_PER_TURN = 4;
 const JAMEYA_NAME_MAX_LENGTH = 60;
 const JAMEYA_NOTE_MAX_LENGTH = 500;
 const JAMEYA_MAX_GRACE_DAYS = 60;
@@ -20,6 +21,7 @@ export interface JameyaValidationMessages {
   noteTooLong: string;
   memberRequired: string;
   amountPositive: string;
+  wholePounds: string;
   amountAboveLimit: string;
   dateRequired: string;
 }
@@ -30,10 +32,13 @@ const nameSchema = (messages: JameyaValidationMessages) =>
 const noteSchema = (messages: JameyaValidationMessages) =>
   z.string().max(JAMEYA_NOTE_MAX_LENGTH, messages.noteTooLong).optional();
 
+const wholePoundsSchema = (messages: JameyaValidationMessages, positiveMessage: string) =>
+  z.number({ error: positiveMessage }).positive(positiveMessage).int(messages.wholePounds);
+
 export function createJameyaDetailsSchema(messages: JameyaValidationMessages) {
   return z.object({
     name: nameSchema(messages),
-    shareAmount: z.number({ error: messages.shareAmountPositive }).positive(messages.shareAmountPositive),
+    shareAmount: wholePoundsSchema(messages, messages.shareAmountPositive),
     recurrenceType: z.enum(JAMEYA_RECURRENCE_TYPES),
     firstDueDate: z.string().min(1, messages.firstDueDateRequired),
     graceDays: z
@@ -60,7 +65,7 @@ export function createJameyaMoneyEntrySchema(
   return z
     .object({
       customerId: z.string().min(1, messages.memberRequired),
-      amount: z.number({ error: messages.amountPositive }).positive(messages.amountPositive),
+      amount: wholePoundsSchema(messages, messages.amountPositive),
       paidAt: z.string().min(1, messages.dateRequired),
       note: noteSchema(messages),
     })

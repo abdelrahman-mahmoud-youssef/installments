@@ -74,7 +74,7 @@ function CollectForm({ jameya, member, onDone }: { jameya: JameyaDetail; member:
             <FormItem>
               <FormLabel>{t('paymentDialog.amount')}</FormLabel>
               <FormControl>
-                <NumberInput step="0.01" min="0" {...field} />
+                <NumberInput step="1" min="0" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

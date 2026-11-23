@@ -20,6 +20,7 @@ export const jameyaKeys = {
   all: ['jameyas'] as const,
   list: (params: JameyaListParams) => [...jameyaKeys.all, 'list', params] as const,
   detail: (id: string) => [...jameyaKeys.all, 'detail', id] as const,
+  preview: (payload: CreateJameyaPayload | null) => [...jameyaKeys.all, 'preview', payload] as const,
   payments: (id: string, page: number) => [...jameyaKeys.all, 'payments', id, page] as const,
   memberPayments: (id: string, customerId: string | null) =>
     [...jameyaKeys.all, 'member-payments', id, customerId] as const,
@@ -67,6 +68,16 @@ export function useJameyaMemberPayments(id: string, customerId: string | null) {
     queryKey: jameyaKeys.memberPayments(id, customerId),
     queryFn: async () => (await listAllJameyaPayments(id)).filter((payment) => payment.customerId === customerId),
     enabled: customerId !== null,
+  });
+}
+
+export function useJameyaPreview(payload: CreateJameyaPayload | null) {
+  return useQuery({
+    queryKey: jameyaKeys.preview(payload),
+    queryFn: () => previewJameya(payload as CreateJameyaPayload),
+    enabled: payload !== null,
+    placeholderData: (previous) => previous,
+    retry: false,
   });
 }
 

@@ -1,37 +1,44 @@
 'use client';
 
-import { ChevronDown, HandCoins } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { DateText } from '@/components/shared/date-text';
 import { Money } from '@/components/shared/money';
 import { Section } from '@/components/shared/section';
 import { Button } from '@/components/ui/button';
-import { useJameyaAccess } from '@/hooks/use-jameya-access';
 import { JameyaCycle, JameyaDetail, JameyaPayout } from '@/lib/api/jameyas';
 import { formatMoney } from '@/lib/format';
 import {
-  canHandOverTurn,
   findCurrentTurn,
-  holderNamesOf,
   JameyaTurnStatus,
+  memberNameOf,
   resolveTurnStatus,
   turnsAroundCurrent,
 } from '@/lib/jameya-turns';
 import { cn } from '@/lib/utils';
 import { JameyaReceiptButton } from './jameya-receipt-button';
+import { JameyaTurnHolders } from './jameya-turn-holders';
 import { JameyaTurnMembers } from './jameya-turn-members';
 import { useJameyaReceipts } from './use-jameya-receipts';
+import { useTurnHoldersLabel } from './use-turn-holders-label';
 
-type HandOver = (cycle: JameyaCycle) => void;
+type HandOver = (cycle: JameyaCycle, customerId: string) => void;
 
-function payoutsWithRemaining(cycle: JameyaCycle): { payout: JameyaPayout; remainingAmount: number }[] {
+interface PayoutWithRemaining {
+  payout: JameyaPayout;
+  entitlementAmount: number;
+  remainingAmount: number;
+}
+
+function payoutsWithRemaining(cycle: JameyaCycle): PayoutWithRemaining[] {
   const paidSoFar = new Map<string, number>();
   return cycle.payouts.map((payout) => {
-    const entitlement = cycle.holders.find((holder) => holder.customerId === payout.customerId)?.entitlementAmount ?? 0;
+    const entitlementAmount =
+      cycle.holders.find((holder) => holder.customerId === payout.customerId)?.entitlementAmount ?? 0;
     const paid = (paidSoFar.get(payout.customerId) ?? 0) + payout.amount;
     paidSoFar.set(payout.customerId, paid);
-    return { payout, remainingAmount: entitlement - paid };
+    return { payout, entitlementAmount, remainingAmount: entitlementAmount - paid };
   });
 }
 
@@ -67,39 +74,39 @@ function TurnPayouts({
   onOpenMember: (customerId: string) => void;
 }) {
   const t = useTranslations('jameyas.detail');
-  const { canManageJameyas } = useJameyaAccess();
   const { buildPayoutReceipt } = useJameyaReceipts(jameya);
-  const holderName = holderNamesOf(jameya, cycle);
+  const isShared = cycle.holders.length > 1;
 
   return (
     <div className="space-y-2 rounded-lg bg-muted/40 p-3">
+      <JameyaTurnHolders jameya={jameya} cycle={cycle} onHandOver={onHandOver} />
       <JameyaTurnMembers jameya={jameya} cycle={cycle} canRecord={false} onOpenMember={onOpenMember} />
       {cycle.payouts.length === 0 ? (
         <p className="text-sm text-muted-foreground">{t('noPayouts')}</p>
       ) : (
         <ul className="space-y-1">
-          {payoutsWithRemaining(cycle).map(({ payout, remainingAmount }) => (
-            <li key={payout.id} className="flex items-center gap-3">
-              <div className="min-w-0 flex-1">
-                <p className="text-sm">
-                  <DateText value={payout.paidAt} />
-                </p>
-                {payout.note && <p className="truncate text-xs text-muted-foreground">{payout.note}</p>}
-              </div>
-              <Money minorUnits={payout.amount} hideWholeDecimals className="text-sm font-semibold" />
-              <JameyaReceiptButton
-                fileName={`${jameya.name} ${holderName}`}
-                buildContent={() => buildPayoutReceipt({ holderName, cycle, payout, remainingAmount })}
-              />
-            </li>
-          ))}
+          {payoutsWithRemaining(cycle).map(({ payout, remainingAmount, entitlementAmount }) => {
+            const holderName = memberNameOf(jameya, payout.customerId);
+            return (
+              <li key={payout.id} className="flex items-center gap-3">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm">
+                    {isShared && <span className="font-medium">{holderName} · </span>}
+                    <DateText value={payout.paidAt} />
+                  </p>
+                  {payout.note && <p className="truncate text-xs text-muted-foreground">{payout.note}</p>}
+                </div>
+                <Money minorUnits={payout.amount} hideWholeDecimals className="text-sm font-semibold" />
+                <JameyaReceiptButton
+                  fileName={`${jameya.name} ${holderName}`}
+                  buildContent={() =>
+                    buildPayoutReceipt({ holderName, cycle, payout, entitlementAmount, remainingAmount })
+                  }
+                />
+              </li>
+            );
+          })}
         </ul>
-      )}
-      {canManageJameyas && canHandOverTurn(jameya, cycle) && (
-        <Button variant="outline" size="sm" onClick={() => onHandOver(cycle)}>
-          <HandCoins className="size-4" />
-          {t('handOverPayout')}
-        </Button>
       )}
     </div>
   );
@@ -119,22 +126,23 @@ function TurnRow({
   onOpenMember: (customerId: string) => void;
 }) {
   const t = useTranslations('jameyas.detail');
+  const holdersLabel = useTurnHoldersLabel(jameya);
   const [isOpen, setIsOpen] = useState(false);
+  const [onlyHolder] = cycle.holders;
   return (
     <li className="py-2">
       <div className="flex items-center gap-3 text-sm">
         <span className="w-6 shrink-0 text-muted-foreground tabular-nums">{cycle.sequence}</span>
-        <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2">
-          {cycle.holders.map((holder) => (
-            <button
-              key={holder.customerId}
-              type="button"
-              onClick={() => onOpenMember(holder.customerId)}
-              className="truncate font-medium hover:underline"
-            >
-              {jameya.members.find((member) => member.customerId === holder.customerId)?.name}
-            </button>
-          ))}
+        <span className="flex min-w-0 flex-1 items-center">
+          <button
+            type="button"
+            onClick={() =>
+              cycle.holders.length === 1 ? onOpenMember(onlyHolder.customerId) : setIsOpen((current) => !current)
+            }
+            className="truncate font-medium hover:underline"
+          >
+            {holdersLabel(cycle)}
+          </button>
         </span>
         <button
           type="button"

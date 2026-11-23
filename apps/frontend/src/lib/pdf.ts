@@ -1,5 +1,6 @@
 import { Font } from '@react-pdf/renderer';
 import { ToWords } from 'to-words';
+import { MoneyFormatOptions } from './format';
 
 Font.register({
   family: 'IBM Plex Sans',
@@ -50,11 +51,13 @@ const NON_BREAKING_SPACE_PATTERN = new RegExp('\\u00a0', 'g');
 export const sanitizeForPdfFont = (text: string) =>
   text.replace(BIDI_CONTROL_CHARS_PATTERN, '').replace(NON_BREAKING_SPACE_PATTERN, ' ');
 
-export const splitMoneyParts = (minorUnits: number, locale: PdfLocale) => {
+export const splitMoneyParts = (minorUnits: number, locale: PdfLocale, options: MoneyFormatOptions = {}) => {
+  const fractionDigits = options.hideWholeDecimals && minorUnits % 100 === 0 ? 0 : 2;
   const parts = new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: 'EGP',
-    minimumFractionDigits: 2,
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
     numberingSystem: 'latn',
   }).formatToParts(minorUnits / 100);
   const amount = parts

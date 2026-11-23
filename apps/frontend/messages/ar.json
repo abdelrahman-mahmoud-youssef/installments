@@ -1303,7 +1303,8 @@
       "received": "قبض",
       "late": "متأخر",
       "turnsValue": "الأدوار {sequences}",
-      "sequenceSeparator": "، "
+      "sequenceSeparator": "، ",
+      "pays": "بيدفع"
     },
     "new": {
       "title": "جمعية جديدة",
@@ -1327,7 +1328,7 @@
       "addMember": "ضيف عميل",
       "noMembers": "لسه مضفتش أعضاء.",
       "memberCount": "{count, plural, one {عضو واحد} two {عضوين} few {# أعضاء} many {# عضو} other {# عضو}}",
-      "orderHint": "أول عضو يقبض أول دور. حرّك الأعضاء أو رتّبهم عشوائي.",
+      "orderHint": "أول دور بيقبض الأول. الدور الواحد ممكن يتقسم على لحد {max} أشخاص.",
       "randomOrder": "ترتيب عشوائي",
       "turnNumber": "الدور {sequence}",
       "moveUp": "طلّع {name} لفوق",
@@ -1353,7 +1354,19 @@
       "turnsBadge": "×{count}",
       "addTurn": "زوّد دور لـ {name}",
       "removeTurn": "شيل دور من {name}",
-      "minMembers": "ضيف عميلين مختلفين على الأقل."
+      "minMembers": "ضيف عميلين مختلفين على الأقل.",
+      "addPartner": "شارك حد في الدور",
+      "addPartnerTo": "ضيف شريك في الدور {sequence}",
+      "removePartner": "شيل {name} من الدور",
+      "split": {
+        "equal": "قسّم بالتساوي",
+        "custom": "مبالغ مختلفة"
+      },
+      "partAmount": "مبلغ {name} (ج.م)",
+      "leftToSplit": "فاضل {amount}",
+      "overSplit": "زيادة {amount}",
+      "splitDone": "المبالغ مظبوطة",
+      "splitPending": "بنحسب…"
     },
     "detail": {
       "notFound": "الجمعية مش موجودة",
@@ -1403,7 +1416,9 @@
         "received": "قبض",
         "payments": "دفعاته",
         "noPayments": "لسه مدفعش حاجة.",
-        "paymentsLoadError": "معرفناش نحمّل الدفعات."
+        "paymentsLoadError": "معرفناش نحمّل الدفعات.",
+        "holdingsTitle": "أدواره في القبض",
+        "monthlyTotal": "بيدفع {amount} {period}"
       },
       "tabs": {
         "current": "الدور ده",
@@ -1416,7 +1431,15 @@
       "receipt": "صورة التحويل (اختياري)",
       "receiptHint": "ارفع صورة التحويل",
       "viewReceipt": "شوف صورة التحويل",
-      "membersTitle": "الأعضاء"
+      "membersTitle": "الأعضاء",
+      "sharedHolders": "{name} و {count} كمان",
+      "sharedTurnGets": "{name} هيقبضوا {amount}",
+      "holder": {
+        "pays": "بيدفع {amount} {period}",
+        "part": "نصيبه {amount}",
+        "received": "قبض {amount}",
+        "remaining": "ليه {amount}"
+      }
     },
     "grid": {
       "member": "العضو",
@@ -1463,7 +1486,9 @@
       "handedOver": "اتسلّم لـ {name}.",
       "shopCovered": "المحل غطّى",
       "done": "تمام",
-      "remainingAfter": "هيفضل ليه {amount} في الدور ده"
+      "remainingAfter": "هيفضل ليه {amount} في الدور ده",
+      "chooseHolder": "مين هيقبض؟",
+      "holderPart": "نصيبه {part} · ليه {remaining}"
     },
     "editDialog": {
       "trigger": "تعديل",
@@ -1492,7 +1517,8 @@
       "footerPrefix": "صادر عن",
       "download": "إيصال",
       "shareError": "معرفناش نعمل الإيصال.",
-      "balanceAfter": "المتبقي على العضو بعد هذه الدفعة"
+      "balanceAfter": "المتبقي على العضو بعد هذه الدفعة",
+      "holderPart": "نصيبه في هذا الدور"
     },
     "statement": {
       "documentLabel": "كشف حساب",
@@ -1500,7 +1526,6 @@
       "title": "كشف حساب عضو في جمعية",
       "member": "العضو",
       "jameya": "الجمعية",
-      "shares": "عدد الأسهم",
       "payoutTurns": "أدوار القبض",
       "sequenceSeparator": "، ",
       "perTurn": {
@@ -1525,7 +1550,8 @@
         "due": "غير مدفوع",
         "upcoming": "لم يحن موعده"
       },
-      "ownTurn": "دور القبض"
+      "ownTurn": "دور القبض",
+      "turnsHeld": "عدد الأدوار"
     },
     "validation": {
       "nameRequired": "اكتب اسم.",
@@ -1537,7 +1563,8 @@
       "memberRequired": "اختار عضو.",
       "amountPositive": "اكتب مبلغ أكبر من صفر.",
       "amountAboveLimit": "المبلغ ده أكبر من اللي لسه عليه.",
-      "dateRequired": "اختار تاريخ."
+      "dateRequired": "اختار تاريخ.",
+      "wholePounds": "اكتب المبلغ بالجنيه من غير قروش."
     }
   }
 }

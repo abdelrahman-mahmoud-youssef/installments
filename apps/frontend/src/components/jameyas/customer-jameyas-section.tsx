@@ -37,7 +37,7 @@ function CustomerJameyasTable({ customerId }: { customerId: string }) {
           {jameya.name}
           {jameya.member && jameya.member.lateAmount > 0 && (
             <Badge variant="destructive" className="shrink-0">
-              {t('customerSection.late')} <Money minorUnits={jameya.member.lateAmount} />
+              {t('customerSection.late')} <Money minorUnits={jameya.member.lateAmount} hideWholeDecimals />
             </Badge>
           )}
         </Link>
@@ -58,16 +58,27 @@ function CustomerJameyasTable({ customerId }: { customerId: string }) {
         ) : null,
     },
     {
+      id: 'monthly',
+      header: t('customerSection.pays'),
+      cell: (jameya) =>
+        jameya.member ? (
+          <span>
+            <Money minorUnits={jameya.member.monthlyAmount} hideWholeDecimals className="font-medium" />{' '}
+            <span className="text-muted-foreground">{t(`detail.period.${jameya.recurrenceType}`)}</span>
+          </span>
+        ) : null,
+    },
+    {
       id: 'owes',
       header: t('customerSection.owes'),
       cell: (jameya) =>
-        jameya.member ? <Money minorUnits={jameya.member.remainingAmount} className="font-medium" /> : null,
+        jameya.member ? <Money minorUnits={jameya.member.remainingAmount} hideWholeDecimals className="font-medium" /> : null,
     },
     {
       id: 'received',
       header: t('customerSection.received'),
       cell: (jameya) =>
-        jameya.member ? <Money minorUnits={jameya.member.receivedAmount} className="text-muted-foreground" /> : null,
+        jameya.member ? <Money minorUnits={jameya.member.receivedAmount} hideWholeDecimals className="text-muted-foreground" /> : null,
     },
     {
       id: 'status',

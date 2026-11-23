@@ -1303,7 +1303,8 @@
       "received": "Received",
       "late": "Late",
       "turnsValue": "Turns {sequences}",
-      "sequenceSeparator": ", "
+      "sequenceSeparator": ", ",
+      "pays": "Pays"
     },
     "new": {
       "title": "New jameya",
@@ -1327,7 +1328,7 @@
       "addMember": "Add a customer",
       "noMembers": "No members added yet.",
       "memberCount": "{count, plural, one {# member} other {# members}}",
-      "orderHint": "The first member receives the first turn. Move members or shuffle them.",
+      "orderHint": "The first turn is paid first. Up to {max} people can share one turn.",
       "randomOrder": "Random order",
       "turnNumber": "Turn {sequence}",
       "moveUp": "Move {name} up",
@@ -1353,7 +1354,19 @@
       "turnsBadge": "×{count}",
       "addTurn": "Give {name} another turn",
       "removeTurn": "Remove one turn from {name}",
-      "minMembers": "Add at least two different customers."
+      "minMembers": "Add at least two different customers.",
+      "addPartner": "Add a partner",
+      "addPartnerTo": "Add a partner to turn {sequence}",
+      "removePartner": "Remove {name} from this turn",
+      "split": {
+        "equal": "Split equally",
+        "custom": "Different amounts"
+      },
+      "partAmount": "{name}'s amount (EGP)",
+      "leftToSplit": "{amount} left",
+      "overSplit": "{amount} too much",
+      "splitDone": "Adds up",
+      "splitPending": "Calculating…"
     },
     "detail": {
       "notFound": "Jameya not found",
@@ -1403,7 +1416,9 @@
         "received": "Got paid",
         "payments": "Payments",
         "noPayments": "No payments yet.",
-        "paymentsLoadError": "Couldn't load the payments."
+        "paymentsLoadError": "Couldn't load the payments.",
+        "holdingsTitle": "Payout turns",
+        "monthlyTotal": "Pays {amount} {period}"
       },
       "tabs": {
         "current": "This turn",
@@ -1416,7 +1431,15 @@
       "receipt": "Transfer screenshot (optional)",
       "receiptHint": "Attach a screenshot of the transfer",
       "viewReceipt": "View the transfer screenshot",
-      "membersTitle": "Members"
+      "membersTitle": "Members",
+      "sharedHolders": "{name} and {count} more",
+      "sharedTurnGets": "{name} share {amount}",
+      "holder": {
+        "pays": "Pays {amount} {period}",
+        "part": "Gets {amount}",
+        "received": "Received {amount}",
+        "remaining": "Owed {amount}"
+      }
     },
     "grid": {
       "member": "Member",
@@ -1463,7 +1486,9 @@
       "handedOver": "Handed over to {name}.",
       "shopCovered": "Covered by the shop",
       "done": "Done",
-      "remainingAfter": "{amount} will still be owed for this turn"
+      "remainingAfter": "{amount} will still be owed for this turn",
+      "chooseHolder": "Who is receiving?",
+      "holderPart": "Gets {part} · owed {remaining}"
     },
     "editDialog": {
       "trigger": "Edit",
@@ -1492,7 +1517,8 @@
       "footerPrefix": "Issued by",
       "download": "Receipt",
       "shareError": "Couldn't create the receipt.",
-      "balanceAfter": "Still owed after this payment"
+      "balanceAfter": "Still owed after this payment",
+      "holderPart": "Their part of this turn"
     },
     "statement": {
       "documentLabel": "STATEMENT",
@@ -1500,7 +1526,6 @@
       "title": "Jameya member statement",
       "member": "Member",
       "jameya": "Jameya",
-      "shares": "Number of shares",
       "payoutTurns": "Payout turns",
       "sequenceSeparator": ", ",
       "perTurn": {
@@ -1525,7 +1550,8 @@
         "due": "Not paid",
         "upcoming": "Not due yet"
       },
-      "ownTurn": "Payout turn"
+      "ownTurn": "Payout turn",
+      "turnsHeld": "Turns held"
     },
     "validation": {
       "nameRequired": "Enter a name.",
@@ -1537,7 +1563,8 @@
       "memberRequired": "Select a member.",
       "amountPositive": "Enter an amount greater than zero.",
       "amountAboveLimit": "This is more than what is still owed.",
-      "dateRequired": "Pick a date."
+      "dateRequired": "Pick a date.",
+      "wholePounds": "Enter whole pounds, without piasters."
     }
   }
 }

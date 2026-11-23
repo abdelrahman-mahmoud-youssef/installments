@@ -101,8 +101,8 @@ export function JameyaMembersGrid({ jameya }: { jameya: JameyaDetail }) {
                     <td key={cycle.id} className="border-b border-border px-1.5 py-2 text-center">
                       <span
                         title={t('cellTitle', {
-                          paid: formatMoney(due.paidAmount, locale),
-                          amount: formatMoney(due.amount, locale),
+                          paid: formatMoney(due.paidAmount, locale, { hideWholeDecimals: true }),
+                          amount: formatMoney(due.amount, locale, { hideWholeDecimals: true }),
                         })}
                         className={cn(
                           'inline-flex min-w-20 items-center justify-center gap-1 rounded-md px-2 py-1 text-xs font-medium whitespace-nowrap',

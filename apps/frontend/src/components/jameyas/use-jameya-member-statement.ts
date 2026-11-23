@@ -49,7 +49,6 @@ export function useJameyaMemberStatement(jameya: JameyaDetail) {
 
   function buildStatement(member: JameyaMember): JameyaStatementContent {
     const memberDues = jameya.dues.filter((due) => due.customerId === member.customerId);
-    const perTurnAmount = memberDues[0]?.amount ?? 0;
     const rows = jameya.cycles.flatMap((cycle) => {
       const due = memberDues.find((item) => item.cycleId === cycle.id);
       if (!due) {
@@ -77,10 +76,10 @@ export function useJameyaMemberStatement(jameya: JameyaDetail) {
       details: [
         { label: t('member'), value: member.name },
         { label: t('jameya'), value: jameya.name },
-        { label: t('shares'), value: String(member.turnSequences.length) },
+        { label: t('turnsHeld'), value: String(member.turnSequences.length) },
         { label: t('payoutTurns'), value: member.turnSequences.join(t('sequenceSeparator')) },
       ],
-      perTurn: { label: t(`perTurn.${jameya.recurrenceType}`), amount: perTurnAmount },
+      perTurn: { label: t(`perTurn.${jameya.recurrenceType}`), amount: member.monthlyAmount },
       totals: [
         { label: t('totalPaid'), amount: member.paidAmount, tone: 'success' },
         { label: t('overdue'), amount: member.lateAmount, tone: member.lateAmount > 0 ? 'danger' : 'muted' },

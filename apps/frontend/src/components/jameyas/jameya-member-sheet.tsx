@@ -7,6 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { useJameyaMemberPayments } from '@/hooks/use-jameyas';
 import { JameyaDetail, JameyaMember } from '@/lib/api/jameyas';
+import { formatMoney } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { JameyaPaymentReceiptLink } from './jameya-payment-receipt-link';
 import { JameyaReceiptButton } from './jameya-receipt-button';
@@ -22,6 +23,43 @@ function MemberFigure({ label, minorUnits, isOwed = false }: { label: string; mi
         hideWholeDecimals
         className={cn('text-base font-semibold', isOwed && minorUnits > 0 && 'text-danger')}
       />
+    </div>
+  );
+}
+
+function MemberHoldings({ jameya, member }: { jameya: JameyaDetail; member: JameyaMember }) {
+  const t = useTranslations('jameyas.detail');
+  const tSection = useTranslations('jameyas.customerSection');
+  const locale = useLocale();
+  const money = (minorUnits: number) => formatMoney(minorUnits, locale, { hideWholeDecimals: true });
+  const period = t(`period.${jameya.recurrenceType}`);
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-baseline justify-between gap-3">
+        <h3 className="text-sm font-semibold">{t('member.holdingsTitle')}</h3>
+        <p className="text-sm text-muted-foreground">
+          {t('member.monthlyTotal', { amount: money(member.monthlyAmount), period })}
+        </p>
+      </div>
+      <ul className="divide-y divide-border">
+        {member.holdings.map((holding) => (
+          <li key={holding.cycleId} className="flex items-center justify-between gap-3 py-2 text-sm">
+            <div className="min-w-0">
+              <p className="font-medium">{tSection('turnValue', { sequence: holding.sequence })}</p>
+              <p className="text-xs text-muted-foreground">
+                {t('holder.pays', { amount: money(holding.contribution), period })}
+              </p>
+            </div>
+            <div className="shrink-0 text-end">
+              <p className="font-semibold">{t('holder.part', { amount: money(holding.entitlementAmount) })}</p>
+              <p className="text-xs text-muted-foreground">
+                {t('holder.received', { amount: money(holding.receivedAmount) })}
+              </p>
+            </div>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -108,6 +146,7 @@ export function JameyaMemberSheet({
                 {member.lateAmount > 0 && <MemberFigure label={t('late')} minorUnits={member.lateAmount} isOwed />}
                 <MemberFigure label={t('received')} minorUnits={member.receivedAmount} />
               </div>
+              <MemberHoldings jameya={jameya} member={member} />
               <div className="space-y-2">
                 <h3 className="text-sm font-semibold">{t('payments')}</h3>
                 <MemberPayments jameya={jameya} member={member} />

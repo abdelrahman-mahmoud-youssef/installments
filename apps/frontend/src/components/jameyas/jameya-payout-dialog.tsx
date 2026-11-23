@@ -19,12 +19,14 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
 import { useCreateJameyaPayout } from '@/hooks/use-jameyas';
 import { useJameyaValidationMessages } from '@/hooks/use-jameya-validation-messages';
 import { ApiError } from '@/lib/api/client';
 import { JameyaCycle, JameyaDetail, JameyaPayoutResult } from '@/lib/api/jameyas';
 import { formatMoney, toMajorUnits, toMinorUnits, todayIso } from '@/lib/format';
+import { availableCashOf, memberNameOf, openHoldersOf, suggestedPayoutOf } from '@/lib/jameya-turns';
 import { createJameyaMoneyEntrySchema, JameyaMoneyEntryInput } from '@/lib/schemas/jameya';
 import { JameyaReceiptButton } from './jameya-receipt-button';
 import { useJameyaReceipts } from './use-jameya-receipts';
@@ -33,7 +35,11 @@ function SummaryLine({ label, minorUnits, tone }: { label: string; minorUnits: n
   return (
     <div className="flex items-center justify-between gap-3 text-sm">
       <span className="text-muted-foreground">{label}</span>
-      <Money minorUnits={minorUnits} className={tone === 'warning' ? 'font-semibold text-warning' : 'font-medium'} />
+      <Money
+        minorUnits={minorUnits}
+        hideWholeDecimals
+        className={tone === 'warning' ? 'font-semibold text-warning' : 'font-medium'}
+      />
     </div>
   );
 }
@@ -53,6 +59,8 @@ function PayoutResult({
 }) {
   const t = useTranslations('jameyas.payoutDialog');
   const { buildPayoutReceipt } = useJameyaReceipts(jameya);
+  const entitlementAmount =
+    cycle.holders.find((holder) => holder.customerId === result.customerId)?.entitlementAmount ?? 0;
 
   return (
     <>
@@ -76,7 +84,13 @@ function PayoutResult({
           variant="full"
           fileName={`${jameya.name} ${holderName}`}
           buildContent={() =>
-            buildPayoutReceipt({ holderName, cycle, payout: result, remainingAmount: result.remainingAmount })
+            buildPayoutReceipt({
+              holderName,
+              cycle,
+              payout: result,
+              entitlementAmount,
+              remainingAmount: result.remainingAmount,
+            })
           }
         />
         <Button type="button" onClick={onClose}>
@@ -87,13 +101,54 @@ function PayoutResult({
   );
 }
 
+function HolderChoice({
+  jameya,
+  cycle,
+  value,
+  onChange,
+}: {
+  jameya: JameyaDetail;
+  cycle: JameyaCycle;
+  value: string;
+  onChange: (customerId: string) => void;
+}) {
+  const t = useTranslations('jameyas.payoutDialog');
+  const locale = useLocale();
+  const money = (minorUnits: number) => formatMoney(minorUnits, locale, { hideWholeDecimals: true });
+
+  return (
+    <div className="space-y-1.5">
+      <p className="text-sm font-medium">{t('chooseHolder')}</p>
+      <RadioGroup value={value} onValueChange={(next) => onChange(String(next))} className="gap-2">
+        {openHoldersOf(cycle).map((holder) => (
+          <label
+            key={holder.customerId}
+            className="relative flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-border px-3 py-2.5 text-sm transition-colors has-[[data-checked]]:border-primary has-[[data-checked]]:bg-primary/5"
+          >
+            <RadioGroupItem
+              value={holder.customerId}
+              className="absolute inset-0 size-full rounded-lg border-none opacity-0"
+            />
+            <span className="truncate font-medium">{memberNameOf(jameya, holder.customerId)}</span>
+            <span className="shrink-0 text-xs text-muted-foreground">
+              {t('holderPart', { part: money(holder.entitlementAmount), remaining: money(holder.remainingAmount) })}
+            </span>
+          </label>
+        ))}
+      </RadioGroup>
+    </div>
+  );
+}
+
 function JameyaPayoutForm({
   jameya,
   cycle,
+  holderId,
   onClose,
 }: {
   jameya: JameyaDetail;
   cycle: JameyaCycle;
+  holderId: string | null;
   onClose: () => void;
 }) {
   const t = useTranslations('jameyas.payoutDialog');
@@ -108,18 +163,20 @@ function JameyaPayoutForm({
   const [schema] = useState(() =>
     createJameyaMoneyEntrySchema(messages, (customerId) => remainingByHolder.get(customerId) ?? 0),
   );
-  const nameOf = (customerId: string) =>
-    jameya.members.find((member) => member.customerId === customerId)?.name ?? '';
-  const openHolders = cycle.holders.filter((holder) => holder.remainingAmount > 0);
-  const availableCash = Math.max(0, cycle.collectedAmount - cycle.paidOutAmount);
-  const suggestedFor = (customerId: string) => Math.min(remainingByHolder.get(customerId) ?? 0, availableCash);
-  const firstHolderId = openHolders[0]?.customerId ?? '';
+  const openHolders = openHoldersOf(cycle);
+  const availableCash = availableCashOf(cycle);
+  const amountFor = (customerId: string) => {
+    const suggested = suggestedPayoutOf(cycle, customerId);
+    return suggested > 0 ? toMajorUnits(suggested) : undefined;
+  };
+  const initialHolderId =
+    openHolders.find((holder) => holder.customerId === holderId)?.customerId ?? openHolders[0]?.customerId ?? '';
 
   const form = useForm<JameyaMoneyEntryInput>({
     resolver: zodResolver(schema),
     defaultValues: {
-      customerId: firstHolderId,
-      amount: suggestedFor(firstHolderId) > 0 ? toMajorUnits(suggestedFor(firstHolderId)) : undefined,
+      customerId: initialHolderId,
+      amount: amountFor(initialHolderId),
       paidAt: todayIso(),
       note: '',
     },
@@ -136,7 +193,7 @@ function JameyaPayoutForm({
         jameya={jameya}
         cycle={cycle}
         result={result}
-        holderName={nameOf(result.customerId)}
+        holderName={memberNameOf(jameya, result.customerId)}
         onClose={onClose}
       />
     );
@@ -164,12 +221,23 @@ function JameyaPayoutForm({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="flex min-h-0 flex-1 flex-col">
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-5">
-          <div className="space-y-0.5">
-            <p className="text-sm text-muted-foreground">{t('holder')}</p>
-            <p className="font-heading text-lg font-semibold">
-              {openHolders.map((holder) => nameOf(holder.customerId)).join(' · ')}
-            </p>
-          </div>
+          {openHolders.length > 1 ? (
+            <HolderChoice
+              jameya={jameya}
+              cycle={cycle}
+              value={customerId}
+              onChange={(nextHolderId) => {
+                form.setValue('customerId', nextHolderId);
+                form.setValue('amount', amountFor(nextHolderId) as number);
+                form.clearErrors('amount');
+              }}
+            />
+          ) : (
+            <div className="space-y-0.5">
+              <p className="text-sm text-muted-foreground">{t('holder')}</p>
+              <p className="font-heading text-lg font-semibold">{memberNameOf(jameya, customerId)}</p>
+            </div>
+          )}
 
           <FormField
             control={form.control}
@@ -178,7 +246,7 @@ function JameyaPayoutForm({
               <FormItem>
                 <FormLabel>{t('amount')}</FormLabel>
                 <FormControl>
-                  <NumberInput step="0.01" min="0" {...field} />
+                  <NumberInput step="1" min="0" {...field} />
                 </FormControl>
                 {remainingAfterPayout > 0 && (
                   <p className="text-sm text-muted-foreground">
@@ -194,7 +262,7 @@ function JameyaPayoutForm({
 
           {fromShopMoney > 0 && (
             <p className="rounded-lg border border-warning/40 bg-warning-soft px-3 py-2.5 text-sm text-warning">
-              {t('fromShopMoneyPrefix')} <Money minorUnits={fromShopMoney} className="font-semibold" />{' '}
+              {t('fromShopMoneyPrefix')} <Money minorUnits={fromShopMoney} hideWholeDecimals className="font-semibold" />{' '}
               {t('fromShopMoneySuffix')}
             </p>
           )}
@@ -247,11 +315,13 @@ function JameyaPayoutForm({
 export function JameyaPayoutDialog({
   jameya,
   cycle,
+  holderId,
   open,
   onOpenChange,
 }: {
   jameya: JameyaDetail;
   cycle: JameyaCycle | null;
+  holderId: string | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
@@ -265,7 +335,13 @@ export function JameyaPayoutDialog({
             <DialogTitle>{t('title', { sequence: cycle.sequence })}</DialogTitle>
             <DialogDescription>{t('description')}</DialogDescription>
           </DialogHeader>
-          <JameyaPayoutForm jameya={jameya} cycle={cycle} onClose={() => onOpenChange(false)} />
+          <JameyaPayoutForm
+            key={`${cycle.id}-${holderId}`}
+            jameya={jameya}
+            cycle={cycle}
+            holderId={holderId}
+            onClose={() => onOpenChange(false)}
+          />
         </DialogContent>
       )}
     </Dialog>

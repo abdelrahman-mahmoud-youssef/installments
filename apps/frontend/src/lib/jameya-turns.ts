@@ -61,14 +61,24 @@ export function dueKindOf(due: JameyaDue, cycle: Pick<JameyaCycle, 'state'>): Ja
   return cycle.state === 'UPCOMING' ? 'upcoming' : 'due';
 }
 
-export function suggestedPaymentOf(jameya: Pick<JameyaDetail, 'dues' | 'members'>, customerId: string): number {
-  const perTurnAmount = jameya.dues.find((due) => due.customerId === customerId)?.amount ?? 0;
-  const remainingAmount = jameya.members.find((member) => member.customerId === customerId)?.remainingAmount ?? 0;
-  return Math.min(perTurnAmount, remainingAmount);
+export function suggestedPaymentOf(jameya: Pick<JameyaDetail, 'members'>, customerId: string): number {
+  const member = jameya.members.find((item) => item.customerId === customerId);
+  return member ? Math.min(member.monthlyAmount, member.remainingAmount) : 0;
 }
 
-export function holderNamesOf(jameya: Pick<JameyaDetail, 'members'>, cycle: JameyaCycle): string {
-  return cycle.holders
-    .map((holder) => jameya.members.find((member) => member.customerId === holder.customerId)?.name ?? '')
-    .join(' · ');
+export function availableCashOf(cycle: JameyaCycle): number {
+  return Math.max(0, cycle.collectedAmount - cycle.paidOutAmount);
+}
+
+export function suggestedPayoutOf(cycle: JameyaCycle, customerId: string): number {
+  const remainingAmount = cycle.holders.find((holder) => holder.customerId === customerId)?.remainingAmount ?? 0;
+  return Math.min(remainingAmount, availableCashOf(cycle));
+}
+
+export function memberNameOf(jameya: Pick<JameyaDetail, 'members'>, customerId: string): string {
+  return jameya.members.find((member) => member.customerId === customerId)?.name ?? '';
+}
+
+export function openHoldersOf(cycle: JameyaCycle): JameyaCycle['holders'] {
+  return cycle.holders.filter((holder) => holder.remainingAmount > 0);
 }

@@ -129,7 +129,7 @@ function JameyaPaymentForm({
               <FormItem>
                 <FormLabel>{t('amount')}</FormLabel>
                 <FormControl>
-                  <NumberInput step="0.01" min="0" {...field} />
+                  <NumberInput step="1" min="0" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
