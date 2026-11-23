@@ -42,7 +42,7 @@ export const JAMEYA_DETAIL_INCLUDE = {
     select: {
       cycleId: true,
       customerId: true,
-      halves: true,
+      contribution: true,
       cycle: { select: { sequence: true } },
       customer: { select: { name: true, phone: true, photoUrl: true, notificationLanguage: true } },
     },
@@ -63,7 +63,7 @@ export interface JameyaDueCell extends JameyaDueRow {
 
 export interface JameyaCycleHolder {
   customerId: string;
-  halves: number;
+  contribution: number;
   entitlementAmount: number;
   paidOutAmount: number;
   remainingAmount: number;
@@ -83,12 +83,22 @@ export interface JameyaCycleSummary {
   payouts: JameyaPayoutRecord[];
 }
 
+export interface JameyaMemberHolding {
+  cycleId: string;
+  sequence: number;
+  contribution: number;
+  entitlementAmount: number;
+  receivedAmount: number;
+}
+
 export interface JameyaMemberSummary {
   customerId: string;
   name: string;
   phone: string;
   photoUrl: string | null;
   turnSequences: number[];
+  holdings: JameyaMemberHolding[];
+  monthlyAmount: number;
   dueAmount: number;
   paidAmount: number;
   remainingAmount: number;
@@ -134,19 +144,19 @@ export function deriveCycleState({ dueDate, holders, dues }: CycleStateInput, to
 }
 
 export function buildCycleHolders(
-  shares: { customerId: string; halves: number }[],
+  shares: { customerId: string; contribution: number }[],
   payouts: { customerId: string; amount: number }[],
-  potAmount: number,
+  shareCount: number,
 ): JameyaCycleHolder[] {
   return shares.map((share) => {
-    const entitlementAmount = calculateEntitlement(potAmount, share.halves);
+    const entitlementAmount = calculateEntitlement(share.contribution, shareCount);
     const paidOutAmount = sumBy(
       payouts.filter((payout) => payout.customerId === share.customerId),
       (payout) => payout.amount,
     );
     return {
       customerId: share.customerId,
-      halves: share.halves,
+      contribution: share.contribution,
       entitlementAmount,
       paidOutAmount,
       remainingAmount: entitlementAmount - paidOutAmount,
@@ -158,10 +168,10 @@ function buildCycleSummary(
   cycle: JameyaCycleRow,
   shares: JameyaShareRow[],
   dues: JameyaDueCell[],
-  potAmount: number,
+  amounts: { potAmount: number; shareCount: number },
   today: Date,
 ): JameyaCycleSummary {
-  const holders = buildCycleHolders(shares, cycle.payouts, potAmount);
+  const holders = buildCycleHolders(shares, cycle.payouts, amounts.shareCount);
   const collectedAmount = sumBy(dues, (due) => due.paidAmount);
   const paidOutAmount = sumBy(cycle.payouts, (payout) => payout.amount);
 
@@ -171,7 +181,7 @@ function buildCycleSummary(
     dueDate: cycle.dueDate,
     lateAfter: cycle.lateAfter,
     state: deriveCycleState({ dueDate: cycle.dueDate, holders, dues }, today),
-    potAmount,
+    potAmount: amounts.potAmount,
     collectedAmount,
     paidOutAmount,
     exposureAmount: calculateExposure(paidOutAmount, collectedAmount),
@@ -237,6 +247,20 @@ function buildMemberReminder(
   );
 }
 
+function buildMemberHoldings(customerId: string, cycles: JameyaCycleSummary[]): JameyaMemberHolding[] {
+  return cycles.flatMap((cycle) =>
+    cycle.holders
+      .filter((holder) => holder.customerId === customerId)
+      .map((holder) => ({
+        cycleId: cycle.id,
+        sequence: cycle.sequence,
+        contribution: holder.contribution,
+        entitlementAmount: holder.entitlementAmount,
+        receivedAmount: holder.paidOutAmount,
+      })),
+  );
+}
+
 function buildMemberSummaries(
   shares: JameyaShareRow[],
   dues: JameyaDueCell[],
@@ -251,22 +275,22 @@ function buildMemberSummaries(
     const dueAmount = sumBy(memberDues, (due) => due.amount);
     const paidAmount = sumBy(memberDues, (due) => due.paidAmount);
     const outstanding = findOutstandingDues(memberDues, cycles);
+    const holdings = buildMemberHoldings(customerId, cycles);
     return {
       customerId,
       name: customerShares[0].customer.name,
       phone: customerShares[0].customer.phone,
       photoUrl: customerShares[0].customer.photoUrl,
       turnSequences: customerShares.map((share) => share.cycle.sequence),
+      holdings,
+      monthlyAmount: sumBy(holdings, (holding) => holding.contribution),
       dueAmount,
       paidAmount,
       remainingAmount: dueAmount - paidAmount,
       dueNowAmount: sumOwed(filterDueByToday(outstanding, context.today)),
       lateAmount: sumBy(lateDues, (due) => due.amount - due.paidAmount),
       lateDueCount: lateDues.length,
-      receivedAmount: sumBy(
-        cycles.flatMap((cycle) => cycle.holders).filter((holder) => holder.customerId === customerId),
-        (holder) => holder.paidOutAmount,
-      ),
+      receivedAmount: sumBy(holdings, (holding) => holding.receivedAmount),
       reminderMessage: buildMemberReminder(customerShares[0], outstanding, context),
     };
   });
@@ -286,7 +310,7 @@ export function buildJameyaDetail(row: JameyaDetailRow, today: Date): JameyaDeta
       cycle,
       shares.filter((share) => share.cycleId === cycle.id),
       dueCellsByCycle[index],
-      potAmount,
+      { potAmount, shareCount: jameya.shareCount },
       today,
     ),
   );

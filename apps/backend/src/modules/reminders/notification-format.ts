@@ -8,11 +8,20 @@ export function formatCount(count: number, language: NotificationLanguage): stri
   return new Intl.NumberFormat(numberLocale(language)).format(count);
 }
 
-export function formatMoney(minorUnits: number, language: NotificationLanguage): string {
+export interface MoneyFormatOptions {
+  hideWholeDecimals?: boolean;
+}
+
+export function formatMoney(
+  minorUnits: number,
+  language: NotificationLanguage,
+  options: MoneyFormatOptions = {},
+): string {
   const locale = numberLocale(language);
+  const fractionDigits = options.hideWholeDecimals && minorUnits % 100 === 0 ? 0 : 2;
   const amount = new Intl.NumberFormat(locale, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
   }).format(minorUnits / 100);
   return language === NotificationLanguage.AR ? `${amount} ج.م` : `EGP ${amount}`;
 }

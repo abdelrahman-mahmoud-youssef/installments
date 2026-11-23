@@ -187,7 +187,13 @@ describe('Jameyas', () => {
     });
     expect(afterSecondPart.cycles[0]).toMatchObject({ state: 'SETTLED', paidOutAmount: 1_000_000, exposureAmount: 0 });
     expect(afterSecondPart.cycles[0].holders).toEqual([
-      { customerId: holder, halves: 2, entitlementAmount: 1_000_000, paidOutAmount: 1_000_000, remainingAmount: 0 },
+      {
+        customerId: holder,
+        contribution: 100_000,
+        entitlementAmount: 1_000_000,
+        paidOutAmount: 1_000_000,
+        remainingAmount: 0,
+      },
     ]);
   });
 
@@ -199,7 +205,7 @@ describe('Jameyas', () => {
 
     await payOut(shop, jameya.id, firstCycle.id, firstHolder, 150_000);
     await expect(payOut(shop, jameya.id, firstCycle.id, firstHolder, 50_001)).rejects.toThrow(
-      'The payout is more than what is left for this turn.',
+      'The payout is more than what is left for this holder in this turn.',
     );
     await expect(payOut(shop, jameya.id, secondCycle.id, secondHolder, 1)).rejects.toThrow('This turn is not due yet.');
     await expect(payOut(shop, jameya.id, firstCycle.id, secondHolder, 1)).rejects.toThrow(

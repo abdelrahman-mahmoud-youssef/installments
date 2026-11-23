@@ -42,7 +42,7 @@ const MESSAGE_COPY = {
 
 export function formatJameyaReminderMessage(data: JameyaReminderData, language: NotificationLanguage): string {
   const copy = MESSAGE_COPY[language];
-  const amount = formatMoney(data.amountDue, language);
+  const amount = formatMoney(data.amountDue, language, { hideWholeDecimals: true });
   const date = formatDate(data.dueDate, language);
   const statusLine = {
     [JameyaReminderStatus.LATE]: copy.late,

@@ -7,10 +7,16 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { CreateJameyaDto } from './dto/create-jameya.dto';
 import { JameyaQueryDto } from './dto/jameya-query.dto';
 import { UpdateJameyaDto } from './dto/update-jameya.dto';
-import { calculateEntitlement, calculatePot, HALVES_PER_SHARE } from './jameya-amounts';
+import { calculateEntitlement, calculatePot } from './jameya-amounts';
 import { buildJameyaDetail, JAMEYA_DETAIL_INCLUDE, JameyaDetail } from './jameya-detail';
 import { lateJameyaDueWhere } from './jameya-late-where';
-import { buildJameyaSchedule, JameyaSchedule, PlannedDueAmount } from './jameya-schedule';
+import {
+  buildJameyaSchedule,
+  InvalidJameyaTurnsError,
+  JameyaSchedule,
+  PlannedDueAmount,
+  RequestedTurn,
+} from './jameya-schedule';
 
 function buildListSelect(today: Date) {
   return {
@@ -37,6 +43,7 @@ type JameyaListRow = Prisma.JameyaGetPayload<{ select: ReturnType<typeof buildLi
 
 export interface JameyaMemberStanding {
   turnSequences: number[];
+  monthlyAmount: number;
   remainingAmount: number;
   lateAmount: number;
   receivedAmount: number;
@@ -49,6 +56,13 @@ export type JameyaListItem = Omit<JameyaListRow, 'cycles' | '_count'> & {
   member?: JameyaMemberStanding;
 };
 
+function requestedTurnsOf(dto: CreateJameyaDto): RequestedTurn[] {
+  if (dto.turns && dto.customerIds) {
+    throw new BadRequestException('Send either turns or customerIds, not both.');
+  }
+  return dto.turns ?? (dto.customerIds ?? []).map((customerId) => ({ holders: [{ customerId }] }));
+}
+
 function owedOf(sum: { amount: number | null; paidAmount: number | null }): number {
   return (sum.amount ?? 0) - (sum.paidAmount ?? 0);
 }
@@ -57,7 +71,7 @@ export interface JameyaPreviewCycle {
   sequence: number;
   dueDate: Date;
   lateAfter: Date;
-  holders: { customerId: string; halves: number; entitlementAmount: number }[];
+  holders: { customerId: string; contribution: number; entitlementAmount: number }[];
 }
 
 export interface JameyaPreview {
@@ -81,7 +95,7 @@ export class JameyasService {
         lateAfter: cycle.lateAfter,
         holders: cycle.holders.map((holder) => ({
           ...holder,
-          entitlementAmount: calculateEntitlement(potAmount, holder.halves),
+          entitlementAmount: calculateEntitlement(holder.contribution, schedule.cycles.length),
         })),
       })),
       dueAmounts: schedule.dueAmounts,
@@ -123,7 +137,7 @@ export class JameyasService {
             jameyaId: jameya.id,
             cycleId: cycle.id,
             customerId: holder.customerId,
-            halves: holder.halves,
+            contribution: holder.contribution,
           })),
         ),
       });
@@ -147,7 +161,8 @@ export class JameyasService {
   }
 
   private async planSchedule(tenantId: string, dto: CreateJameyaDto): Promise<JameyaSchedule> {
-    const memberIds = [...new Set(dto.customerIds)];
+    const turns = requestedTurnsOf(dto);
+    const memberIds = [...new Set(turns.flatMap((turn) => turn.holders.map((holder) => holder.customerId)))];
     if (memberIds.length < JAMEYA_MIN_MEMBERS) {
       throw new BadRequestException('A jameya needs at least two different members.');
     }
@@ -157,13 +172,20 @@ export class JameyasService {
     if (memberCount !== memberIds.length) {
       throw new NotFoundException('Customer not found.');
     }
-    return buildJameyaSchedule({
-      shareAmount: dto.shareAmount,
-      recurrenceType: dto.recurrenceType,
-      firstDueDate: new Date(dto.firstDueDate),
-      graceDays: dto.graceDays,
-      turns: dto.customerIds.map((customerId) => [{ customerId, halves: HALVES_PER_SHARE }]),
-    });
+    try {
+      return buildJameyaSchedule({
+        shareAmount: dto.shareAmount,
+        recurrenceType: dto.recurrenceType,
+        firstDueDate: new Date(dto.firstDueDate),
+        graceDays: dto.graceDays,
+        turns,
+      });
+    } catch (error) {
+      if (error instanceof InvalidJameyaTurnsError) {
+        throw new BadRequestException(error.message);
+      }
+      throw error;
+    }
   }
 
   async findAll(tenantId: string, query: JameyaQueryDto): Promise<PaginatedResult<JameyaListItem>> {
@@ -210,7 +232,7 @@ export class JameyasService {
       this.prisma.jameyaShare.findMany({
         where: memberWhere,
         orderBy: { cycle: { sequence: 'asc' } },
-        select: { jameyaId: true, cycle: { select: { sequence: true } } },
+        select: { jameyaId: true, contribution: true, cycle: { select: { sequence: true } } },
       }),
       this.prisma.jameyaDue.groupBy({ by: ['jameyaId'], where: memberWhere, _sum: { amount: true, paidAmount: true } }),
       this.prisma.jameyaDue.groupBy({
@@ -229,10 +251,12 @@ export class JameyasService {
       const standing = standings.get(share.jameyaId);
       if (standing) {
         standing.turnSequences.push(share.cycle.sequence);
+        standing.monthlyAmount += share.contribution;
         continue;
       }
       standings.set(share.jameyaId, {
         turnSequences: [share.cycle.sequence],
+        monthlyAmount: share.contribution,
         remainingAmount: remainingByJameya.get(share.jameyaId) ?? 0,
         lateAmount: lateByJameya.get(share.jameyaId) ?? 0,
         receivedAmount: receivedByJameya.get(share.jameyaId) ?? 0,

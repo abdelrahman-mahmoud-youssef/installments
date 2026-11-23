@@ -1,5 +1,5 @@
 import { NotificationLanguage } from '@prisma/client';
-import { formatDate, formatMoney } from '../reminders/notification-format';
+import { formatDate } from '../reminders/notification-format';
 import { formatJameyaReminderMessage, JameyaReminderData, JameyaReminderStatus } from './jameya-reminder-message';
 
 const dueDate = new Date('2026-11-10');
@@ -17,7 +17,7 @@ function reminder(status: JameyaReminderStatus): JameyaReminderData {
 
 describe('formatJameyaReminderMessage', () => {
   it('writes a late English reminder with the amount and the date it was due', () => {
-    const money = formatMoney(150_000, NotificationLanguage.EN);
+    const money = 'EGP 1,500';
     const date = formatDate(dueDate, NotificationLanguage.EN);
 
     expect(formatJameyaReminderMessage(reminder(JameyaReminderStatus.LATE), NotificationLanguage.EN)).toBe(
@@ -33,7 +33,7 @@ describe('formatJameyaReminderMessage', () => {
   });
 
   it('writes a reminder for a payment past its date but inside the grace days as due since that date', () => {
-    const money = formatMoney(150_000, NotificationLanguage.EN);
+    const money = 'EGP 1,500';
     const date = formatDate(dueDate, NotificationLanguage.EN);
     const english = formatJameyaReminderMessage(reminder(JameyaReminderStatus.DUE), NotificationLanguage.EN);
     const arabic = formatJameyaReminderMessage(reminder(JameyaReminderStatus.DUE), NotificationLanguage.AR);
@@ -41,7 +41,7 @@ describe('formatJameyaReminderMessage', () => {
     expect(english).toContain(`⏳ Your payment of ${money} has been due since ${date}.`);
     expect(english).not.toMatch(/late|next payment/);
     expect(arabic).toContain(
-      `⏳ ميعاد دفعتك كان يوم ${formatDate(dueDate, NotificationLanguage.AR)}: ${formatMoney(150_000, NotificationLanguage.AR)}`,
+      `⏳ ميعاد دفعتك كان يوم ${formatDate(dueDate, NotificationLanguage.AR)}: ${'١٬٥٠٠ ج.م'}`,
     );
     expect(arabic).not.toMatch(/متأخرة|الجاية/);
   });
@@ -49,7 +49,7 @@ describe('formatJameyaReminderMessage', () => {
   it('writes an upcoming English reminder without calling it late', () => {
     const message = formatJameyaReminderMessage(reminder(JameyaReminderStatus.UPCOMING), NotificationLanguage.EN);
 
-    const money = formatMoney(150_000, NotificationLanguage.EN);
+    const money = 'EGP 1,500';
     const date = formatDate(dueDate, NotificationLanguage.EN);
 
     expect(message).toContain(`📅 Your next payment of ${money} is due ${date}.`);
@@ -57,7 +57,7 @@ describe('formatJameyaReminderMessage', () => {
   });
 
   it('writes a late Arabic reminder', () => {
-    const money = formatMoney(150_000, NotificationLanguage.AR);
+    const money = '١٬٥٠٠ ج.م';
     const date = formatDate(dueDate, NotificationLanguage.AR);
 
     expect(formatJameyaReminderMessage(reminder(JameyaReminderStatus.LATE), NotificationLanguage.AR)).toBe(
@@ -75,7 +75,7 @@ describe('formatJameyaReminderMessage', () => {
   it('writes an upcoming Arabic reminder without calling it late', () => {
     const message = formatJameyaReminderMessage(reminder(JameyaReminderStatus.UPCOMING), NotificationLanguage.AR);
 
-    const money = formatMoney(150_000, NotificationLanguage.AR);
+    const money = '١٬٥٠٠ ج.م';
     const date = formatDate(dueDate, NotificationLanguage.AR);
 
     expect(message).toContain(`📅 دفعتك الجاية: ${money} ميعادها ${date}`);

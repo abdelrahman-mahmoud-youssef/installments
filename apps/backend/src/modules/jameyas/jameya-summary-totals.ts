@@ -1,6 +1,5 @@
 import { JameyaStatus } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
-import { calculatePot } from './jameya-amounts';
 import { buildCycleHolders } from './jameya-detail';
 import { lateJameyaDueWhere, OUTSTANDING_JAMEYA_DUE_STATUSES } from './jameya-late-where';
 
@@ -27,15 +26,16 @@ export async function computeJameyaSummaryTotals(
     prisma.jameyaCycle.findMany({
       where: { ...activeJameya, dueDate: { lte: today } },
       select: {
-        jameya: { select: { shareAmount: true, shareCount: true } },
-        shares: { select: { customerId: true, halves: true } },
+        jameya: { select: { shareCount: true } },
+        shares: { select: { customerId: true, contribution: true } },
         payouts: { select: { customerId: true, amount: true } },
       },
     }),
   ]);
-  const payoutsPendingCount = dueCycles.filter((cycle) => {
-    const potAmount = calculatePot(cycle.jameya.shareAmount, cycle.jameya.shareCount);
-    return buildCycleHolders(cycle.shares, cycle.payouts, potAmount).some((holder) => holder.remainingAmount > 0);
-  }).length;
+  const payoutsPendingCount = dueCycles.filter((cycle) =>
+    buildCycleHolders(cycle.shares, cycle.payouts, cycle.jameya.shareCount).some(
+      (holder) => holder.remainingAmount > 0,
+    ),
+  ).length;
   return { dueTodayCount, lateCount, payoutsPendingCount };
 }

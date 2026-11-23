@@ -1,11 +1,22 @@
 import { RecurrenceType } from '@prisma/client';
 import { addUtcDays } from '../../common/date/utc-date';
 import { generateDueDates } from '../../common/installments/recurrence';
-import { calculateDueAmount, HALVES_PER_SHARE } from './jameya-amounts';
+import { isWholePounds, splitEqually } from './jameya-amounts';
+
+export class InvalidJameyaTurnsError extends Error {}
+
+export interface RequestedTurnHolder {
+  customerId: string;
+  contribution?: number;
+}
+
+export interface RequestedTurn {
+  holders: RequestedTurnHolder[];
+}
 
 export interface JameyaTurnHolder {
   customerId: string;
-  halves: number;
+  contribution: number;
 }
 
 export interface JameyaScheduleInput {
@@ -13,7 +24,7 @@ export interface JameyaScheduleInput {
   recurrenceType: RecurrenceType;
   firstDueDate: Date;
   graceDays: number;
-  turns: JameyaTurnHolder[][];
+  turns: RequestedTurn[];
 }
 
 export interface PlannedCycle {
@@ -40,47 +51,62 @@ export interface JameyaSchedule {
   dues: PlannedDue[];
 }
 
-function sumHalves(holders: JameyaTurnHolder[]): number {
-  return holders.reduce((total, holder) => total + holder.halves, 0);
-}
-
-function assertTurnsAreWhole(input: JameyaScheduleInput): void {
-  if (input.turns.some((holders) => sumHalves(holders) !== HALVES_PER_SHARE)) {
-    throw new Error('Every turn must add up to exactly one full share.');
-  }
-  const hasHalfShares = input.turns.some((holders) => holders.some((holder) => holder.halves !== HALVES_PER_SHARE));
-  if (hasHalfShares && input.shareAmount % HALVES_PER_SHARE !== 0) {
-    throw new Error('The share amount must split evenly into two halves.');
+function assertHoldersAreDistinct(holders: RequestedTurnHolder[]): void {
+  if (new Set(holders.map((holder) => holder.customerId)).size !== holders.length) {
+    throw new InvalidJameyaTurnsError('A customer can appear only once in the same turn.');
   }
 }
 
-function totalHalvesByCustomer(turns: JameyaTurnHolder[][]): Map<string, number> {
-  const halvesByCustomer = new Map<string, number>();
+function resolveContributions(shareAmount: number, holders: RequestedTurnHolder[]): number[] {
+  const contributions = holders.flatMap((holder) => (holder.contribution === undefined ? [] : [holder.contribution]));
+  if (contributions.length === 0) {
+    return splitEqually(shareAmount, holders.length);
+  }
+  if (contributions.length !== holders.length) {
+    throw new InvalidJameyaTurnsError('Either every holder in a turn has an amount or none does.');
+  }
+  if (contributions.some((contribution) => contribution <= 0 || !isWholePounds(contribution))) {
+    throw new InvalidJameyaTurnsError('Every amount in a turn must be a positive whole number of pounds.');
+  }
+  if (contributions.reduce((total, contribution) => total + contribution, 0) !== shareAmount) {
+    throw new InvalidJameyaTurnsError('The amounts in every turn must add up to exactly the share amount.');
+  }
+  return contributions;
+}
+
+export function resolveTurnHolders(shareAmount: number, turn: RequestedTurn): JameyaTurnHolder[] {
+  assertHoldersAreDistinct(turn.holders);
+  const contributions = resolveContributions(shareAmount, turn.holders);
+  return turn.holders.map((holder, index) => ({ customerId: holder.customerId, contribution: contributions[index] }));
+}
+
+function totalContributionByCustomer(turns: JameyaTurnHolder[][]): Map<string, number> {
+  const totals = new Map<string, number>();
   for (const holder of turns.flat()) {
-    halvesByCustomer.set(holder.customerId, (halvesByCustomer.get(holder.customerId) ?? 0) + holder.halves);
+    totals.set(holder.customerId, (totals.get(holder.customerId) ?? 0) + holder.contribution);
   }
-  return halvesByCustomer;
+  return totals;
 }
 
 export function buildJameyaSchedule(input: JameyaScheduleInput): JameyaSchedule {
-  assertTurnsAreWhole(input);
+  if (!isWholePounds(input.shareAmount)) {
+    throw new InvalidJameyaTurnsError('The share amount must be a whole number of pounds.');
+  }
+  const turns = input.turns.map((turn) => resolveTurnHolders(input.shareAmount, turn));
 
   const dueDates = generateDueDates({
     firstPaymentDate: input.firstDueDate,
     recurrenceType: input.recurrenceType,
-    installmentCount: input.turns.length,
+    installmentCount: turns.length,
   });
-  const cycles = input.turns.map((holders, index) => ({
+  const cycles = turns.map((holders, index) => ({
     sequence: index + 1,
     dueDate: dueDates[index],
     lateAfter: addUtcDays(dueDates[index], input.graceDays),
     holders,
   }));
 
-  const dueAmounts = [...totalHalvesByCustomer(input.turns)].map(([customerId, halves]) => ({
-    customerId,
-    amount: calculateDueAmount(input.shareAmount, halves),
-  }));
+  const dueAmounts = [...totalContributionByCustomer(turns)].map(([customerId, amount]) => ({ customerId, amount }));
   const dues = cycles.flatMap((cycle) => dueAmounts.map((due) => ({ sequence: cycle.sequence, ...due })));
 
   return { cycles, dueAmounts, dues };

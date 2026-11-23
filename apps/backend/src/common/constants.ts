@@ -107,6 +107,10 @@ export const JAMEYA_RECEIPT_IMAGE_MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
 
 export const JAMEYA_MAX_TURNS = 60;
 
+export const JAMEYA_MAX_HOLDERS_PER_TURN = 4;
+
+export const JAMEYA_WHOLE_POUND = 100;
+
 export const JAMEYA_MAX_SHARE_AMOUNT = 10_000_000;
 
 export const JAMEYA_MAX_GRACE_DAYS = 60;

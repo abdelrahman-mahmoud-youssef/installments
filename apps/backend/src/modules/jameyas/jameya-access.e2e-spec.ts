@@ -1,118 +1,35 @@
-import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { APP_GUARD } from '@nestjs/core';
-import { JwtModule, JwtService } from '@nestjs/jwt';
-import { PassportModule } from '@nestjs/passport';
-import { Test } from '@nestjs/testing';
-import { Role } from '@prisma/client';
+import { JwtService } from '@nestjs/jwt';
 import { randomUUID } from 'node:crypto';
 import { PLATFORM_TOKEN_SCOPE } from '../../common/decorators/current-platform-admin.decorator';
 import { addUtcDays, getUtcToday } from '../../common/date/utc-date';
-import { RolesGuard } from '../../common/guards/roles.guard';
 import { PrismaService } from '../../prisma/prisma.service';
-import { StorageService } from '../storage/storage.service';
-import { prepareTestDatabase } from '../../test-support/test-database';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { JwtStrategy } from '../auth/jwt.strategy';
-import { SubscriptionActivationService } from '../platform/billing/subscription-activation.service';
-import { PlatformJwtStrategy } from '../platform/platform-jwt.strategy';
-import { PlatformTenantsController } from '../platform/platform-tenants.controller';
-import { PlatformTenantsService } from '../platform/platform-tenants.service';
-import { JameyaPaymentsService } from './jameya-payments.service';
-import { JameyaPayoutsService } from './jameya-payouts.service';
-import { JameyasController } from './jameyas.controller';
-import { JameyasService } from './jameyas.service';
-
-const JWT_SECRET = 'e2e-jwt-secret-that-is-long-enough';
-
-interface ShopAccounts {
-  tenantId: string;
-  adminToken: string;
-  staffToken: string;
-  customerIds: string[];
-}
+import { JameyaHttpApp, JameyaTestShop, startJameyaHttpApp } from '../../test-support/jameya-http-app';
 
 describe('Jameya routes access', () => {
-  let app: INestApplication;
+  let harness: JameyaHttpApp;
   let prisma: PrismaService;
   let jwt: JwtService;
-  let baseUrl: string;
   const today = getUtcToday();
 
   beforeAll(async () => {
-    prepareTestDatabase();
-    const moduleRef = await Test.createTestingModule({
-      imports: [
-        PassportModule,
-        JwtModule.register({ secret: JWT_SECRET, signOptions: { expiresIn: '1h' } }),
-        ConfigModule.forRoot({ isGlobal: true, ignoreEnvFile: true, load: [() => ({ JWT_SECRET })] }),
-      ],
-      controllers: [JameyasController, PlatformTenantsController],
-      providers: [
-        PrismaService,
-        JameyasService,
-        JameyaPaymentsService,
-        { provide: StorageService, useValue: {} },
-        JameyaPayoutsService,
-        PlatformTenantsService,
-        SubscriptionActivationService,
-        JwtStrategy,
-        PlatformJwtStrategy,
-        { provide: APP_GUARD, useClass: JwtAuthGuard },
-        { provide: APP_GUARD, useClass: RolesGuard },
-      ],
-    }).compile();
-    app = moduleRef.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
-    await app.init();
-    await app.listen(0);
-    baseUrl = await app.getUrl();
-    prisma = app.get(PrismaService);
-    jwt = app.get(JwtService);
+    harness = await startJameyaHttpApp();
+    prisma = harness.prisma;
+    jwt = harness.jwt;
   }, 120_000);
 
   afterAll(async () => {
-    await app.close();
+    await harness.app.close();
   });
 
   function request(token: string, method: string, path: string, body?: unknown): Promise<Response> {
-    return fetch(`${baseUrl}${path}`, {
-      method,
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: body === undefined ? undefined : JSON.stringify(body),
-    });
+    return harness.request(token, method, path, body);
   }
 
-  async function signUser(tenantId: string, role: Role): Promise<string> {
-    const user = await prisma.user.create({
-      data: { tenantId, name: role, email: `${role}-${randomUUID()}@example.com`, passwordHash: 'x', role },
-    });
-    return jwt.signAsync({ sub: user.id, tenantId, role, email: user.email, name: user.name });
+  function createShop(jameyaEnabled: boolean): Promise<JameyaTestShop> {
+    return harness.createShop({ jameyaEnabled, memberCount: 2 });
   }
 
-  async function createShop(jameyaEnabled: boolean): Promise<ShopAccounts> {
-    const suffix = randomUUID();
-    const tenant = await prisma.tenant.create({
-      data: {
-        name: `Shop ${suffix}`,
-        slug: `shop-${suffix}`,
-        subscriptionExpiresOn: addUtcDays(today, 30),
-        jameyaEnabled,
-      },
-    });
-    const customers = await prisma.customer.createManyAndReturn({
-      data: [1, 2].map((index) => ({ tenantId: tenant.id, name: `Member ${index}`, phone: `010000000${index}` })),
-      select: { id: true },
-    });
-    return {
-      tenantId: tenant.id,
-      adminToken: await signUser(tenant.id, Role.ADMIN),
-      staffToken: await signUser(tenant.id, Role.STAFF),
-      customerIds: customers.map((customer) => customer.id),
-    };
-  }
-
-  function jameyaBody(shop: ShopAccounts) {
+  function jameyaBody(shop: JameyaTestShop) {
     return {
       name: 'Circle',
       shareAmount: 100_000,
@@ -123,7 +40,7 @@ describe('Jameya routes access', () => {
     };
   }
 
-  async function createJameya(shop: ShopAccounts): Promise<{ id: string; cycleId: string }> {
+  async function createJameya(shop: JameyaTestShop): Promise<{ id: string; cycleId: string }> {
     const response = await request(shop.adminToken, 'POST', '/jameyas', jameyaBody(shop));
     expect(response.status).toBe(201);
     const jameya = (await response.json()) as { id: string; cycles: { id: string }[] };
@@ -158,9 +75,12 @@ describe('Jameya routes access', () => {
           sequence: 1,
           dueDate: firstDueDate.toISOString(),
           lateAfter: addUtcDays(firstDueDate, 2).toISOString(),
-          holders: [{ customerId: shop.customerIds[0], halves: 2, entitlementAmount: 200_000 }],
+          holders: [{ customerId: shop.customerIds[0], contribution: 100_000, entitlementAmount: 200_000 }],
         },
-        { sequence: 2, holders: [{ customerId: shop.customerIds[1], halves: 2, entitlementAmount: 200_000 }] },
+        {
+          sequence: 2,
+          holders: [{ customerId: shop.customerIds[1], contribution: 100_000, entitlementAmount: 200_000 }],
+        },
       ],
       dueAmounts: shop.customerIds.map((customerId) => ({ customerId, amount: 100_000 })),
     });

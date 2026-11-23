@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { getUtcToday } from '../../common/date/utc-date';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateJameyaPayoutDto } from './dto/create-jameya-payout.dto';
-import { calculateCoveredAmount, calculateEntitlement, calculatePot } from './jameya-amounts';
+import { calculateCoveredAmount, calculateEntitlement } from './jameya-amounts';
 import { JAMEYA_PAYOUT_SELECT, JameyaPayoutRecord } from './jameya-detail';
 import { assertJameyaActive, completeJameyaIfFinished, lockJameya } from './jameya-transaction';
 
@@ -35,7 +35,7 @@ export class JameyaPayoutsService {
 
       const cycle = await tx.jameyaCycle.findFirst({
         where: { id: cycleId, jameyaId },
-        select: { dueDate: true, shares: { where: { customerId: dto.customerId }, select: { halves: true } } },
+        select: { dueDate: true, shares: { where: { customerId: dto.customerId }, select: { contribution: true } } },
       });
       if (!cycle) {
         throw new NotFoundException('Cycle not found.');
@@ -52,13 +52,13 @@ export class JameyaPayoutsService {
         tx.jameyaDue.aggregate({ where: { cycleId }, _sum: { paidAmount: true } }),
         tx.jameyaPayout.findMany({ where: { cycleId }, select: { customerId: true, amount: true } }),
       ]);
-      const entitlement = calculateEntitlement(calculatePot(jameya.shareAmount, jameya.shareCount), share.halves);
+      const entitlement = calculateEntitlement(share.contribution, jameya.shareCount);
       const remaining = entitlement - sumAmounts(cyclePayouts.filter((payout) => payout.customerId === dto.customerId));
       if (dto.amount > remaining) {
         throw new BadRequestException(
           remaining === 0
-            ? 'This turn has already been paid out in full.'
-            : 'The payout is more than what is left for this turn.',
+            ? 'This holder has already been paid out in full for this turn.'
+            : 'The payout is more than what is left for this holder in this turn.',
         );
       }
 
@@ -91,19 +91,19 @@ export class JameyaPayoutsService {
   private async findResult(payoutId: string): Promise<JameyaPayoutResult> {
     const { jameya, ...payout } = await this.prisma.jameyaPayout.findUniqueOrThrow({
       where: { id: payoutId },
-      select: { ...JAMEYA_PAYOUT_SELECT, jameya: { select: { shareAmount: true, shareCount: true } } },
+      select: { ...JAMEYA_PAYOUT_SELECT, jameya: { select: { shareCount: true } } },
     });
     const [share, paidOut] = await Promise.all([
       this.prisma.jameyaShare.findUniqueOrThrow({
         where: { cycleId_customerId: { cycleId: payout.cycleId, customerId: payout.customerId } },
-        select: { halves: true },
+        select: { contribution: true },
       }),
       this.prisma.jameyaPayout.aggregate({
         where: { cycleId: payout.cycleId, customerId: payout.customerId },
         _sum: { amount: true },
       }),
     ]);
-    const entitlement = calculateEntitlement(calculatePot(jameya.shareAmount, jameya.shareCount), share.halves);
+    const entitlement = calculateEntitlement(share.contribution, jameya.shareCount);
     return { ...payout, remainingAmount: entitlement - (paidOut._sum.amount ?? 0) };
   }
 }

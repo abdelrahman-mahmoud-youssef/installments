@@ -1,5 +1,10 @@
-import { IsDateString, IsInt, IsOptional, IsPositive, IsString, IsUUID, MaxLength } from 'class-validator';
-import { JAMEYA_NOTE_MAX_LENGTH, JAMEYA_RECEIPT_IMAGE_MAX_UPLOAD_BYTES } from '../../../common/constants';
+import { IsDateString, IsDivisibleBy, IsInt, IsOptional, IsPositive, IsString, IsUUID, MaxLength } from 'class-validator';
+import {
+  JAMEYA_NOTE_MAX_LENGTH,
+  JAMEYA_RECEIPT_IMAGE_MAX_UPLOAD_BYTES,
+  JAMEYA_WHOLE_POUND,
+} from '../../../common/constants';
+import { WHOLE_POUNDS_MESSAGE } from './create-jameya.dto';
 
 export class CreateJameyaPaymentDto {
   @IsString()
@@ -7,6 +12,7 @@ export class CreateJameyaPaymentDto {
 
   @IsInt()
   @IsPositive()
+  @IsDivisibleBy(JAMEYA_WHOLE_POUND, WHOLE_POUNDS_MESSAGE)
   amount!: number;
 
   @IsOptional()

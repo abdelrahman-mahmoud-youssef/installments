@@ -766,16 +766,16 @@ model JameyaCycle {
 }
 
 model JameyaShare {
-  id         String      @id @default(cuid())
-  tenantId   String
-  jameyaId   String
-  cycleId    String
-  customerId String
-  halves     Int
-  tenant     Tenant      @relation(fields: [tenantId], references: [id])
-  jameya     Jameya      @relation(fields: [jameyaId], references: [id])
-  cycle      JameyaCycle @relation(fields: [cycleId], references: [id])
-  customer   Customer    @relation(fields: [customerId], references: [id])
+  id           String      @id @default(cuid())
+  tenantId     String
+  jameyaId     String
+  cycleId      String
+  customerId   String
+  contribution Int
+  tenant       Tenant      @relation(fields: [tenantId], references: [id])
+  jameya       Jameya      @relation(fields: [jameyaId], references: [id])
+  cycle        JameyaCycle @relation(fields: [cycleId], references: [id])
+  customer     Customer    @relation(fields: [customerId], references: [id])
 
   @@unique([cycleId, customerId])
   @@index([jameyaId, customerId])
