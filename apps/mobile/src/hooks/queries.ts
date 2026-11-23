@@ -775,6 +775,16 @@ export function useJameyaMemberPayments(id: string, customerId: string | null) {
   });
 }
 
+export function useJameyaPreview(input: CreateJameyaInput | null) {
+  return useQuery({
+    queryKey: ['jameyas', 'preview', input] as const,
+    queryFn: () => previewJameya(input as CreateJameyaInput),
+    enabled: input !== null,
+    placeholderData: (previous) => previous,
+    retry: false,
+  });
+}
+
 export function usePreviewJameya() {
   return useMutation({ mutationFn: (input: CreateJameyaInput) => previewJameya(input) });
 }

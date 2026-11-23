@@ -25,6 +25,7 @@ export interface PayoutReceiptInput {
   holderName: string;
   cycle: Pick<JameyaCycle, 'sequence' | 'dueDate'>;
   payout: Pick<JameyaPayout, 'amount' | 'paidAt' | 'note'>;
+  entitlementAmount: number;
   remainingAmount: number;
 }
 
@@ -58,7 +59,7 @@ export function useShareJameyaReceipt(jameyaName: string) {
       const shop = branding.data;
       setIsSharing(true);
       try {
-        const money = splitStatementMoney(content.amount, locale);
+        const money = splitStatementMoney(content.amount, locale, { hideWholeDecimals: true });
         const html = buildJameyaReceiptHtml({
           isRTL,
           fontFaces: await loadStatementFontFaces(isRTL),
@@ -141,6 +142,7 @@ export function useShareJameyaReceipt(jameyaName: string) {
             ],
             input.payout.note,
           ),
+          { label: t('jameyas.receipt.holderPart'), value: formatMoney(input.entitlementAmount, locale) },
           { label: t('jameyas.receipt.stillOwedForTurn'), value: formatMoney(input.remainingAmount, locale) },
         ],
       }),

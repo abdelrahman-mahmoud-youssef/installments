@@ -10,6 +10,7 @@ export const JAMEYA_RECURRENCE_TYPES: JameyaRecurrenceType[] = ['MONTHLY', 'WEEK
 
 export interface JameyaMemberStanding {
   turnSequences: number[];
+  monthlyAmount: number;
   remainingAmount: number;
   lateAmount: number;
   receivedAmount: number;
@@ -53,7 +54,7 @@ export interface JameyaPayout {
 
 export interface JameyaCycleHolder {
   customerId: string;
-  halves: number;
+  contribution: number;
   entitlementAmount: number;
   paidOutAmount: number;
   remainingAmount: number;
@@ -73,12 +74,22 @@ export interface JameyaCycle {
   payouts: JameyaPayout[];
 }
 
+export interface JameyaMemberHolding {
+  cycleId: string;
+  sequence: number;
+  contribution: number;
+  entitlementAmount: number;
+  receivedAmount: number;
+}
+
 export interface JameyaMember {
   customerId: string;
   name: string;
   phone: string;
   photoUrl: string | null;
   turnSequences: number[];
+  holdings: JameyaMemberHolding[];
+  monthlyAmount: number;
   dueAmount: number;
   paidAmount: number;
   remainingAmount: number;
@@ -133,9 +144,18 @@ export interface JameyaPreview {
     sequence: number;
     dueDate: string;
     lateAfter: string;
-    holders: { customerId: string; halves: number; entitlementAmount: number }[];
+    holders: { customerId: string; contribution: number; entitlementAmount: number }[];
   }[];
   dueAmounts: { customerId: string; amount: number }[];
+}
+
+export interface JameyaTurnHolderInput {
+  customerId: string;
+  contribution?: number;
+}
+
+export interface JameyaTurnInput {
+  holders: JameyaTurnHolderInput[];
 }
 
 export interface CreateJameyaInput {
@@ -145,7 +165,7 @@ export interface CreateJameyaInput {
   firstDueDate: string;
   graceDays: number;
   notes?: string;
-  customerIds: string[];
+  turns: JameyaTurnInput[];
 }
 
 export interface UpdateJameyaInput {

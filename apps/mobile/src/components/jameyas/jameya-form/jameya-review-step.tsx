@@ -8,11 +8,11 @@ import { useI18n } from '@/i18n/i18n-context';
 import { formatCalendarDate, formatMoney, formatNumber } from '@/lib/format';
 import { useTheme } from '@/theme/theme-context';
 import { spacing } from '@/theme/tokens';
-import { JameyaFormTurn } from './use-jameya-form';
+import { WizardMemberTurns } from '@/lib/jameya-wizard';
 
 interface JameyaReviewStepProps {
   preview: JameyaPreview;
-  turns: JameyaFormTurn[];
+  memberTurns: WizardMemberTurns[];
 }
 
 function ReviewFigure({ label, value }: { label: string; value: string }) {
@@ -26,11 +26,13 @@ function ReviewFigure({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function JameyaReviewStep({ preview, turns }: JameyaReviewStepProps) {
+export function JameyaReviewStep({ preview, memberTurns }: JameyaReviewStepProps) {
   const { t, locale } = useI18n();
   const { colors } = useTheme();
-  const nameOf = (customerId: string) => turns.find((turn) => turn.id === customerId)?.name ?? '';
-  const turnCountOf = (customerId: string) => turns.filter((turn) => turn.id === customerId).length;
+  const nameOf = (customerId: string) =>
+    memberTurns.find((group) => group.member.id === customerId)?.member.name ?? '';
+  const turnCountOf = (customerId: string) =>
+    memberTurns.find((group) => group.member.id === customerId)?.count ?? 0;
 
   return (
     <View style={{ gap: spacing.lg }}>
@@ -80,9 +82,13 @@ export function JameyaReviewStep({ preview, turns }: JameyaReviewStepProps) {
                 {formatNumber(cycle.sequence, locale)}
               </AppText>
               <View style={{ flex: 1, gap: 2 }}>
-                <AppText variant="bodyStrong" numberOfLines={1}>
-                  {cycle.holders.map((holder) => nameOf(holder.customerId)).join(' · ')}
-                </AppText>
+                {cycle.holders.map((holder) => (
+                  <AppText key={holder.customerId} variant="bodyStrong" numberOfLines={1}>
+                    {cycle.holders.length > 1
+                      ? `${nameOf(holder.customerId)} · ${formatMoney(holder.contribution, locale)} → ${formatMoney(holder.entitlementAmount, locale)}`
+                      : nameOf(holder.customerId)}
+                  </AppText>
+                ))}
                 <AppText variant="caption" tone="muted">
                   {`${t('jameyas.new.review.dueDate')}: ${formatCalendarDate(cycle.dueDate, locale)}`}
                 </AppText>

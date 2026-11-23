@@ -10,9 +10,7 @@ import { PressableScale } from '@/components/ui/pressable-scale';
 import { useI18n } from '@/i18n/i18n-context';
 import { formatCalendarDate, formatMoney, formatNumber } from '@/lib/format';
 import {
-  canHandOverCycle,
   findCurrentTurn,
-  holderNamesOf,
   jameyaMemberName,
   JameyaTurnStatus,
   payoutsWithRemaining,
@@ -22,10 +20,11 @@ import {
 import { useTheme } from '@/theme/theme-context';
 import { radius, spacing } from '@/theme/tokens';
 import { JameyaReceiptIconButton } from './jameya-receipt-icon-button';
+import { JameyaTurnHolders, useTurnHoldersLabel } from './jameya-turn-holders';
 import { JameyaTurnMembers } from './jameya-turn-members';
 import { useShareJameyaReceipt } from './use-share-jameya-receipt';
 
-type HandOver = (cycle: JameyaCycle) => void;
+type HandOver = (cycle: JameyaCycle, customerId: string) => void;
 
 function TurnStatusText({ status }: { status: JameyaTurnStatus }) {
   const { t, locale } = useI18n();
@@ -50,21 +49,27 @@ function TurnPayouts({ jameya, cycle, canManage, onHandOver, onOpenMember }: Tur
   const { t, locale } = useI18n();
   const { colors } = useTheme();
   const { sharePayoutReceipt, canShare } = useShareJameyaReceipt(jameya.name);
+  const isShared = cycle.holders.length > 1;
 
   return (
     <View style={{ gap: spacing.md, backgroundColor: colors.surfaceMuted, borderRadius: radius.md, padding: spacing.md }}>
+      <JameyaTurnHolders jameya={jameya} cycle={cycle} canManage={canManage} onHandOver={onHandOver} />
       <JameyaTurnMembers jameya={jameya} cycle={cycle} onOpenMember={onOpenMember} />
       {cycle.payouts.length === 0 ? (
         <AppText variant="caption" tone="muted">
           {t('jameyas.detail.noPayouts')}
         </AppText>
       ) : (
-        payoutsWithRemaining(cycle).map(({ payout, remainingAmount }) => {
+        payoutsWithRemaining(cycle).map(({ payout, entitlementAmount, remainingAmount }) => {
           const holderName = jameyaMemberName(jameya, payout.customerId);
           return (
             <View key={payout.id} style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
               <View style={{ flex: 1, gap: 2 }}>
-                <AppText variant="caption">{formatCalendarDate(payout.paidAt, locale)}</AppText>
+                <AppText variant="caption">
+                  {isShared
+                    ? `${holderName} · ${formatCalendarDate(payout.paidAt, locale)}`
+                    : formatCalendarDate(payout.paidAt, locale)}
+                </AppText>
                 {payout.note ? (
                   <AppText variant="caption" tone="muted">
                     {payout.note}
@@ -74,20 +79,14 @@ function TurnPayouts({ jameya, cycle, canManage, onHandOver, onOpenMember }: Tur
               <MoneyText minorUnits={payout.amount} variant="bodyStrong" />
               <JameyaReceiptIconButton
                 disabled={!canShare}
-                onPress={() => void sharePayoutReceipt({ holderName, cycle, payout, remainingAmount })}
+                onPress={() =>
+                  void sharePayoutReceipt({ holderName, cycle, payout, entitlementAmount, remainingAmount })
+                }
               />
             </View>
           );
         })
       )}
-      {canManage && canHandOverCycle(jameya, cycle) ? (
-        <Button
-          variant="secondary"
-          icon="hand-left-outline"
-          title={t('jameyas.detail.handOverPayout')}
-          onPress={() => onHandOver(cycle)}
-        />
-      ) : null}
     </View>
   );
 }
@@ -105,6 +104,7 @@ function TurnRow({ status, ...props }: TurnRowProps & { status: JameyaTurnStatus
   const { colors } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const { jameya, cycle } = props;
+  const holdersLabel = useTurnHoldersLabel(jameya);
 
   return (
     <View style={{ gap: spacing.sm }}>
@@ -113,12 +113,14 @@ function TurnRow({ status, ...props }: TurnRowProps & { status: JameyaTurnStatus
           {formatNumber(cycle.sequence, locale)}
         </AppText>
         <PressableScale
-          onPress={() => props.onOpenMember(cycle.holders[0].customerId)}
+          onPress={() =>
+            cycle.holders.length === 1 ? props.onOpenMember(cycle.holders[0].customerId) : setIsOpen((current) => !current)
+          }
           accessibilityRole="button"
           style={{ flex: 1 }}
         >
           <AppText variant="bodyStrong" numberOfLines={1}>
-            {holderNamesOf(jameya, cycle)}
+            {holdersLabel(cycle)}
           </AppText>
         </PressableScale>
         <PressableScale

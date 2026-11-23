@@ -2,7 +2,7 @@ import { randomUUID } from 'expo-crypto';
 import { useEffect, useState } from 'react';
 import { JameyaMoneyEntryInput } from '@/api/jameyas';
 import { useI18n } from '@/i18n/i18n-context';
-import { parseAmountInput, todayIsoDate, toMajorUnitsText, toMinorUnits } from '@/lib/format';
+import { parseAmountInput, parseWholeAmountInput, todayIsoDate, toMajorUnitsText, toMinorUnits } from '@/lib/format';
 
 interface MoneyEntryDefaults {
   customerId: string;
@@ -30,7 +30,7 @@ export function useJameyaMoneyEntry(visible: boolean, defaults: MoneyEntryDefaul
     setClientRequestId(randomUUID());
   }, [visible]);
 
-  const parsedAmount = parseAmountInput(amountText);
+  const parsedAmount = parseWholeAmountInput(amountText);
   const amount = parsedAmount !== null ? toMinorUnits(parsedAmount) : 0;
 
   const setAmount = (minorUnits: number) => setAmountText(minorUnits > 0 ? toMajorUnitsText(minorUnits) : '');
@@ -40,7 +40,9 @@ export function useJameyaMoneyEntry(visible: boolean, defaults: MoneyEntryDefaul
       return t('jameyas.validation.memberRequired');
     }
     if (parsedAmount === null) {
-      return t('jameyas.validation.amountPositive');
+      return parseAmountInput(amountText) === null
+        ? t('jameyas.validation.amountPositive')
+        : t('jameyas.validation.wholePounds');
     }
     return amount > limit ? t('jameyas.validation.amountAboveLimit') : null;
   };

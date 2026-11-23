@@ -6,6 +6,7 @@ import { JameyaCycle, JameyaDetail, JameyaMoneyEntryInput, JameyaPayoutResult } 
 import { AppText } from '@/components/ui/app-text';
 import { BottomSheet } from '@/components/ui/bottom-sheet';
 import { Button } from '@/components/ui/button';
+import { ChoiceChips } from '@/components/ui/choice-chips';
 import { DateStepper } from '@/components/ui/date-stepper';
 import { TextField } from '@/components/ui/text-field';
 import { useCreateJameyaPayout } from '@/hooks/queries';
@@ -14,8 +15,10 @@ import { formatMoney, formatNumber, todayIsoDate } from '@/lib/format';
 import {
   amountFromShopMoney,
   availableCycleCash,
+  holderRemainingOf,
   jameyaMemberName,
-  suggestedPayoutAmount,
+  openHoldersOf,
+  suggestedPayoutOf,
 } from '@/lib/jameya';
 import { useTheme } from '@/theme/theme-context';
 import { radius, spacing } from '@/theme/tokens';
@@ -28,6 +31,7 @@ interface JameyaPayoutSheetProps {
   visible: boolean;
   jameya: JameyaDetail;
   cycle: JameyaCycle | null;
+  holderId: string | null;
   onClose: () => void;
 }
 
@@ -43,6 +47,8 @@ function PayoutResult({ jameya, cycle, result, onDone }: PayoutResultProps) {
   const { colors } = useTheme();
   const { sharePayoutReceipt, canShare } = useShareJameyaReceipt(jameya.name);
   const holderName = jameyaMemberName(jameya, result.customerId);
+  const entitlementAmount =
+    cycle.holders.find((holder) => holder.customerId === result.customerId)?.entitlementAmount ?? 0;
 
   return (
     <View style={{ gap: spacing.lg }}>
@@ -69,7 +75,13 @@ function PayoutResult({ jameya, cycle, result, onDone }: PayoutResultProps) {
         title={t('jameyas.receipt.download')}
         disabled={!canShare}
         onPress={() =>
-          void sharePayoutReceipt({ holderName, cycle, payout: result, remainingAmount: result.remainingAmount })
+          void sharePayoutReceipt({
+            holderName,
+            cycle,
+            payout: result,
+            entitlementAmount,
+            remainingAmount: result.remainingAmount,
+          })
         }
       />
       <Button title={t('jameyas.payoutDialog.done')} onPress={onDone} />
@@ -81,20 +93,23 @@ interface PayoutFormProps {
   visible: boolean;
   jameya: JameyaDetail;
   cycle: JameyaCycle;
+  holderId: string | null;
   saving: boolean;
   onSubmit: (input: JameyaMoneyEntryInput) => Promise<void>;
 }
 
-function PayoutForm({ visible, jameya, cycle, saving, onSubmit }: PayoutFormProps) {
+function PayoutForm({ visible, jameya, cycle, holderId, saving, onSubmit }: PayoutFormProps) {
   const { t, locale } = useI18n();
   const { colors } = useTheme();
-  const openHolders = cycle.holders.filter((holder) => holder.remainingAmount > 0);
+  const openHolders = openHoldersOf(cycle);
   const availableCash = availableCycleCash(cycle);
-  const remainingFor = (customerId: string) =>
-    cycle.holders.find((holder) => holder.customerId === customerId)?.remainingAmount ?? 0;
-  const suggestedFor = (customerId: string) => suggestedPayoutAmount(remainingFor(customerId), availableCash);
-  const firstHolderId = openHolders[0]?.customerId ?? '';
-  const entry = useJameyaMoneyEntry(visible, { customerId: firstHolderId, amount: suggestedFor(firstHolderId) });
+  const remainingFor = (customerId: string) => holderRemainingOf(cycle, customerId);
+  const initialHolderId =
+    openHolders.find((holder) => holder.customerId === holderId)?.customerId ?? openHolders[0]?.customerId ?? '';
+  const entry = useJameyaMoneyEntry(visible, {
+    customerId: initialHolderId,
+    amount: suggestedPayoutOf(cycle, initialHolderId),
+  });
   const fromShopMoney = amountFromShopMoney(entry.amount, availableCash);
   const remainingAfterPayout = Math.max(0, remainingFor(entry.customerId) - entry.amount);
 
@@ -115,20 +130,49 @@ function PayoutForm({ visible, jameya, cycle, saving, onSubmit }: PayoutFormProp
       <AppText variant="caption" tone="muted">
         {t('jameyas.payoutDialog.description')}
       </AppText>
-      <View style={{ gap: 2 }}>
-        <AppText variant="caption" tone="muted">
-          {t('jameyas.payoutDialog.holder')}
-        </AppText>
-        <AppText variant="heading">
-          {openHolders.map((holder) => jameyaMemberName(jameya, holder.customerId)).join(' · ')}
-        </AppText>
-      </View>
+      {openHolders.length > 1 ? (
+        <View style={{ gap: spacing.xs }}>
+          <AppText variant="caption" tone="muted">
+            {t('jameyas.payoutDialog.chooseHolder')}
+          </AppText>
+          <ChoiceChips
+            options={openHolders.map((holder) => ({
+              value: holder.customerId,
+              label: jameyaMemberName(jameya, holder.customerId),
+            }))}
+            selected={entry.customerId || null}
+            onSelect={(customerId) => {
+              entry.setCustomerId(customerId);
+              entry.setAmount(suggestedPayoutOf(cycle, customerId));
+              entry.setError(null);
+            }}
+          />
+          {entry.customerId ? (
+            <AppText variant="caption" tone="muted">
+              {t('jameyas.payoutDialog.holderPart', {
+                part: formatMoney(
+                  cycle.holders.find((holder) => holder.customerId === entry.customerId)?.entitlementAmount ?? 0,
+                  locale,
+                ),
+                remaining: formatMoney(remainingFor(entry.customerId), locale),
+              })}
+            </AppText>
+          ) : null}
+        </View>
+      ) : (
+        <View style={{ gap: 2 }}>
+          <AppText variant="caption" tone="muted">
+            {t('jameyas.payoutDialog.holder')}
+          </AppText>
+          <AppText variant="heading">{jameyaMemberName(jameya, entry.customerId)}</AppText>
+        </View>
+      )}
 
       <TextField
         label={t('jameyas.payoutDialog.amount')}
         value={entry.amountText}
         onChangeText={entry.setAmountText}
-        keyboardType="decimal-pad"
+        keyboardType="number-pad"
         placeholder="0"
         error={entry.error ?? undefined}
       />
@@ -183,7 +227,7 @@ function PayoutForm({ visible, jameya, cycle, saving, onSubmit }: PayoutFormProp
   );
 }
 
-export function JameyaPayoutSheet({ visible, jameya, cycle, onClose }: JameyaPayoutSheetProps) {
+export function JameyaPayoutSheet({ visible, jameya, cycle, holderId, onClose }: JameyaPayoutSheetProps) {
   const { t, locale } = useI18n();
   const createPayout = useCreateJameyaPayout(jameya.id);
   const [result, setResult] = useState<JameyaPayoutResult | null>(null);
@@ -206,6 +250,7 @@ export function JameyaPayoutSheet({ visible, jameya, cycle, onClose }: JameyaPay
           visible={visible}
           jameya={jameya}
           cycle={cycle}
+          holderId={holderId}
           saving={createPayout.isPending}
           onSubmit={async (input) => setResult(await createPayout.mutateAsync({ cycleId: cycle.id, input }))}
         />

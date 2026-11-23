@@ -57,6 +57,7 @@ function CustomerJameyaCard({ jameya }: { jameya: JameyaListItem }) {
           {member ? (
             <JameyaFigures
               figures={[
+                { label: t('jameyas.customerSection.pays'), minorUnits: member.monthlyAmount },
                 { label: t('jameyas.customerSection.owes'), minorUnits: member.remainingAmount },
                 { label: t('jameyas.customerSection.received'), minorUnits: member.receivedAmount },
               ]}

@@ -45,7 +45,7 @@ export default function JameyaDetailScreen() {
   const { isAdmin, canUseJameyas } = useAuth();
   const { data, dataUpdatedAt, isPending, isError, error, refetch, isRefetching } = useJameya(id, canUseJameyas);
   const [openSheet, setOpenSheet] = useState<OpenSheet>(null);
-  const [payoutCycle, setPayoutCycle] = useState<JameyaCycle | null>(null);
+  const [payoutTarget, setPayoutTarget] = useState<{ cycle: JameyaCycle; customerId: string } | null>(null);
   const [memberId, setMemberId] = useState<string | null>(null);
   const [tab, setTab] = useState<DetailTab>('current');
   const [collectMember, setCollectMember] = useState<JameyaMember | null>(null);
@@ -69,8 +69,8 @@ export default function JameyaDetailScreen() {
   const currentTurn = findCurrentTurn(data);
   const canRecordPayment = data.status === 'ACTIVE' && data.members.some((member) => member.remainingAmount > 0);
 
-  const startPayout = (cycle: JameyaCycle) => {
-    setPayoutCycle(cycle);
+  const startPayout = (cycle: JameyaCycle, customerId: string) => {
+    setPayoutTarget({ cycle, customerId });
     setOpenSheet('payout');
   };
 
@@ -197,7 +197,13 @@ export default function JameyaDetailScreen() {
       <JameyaPaymentSheet visible={openSheet === 'payment'} jameya={data} onClose={closeSheet} />
       {isAdmin ? (
         <>
-          <JameyaPayoutSheet visible={openSheet === 'payout'} jameya={data} cycle={payoutCycle} onClose={closeSheet} />
+          <JameyaPayoutSheet
+            visible={openSheet === 'payout'}
+            jameya={data}
+            cycle={payoutTarget?.cycle ?? null}
+            holderId={payoutTarget?.customerId ?? null}
+            onClose={closeSheet}
+          />
           <JameyaEditSheet visible={openSheet === 'edit'} jameya={data} onClose={closeSheet} />
         </>
       ) : null}

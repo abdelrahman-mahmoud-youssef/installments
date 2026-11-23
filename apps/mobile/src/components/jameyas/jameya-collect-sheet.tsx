@@ -89,7 +89,7 @@ export function JameyaCollectSheet({ jameya, member, onClose }: JameyaCollectShe
             label={t('jameyas.paymentDialog.amount')}
             value={entry.amountText}
             onChangeText={entry.setAmountText}
-            keyboardType="decimal-pad"
+            keyboardType="number-pad"
             placeholder="0"
             error={entry.error ?? undefined}
           />

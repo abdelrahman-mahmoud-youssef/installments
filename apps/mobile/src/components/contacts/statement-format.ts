@@ -13,11 +13,21 @@ function padTwo(value: number): string {
   return String(value).padStart(2, '0');
 }
 
-export function splitStatementMoney(minorUnits: number, locale: Locale): { currency: string; amount: string } {
+export interface StatementMoneyOptions {
+  hideWholeDecimals?: boolean;
+}
+
+export function splitStatementMoney(
+  minorUnits: number,
+  locale: Locale,
+  options: StatementMoneyOptions = {},
+): { currency: string; amount: string } {
   const [whole, fraction] = toMajorUnits(Math.abs(minorUnits)).toFixed(AMOUNT_DECIMALS).split('.');
+  const groupedWhole = whole.replace(THOUSANDS_GROUP_PATTERN, ',');
+  const showFraction = !options.hideWholeDecimals || Number(fraction) !== 0;
   return {
     currency: STATEMENT_CURRENCY_LABEL[locale],
-    amount: `${whole.replace(THOUSANDS_GROUP_PATTERN, ',')}.${fraction}`,
+    amount: showFraction ? `${groupedWhole}.${fraction}` : groupedWhole,
   };
 }
 

@@ -2,7 +2,7 @@ import { Stack, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { ApiError } from '@/api/client';
-import { JameyaPreview } from '@/api/jameyas';
+import { CreateJameyaInput, JameyaPreview } from '@/api/jameyas';
 import { useAuth } from '@/auth/auth-context';
 import { CustomerPickerSheet } from '@/components/contracts/contract-form/customer-picker-sheet';
 import { CustomerFormSheet } from '@/components/customers/customer-form-sheet';
@@ -18,7 +18,8 @@ import { FloatingActionBar } from '@/components/ui/floating-action-bar';
 import { KeyboardDoneBar } from '@/components/ui/keyboard-done-bar';
 import { StepIndicator } from '@/components/ui/step-indicator';
 import { useToast } from '@/components/ui/toast-context';
-import { useCreateCustomer, useCreateJameya, usePreviewJameya } from '@/hooks/queries';
+import { useCreateCustomer, useCreateJameya, useJameyaPreview, usePreviewJameya } from '@/hooks/queries';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useI18n } from '@/i18n/i18n-context';
 import { formatNumber } from '@/lib/format';
 import { useTheme } from '@/theme/theme-context';
@@ -29,6 +30,8 @@ type FormStep = 'details' | 'members' | 'order' | 'review';
 type OpenSheet = 'picker' | 'newCustomer' | null;
 
 const FORM_STEPS: FormStep[] = ['details', 'members', 'order', 'review'];
+
+const PREVIEW_DEBOUNCE_MS = 400;
 
 export default function NewJameyaScreen() {
   const { t, locale, isRTL } = useI18n();
@@ -44,6 +47,14 @@ export default function NewJameyaScreen() {
   const [openSheet, setOpenSheet] = useState<OpenSheet>(null);
   const [preview, setPreview] = useState<JameyaPreview | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [partnerTurnIndex, setPartnerTurnIndex] = useState<number | null>(null);
+  const livePreviewRequest = useDebouncedValue(
+    step === 'order' && form.everyTurnAddsUp && form.shareAmount > 0 ? JSON.stringify(form.payload()) : null,
+    PREVIEW_DEBOUNCE_MS,
+  );
+  const livePreview = useJameyaPreview(
+    livePreviewRequest === null ? null : (JSON.parse(livePreviewRequest) as CreateJameyaInput),
+  );
 
   if (!canUseJameyas) {
     return <JameyaUnavailable title={t('jameyas.new.title')} message={t('jameyas.notEnabled')} />;
@@ -77,7 +88,7 @@ export default function NewJameyaScreen() {
       showStep('members');
     } else if (step === 'members' && form.hasValidTurns) {
       showStep('order');
-    } else if (step === 'order') {
+    } else if (step === 'order' && form.everyTurnAddsUp) {
       void goToReview();
     }
   };
@@ -129,9 +140,25 @@ export default function NewJameyaScreen() {
           />
         ) : null}
         {step === 'order' ? (
-          <JameyaOrderStep turns={form.turns} onMove={form.moveTurn} onShuffle={form.shuffleTurns} />
+          <JameyaOrderStep
+            turns={form.turns}
+            shareAmount={form.shareAmount}
+            previewContributionOf={(turnIndex, customerId) =>
+              livePreview.data?.cycles[turnIndex]?.holders.find((holder) => holder.customerId === customerId)
+                ?.contribution
+            }
+            onMove={form.moveTurn}
+            onShuffle={form.shuffleTurns}
+            onAddPartner={(turnIndex) => {
+              setPartnerTurnIndex(turnIndex);
+              setOpenSheet('picker');
+            }}
+            onRemovePartner={form.removePartner}
+            onSplit={form.setSplit}
+            onAmount={form.setHolderAmount}
+          />
         ) : null}
-        {step === 'review' && preview ? <JameyaReviewStep preview={preview} turns={form.turns} /> : null}
+        {step === 'review' && preview ? <JameyaReviewStep preview={preview} memberTurns={form.memberTurns} /> : null}
         {apiError ? (
           <AppText variant="caption" tone="danger">
             {apiError}
@@ -165,7 +192,7 @@ export default function NewJameyaScreen() {
               title={step === 'order' ? t('jameyas.new.toReview') : t('jameyas.new.next')}
               icon={isRTL ? 'arrow-back' : 'arrow-forward'}
               loading={previewJameya.isPending}
-              disabled={step === 'members' && !form.hasValidTurns}
+              disabled={(step === 'members' && !form.hasValidTurns) || (step === 'order' && !form.everyTurnAddsUp)}
               onPress={goNext}
               style={{ flex: 1 }}
             />
@@ -176,20 +203,45 @@ export default function NewJameyaScreen() {
       <KeyboardDoneBar />
       <CustomerPickerSheet
         visible={openSheet === 'picker'}
-        selectedIds={form.memberTurns.map(({ member }) => member.id)}
-        onClose={() => setOpenSheet(null)}
-        onSelect={(customer) => form.addTurn({ id: customer.id, name: customer.name, phone: customer.phone })}
+        selectedIds={
+          partnerTurnIndex === null
+            ? form.memberTurns.map(({ member }) => member.id)
+            : (form.turns[partnerTurnIndex]?.holders.map((holder) => holder.id) ?? [])
+        }
+        onClose={() => {
+          setOpenSheet(null);
+          setPartnerTurnIndex(null);
+        }}
+        onSelect={(customer) => {
+          const member = { id: customer.id, name: customer.name, phone: customer.phone };
+          if (partnerTurnIndex === null) {
+            form.addTurn(member);
+            return;
+          }
+          form.addPartner(partnerTurnIndex, member);
+          setOpenSheet(null);
+          setPartnerTurnIndex(null);
+        }}
         onCreateNew={() => setOpenSheet('newCustomer')}
       />
       <CustomerFormSheet
         visible={openSheet === 'newCustomer'}
         customer={null}
         saving={createCustomer.isPending}
-        onClose={() => setOpenSheet(null)}
+        onClose={() => {
+          setOpenSheet(null);
+          setPartnerTurnIndex(null);
+        }}
         onSubmit={async (input) => {
           const customer = await createCustomer.mutateAsync(input);
-          form.addTurn({ id: customer.id, name: customer.name, phone: customer.phone });
+          const member = { id: customer.id, name: customer.name, phone: customer.phone };
+          if (partnerTurnIndex === null) {
+            form.addTurn(member);
+          } else {
+            form.addPartner(partnerTurnIndex, member);
+          }
           setOpenSheet(null);
+          setPartnerTurnIndex(null);
           showToast(t('customerForm.created'));
         }}
       />

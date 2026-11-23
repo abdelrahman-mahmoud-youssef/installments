@@ -66,7 +66,7 @@ export function useShareJameyaStatement(jameya: JameyaDetail) {
           details: [
             { label: t('jameyas.statement.member'), value: member.name },
             { label: t('jameyas.statement.jameya'), value: jameya.name },
-            { label: t('jameyas.statement.shares'), value: formatNumber(member.turnSequences.length, locale) },
+            { label: t('jameyas.statement.turnsHeld'), value: formatNumber(member.turnSequences.length, locale) },
             {
               label: t('jameyas.statement.payoutTurns'),
               value: member.turnSequences
@@ -75,7 +75,7 @@ export function useShareJameyaStatement(jameya: JameyaDetail) {
             },
             {
               label: t(`jameyas.statement.perTurn.${jameya.recurrenceType}`),
-              value: money(memberDues[0]?.amount ?? 0),
+              value: money(member.monthlyAmount),
             },
           ],
           totals: [

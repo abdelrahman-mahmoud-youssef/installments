@@ -7,9 +7,9 @@ import { MoneyText } from '@/components/ui/money-text';
 import { SkeletonCardList } from '@/components/ui/skeleton';
 import { useJameyaMemberPayments } from '@/hooks/queries';
 import { useI18n } from '@/i18n/i18n-context';
-import { formatCalendarDate, formatNumber } from '@/lib/format';
+import { formatCalendarDate, formatMoney, formatNumber } from '@/lib/format';
 import { useTheme } from '@/theme/theme-context';
-import { radius, spacing } from '@/theme/tokens';
+import { logicalTextAlign, radius, spacing } from '@/theme/tokens';
 import { JameyaReceiptIconButton } from './jameya-receipt-icon-button';
 import { JameyaReminderButton } from './jameya-reminder-button';
 import { useShareJameyaReceipt } from './use-share-jameya-receipt';
@@ -93,6 +93,55 @@ function MemberPayments({ jameya, member }: { jameya: JameyaDetail; member: Jame
   );
 }
 
+function MemberHoldings({ jameya, member }: { jameya: JameyaDetail; member: JameyaMember }) {
+  const { t, locale } = useI18n();
+  const { colors } = useTheme();
+  const period = t(`jameyas.detail.period.${jameya.recurrenceType}`);
+
+  return (
+    <View style={{ gap: spacing.sm }}>
+      <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.md }}>
+        <AppText variant="bodyStrong" style={{ flex: 1 }}>
+          {t('jameyas.detail.member.holdingsTitle')}
+        </AppText>
+        <AppText variant="caption" tone="muted">
+          {t('jameyas.detail.member.monthlyTotal', { amount: formatMoney(member.monthlyAmount, locale), period })}
+        </AppText>
+      </View>
+      {member.holdings.map((holding, index) => (
+        <View
+          key={holding.cycleId}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: spacing.md,
+            paddingTop: index === 0 ? 0 : spacing.sm,
+            borderTopWidth: index === 0 ? 0 : 1,
+            borderColor: colors.border,
+          }}
+        >
+          <View style={{ flex: 1, gap: 2 }}>
+            <AppText variant="body">
+              {t('jameyas.customerSection.turnValue', { sequence: formatNumber(holding.sequence, locale) })}
+            </AppText>
+            <AppText variant="caption" tone="muted">
+              {t('jameyas.detail.holder.pays', { amount: formatMoney(holding.contribution, locale), period })}
+            </AppText>
+          </View>
+          <View style={{ alignItems: 'flex-end', gap: 2 }}>
+            <AppText variant="bodyStrong" align={logicalTextAlign.end}>
+              {t('jameyas.detail.holder.part', { amount: formatMoney(holding.entitlementAmount, locale) })}
+            </AppText>
+            <AppText variant="caption" tone="muted" align={logicalTextAlign.end}>
+              {t('jameyas.detail.holder.received', { amount: formatMoney(holding.receivedAmount, locale) })}
+            </AppText>
+          </View>
+        </View>
+      ))}
+    </View>
+  );
+}
+
 interface JameyaMemberSheetProps {
   jameya: JameyaDetail;
   customerId: string | null;
@@ -127,6 +176,7 @@ export function JameyaMemberSheet({ jameya, customerId, onClose }: JameyaMemberS
             ) : null}
             <MemberFigure label={t('jameyas.detail.member.received')} minorUnits={member.receivedAmount} />
           </View>
+          <MemberHoldings jameya={jameya} member={member} />
           <View style={{ gap: spacing.sm }}>
             <AppText variant="bodyStrong">{t('jameyas.detail.member.payments')}</AppText>
             <MemberPayments jameya={jameya} member={member} />

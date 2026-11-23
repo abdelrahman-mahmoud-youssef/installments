@@ -123,6 +123,10 @@ export function parseAmountInput(text: string): number | null {
   return amount !== null && amount > 0 ? amount : null;
 }
 
+export function parseWholeAmountInput(text: string): number | null {
+  return parseCountInput(text);
+}
+
 export function parseCountInput(text: string): number | null {
   const count = parseAmountInput(text);
   return count !== null && Number.isInteger(count) ? count : null;

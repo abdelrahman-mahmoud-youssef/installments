@@ -1,23 +1,28 @@
 import { useState } from 'react';
 import { CreateJameyaInput, JameyaRecurrenceType } from '@/api/jameyas';
-import { parseAmountInput, parseNonNegativeAmountInput, todayIsoDate, toMinorUnits } from '@/lib/format';
+import {
+  parseAmountInput,
+  parseNonNegativeAmountInput,
+  parseWholeAmountInput,
+  todayIsoDate,
+  toMinorUnits,
+} from '@/lib/format';
+import {
+  groupMemberTurns,
+  JameyaTurnSplit,
+  toTurnsInput,
+  turnAddsUp,
+  WizardMember,
+  WizardTurn,
+  withHolderAmount,
+  withoutLastTurnOf,
+  withoutPartner,
+  withPartner,
+  withSoloTurn,
+  withSplit,
+} from '@/lib/jameya-wizard';
 import { createLocalId } from '@/lib/local-id';
 import { JAMEYA_MAX_GRACE_DAYS, JAMEYA_MAX_TURNS, JAMEYA_MIN_MEMBERS, JAMEYA_MIN_TURNS } from '../jameya-limits';
-
-export interface JameyaFormMember {
-  id: string;
-  name: string;
-  phone: string;
-}
-
-export interface JameyaFormTurn extends JameyaFormMember {
-  turnId: string;
-}
-
-export interface JameyaMemberTurns {
-  member: JameyaFormMember;
-  count: number;
-}
 
 export interface JameyaFormValues {
   name: string;
@@ -30,7 +35,7 @@ export interface JameyaFormValues {
 
 export type JameyaFormField = 'name' | 'shareAmount' | 'graceDays';
 
-export type JameyaFormErrorCode = 'nameRequired' | 'shareAmountPositive' | 'graceDaysRange';
+export type JameyaFormErrorCode = 'nameRequired' | 'shareAmountPositive' | 'wholePounds' | 'graceDaysRange';
 
 function initialValues(): JameyaFormValues {
   return {
@@ -55,6 +60,8 @@ function detailsErrors(values: JameyaFormValues): Partial<Record<JameyaFormField
   }
   if (parseAmountInput(values.shareAmount) === null) {
     errors.shareAmount = 'shareAmountPositive';
+  } else if (parseWholeAmountInput(values.shareAmount) === null) {
+    errors.shareAmount = 'wholePounds';
   }
   if (parseGraceDays(values.graceDays) === null) {
     errors.graceDays = 'graceDaysRange';
@@ -77,25 +84,14 @@ function swapped<T>(items: T[], from: number, to: number): T[] {
   return result;
 }
 
-function groupTurns(turns: JameyaFormTurn[]): JameyaMemberTurns[] {
-  const groups = new Map<string, JameyaMemberTurns>();
-  for (const turn of turns) {
-    const group = groups.get(turn.id);
-    if (group) {
-      group.count += 1;
-    } else {
-      groups.set(turn.id, { member: { id: turn.id, name: turn.name, phone: turn.phone }, count: 1 });
-    }
-  }
-  return [...groups.values()];
-}
-
 export function useJameyaForm() {
   const [values, setValues] = useState<JameyaFormValues>(initialValues);
-  const [turns, setTurns] = useState<JameyaFormTurn[]>([]);
+  const [turns, setTurns] = useState<WizardTurn[]>([]);
   const [errorCodes, setErrorCodes] = useState<Partial<Record<JameyaFormField, JameyaFormErrorCode>>>({});
-  const memberTurns = groupTurns(turns);
+  const memberTurns = groupMemberTurns(turns);
   const hasEnoughMembers = memberTurns.length >= JAMEYA_MIN_MEMBERS;
+  const shareAmount = toMinorUnits(parseWholeAmountInput(values.shareAmount) ?? 0);
+  const everyTurnAddsUp = turns.every((turn) => turnAddsUp(turn, shareAmount));
 
   const setField = <K extends keyof JameyaFormValues>(field: K, value: JameyaFormValues[K]) =>
     setValues((current) => ({ ...current, [field]: value }));
@@ -106,16 +102,22 @@ export function useJameyaForm() {
     return Object.keys(errors).length === 0;
   };
 
-  const addTurn = (member: JameyaFormMember) =>
-    setTurns((current) =>
-      current.length >= JAMEYA_MAX_TURNS ? current : [...current, { ...member, turnId: createLocalId() }],
-    );
+  const addTurn = (member: WizardMember) =>
+    setTurns((current) => (current.length >= JAMEYA_MAX_TURNS ? current : withSoloTurn(current, member, createLocalId())));
 
-  const removeTurn = (customerId: string) =>
-    setTurns((current) => {
-      const lastIndex = current.map((turn) => turn.id).lastIndexOf(customerId);
-      return current.filter((_, index) => index !== lastIndex);
-    });
+  const removeTurn = (customerId: string) => setTurns((current) => withoutLastTurnOf(current, customerId));
+
+  const addPartner = (turnIndex: number, member: WizardMember) =>
+    setTurns((current) => withPartner(current, turnIndex, member));
+
+  const removePartner = (turnIndex: number, customerId: string) =>
+    setTurns((current) => withoutPartner(current, turnIndex, customerId));
+
+  const setSplit = (turnIndex: number, split: JameyaTurnSplit) =>
+    setTurns((current) => withSplit(current, turnIndex, split));
+
+  const setHolderAmount = (turnIndex: number, customerId: string, amountText: string) =>
+    setTurns((current) => withHolderAmount(current, turnIndex, customerId, amountText));
 
   const moveTurn = (from: number, to: number) => setTurns((current) => swapped(current, from, to));
 
@@ -123,12 +125,12 @@ export function useJameyaForm() {
 
   const payload = (): CreateJameyaInput => ({
     name: values.name.trim(),
-    shareAmount: toMinorUnits(parseAmountInput(values.shareAmount) ?? 0),
+    shareAmount,
     recurrenceType: values.recurrenceType,
     firstDueDate: values.firstDueDate,
     graceDays: parseGraceDays(values.graceDays) ?? 0,
     notes: values.notes.trim() || undefined,
-    customerIds: turns.map((turn) => turn.id),
+    turns: toTurnsInput(turns),
   });
 
   return {
@@ -140,8 +142,14 @@ export function useJameyaForm() {
     memberTurns,
     hasEnoughMembers,
     hasValidTurns: hasEnoughMembers && turns.length >= JAMEYA_MIN_TURNS && turns.length <= JAMEYA_MAX_TURNS,
+    shareAmount,
+    everyTurnAddsUp,
     addTurn,
     removeTurn,
+    addPartner,
+    removePartner,
+    setSplit,
+    setHolderAmount,
     moveTurn,
     shuffleTurns,
     payload,

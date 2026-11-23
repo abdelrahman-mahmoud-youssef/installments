@@ -37,7 +37,7 @@ export function JameyaDetailsStep({ values, setField, errorFor }: JameyaDetailsS
         label={t('jameyas.new.shareAmount')}
         value={values.shareAmount}
         onChangeText={(text) => setField('shareAmount', text)}
-        keyboardType="decimal-pad"
+        keyboardType="number-pad"
         placeholder="0"
         error={errorFor('shareAmount')}
       />

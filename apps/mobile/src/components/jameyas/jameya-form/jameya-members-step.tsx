@@ -10,14 +10,14 @@ import { formatNumber, isolateLtr } from '@/lib/format';
 import { useTheme } from '@/theme/theme-context';
 import { spacing } from '@/theme/tokens';
 import { JAMEYA_MAX_TURNS, JAMEYA_MIN_TURNS } from '../jameya-limits';
-import { JameyaFormMember, JameyaMemberTurns } from './use-jameya-form';
+import { WizardMember, WizardMemberTurns } from '@/lib/jameya-wizard';
 
 interface JameyaMembersStepProps {
-  memberTurns: JameyaMemberTurns[];
+  memberTurns: WizardMemberTurns[];
   turnCount: number;
   hasEnoughMembers: boolean;
   onAddCustomer: () => void;
-  onAddTurn: (member: JameyaFormMember) => void;
+  onAddTurn: (member: WizardMember) => void;
   onRemoveTurn: (customerId: string) => void;
 }
 

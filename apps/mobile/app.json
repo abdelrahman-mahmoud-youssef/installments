@@ -2,7 +2,7 @@
   "expo": {
     "name": "Qistak",
     "slug": "qistak",
-    "version": "1.3.1",
+    "version": "1.3.2",
     "scheme": "qistak",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
