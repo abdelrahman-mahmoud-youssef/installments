@@ -189,7 +189,7 @@ describe('Jameyas', () => {
     expect(afterSecondPart.cycles[0].holders).toEqual([
       {
         customerId: holder,
-        contribution: 100_000,
+        contribution: 250_000,
         entitlementAmount: 1_000_000,
         paidOutAmount: 1_000_000,
         remainingAmount: 0,

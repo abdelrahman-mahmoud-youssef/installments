@@ -93,12 +93,14 @@ describe('Jameya follow-up', () => {
 
     expect(byId.get(lateJameya.id)).toEqual({
       turnSequences: [2],
+      monthlyAmount: 100_000,
       remainingAmount: 250_000,
       lateAmount: 150_000,
       receivedAmount: 120_000,
     });
     expect(byId.get(futureJameya.id)).toEqual({
       turnSequences: [1],
+      monthlyAmount: 100_000,
       remainingAmount: 300_000,
       lateAmount: 0,
       receivedAmount: 0,
